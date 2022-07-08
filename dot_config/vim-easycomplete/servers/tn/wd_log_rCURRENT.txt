@@ -1,0 +1,13 @@
+INFO [global_config::config_migrations] [2022-06-24:11:57:43 WD-TabNine INFO] Migrating configuration properties if necessary...
+INFO [global_config::config_migrations] [2022-06-24:11:57:43 WD-TabNine INFO] Migrating configuration properties if necessary...
+INFO [global_config::config_migrations] [2022-06-24:11:57:43 WD-TabNine INFO] Migrating configuration properties if necessary...
+INFO [watchdog_server::wd_analytics] [2022-06-24:11:57:43 WD-TabNine INFO] starting heartbeat loop for watchdog
+INFO [watchdog_server::wd_analytics] [2022-06-24:11:57:43 WD-TabNine INFO] starting heartbeat loop for watchdog
+INFO [WD_TabNine] [2022-06-24:11:57:43 WD-TabNine INFO] terminating because another watchdog is already running.
+INFO [WD_TabNine] [2022-06-24:11:57:43 WD-TabNine INFO] terminating because another watchdog is already running.
+ERROR [global_config::global_config] [2022-06-24:11:57:43 WD-TabNine ERROR] Could not watch "/Users/rai/Library/Preferences/TabNine/tabnine_config.json": PathNotFound
+INFO [watchdog_server::wd_analytics] [2022-06-24:11:57:43 WD-TabNine INFO] starting heartbeat loop for watchdog
+INFO [WD_TabNine] [2022-06-24:11:57:43 WD-TabNine INFO] terminating because another watchdog is already running.
+ERROR [analytics::send_queue] [2022-06-24:11:57:44 WD-TabNine ERROR] Failed to send analytics event, maximizing send backoff policy: Permanent(Error(ErrorSendingAnalytics { status: 400 }, State { next_error: None, backtrace: InternalBacktrace { backtrace: None } }))
+ERROR [analytics::send_queue] [2022-06-24:11:57:44 WD-TabNine ERROR] Failed to send analytics event, maximizing send backoff policy: Permanent(Error(ErrorSendingAnalytics { status: 400 }, State { next_error: None, backtrace: InternalBacktrace { backtrace: None } }))
+ERROR [analytics::send_queue] [2022-06-24:11:57:44 WD-TabNine ERROR] Failed to send analytics event, maximizing send backoff policy: Permanent(Error(ErrorSendingAnalytics { status: 400 }, State { next_error: None, backtrace: InternalBacktrace { backtrace: None } }))

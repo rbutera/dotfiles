@@ -1,0 +1,12 @@
+[aws]
+disabled = true
+
+[package]
+display_private = true
+
+[python]
+pyenv_version_name = false
+
+[sudo]
+disabled = false
+

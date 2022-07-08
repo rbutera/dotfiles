@@ -1,0 +1,31 @@
+Host pidgey
+ HostName pidgey
+ User rai
+ ForwardAgent yes
+ RemoteForward 48969 127.0.0.1:48969
+
+Host 100.84.231.100
+ ForwardAgent yes
+ IdentityFile ~/.ssh/id_ed25519
+
+Host *
+ AddKeysToAgent yes
+ UseKeychain yes
+ IdentityFile ~/.ssh/id_ed25519
+
+Host rbutera
+ HostName ssh.rbutera.com
+ User ubuntu
+ ForwardAgent yes
+ RemoteForward 52698 127.0.0.1:52698
+
+# GitLab.com
+Host gitlab.com
+ Preferredauthentications publickey
+ IdentityFile ~/.ssh/id_ed25519
+
+Host github.com
+ UseKeychain yes
+ IdentityFile ~/.ssh/id_ed25519
+
+Include ~/.fig/ssh
