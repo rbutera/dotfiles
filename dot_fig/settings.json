@@ -1,9 +1,7 @@
 {
-  "autocomplete.enter": "ignore",
   "autocomplete.keybindings.enter": "ignore",
   "autocomplete.keybindings.tab": "insertCommonPrefixOrInsertSelected",
   "autocomplete.preferVerboseSuggestions": true,
-  "autocomplete.tab": "insertOrPrefix",
   "dotfiles.syncImmediately": false,
   "immediatelyExecuteAfterSpace": false,
   "integrations.experimental": true,

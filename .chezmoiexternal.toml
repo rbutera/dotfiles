@@ -23,3 +23,7 @@
   url = "https://github.com/rbutera/astronvim_config"
   refreshPeriod = "1h"
 
+[".tmux"]
+  type = "git-repo"
+  url = "https://github.com/rbutera/.tmux"
+  refreshPeriod = "24h"
