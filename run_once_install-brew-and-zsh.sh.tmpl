@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "Installing Homebrew"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+
+{{ if eq .chezmoi.os "linux" -}}
+  echo "Linux detected. Installing zsh"
+  {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+    sudo apt install zsh -y
+  {{else}}
+    sudo pacman -S --noconfirm zsh zsh-completions
+  {{end}}
+  echo "zsh has been installed at $(which zsh)"
+  chsh -s /usr/bin/zsh
+{{ end -}}
