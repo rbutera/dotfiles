@@ -1,0 +1,18 @@
+#!/bin/bash
+
+CURRENT_DEVICE=$(SwitchAudioSource -c)
+echo "current device is $CURRENT_DEVICE"
+
+case $CURRENT_DEVICE in 
+	"CORSAIR VIRTUOSO XT Wireless Gaming Receiver")
+		echo "Switching to speakers"
+		SwitchAudioSource -t output -u "FiiO"
+		;;
+	"FiiO USB DAC-E10")
+		echo "Switching to headset"
+		SwitchAudioSource -t output -u "Gaming Receiver"
+		;;
+	*) 
+		echo "Unsupported option!"
+		;;
+esac

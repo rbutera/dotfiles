@@ -1,0 +1,4 @@
+#!/bin/zsh
+pbpaste | md2slack | pbcopy;
+echo $(pbpaste);
+open /Applications/Slack.app;

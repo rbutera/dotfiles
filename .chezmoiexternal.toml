@@ -1,0 +1,25 @@
+[".zprezto"]
+  type = "git-repo"
+  url = "https://github.com/rbutera/prezto"
+  refreshPeriod = "24h"
+
+[".zprezto/modules/zsh-z"]
+  type = "git-repo"
+  url = "https://github.com/agkozak/zsh-z"
+  refreshPeriod = "168h"
+
+[".zprezto/contrib"]
+  type = "git-repo"
+  url = "https://github.com/belak/prezto-contrib"
+  refreshPeriod = "168h"
+
+[".config/nvim"]
+  type = "git-repo"
+  url = "https://github.com/AstroNvim/AstroNvim"
+  refreshPeriod = "24h"
+
+[".config/nvim/lua/user"]
+  type = "git-repo"
+  url = "https://github.com/rbutera/astronvim_config"
+  refreshPeriod = "1h"
+
