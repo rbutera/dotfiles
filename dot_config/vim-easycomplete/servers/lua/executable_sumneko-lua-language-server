@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+/Users/rai/.local/share/nvim/lsp_servers/sumneko_lua/extension/server/bin/lua-language-server -E -e LANG=en /Users/rai/.local/share/nvim/lsp_servers/sumneko_lua/extension/server/bin/main.lua $*
