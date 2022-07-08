@@ -1,6 +1,7 @@
 #!/bin/zsh
 brew bundle --file $HOME/Brewfile
 $(brew --prefix)/opt/fzf/install
+curl -sS https://webinstall.dev/nerdfont | bash
 
 {{ if eq .chezmoi.os "darwin" -}}
   echo "MacOS detected"
