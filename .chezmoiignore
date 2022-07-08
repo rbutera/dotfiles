@@ -2,6 +2,8 @@
 Library/Application\ Support
 {{ end }} 
 {{ if ne .chezmoi.os "linux" }}
+.config/systemd
+.config/systemd/user/ssh-agent.service
 .linuxbrew
 {{ end }}
 

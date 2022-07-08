@@ -5,8 +5,8 @@ $(brew --prefix)/opt/fzf/install
 {{ if eq .chezmoi.os "darwin" -}}
   echo "MacOS detected"
 {{ else if eq .chezmoi.os "linux" -}}
-  PACKAGES="neovim fzf fzy ripgrep htop nodenv fd bat"
-  LINUX_GUI_PACKAGES="ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty"
+  PACKAGES="neovim fzf fzy ripgrep htop nodenv fd bat xclip"
+  LINUX_GUI_PACKAGES="ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl"
   echo "Installing $PACKAGES"
   {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
     echo "Ubuntu detected. Skipping GUI specific packages"
