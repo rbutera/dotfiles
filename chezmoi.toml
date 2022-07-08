@@ -3,3 +3,5 @@
 
 [diff]
   command = "delta"
+  args = ["--side-by-side", "--line-numbers", "{{ .Destination }}", "{{ .Target }}"]
+  pager = ""
