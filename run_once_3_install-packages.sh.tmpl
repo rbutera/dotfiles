@@ -11,7 +11,7 @@ $(brew --prefix)/opt/fzf/install
   {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
     echo "Ubuntu detected. Skipping GUI specific packages"
     sudo apt-get install -y build-essential
-    sudo apt-get install -y neovim fzf fzy ripgrep htop fd-find bat xclip keychain util-linux efitools binutils zlib openssh-client openssh-server
+    sudo apt-get install -y neovim htop fd-find bat xclip keychain util-linux efitools binutils zlib1g openssh-client openssh-server
     {{else}}
     echo "Arch Linux detected"
     
