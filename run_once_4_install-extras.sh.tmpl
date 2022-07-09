@@ -1,6 +1,7 @@
 #!/bin/bash
 
-{{if neq .chezmoi.wsl }}
+{{if not .chezmoi.wsl }}
+echo "Installing extras, including catppuccin repos"
 mkdir -p $HOME/dev/catppuccin
 ctpcn() {
   repo=$1
@@ -10,8 +11,6 @@ ctpcn() {
 cd catppuccin
 gh repo clone catppuccin/wallpapers
 {{if eq .chezmoi.os "linux"}}
-
-
 ctpcn kitty
 ctpcn alacritty
 ctpcn kde
