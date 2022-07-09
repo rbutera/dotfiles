@@ -1,6 +1,6 @@
 #!/bin/bash
 
-{{if not .chezmoi.wsl }}
+{{if not .wsl }}
 echo "Installing extras, including catppuccin repos"
 mkdir -p $HOME/dev/catppuccin
 ctpcn() {

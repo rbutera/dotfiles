@@ -8,7 +8,7 @@ echo "Installing Homebrew"
 
   {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
     sudo apt update
-    {{- if .chezmoi.wsl -}}
+    {{- if .wsl -}}
     echo "installing x11-apps for WSL"
     sudo apt install x11-apps
     {{end}}
