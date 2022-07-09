@@ -1,7 +1,13 @@
-#!/bin/bash
+#!/bin/zsh
 # install global node packages
+source ~/.zshrc
+source ~/.zprofile
+
+echo "nodenv: using $(which nodenv)"
 nodenv install 16.13.1
 nodenv global 16.13.1
+
+echo "npm: using $(which npm)"
 npm install -g @nestjs/cli prettier eslint typescript xo markdownlint remark hicat ts-node
 
 # install global python packages
@@ -14,7 +20,12 @@ libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-d
 sudo pacman -S --needed base-devel openssl zlib xz tk
   {{end}}
 {{end}}
+
+# install python stuff
+
 pyenv install 3.10.4
 pyenv global 3.10.4
+echo "using $(which pip)"
+echo "path is $PATH"
 pip install autopep8 flake8 black click
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
