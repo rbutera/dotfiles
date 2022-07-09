@@ -2,8 +2,7 @@
 source $HOME/.zprofile
 source $HOME/.zshrc
 
-# cp -Rv ~/.local/share/chezmoi/Brewfile.tmpl $HOME/Brewfile
-brew bundle --file $HOME/Brewfile
+brew bundle --file $HOME/raisbrewfile
 $(brew --prefix)/opt/fzf/install
 
 {{ if eq .chezmoi.os "darwin" -}}
