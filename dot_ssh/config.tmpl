@@ -5,20 +5,24 @@ Host pidgey
 
 Host 100.84.231.100
  ForwardAgent yes
+ IdentityFile ~/.ssh/id_2022
  IdentityFile ~/.ssh/id_ed25519
 
 Host *
  IgnoreUnknown UseKeychain,AddKeysToAgent
  AddKeysToAgent yes
  UseKeychain yes
+ IdentityFile ~/.ssh/id_2022
  IdentityFile ~/.ssh/id_ed25519
 
 # GitLab.com
 Host gitlab.com
  Preferredauthentications publickey
+ IdentityFile ~/.ssh/id_2022
  IdentityFile ~/.ssh/id_ed25519
 
 Host github.com
+ IdentityFile ~/.ssh/id_2022
  IdentityFile ~/.ssh/id_ed25519
 
 Include ~/.fig/ssh

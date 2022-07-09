@@ -1,20 +1,23 @@
-# Fig pre block. Keep at the top of this file.
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && . "$HOME/.fig/shell/zshrc.pre.zsh"
-#
 # Executes commands at the start of an interactive session.
 #
 # Authors:
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
+{{- if eq .chezmoi.os "darwin"}}
+# Fig pre block. Keep at the top of this file.
+[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && . "$HOME/.fig/shell/zshrc.pre.zsh"
+{{end}}
 
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
-# Handle Mac platforms
 CPU=$(uname -p)
 unamestr=$(uname)
+
+{{- if eq .chezmoi.os "darwin"}}
+# Handle Mac platforms
 if [[ "$unamestr" == "Darwin" ]]; then 
   if [[ "$CPU" == "arm" ]]; then
 		export PATH="/opt/homebrew/bin:$PATH"
@@ -28,9 +31,13 @@ if [[ "$unamestr" == "Darwin" ]]; then
     alias nvim=/usr/local/bin/nvim
   fi
 fi
-
-# Customize to your needs...
 alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
+{{end}}
+
 
 # finds the process using a particular port and kills it
 killport() {  local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }'); kill -9 $PORT }
@@ -40,7 +47,7 @@ alias rr="source ~/.zshrc; clear"
 # for remote ssh code
 # alias code="${VSCODE_GIT_ASKPASS_NODE%/*}/bin/code"
 export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
-# export PATH=/Users/rai/bin:$PATH
+export PATH=$HOME/bin:$PATH
 
 # START CURSOR TERMINAL FIX
 # formats cursor in terminal
@@ -76,16 +83,8 @@ if [[ "$unamestr" == "Linux" ]]; then
 fi
 
 export PATH
-rcode() {
-  target_path=$1
-  code --folder-uri=scode-remote://ssh-remote+192.168.50.200/Users/rai/$target_path
-}
 
 alias code="code-insiders"
-
-# for rdcli
-export REALDEBRID_USERNAME=yaboirairai
-export REALDEBRID_PASSWORD=qY54HZ%777C$
 
 # to enable ctrl+R in vi mode
 bindkey "^R" history-incremental-search-backward
@@ -101,26 +100,6 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-
-# pnpm
-export PNPM_HOME="/Users/rai/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-
-# from https://rabexc.org/posts/pitfalls-of-ssh-agents
-# ssh-add -l &>/dev/null
-# if [ "$?" == 2 ]; then
-  # test -r ~/.ssh-agent && \
-    # eval "$(<~/.ssh-agent)" >/dev/null
-#
-  # ssh-add -l &>/dev/null
-  # if [ "$?" == 2 ]; then
-    # (umask 066; ssh-agent -s > ~/.ssh-agent)
-    # eval "$(<~/.ssh-agent)" >/dev/null
-    # ssh-add
-  # fi
-# fi
-
 # tabtab source for packages
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
@@ -128,13 +107,15 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
+export PATH="$HOME/.poetry/bin:$PATH"
+
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"
 
+{{- if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && . "$HOME/.fig/shell/zshrc.post.zsh"
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-source /home/rai/.config/broot/launcher/bash/br
+{{end}}
