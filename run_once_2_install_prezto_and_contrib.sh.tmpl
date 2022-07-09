@@ -1,0 +1,12 @@
+#!/bin/zsh
+git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
+cd ~/.zprezto
+git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
+mkdir -p ~/.zprezto-contrib
+git clone https://github.com/agkozak/zsh-z.git ~/.zprezto-contrib/zsh-z
+curl -sS https://starship.rs/install.sh | sh
+# restore zsh dotfiles
+source $HOME/manage_zsh_dotfiles.sh
+restore_zsh_dotfiles
+source ~/.zshrc
+

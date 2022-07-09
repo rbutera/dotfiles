@@ -1,0 +1,140 @@
+# Fig pre block. Keep at the top of this file.
+[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && . "$HOME/.fig/shell/zshrc.pre.zsh"
+#
+# Executes commands at the start of an interactive session.
+#
+# Authors:
+#   Sorin Ionescu <sorin.ionescu@gmail.com>
+#
+
+# Source Prezto.
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+# Handle Mac platforms
+CPU=$(uname -p)
+unamestr=$(uname)
+if [[ "$unamestr" == "Darwin" ]]; then 
+  if [[ "$CPU" == "arm" ]]; then
+		export PATH="/opt/homebrew/bin:$PATH"
+		export EDITOR=/opt/homebrew/bin/nvim
+		export SUDO_EDITOR=/opt/homebrew/bin/nvim
+		alias nvim=/opt/homebrew/bin/nvim
+		alias oldbrew=/usr/local/bin/brew
+  else
+		export PATH="/usr/local/bin:$PATH"
+		export EDITOR=/usr/local/bin/nvim
+    alias nvim=/usr/local/bin/nvim
+  fi
+fi
+
+# Customize to your needs...
+alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
+
+# finds the process using a particular port and kills it
+killport() {  local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }'); kill -9 $PORT }
+
+alias rr="source ~/.zshrc; clear"
+
+# for remote ssh code
+# alias code="${VSCODE_GIT_ASKPASS_NODE%/*}/bin/code"
+export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
+# export PATH=/Users/rai/bin:$PATH
+
+# START CURSOR TERMINAL FIX
+# formats cursor in terminal
+function zle-keymap-select () {
+  case $KEYMAP in
+    vicmd) echo -ne '\e[1 q';; # block
+    viins|main) echo -ne '\e[5 q';; # beam
+  esac
+}
+
+zle -N zle-keymap-select
+
+zle-line-init() {
+  zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+  echo -ne "\e[5 q"
+}
+
+zle -N zle-line-init
+echo -ne '\e[5 q' # Use beam shape cursor on startup.
+preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+
+
+# END CURSOR TERMINAL FIX 
+
+path+=('/users/rai/bin')
+path+=('/users/rai/go/bin')
+unamestr=$(uname)
+if [[ "$unamestr" == "Linux" ]]; then
+  path+=('/home/linuxbrew/.linuxbrew/bin')
+  # For Loading the SSH key
+  # /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
+  source $HOME/.keychain/$HOST-sh
+fi
+
+export PATH
+rcode() {
+  target_path=$1
+  code --folder-uri=scode-remote://ssh-remote+192.168.50.200/Users/rai/$target_path
+}
+
+alias code="code-insiders"
+
+# for rdcli
+export REALDEBRID_USERNAME=yaboirairai
+export REALDEBRID_PASSWORD=qY54HZ%777C$
+
+# to enable ctrl+R in vi mode
+bindkey "^R" history-incremental-search-backward
+
+# load aliases
+source ~/.aliases
+
+export EDITOR=nvim
+export SUDO_EDITOR=nvim
+
+# for pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+
+# pnpm
+export PNPM_HOME="/Users/rai/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
+
+# from https://rabexc.org/posts/pitfalls-of-ssh-agents
+# ssh-add -l &>/dev/null
+# if [ "$?" == 2 ]; then
+  # test -r ~/.ssh-agent && \
+    # eval "$(<~/.ssh-agent)" >/dev/null
+#
+  # ssh-add -l &>/dev/null
+  # if [ "$?" == 2 ]; then
+    # (umask 066; ssh-agent -s > ~/.ssh-agent)
+    # eval "$(<~/.ssh-agent)" >/dev/null
+    # ssh-add
+  # fi
+# fi
+
+# tabtab source for packages
+# uninstall by removing these lines
+[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+# starship prompt (should be last)
+eval "$(starship init zsh)"
+
+# Fig post block. Keep at the bottom of this file.
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && . "$HOME/.fig/shell/zshrc.post.zsh"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+source /home/rai/.config/broot/launcher/bash/br

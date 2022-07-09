@@ -1,7 +1,12 @@
+zplug/.git*
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh
 0_install-cli-tools.sh
 Library/Application\ Support
+mac
+.config/iterm
+.config/iTerm
+.config/.karabiner
 {{ end }} 
 {{ if ne .chezmoi.os "linux" }}
 .config/systemd

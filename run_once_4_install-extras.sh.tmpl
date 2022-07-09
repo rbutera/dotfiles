@@ -1,0 +1,25 @@
+#!/bin/bash
+
+{{if neq .chezmoi.wsl }}
+mkdir -p $HOME/dev/catppuccin
+ctpcn() {
+  repo=$1
+  echo "cloning catppuccin/$repo"
+  gh repo clone "catppuccin/$repo"
+}
+cd catppuccin
+gh repo clone catppuccin/wallpapers
+{{if eq .chezmoi.os "linux"}}
+
+
+ctpcn kitty
+ctpcn alacritty
+ctpcn kde
+ctpcn gtk
+ctpcn grub
+ctpcn sddm
+ctpcn cursors
+{{end}}
+{{else}}
+echo "WSL detected. Skipping extras"
+{{end}}
