@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+rm -rf ~/Brewfile
+cp -Rv ~/.local/share/chezmoi/Brewfile.tmpl $HOME/Brewfile
 brew bundle --file $HOME/Brewfile
 $(brew --prefix)/opt/fzf/install
 
