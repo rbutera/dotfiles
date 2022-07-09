@@ -6,7 +6,8 @@ mkdir -p ~/.zprezto-contrib
 git clone https://github.com/agkozak/zsh-z.git ~/.zprezto-contrib/zsh-z
 curl -sS https://starship.rs/install.sh | sh
 # restore zsh dotfiles
-source $HOME/manage_zsh_dotfiles.sh
+
+{{ include 'manage_zsh_dotfiles.sh' }}
 restore_zsh_dotfiles
 source ~/.zshrc
 

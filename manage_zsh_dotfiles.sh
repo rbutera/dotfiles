@@ -1,5 +1,3 @@
-#!/bin/bash
-
 backup_zsh_dotfiles() {
   echo "backing up zsh dotfiles..."
   mkdir -p ~/zsh_backup
