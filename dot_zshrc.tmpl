@@ -79,7 +79,8 @@ if [[ "$unamestr" == "Linux" ]]; then
   path+=('/home/linuxbrew/.linuxbrew/bin')
   # For Loading the SSH key
   # /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
-  source $HOME/.keychain/$HOST-sh
+  mkdir -p $HOME/.keychain
+  [[ -f "$HOME/.keychain/$HOST-sh" ]] && source $HOME/.keychain/$HOST-sh
 fi
 
 export PATH
