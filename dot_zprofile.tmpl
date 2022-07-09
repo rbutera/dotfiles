@@ -81,6 +81,7 @@ export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/nu
 [ -d "$HOME/.nodenv/bin" ] && path+=($HOME/.nodenv/bin)
 [ -d "$HOME/.pyenv/bin" ] && path+=($HOME/.pyenv/bin)
 [ -d "$HOME/go" ] && GOPATH=$HOME/go && path+=($GOROOT/bin:$GOPATH/bin)
+[ -d "$HOME/.poetry/bin" ] && path+=($HOME/.poetry/bin)
 export PATH
 
 {{if eq .chezmoi.os "darwin" }}
