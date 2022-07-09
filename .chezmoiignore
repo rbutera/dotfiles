@@ -13,4 +13,7 @@ mac
 .config/systemd/user/ssh-agent.service
 .linuxbrew
 {{ end }}
-
+~/README.md
+home/rai/README.md
+/Users/rai/README.md
+README.md

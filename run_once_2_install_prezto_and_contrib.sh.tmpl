@@ -7,7 +7,19 @@ git clone https://github.com/agkozak/zsh-z.git ~/.zprezto-contrib/zsh-z
 curl -sS https://starship.rs/install.sh | sh
 # restore zsh dotfiles
 
-{{ include 'manage_zsh_dotfiles.sh' }}
+restore_zsh_dotfiles() {
+  echo "restoring zsh dotfiles from backup..."
+  mkdir -p ~/zsh_backup
+  rm -rf ~/.zshrc ~/.zlogin ~/.zlogout ~/.zshenv ~/.zprofile ~/.zpreztorc
+  mv -v ~/zsh_backup/.zlogin ~/.zlogin
+  mv -v ~/zsh_backup/.zlogout ~/.zlogout
+  mv -v ~/zsh_backup/.zpreztorc ~/.zpreztorc
+  mv -v ~/zsh_backup/.zshrc ~/.zshrc
+  mv -v ~/zsh_backup/.zprofile ~/.zprofile
+  mv -v ~/zsh_backup/.zshenv ~/.zshenv
+  rm -rf ~/zsh_backup
+  echo "finished restoring zsh dotfiles from backup"
+}
 restore_zsh_dotfiles
 source ~/.zshrc
 
