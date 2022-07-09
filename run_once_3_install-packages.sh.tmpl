@@ -11,7 +11,7 @@ $(brew --prefix)/opt/fzf/install
   {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
     echo "Ubuntu detected. Skipping GUI specific packages"
     sudo apt-get install -y build-essential
-    sudo apt-get install -y neovim fzf fzy ripgrep htop fd-find bat xclip openssh keychain util-linux efitools binutils
+    sudo apt-get install -y neovim fzf fzy ripgrep htop fd-find bat xclip keychain util-linux efitools binutils zlib openssh-client openssh-server
     {{else}}
     echo "Arch Linux detected"
     
@@ -35,14 +35,18 @@ EOT
     echo "yay is now installed: $(which yay)"
     sudo yay -Y --gendb
     echo "Installing $LINUX_GUI_PACKAGES"
-    sudo yay -S --noconfirm neovim fzf fzy ripgrep htop nodenv fd-find bat xclip openssh keychain util-linux efitools binutils ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl mmv
+    sudo yay -S --noconfirm neovim fzf fzy ripgrep htop nodenv fd-find bat xclip openssh keychain util-linux efitools binutils ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl mmv zlib
     sudo yay -S --noconfirm visual-studio-code-bin visual-studio-code-insiders-bin
     {{ end -}}
 {{ end -}}
 
-# install global node packages 
+# install global node packages
+nodenv install 16.13.1
+nodenv global 16.13.1
 npm install -g @nest/cli eslint typescript xo markdownlint remark hicat
 
 # install global python packages
+pyenv install 3.10.4
+pyenv global 3.10.4
 pip install autopep8 flake8 black click
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
