@@ -1,0 +1,34 @@
+#!/bin/bash
+echo "Installing Homebrew"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+
+{{ if eq .chezmoi.os "linux" -}}
+  echo "Linux detected. Installing zsh"
+
+  {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+    sudo apt update
+    {{- if .chezmoi.wsl -}}
+    echo "installing x11-apps for WSL"
+    sudo apt install x11-apps
+    {{end}}
+    sudo apt install zsh -y
+  {{else}}
+    echo "non-ubuntu based distro detected:"
+    cat "/etc/os-release"
+    echo "assuming arch linux..."
+    sudo pacman -S --noconfirm zsh zsh-completions
+  {{end}}
+  echo "zsh has been installed at $(which zsh)"
+{{ end -}}
+
+
+# install zplug
+curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+
+# backup zsh files
+source $HOME/manage_zsh_dotfiles.sh
+backup_zsh_dotfiles
+
+# change shell to zsh
+chsh -s /bin/zsh

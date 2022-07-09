@@ -1,4 +1,5 @@
 #!/bin/bash
+{{- if eq .chezmoi.os "darwin" -}}
 echo "Checking Xcode CLI tools"
 # Only run if the tools are not installed yet
 # To check that try to print the SDK path
@@ -13,3 +14,6 @@ if [ $? -ne 0 ]; then
 else
   echo "Xcode CLI tools OK"
 fi
+{{else}}
+echo "skipping xcode cli tool installation - not running MacOS"
+{{end}}
