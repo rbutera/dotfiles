@@ -4,17 +4,16 @@
 [diff]
   command = "delta"
   pager = "less"
-
-{{ $email := promptString "What's your (git) email address?" "rai@rbutera.com" }}
-{{ $name := promptString "What's your (git) full name?" "Rai Butera" }}
+{{- $email := promptString "What's your (git) email address?" "rai@rbutera.com" -}}
+{{ $name := promptString "What's your (git) full name?" "Rai Butera"}}
 
 [data]
   email = {{ $email | quote }}
   {{ if eq .chezmoi.os "linux" -}}
   {{- $wsl := hasSuffix "WSL2" .chezmoi.kernel.osrelease -}}
   wsl = {{ $wsl }}
-  {{else}}
+  {{- else}}
   wsl = false
-  {{end}}
+  {{- end}}
   name = {{ $name | quote }}
   
