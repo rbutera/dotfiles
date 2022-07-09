@@ -27,7 +27,7 @@ echo "Installing Homebrew"
 curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 
 # backup zsh files
-source $HOME/manage_zsh_dotfiles.sh
+{{ include 'manage_zsh_dotfiles.sh' }}
 backup_zsh_dotfiles
 
 # change shell to zsh
