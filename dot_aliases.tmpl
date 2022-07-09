@@ -5,6 +5,7 @@ alias ....="cd ../../.."
 alias .....="cd ../../../.."
 alias ~="cd ~" # `cd` is probably faster to type though
 alias -- -="cd -"
+alias g=" git"
 
 # Detect which `ls` flavor is in use
 if ls --color >/dev/null 2>&1; then # GNU `ls`
@@ -188,3 +189,22 @@ function open_dev_essentials() {
 alias vim="nvim"
 
 alias raisync="rsync -rvzP"
+
+{{- if eq .chezmoi.os "linux" }}
+alias pbcopy="xclip -selection clipboard"
+alias pbpaste="xclip -selection clipboard -o"
+{{end}}
+
+czm() {
+  command="chezmoi edit --apply $@"
+  echo "$command"
+  eval $command
+}
+
+alias czd="chezmoi diff"
+alias czu="chezmoi update"
+
+gca() {
+  git add . && git commit -m $@
+}
+
