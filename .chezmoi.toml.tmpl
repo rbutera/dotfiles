@@ -3,8 +3,10 @@
 
 [diff]
   command = "delta"
+  pager = "less"
 
 {{ $email := promptString "What's your (git) email address?" "rai@rbutera.com" }}
+{{ $name := promptString "What's your (git) full name?" "Rai Butera" }}
 
 [data]
   email = {{ $email | quote }}
@@ -14,4 +16,5 @@
   {{else}}
   wsl = false
   {{end}}
+  name = {{ $name | quote }}
   
