@@ -1,3 +1,4 @@
+#!/bin/bash
 # install global node packages
 nodenv install 16.13.1
 nodenv global 16.13.1
