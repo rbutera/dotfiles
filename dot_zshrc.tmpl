@@ -116,7 +116,7 @@ export PATH="$HOME/.poetry/bin:$PATH"
 # starship prompt (should be last)
 eval "$(starship init zsh)"
 
-{{- if eq .chezmoi.os "darwin" }}
+{{ if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && . "$HOME/.fig/shell/zshrc.post.zsh"
 {{end}}

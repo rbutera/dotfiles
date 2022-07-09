@@ -1,7 +1,8 @@
 #!/bin/zsh
+source $HOME/.zprofile
+source $HOME/.zshrc
 
-rm -rf ~/Brewfile
-cp -Rv ~/.local/share/chezmoi/Brewfile.tmpl $HOME/Brewfile
+# cp -Rv ~/.local/share/chezmoi/Brewfile.tmpl $HOME/Brewfile
 brew bundle --file $HOME/Brewfile
 $(brew --prefix)/opt/fzf/install
 
@@ -13,7 +14,7 @@ $(brew --prefix)/opt/fzf/install
   {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
     echo "Ubuntu detected. Skipping GUI specific packages"
     sudo apt-get install -y build-essential
-    sudo apt-get install -y neovim htop fd-find bat xclip keychain util-linux efitools binutils zlib1g openssh-client openssh-server
+    sudo apt-get install -y xclip keychain util-linux efitools binutils zlib1g openssh-client openssh-server
     {{else}}
     echo "Arch Linux detected"
     

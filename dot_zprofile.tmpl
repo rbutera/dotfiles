@@ -11,9 +11,9 @@
 # Browser
 #
 
-if [[ "$OSTYPE" == darwin* ]]; then
-  export BROWSER='open'
-fi
+{{ if eq .chezmoi.os "darwin" }}
+export BROWSER='open'
+{{end}}
 
 #
 # Editors
@@ -78,5 +78,12 @@ export LIBGL_ALWAYS_INDIRECT=1
 export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null):0
 {{ end }}
 
+[ -d "$HOME/.nodenv/bin" ] && path+=($HOME/.nodenv/bin)
+[ -d "$HOME/.pyenv/bin" ] && path+=($HOME/.pyenv/bin)
+[ -d "$HOME/go" ] && GOPATH=$HOME/go && path+=($GOROOT/bin:$GOPATH/bin)
+export PATH
+
+{{if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zprofile.post.zsh" ]] && . "$HOME/.fig/shell/zprofile.post.zsh"
+{{end}}
