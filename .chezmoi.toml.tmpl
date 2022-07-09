@@ -1,0 +1,17 @@
+[edit]
+  command = "nvim"
+
+[diff]
+  command = "delta"
+
+{{ $email := promptString "What's your (git) email address?" "rai@rbutera.com" }}
+
+[data]
+  email = {{ $email | quote }}
+  {{ if eq .chezmoi.os "linux" -}}
+  {{- $wsl := hasSuffix "WSL2" .chezmoi.kernel.osrelease -}}
+  wsl = {{ $wsl }}
+  {{else}}
+  wsl = false
+  {{end}}
+  

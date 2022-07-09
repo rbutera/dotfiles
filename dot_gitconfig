@@ -45,7 +45,6 @@
 	# push
 	pu = push -v --tags
 
-
 [apply]
 	# Detect whitespace errors when applying a patch
 	whitespace = fix
@@ -86,8 +85,6 @@
 	# Include summaries of merged commits in newly created merge commit messages
 	log = true
 
-# URL shorthands
-	tool = Kaleidoscope
 [url "git@github.com:"]
 	insteadOf = "gh:"
 	pushInsteadOf = "github:"
@@ -104,35 +101,25 @@
 [push]
 	default = matching
 	followTags = true
+
 [user]
-	name = Rai Butera
-	email = rai@rbutera.com
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path =
-[mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+	name = {{ .chezmoi.name }} 
+	email = {{ .chezmoi.email }}
+
 [mergetool]
 	keepBackup = true
 	prompt = false
-[diff]
-	tool = Kaleidoscope
+
+{{ if eq .chezmoi.os "darwin" -}}
 [credential]
 	helper = osxkeychain
+{{end}}
+
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
-[mergetool "Kaleidoscope"]
-	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustexitcode = true
-[difftool "Kaleidoscope"]
-	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
-[difftool]
-	prompt = false
-[mergetool]
 [fetch]
 	prune = true
 [init]
