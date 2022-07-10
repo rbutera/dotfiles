@@ -1,7 +1,8 @@
 #!/bin/zsh
 source $HOME/.zprofile
 source $HOME/.zshrc
-
+rm -rf ~/raisbrewfile
+chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrewfile
 brew bundle --file $HOME/raisbrewfile
 $(brew --prefix)/opt/fzf/install
 
@@ -24,22 +25,22 @@ $(brew --prefix)/opt/fzf/install
     sudo pacman-key --lsign-key FBA220DFC880C036
     sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
     sudo touch /etc/pacman.conf
-    cat <<EOT >> /etc/pacman.conf
-[chaotic-aur]
-Include = /etc/pacman.d/chaotic-mirrorlist 
-EOT
+    echo "" >> /etc/pacman.conf
+    echo "[chaotic-aur]" >> /etc/pacman.conf
+    echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
     echo "added chaotic mirrorlist to pacman.conf:"
     sudo cat /etc/pacman.conf
 
     # install yay
-    echo "installing yay"
-    sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
-    echo "yay is now installed: $(which yay)"
-    sudo yay -Y --gendb
-    echo "Installing $LINUX_GUI_PACKAGES"
-    sudo yay -S --noconfirm neovim fzf fzy ripgrep htop nodenv fd-find bat xclip openssh keychain util-linux efitools binutils ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl mmv zlib
-    sudo yay -S --noconfirm visual-studio-code-bin visual-studio-code-insiders-bin
+    # echo "installing yay"
+    # sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+    # echo "yay is now installed: $(which yay)"
+    # sudo yay -Y --gendb
+    # echo "Installing $LINUX_GUI_PACKAGES"
+    yay -S --noconfirm neovim fzf fzy ripgrep htop nodenv fd-find bat xclip openssh keychain util-linux efitools binutils ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl mmv zlib
+    yay -S --noconfirm visual-studio-code-insiders-bin
     {{ end -}}
 {{ end -}}
 
-nvim +PackerSync
+nvim  --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+
