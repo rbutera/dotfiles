@@ -1,3 +1,7 @@
+{{- $email := promptString "What's your (git) email address?" "rai@rbutera.com" }}
+{{- $name := promptString "What's your (git) full name?" "Rai Butera"}}
+{{- $install_node := promptBool "Would you like to (re)install Node.js and Node.js packages?" true }}
+{{- $install_python := promptBool "Would you like to (re)install python and python packages?" true -}}
 [edit]
   command = "nvim"
 
@@ -7,16 +11,16 @@
 [diff]
   command = "delta"
   pager = "less"
-{{- $email := promptString "What's your (git) email address?" "rai@rbutera.com" -}}
-{{ $name := promptString "What's your (git) full name?" "Rai Butera"}}
 
 [data]
   email = {{ $email | quote }}
-  {{ if eq .chezmoi.os "linux" -}}
+  {{- if eq .chezmoi.os "linux" -}}
   {{- $wsl := hasSuffix "WSL2" .chezmoi.kernel.osrelease -}}
   wsl = {{ $wsl }}
   {{- else}}
   wsl = false
   {{- end}}
   name = {{ $name | quote }}
+  install_python = {{ $install_python }}
+  install_node = {{ $install_node }}
   
