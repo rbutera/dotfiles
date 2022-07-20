@@ -201,5 +201,9 @@ czm() {
   eval $command
 }
 
+alias cd() {
+  builtin cd "$@" && ls;
+}
+
 alias czd="chezmoi diff"
 alias czu="chezmoi update"
