@@ -195,13 +195,13 @@ alias pbcopy="xclip -selection clipboard"
 alias pbpaste="xclip -selection clipboard -o"
 {{end}}
 
-czm() {
+function czm() {
   command="chezmoi edit --apply $@"
   echo "$command"
   eval $command
 }
 
-cd() {
+function cd() {
   builtin cd "$@" && ls;
 }
 
