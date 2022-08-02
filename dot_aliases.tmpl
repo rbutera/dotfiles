@@ -207,3 +207,8 @@ function cd() {
 
 alias czd="chezmoi diff"
 alias czu="chezmoi update"
+
+function lexstep_client_pr() {
+  echo "Creating PR for lexstep-nest-client"
+  open "https://github.com/LexStep/lexstep-client/compare/nest/develop...rbutera:lexstep-nest-client:develop"
+}
