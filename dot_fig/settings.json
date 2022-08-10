@@ -1,9 +1,11 @@
 {
-  "autocomplete.keybindings.enter": "ignore",
-  "autocomplete.keybindings.tab": "insertCommonPrefixOrInsertSelected",
-  "autocomplete.preferVerboseSuggestions": true,
-  "dotfiles.syncImmediately": false,
-  "immediatelyExecuteAfterSpace": false,
-  "integrations.experimental": true,
-  "plugins.beta": true
+  "autocomplete.disable" : false,
+  "autocomplete.keybindings.enter" : "ignore",
+  "autocomplete.keybindings.tab" : "insertCommonPrefixOrInsertSelected",
+  "autocomplete.preferVerboseSuggestions" : true,
+  "autocomplete.theme" : "dark",
+  "dotfiles.syncImmediately" : false,
+  "immediatelyExecuteAfterSpace" : false,
+  "integrations.experimental" : true,
+  "plugins.beta" : true
 }

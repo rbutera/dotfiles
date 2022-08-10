@@ -98,35 +98,16 @@ local config = {
 			-- },
 			{ "lukas-reineke/indent-blankline.nvim" },
 			{ "j-hui/fidget.nvim" },
-			-- { "MunifTanjim/nui.nvim" },
 			{ "VonHeikemen/searchbox.nvim" },
 			{
 				"folke/todo-comments.nvim",
 				requires = "nvim-lua/plenary.nvim",
 				config = function()
-					require("todo-comments").setup({
-						-- your configuration comes here
-						-- or leave it empty to use the default settings
-						-- refer to the configuration section below
-					})
+					require("todo-comments").setup({})
 				end,
 			},
 			{
-				"ghillb/cybu.nvim",
-				branch = "v1.x", -- won't receive breaking changes
-				-- branch = "main", -- timely updates
-				requires = { "kyazdani42/nvim-web-devicons" }, --optional
-				config = function()
-					local ok, cybu = pcall(require, "cybu")
-					if not ok then
-						return
-					end
-					cybu.setup()
-					vim.keymap.set("n", "K", "<Plug>(CybuPrev)")
-					vim.keymap.set("n", "J", "<Plug>(CybuNext)")
-					vim.keymap.set({ "n", "v" }, "<c-s-tab>", "<plug>(CybuLastusedPrev)")
-					vim.keymap.set({ "n", "v" }, "<c-tab>", "<plug>(CybuLastusedNext)")
-				end,
+				"nvim-lua/plenary.nvim",
 			},
 			{
 				"catppuccin/nvim",
@@ -177,24 +158,25 @@ local config = {
 			{
 				"ggandor/leap.nvim",
 				requires = "tpope/vim-repeat",
-				-- config = function()
-				-- local l = require("leap")
-				-- l.set_default_keymaps()
-				-- end,
+				config = function()
+					local l = require("leap")
+					l.set_default_keymaps()
+				end,
 			},
 			{
 				"kylechui/nvim-surround",
 				config = function()
-					require("nvim-surround").setup({
-						-- Configuration here, or leave empty to use defaults
-					})
+					require("nvim-surround").setup({})
 				end,
 			},
 			{
 				"kosayoda/nvim-lightbulb",
 				requires = "antoinemadec/FixCursorHold.nvim",
 				config = function()
-					require("nvim-lightbulb").setup({ autocmd = { enabled = true } })({})
+					require("nvim-lightbulb").setup({
+						autocmd = { enabled = true },
+					})
+					-- ({})
 				end,
 			},
 		},
@@ -205,13 +187,9 @@ local config = {
 			-- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/formatting
 			-- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/diagnostics
 			config.sources = {
-				-- Set a formatter
-				-- null_ls.builtins.formatting.rufo,
-				-- null_ls.builtins.formatting.autopep8,
 				null_ls.builtins.formatting.eslint_d,
 				null_ls.builtins.code_actions.eslint_d,
 				null_ls.builtins.diagnostics.eslint_d,
-				-- null_ls.builtins.formatting.flake8,
 				null_ls.builtins.diagnostics.luacheck,
 				null_ls.builtins.diagnostics.mypy,
 				null_ls.builtins.code_actions.shellcheck,
@@ -227,9 +205,6 @@ local config = {
 				null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.stylua,
 				null_ls.builtins.diagnostics.pylint,
-
-				-- Set a linter
-				-- null_ls.builtins.diagnostics.rubocop,
 			}
 			-- set up null-ls's on_attach function
 			config.on_attach = function(client)
