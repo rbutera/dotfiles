@@ -3,13 +3,23 @@
 source ~/.zshrc
 source ~/.zprofile
 
+{{ if .eq .chezmoi.os "linux"}}
+curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-installer | bash
+curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-doctor | bash
+{{end}}
+
+{{ if .eq .chezmoi.os "darwin"}}
+brew install nodenv
+curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-doctor | bash
+{{end}}
+
 {{ if .install_node }}
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install node
-nvm install --lts
-nvm use node
 echo "Installing node.js and node.js packages"
 echo "npm: using $(which npm)"
+nodenv install 16.13.1
+nodenv install 14.18.2
+nodenv global 16.13.1
+nodenv shell 16.13.1
 npm install -g @nestjs/cli prettier eslint typescript xo markdownlint remark hicat ts-node prisma md2slack
 {{ end }}
 
