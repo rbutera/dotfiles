@@ -117,28 +117,28 @@ local config = {
 				end,
 			},
 			{ "echasnovski/mini.nvim", branch = "stable" },
-			{
-				"lewis6991/hover.nvim",
-				config = function()
-					require("hover").setup({
-						init = function()
-							-- Require providers
-							require("hover.providers.lsp")
-							require("hover.providers.gh")
-							require("hover.providers.man")
-							require("hover.providers.dictionary")
-						end,
-						preview_opts = {
-							border = nil,
-						},
-						title = true,
-					})
-
-					-- Setup keymaps
-					vim.keymap.set("n", "gh", require("hover").hover, { desc = "hover.nvim" })
-					vim.keymap.set("n", "gH", require("hover").hover_select, { desc = "hover.nvim (select)" })
-				end,
-			},
+			-- {
+			-- 	"lewis6991/hover.nvim",
+			-- 	config = function()
+			-- 		require("hover").setup({
+			-- 			init = function()
+			-- 				-- Require providers
+			-- 				require("hover.providers.lsp")
+			-- 				-- require("hover.providers.gh")
+			-- 				-- require("hover.providers.man")
+			-- 				-- require("hover.providers.dictionary")
+			-- 			end,
+			-- 			preview_opts = {
+			-- 				border = nil,
+			-- 			},
+			-- 			title = true,
+			-- 		})
+			--
+			-- 		 -- Setup keymaps
+			-- 		 vim.keymap.set("n", "gh", require("hover").hover, { desc = "hover.nvim" })
+			-- 		 vim.keymap.set("n", "gH", require("hover").hover_select, { desc = "hover.nvim (select)" })
+			-- 	end,
+			-- },
 			{
 				"folke/trouble.nvim",
 				requires = "kyazdani42/nvim-web-devicons",
@@ -173,11 +173,12 @@ local config = {
 				"kosayoda/nvim-lightbulb",
 				requires = "antoinemadec/FixCursorHold.nvim",
 				config = function()
-					require("nvim-lightbulb").setup({
-						autocmd = { enabled = true },
-					})
-					-- ({})
+					require("nvim-lightbulb").setup({ autocmd = { enabled = true } })
 				end,
+			},
+			{
+				"windwp/nvim-spectre",
+				requires = "windwp/nvim-spectre",
 			},
 		},
 		-- All other entries override the setup() call for default plugins
@@ -293,6 +294,9 @@ local config = {
 		vim.keymap.set("n", "<leader>O", "O<Esc>j")
 		vim.keymap.set({ "n", "v" }, "<leader>yj", "y'>o<Esc>p")
 
+		vim.keymap.set("n", "gh", function()
+			vim.diagnostic.open_float()
+		end)
 		-- for spectre
 		vim.keymap.set("n", "<leader>S", function()
 			require("spectre").open()
@@ -310,6 +314,36 @@ local config = {
 			command = "source <afile> | PackerSync",
 		})
 
+		vim.keymap.del("n", "<leader>q")
+		vim.keymap.set("n", "<leader>q", function()
+			vim.lsp.buf.code_action()
+		end)
+
+		local function alpha_on_bye(cmd)
+			local bufs = vim.fn.getbufinfo({ buflisted = true })
+			vim.cmd(cmd)
+			if require("core.utils").is_available("alpha-nvim") and not bufs[2] then
+				require("alpha").start(true)
+			end
+		end
+		vim.keymap.del("n", "<leader>c")
+		if require("core.utils").is_available("bufdelete.nvim") then
+			vim.keymap.set("n", "<leader>c", function()
+				alpha_on_bye("Bdelete!")
+			end, { desc = "Close buffer" })
+		else
+			vim.keymap.set("n", "<leader>c", function()
+				alpha_on_bye("bdelete!")
+			end, { desc = "Close buffer" })
+		end
+
+		-- vim.keymap.del("n", "<leader>lr")
+		vim.keymap.set("n", "<leader>rs", function()
+			vim.lsp.buf.rename()
+		end, { desc = "Rename symbol" })
+		-- vim.keymap.set("n", "<leader>r", function()
+		-- vim.lsp.buf.rename()
+		-- end, { desc = "Rename current symbol" })
 		-- Set up custom filetypes
 		-- vim.filetype.add {
 		--   extension = {
