@@ -3,12 +3,12 @@
 source ~/.zshrc
 source ~/.zprofile
 
-{{ if .eq .chezmoi.os "linux"}}
+{{ if eq .chezmoi.os "linux"}}
 curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-installer | bash
 curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-doctor | bash
 {{end}}
 
-{{ if .eq .chezmoi.os "darwin"}}
+{{ if eq .chezmoi.os "darwin"}}
 brew install nodenv
 curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-doctor | bash
 {{end}}
