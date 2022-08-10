@@ -109,8 +109,13 @@ command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 export PATH="$HOME/.poetry/bin:$PATH"
-eval "$(nodenv init -)"
 
+load-nvmrc() {
+  if [[ -f .nvmrc && -r .nvmrc ]]; then
+    nvm use
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
