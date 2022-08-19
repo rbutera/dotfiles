@@ -153,7 +153,17 @@ local config = {
 				"nvim-lua/plenary.nvim",
 			},
 			{
-				"github/copilot.vim",
+				"zbirenbaum/copilot.lua",
+				event = "InsertEnter",
+				config = function()
+					vim.schedule(function()
+						require("copilot").setup()
+					end)
+				end,
+			},
+			{
+				"zbirenbaum/copilot-cmp",
+				module = "copilot_cmp",
 			},
 			{
 				"ggandor/leap.nvim",
@@ -257,6 +267,13 @@ local config = {
 	-- false == disabled
 	-- true == 1000
 	cmp = {
+		sources = {
+			{ name = "copilot", group_index = 2 },
+			{ name = "nvim_lsp", group_index = 2 },
+			{ name = "path", group_index = 2 },
+			{ name = "luasnip", group_index = 2 },
+			{ name = "buffer", group_index = 2 },
+		},
 		source_priority = {
 			nvim_lsp = 1000,
 			luasnip = 750,
@@ -289,22 +306,23 @@ local config = {
 	-- good place to configure mappings and vim options
 	polish = function()
 		-- Set key bindings
-		vim.keymap.set("n", "<C-s>", ":w!<CR>")
-		vim.keymap.set("n", "<leader>o", "o<Esc>k")
-		vim.keymap.set("n", "<leader>O", "O<Esc>j")
-		vim.keymap.set({ "n", "v" }, "<leader>yj", "y'>o<Esc>p")
+		vim.keymap.set("n", "<C-s>", ":w!<CR>", { desc = "Save file" })
+		vim.keymap.set("n", "<leader>o", "o<Esc>k", { desc = "Insert line below" })
+		vim.keymap.set("n", "<leader>O", "O<Esc>j", { desc = "Insert line above" })
+		vim.keymap.set({ "n", "v" }, "<leader>yj", "y'>o<Esc>p", { desc = "Duplicate line(s) down" })
+		vim.keymap.set({ "n", "v" }, "<leader>yk", "y'>O<Esc>p", { desc = "Duplicate line(s) up" })
 
 		vim.keymap.set("n", "gh", function()
 			vim.diagnostic.open_float()
-		end)
+		end, { desc = "Floating diagnostics" })
 		-- for spectre
 		vim.keymap.set("n", "<leader>S", function()
 			require("spectre").open()
-		end)
+		end, { desc = "Open Spectre (find/replace)" })
 		-- search current word
 		vim.keymap.set("n", "<leader>sw", function()
 			require("spectre").open_visual({ select_word = true })
-		end)
+		end, { desc = "Find/replace with selected word" })
 		-- Set autocommands
 		vim.api.nvim_create_augroup("packer_conf", { clear = true })
 		vim.api.nvim_create_autocmd("BufWritePost", {
@@ -317,7 +335,7 @@ local config = {
 		vim.keymap.del("n", "<leader>q")
 		vim.keymap.set("n", "<leader>q", function()
 			vim.lsp.buf.code_action()
-		end)
+		end, { desc = "Quick fix / code action" })
 
 		local function alpha_on_bye(cmd)
 			local bufs = vim.fn.getbufinfo({ buflisted = true })
