@@ -100,14 +100,14 @@ local config = {
 			{ "j-hui/fidget.nvim" },
 			{ "VonHeikemen/searchbox.nvim" },
 			{
+				"nvim-lua/plenary.nvim",
+			},
+			{
 				"folke/todo-comments.nvim",
 				requires = "nvim-lua/plenary.nvim",
 				config = function()
 					require("todo-comments").setup({})
 				end,
-			},
-			{
-				"nvim-lua/plenary.nvim",
 			},
 			{
 				"catppuccin/nvim",
@@ -154,16 +154,31 @@ local config = {
 			},
 			{
 				"zbirenbaum/copilot.lua",
-				event = "InsertEnter",
+				event = { "VimEnter" },
 				config = function()
-					vim.schedule(function()
-						require("copilot").setup()
-					end)
+					vim.defer_fn(function()
+						require("copilot").setup({
+							cmp = {
+								enabled = true,
+								method = "getCompletionsCycling",
+							},
+							panel = { -- no config options yet
+								enabled = true,
+							},
+							ft_disable = {},
+							plugin_manager_path = vim.fn.stdpath("data") .. "/site/pack/packer",
+							server_opts_overrides = {},
+						})
+					end, 100)
 				end,
 			},
 			{
 				"zbirenbaum/copilot-cmp",
 				module = "copilot_cmp",
+				after = "nvim-cmp",
+				config = function()
+					astronvim.add_user_cmp_source("copilot")
+				end,
 			},
 			{
 				"ggandor/leap.nvim",
@@ -189,6 +204,12 @@ local config = {
 			{
 				"windwp/nvim-spectre",
 				requires = "windwp/nvim-spectre",
+			},
+			{
+				"bkad/CamelCaseMotion",
+				config = function()
+					vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
+				end,
 			},
 		},
 		-- All other entries override the setup() call for default plugins
@@ -267,14 +288,8 @@ local config = {
 	-- false == disabled
 	-- true == 1000
 	cmp = {
-		sources = {
-			{ name = "copilot", group_index = 2 },
-			{ name = "nvim_lsp", group_index = 2 },
-			{ name = "path", group_index = 2 },
-			{ name = "luasnip", group_index = 2 },
-			{ name = "buffer", group_index = 2 },
-		},
 		source_priority = {
+			copilot = 1200,
 			nvim_lsp = 1000,
 			luasnip = 750,
 			buffer = 500,
