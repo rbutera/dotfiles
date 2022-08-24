@@ -211,6 +211,21 @@ local config = {
 					vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
 				end,
 			},
+			{
+				"nvim-treesitter/nvim-treesitter-context",
+			},
+			{
+				"jose-elias-alvarez/typescript.nvim",
+				after = "mason-lspconfig.nvim",
+				config = function()
+					require("typescript").setup({
+						server = astronvim.lsp.server_settings("tsserver"),
+					})
+				end,
+			},
+		},
+		["mason-lspconfig"] = {
+			ensure_installed = { "tsserver" },
 		},
 		-- All other entries override the setup() call for default plugins
 		["null-ls"] = function(config)
@@ -298,6 +313,7 @@ local config = {
 	},
 	-- Extend LSP configuration
 	lsp = {
+		skip_setup = { "tsserver" },
 		-- enable servers that you already have installed without lsp-installer
 		servers = {},
 		-- add to the server on_attach function
