@@ -205,12 +205,12 @@ local config = {
 				"windwp/nvim-spectre",
 				requires = "windwp/nvim-spectre",
 			},
-			{
-				"bkad/CamelCaseMotion",
-				config = function()
-					vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
-				end,
-			},
+			-- {
+			-- 	"bkad/CamelCaseMotion",
+			-- 	config = function()
+			-- 		vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
+			-- 	end,
+			-- },
 			{
 				"nvim-treesitter/nvim-treesitter-context",
 			},
@@ -342,6 +342,8 @@ local config = {
 		vim.keymap.set("n", "<leader>O", "O<Esc>j", { desc = "Insert line above" })
 		vim.keymap.set({ "n", "v" }, "<leader>yj", "y'>o<Esc>p", { desc = "Duplicate line(s) down" })
 		vim.keymap.set({ "n", "v" }, "<leader>yk", "y'>O<Esc>p", { desc = "Duplicate line(s) up" })
+		vim.keymap.set("n", "<leader>kh", "<cmd>Neotree toggle<cr>", { desc = "Toggle Explorer" })
+		vim.keymap.set("n", "<leader>kH", "<cmd>Neotree focus<cr>", { desc = "Focus Explorer" })
 
 		vim.keymap.set("n", "gh", function()
 			vim.diagnostic.open_float()
@@ -404,6 +406,7 @@ local config = {
 		--   pattern = {
 		--     ["~/%.config/foo/.*"] = "fooscript",
 		--   },
+		--
 		-- }
 	end,
 }
