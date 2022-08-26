@@ -223,6 +223,9 @@ local config = {
 					})
 				end,
 			},
+			{
+				"hashivim/vim-terraform",
+			},
 		},
 		["mason-lspconfig"] = {
 			ensure_installed = { "tsserver" },
