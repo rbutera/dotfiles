@@ -260,7 +260,7 @@ local config = {
 				null_ls.builtins.diagnostics.pylint,
 			}
 			-- set up null-ls's on_attach function
-			config.on_attach = function(client)
+			config.on_attach = function(client, bufnr)
 				-- NOTE: You can remove this on attach function to disable format on save
 				if client.resolved_capabilities.document_formatting then
 					vim.api.nvim_create_autocmd("BufWritePre", {
@@ -268,7 +268,7 @@ local config = {
 						pattern = "<buffer>",
 						callback = function()
 							return vim.lsp.buf.formatting_sync({
-								bufnr = bufnr,
+								-- bufnr = bufnr,
 								filter = function(client)
 									return client.name == "null-ls"
 								end,
