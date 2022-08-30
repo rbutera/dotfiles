@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
 alias ...="cd ../.."
@@ -211,6 +213,28 @@ alias czu="chezmoi update"
 function lexstep_client_pr() {
   echo "Creating PR for lexstep-nest-client"
   open "https://github.com/LexStep/lexstep-client/compare/nest/develop...rbutera:lexstep-nest-client:develop"
+}
+
+function standup2slack(){
+  npx md2slack today | pbcopy;
+  echo "Will send the following to slack:\n"
+  echo "$(pbpaste)"
+  echo "\n"
+  read -q "REPLY?Continue?"
+
+  case "$REPLY" in 
+    y|Y ) echo "yes";;
+    n|N ) echo "no";;
+    * ) echo "invalid";;
+  esac
+
+  echo "Continuing..."
+  # nodenv shell 18.7.0;
+  # nodenv global 18.7.0;
+  # npm install -g md2slack; 
+
+  npx md2slack today | pbcopy;
+  osascript -e 'tell application "Keyboard Maestro Engine" to do script "standup to slack"'
 }
 
 alias nvimcfg="czm ~/.config/nvim/lua/user/init.lua"
