@@ -266,7 +266,14 @@ local config = {
 					vim.api.nvim_create_autocmd("BufWritePre", {
 						desc = "Auto format before save",
 						pattern = "<buffer>",
-						callback = vim.lsp.buf.formatting_sync,
+						callback = function()
+							return vim.lsp.buf.formatting_sync({
+								bufnr = bufnr,
+								filter = function(client)
+									return client.name == "null-ls"
+								end,
+							})
+						end,
 					})
 				end
 			end
