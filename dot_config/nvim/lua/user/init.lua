@@ -205,12 +205,12 @@ local config = {
 				"windwp/nvim-spectre",
 				requires = "windwp/nvim-spectre",
 			},
-			-- {
-			-- 	"bkad/CamelCaseMotion",
-			-- 	config = function()
-			-- 		vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
-			-- 	end,
-			-- },
+			{
+				"bkad/CamelCaseMotion",
+				config = function()
+					vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
+				end,
+			},
 			{
 				"nvim-treesitter/nvim-treesitter-context",
 			},
@@ -222,6 +222,9 @@ local config = {
 						server = astronvim.lsp.server_settings("tsserver"),
 					})
 				end,
+			},
+			{
+				"hashivim/vim-terraform",
 			},
 		},
 		["mason-lspconfig"] = {
