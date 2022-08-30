@@ -226,6 +226,9 @@ local config = {
 			{
 				"hashivim/vim-terraform",
 			},
+			{
+				"tpope/vim-eunuch",
+			},
 		},
 		["mason-lspconfig"] = {
 			ensure_installed = { "tsserver" },
