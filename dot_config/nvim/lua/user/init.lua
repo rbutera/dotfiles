@@ -254,7 +254,8 @@ local config = {
 				null_ls.builtins.formatting.gofumpt,
 				null_ls.builtins.formatting.shfmt,
 				null_ls.builtins.diagnostics.tsc,
-				null_ls.builtins.formatting.black.with({ extra_args = { "--fast" } }),
+				-- null_ls.builtins.formatting.black.with({ extra_args = { "--fast" } }),
+				null_ls.builtins.formatting.black,
 				null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.stylua,
 				-- null_ls.builtins.diagnostics.pylint,
@@ -342,6 +343,10 @@ local config = {
 			end
 
 			if client.name == "tsserver" then
+				client.resolved_capabilities.document_formatting = false
+			end
+
+			if client.name == "terraformls" then
 				client.resolved_capabilities.document_formatting = false
 			end
 		end,
