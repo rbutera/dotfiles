@@ -257,7 +257,7 @@ local config = {
 				null_ls.builtins.formatting.black.with({ extra_args = { "--fast" } }),
 				null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.stylua,
-				null_ls.builtins.diagnostics.pylint,
+				-- null_ls.builtins.diagnostics.pylint,
 			}
 			-- set up null-ls's on_attach function
 			config.on_attach = function(client, bufnr)

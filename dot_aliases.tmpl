@@ -241,3 +241,11 @@ alias nvimcfg="czm ~/.config/nvim/lua/user/init.lua"
 
 alias gitroot='cd $(git rev-parse --show-toplevel)'
 
+function chezup(){
+  CURRENT_DIR=$PWD;
+  echo "Navigating to chezmoi directory from $CURRENT_DIR"
+  cd ~/.local/share/chezmoi;
+  g ca "$@" && git push 
+  echo "navigating back to $CURRENT_DIR"
+  cd "$CURRENT_DIR";
+}
