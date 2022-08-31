@@ -268,7 +268,7 @@ local config = {
 						pattern = "<buffer>",
 						callback = function()
 							return vim.lsp.buf.formatting_sync({
-								-- bufnr = bufnr,
+								bufnr = bufnr,
 								filter = function(client)
 									return client.name == "null-ls"
 								end,
@@ -336,7 +336,7 @@ local config = {
 		-- enable servers that you already have installed without lsp-installer
 		servers = {},
 		-- add to the server on_attach function
-		on_attach = function(client, bufnr)
+		on_attach = function(client)
 			if client.name == "pylsp" then
 				client.resolved_capabilities.document_formatting = false
 			end
