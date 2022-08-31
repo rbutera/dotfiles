@@ -268,7 +268,7 @@ local config = {
 						pattern = "<buffer>",
 						callback = function()
 							return vim.lsp.buf.formatting_sync({
-								bufnr = bufnr,
+								-- bufnr = bufnr,
 								filter = function(client)
 									return client.name == "null-ls"
 								end,
