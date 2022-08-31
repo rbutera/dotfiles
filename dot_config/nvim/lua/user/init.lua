@@ -260,7 +260,7 @@ local config = {
 				null_ls.builtins.diagnostics.pylint,
 			}
 			-- set up null-ls's on_attach function
-			config.on_attach = function(client)
+			config.on_attach = function(client, bufnr)
 				-- NOTE: You can remove this on attach function to disable format on save
 				if client.resolved_capabilities.document_formatting then
 					vim.api.nvim_create_autocmd("BufWritePre", {
@@ -287,6 +287,12 @@ local config = {
 		},
 		packer = {
 			compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua",
+		},
+		{
+			"numToStr/Comment.nvim",
+			config = function()
+				require("Comment").setup()
+			end,
 		},
 	},
 	-- LuaSnip Options
@@ -330,8 +336,15 @@ local config = {
 		-- enable servers that you already have installed without lsp-installer
 		servers = {},
 		-- add to the server on_attach function
-		-- on_attach = function(client, bufnr)
-		-- end,
+		on_attach = function(client, bufnr)
+			if client.name == "pylsp" then
+				client.resolved_capabilities.document_formatting = false
+			end
+
+			if client.name == "tsserver" then
+				client.resolved_capabilities.document_formatting = false
+			end
+		end,
 
 		-- override the lsp installer server-registration function
 		-- server_registration = function(server, opts)
