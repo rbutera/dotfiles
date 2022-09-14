@@ -454,11 +454,11 @@ local config = {
 		end
 		vim.keymap.del("n", "<leader>c")
 		if require("core.utils").is_available("bufdelete.nvim") then
-			vim.keymap.set("n", "<leader>c", function()
+			vim.keymap.set("n", "<leader>x", function()
 				alpha_on_bye("Bdelete!")
 			end, { desc = "Close buffer" })
 		else
-			vim.keymap.set("n", "<leader>c", function()
+			vim.keymap.set("n", "<leader>x", function()
 				alpha_on_bye("bdelete!")
 			end, { desc = "Close buffer" })
 		end
