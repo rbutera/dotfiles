@@ -150,9 +150,6 @@ local config = {
 				"folke/lsp-colors.nvim",
 			},
 			{
-				"nvim-lua/plenary.nvim",
-			},
-			{
 				"zbirenbaum/copilot.lua",
 				event = { "VimEnter" },
 				config = function()
@@ -228,6 +225,51 @@ local config = {
 			},
 			{
 				"tpope/vim-eunuch",
+			},
+			{
+				"kevinhwang91/nvim-ufo",
+				requires = "kevinhwang91/promise-async",
+				config = function()
+					vim.o.foldcolumn = "1"
+					vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+					vim.o.foldlevelstart = 99
+					vim.o.foldenable = true
+
+					-- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+					vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+					vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+
+					local ftMap = {
+						vim = "indent",
+						python = { "indent" },
+						git = "",
+					}
+
+					local function customizeSelector(bufnr)
+						local function handleFallbackException(err, providerName)
+							if type(err) == "string" and err:match("UfoFallbackException") then
+								return require("ufo").getFolds(providerName, bufnr)
+							else
+								return require("promise").reject(err)
+							end
+						end
+
+						return require("ufo")
+							.getFolds("lsp", bufnr)
+							:catch(function(err)
+								return handleFallbackException(err, "treesitter")
+							end)
+							:catch(function(err)
+								return handleFallbackException(err, "indent")
+							end)
+					end
+
+					require("ufo").setup({
+						provider_selector = function(bufnr, filetype, buftype)
+							return ftMap[filetype] or customizeSelector
+						end,
+					})
+				end,
 			},
 		},
 		["mason-lspconfig"] = {
@@ -389,6 +431,7 @@ local config = {
 		end, { desc = "Find/replace with selected word" })
 		-- Set autocommands
 		vim.api.nvim_create_augroup("packer_conf", { clear = true })
+
 		vim.api.nvim_create_autocmd("BufWritePost", {
 			desc = "Sync packer after modifying plugins.lua",
 			group = "packer_conf",
@@ -397,6 +440,7 @@ local config = {
 		})
 
 		vim.keymap.del("n", "<leader>q")
+
 		vim.keymap.set("n", "<leader>q", function()
 			vim.lsp.buf.code_action()
 		end, { desc = "Quick fix / code action" })
@@ -423,6 +467,10 @@ local config = {
 		vim.keymap.set("n", "<leader>rs", function()
 			vim.lsp.buf.rename()
 		end, { desc = "Rename symbol" })
+
+		vim.keymap.set("n", "<C-p>", function()
+			require("telescope.builtin").find_files()
+		end, { desc = "Search files" })
 		-- vim.keymap.set("n", "<leader>r", function()
 		-- vim.lsp.buf.rename()
 		-- end, { desc = "Rename current symbol" })
