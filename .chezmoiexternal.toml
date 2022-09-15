@@ -3,8 +3,4 @@
   url = "https://github.com/agkozak/zsh-z"
   refreshPeriod = "168h"
 
-[".tmux"]
-  type = "git-repo"
-  url = "https://github.com/rbutera/.tmux"
-  refreshPeriod = "24h"
 
