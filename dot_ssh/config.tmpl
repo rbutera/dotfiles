@@ -16,6 +16,15 @@ Host mew
   IdentityFile ~/.ssh/id_ed25519
   ForwardAgent yes
 
+Host lexstep.com 
+  ForwardAgent yes
+  StrictHostKeyChecking no
+
+Host bastion-stage.lexstep.com
+   ## ForwardAgent yes
+   StrictHostKeyChecking no
+   ## IdentityFile ~/dumps/keys/lexstep-staging.pem
+
 Host 100.84.231.100
  ForwardAgent yes
  IdentityFile ~/.ssh/id_ed25519
