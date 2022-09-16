@@ -290,7 +290,7 @@ local config = {
 				null_ls.builtins.code_actions.shellcheck,
 				null_ls.builtins.completion.tags,
 				null_ls.builtins.formatting.markdownlint,
-				null_ls.builtins.formatting.prettierd,
+				null_ls.builtins.formatting.prettier,
 				null_ls.builtins.formatting.terrafmt,
 				null_ls.builtins.formatting.terraform_fmt,
 				null_ls.builtins.formatting.gofumpt,

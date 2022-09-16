@@ -251,11 +251,16 @@ function chezup(){
 }
 
 function lexstep_ssh_cleanup(){
-  ssh-keygen -r bastion-stage.lexstep.com
-  ssh-keygen -r bastion.lexstep.com
-  ssh-keygen -r bastion-dev.lexstep.com
+  ssh-keygen -R bastion-stage.lexstep.com
+  ssh-keygen -R bastion.lexstep.com
+  ssh-keygen -R bastion-dev.lexstep.com
 
-  sudo ssh-keygen -r bastion-stage.lexstep.com
-  sudo ssh-keygen -r bastion.lexstep.com
-  sudo ssh-keygen -r bastion-dev.lexstep.com
+  sudo ssh-keygen -R bastion-stage.lexstep.com
+  sudo ssh-keygen -R bastion.lexstep.com
+  sudo ssh-keygen -R bastion-dev.lexstep.com
+}
+
+function lexstep_stage_bastion(){
+  lexstep_ssh_cleanup;
+  ssh ec2-user@bastion-stage.lexstep.com
 }
