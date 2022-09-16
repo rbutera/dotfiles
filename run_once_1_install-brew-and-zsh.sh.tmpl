@@ -3,8 +3,8 @@ echo "Installing Homebrew"
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 install_zsh_linux() {
-  {{ if eq .chezmoi.os "linux" -}}
-    echo "Linux detected. Installing zsh"
+  {{if eq .chezmoi.os "linux"}}
+  echo "Linux detected. Installing zsh"
 
     {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
       sudo apt update
@@ -20,6 +20,8 @@ install_zsh_linux() {
       sudo pacman -S --noconfirm zsh zsh-completions
     {{end}}
     echo "zsh has been installed at $(which zsh)"
+    {{else}}
+    echo "Not on linux."
   {{ end -}}
 }
 
@@ -49,7 +51,9 @@ install_zsh() {
     then
       echo "(re)installing zsh etc"
       backup_zsh_dotfiles
+      {{if eq .chezmoi.os "linux"}}
       install_zsh_linux
+      {{end}}
       install_zplug
       chsh -s /bin/zsh
       source ~/.zshrc
