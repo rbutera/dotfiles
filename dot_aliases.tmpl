@@ -249,3 +249,13 @@ function chezup(){
   echo "navigating back to $CURRENT_DIR"
   cd "$CURRENT_DIR";
 }
+
+function lexstep_ssh_cleanup(){
+  ssh-keygen -r bastion-stage.lexstep.com
+  ssh-keygen -r bastion.lexstep.com
+  ssh-keygen -r bastion-dev.lexstep.com
+
+  sudo ssh-keygen -r bastion-stage.lexstep.com
+  sudo ssh-keygen -r bastion.lexstep.com
+  sudo ssh-keygen -r bastion-dev.lexstep.com
+}
