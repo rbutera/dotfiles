@@ -2,32 +2,33 @@
 echo "Installing Homebrew"
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+install_zsh_linux() {
+  {{ if eq .chezmoi.os "linux" -}}
+    echo "Linux detected. Installing zsh"
 
-{{ if eq .chezmoi.os "linux" -}}
-  echo "Linux detected. Installing zsh"
-
-  {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
-    sudo apt update
-    {{- if .wsl }}
-    echo "installing x11-apps for WSL"
-    sudo apt install x11-apps
+    {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+      sudo apt update
+      {{- if .wsl }}
+      echo "installing x11-apps for WSL"
+      sudo apt install x11-apps
+      {{end}}
+      sudo apt install zsh -y
+    {{else}}
+      echo "non-ubuntu based distro detected:"
+      cat "/etc/os-release"
+      echo "assuming arch linux..."
+      sudo pacman -S --noconfirm zsh zsh-completions
     {{end}}
-    sudo apt install zsh -y
-  {{else}}
-    echo "non-ubuntu based distro detected:"
-    cat "/etc/os-release"
-    echo "assuming arch linux..."
-    sudo pacman -S --noconfirm zsh zsh-completions
-  {{end}}
-  echo "zsh has been installed at $(which zsh)"
-{{ end -}}
+    echo "zsh has been installed at $(which zsh)"
+  {{ end -}}
+}
 
+install_zplug () {
+  # install zplug
+  rm -rf ~/.zplug
+  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+}
 
-# install zplug
-rm -rf ~/.zplug
-curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
-
-# backup zsh files
 backup_zsh_dotfiles() {
   echo "backing up zsh dotfiles..."
   mkdir -p ~/zsh_backup
@@ -39,7 +40,24 @@ backup_zsh_dotfiles() {
   mv -v ~/.zshenv ~/zsh_backup/.zshenv
   echo "finished backing up zsh dotfiles"
 }
-backup_zsh_dotfiles
 
-# change shell to zsh
-chsh -s /bin/zsh
+
+install_zsh() {
+    read -p "Install zsh? (y/Y) " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+      echo "(re)installing zsh etc"
+      backup_zsh_dotfiles
+      install_zsh_linux
+      install_zplug
+      chsh -s /bin/zsh
+      source ~/.zshrc
+    else
+        echo
+        echo "Declined. Skipping zsh install"
+    fi
+}
+
+install_zsh
+

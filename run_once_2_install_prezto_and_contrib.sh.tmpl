@@ -1,26 +1,20 @@
 #!/bin/zsh
-rm -rf ~/.zprezto
-git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
-cd ~/.zprezto
-git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
-mkdir -p ~/.zprezto-contrib
-git clone https://github.com/agkozak/zsh-z.git ~/.zprezto-contrib/zsh-z
-curl -sS https://starship.rs/install.sh | sh
-# restore zsh dotfiles
 
-restore_zsh_dotfiles() {
-  echo "restoring zsh dotfiles from backup..."
-  mkdir -p ~/zsh_backup
-  rm -rf ~/.zshrc ~/.zlogin ~/.zlogout ~/.zshenv ~/.zprofile ~/.zpreztorc
-  mv -v ~/zsh_backup/.zlogin ~/.zlogin
-  mv -v ~/zsh_backup/.zlogout ~/.zlogout
-  mv -v ~/zsh_backup/.zpreztorc ~/.zpreztorc
-  mv -v ~/zsh_backup/.zshrc ~/.zshrc
-  mv -v ~/zsh_backup/.zprofile ~/.zprofile
-  mv -v ~/zsh_backup/.zshenv ~/.zshenv
-  rm -rf ~/zsh_backup
-  echo "finished restoring zsh dotfiles from backup"
+install_zprezto() {
+    if read -q "choice?Press Y/y if you want to reinstall zprezto and starship"; then
+      rm -rf ~/.zprezto
+      git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
+      cd ~/.zprezto
+      git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
+      mkdir -p ~/.zprezto-contrib
+      git clone https://github.com/agkozak/zsh-z.git ~/.zprezto-contrib/zsh-z
+      curl -sS https://starship.rs/install.sh | sh
+      source ~/.zshrc
+    else
+        echo
+        echo "'$choice' not 'Y' or 'y'. Exiting..."
+    fi
 }
-restore_zsh_dotfiles
-source ~/.zshrc
+
+install_zprezto
 
