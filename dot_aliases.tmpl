@@ -250,6 +250,17 @@ function chezup(){
   cd "$CURRENT_DIR";
 }
 
+function chezsync(){
+  CURRENT_DIR=$PWD;
+  echo "Navigating to chezmoi directory from $CURRENT_DIR"
+  cd ~/.local/share/chezmoi;
+  git stash save
+  git pull
+  git stash pop
+  echo "navigating back to $CURRENT_DIR"
+  cd "$CURRENT_DIR";
+}
+
 function lexstep_ssh_cleanup(){
   ssh-keygen -R bastion-stage.lexstep.com
   ssh-keygen -R bastion.lexstep.com
@@ -264,3 +275,7 @@ function lexstep_stage_bastion(){
   lexstep_ssh_cleanup;
   ssh ec2-user@bastion-stage.lexstep.com
 }
+
+alias nv="nvim ."
+
+
