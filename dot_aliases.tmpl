@@ -276,6 +276,16 @@ function lexstep_stage_bastion(){
   ssh ec2-user@bastion-stage.lexstep.com
 }
 
-alias nv="nvim ."
+function nv(){
+  NV_INPUT=$@
+  echo "starting neovim"
+  if [[ -z "$NV_INPUT" ]] then
+    echo "nv: running neovim in current directory"
+    nvim .
+  else
+    echo "nv: running neovim $@"
+    nvim $@
+  fi
+}
 
 
