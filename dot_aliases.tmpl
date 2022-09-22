@@ -288,4 +288,8 @@ function nv(){
   fi
 }
 
+function ec2ips(){
+  aws ec2 describe-instances --query 'Reservations[*].Instances[*].{ip:PrivateIpAddress,name:Tags[?Key==`Name`].Value}' | jq '[.[][] | { name: .name[0], ip }] | sort_by(.name)'
+}
+
 alias infsta="cd ~/dev/lexstep/nest-infrastructure/server/staging-env"
