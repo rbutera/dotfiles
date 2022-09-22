@@ -272,8 +272,13 @@ function lexstep_ssh_cleanup(){
 }
 
 function lexstep_stage_bastion(){
+  COMMAND=$1
   lexstep_ssh_cleanup;
-  ssh ec2-user@bastion-stage.lexstep.com
+  if [[ -z "$COMMAND" ]]; then
+    ssh ec2-user@bastion-stage.lexstep.com "$COMMAND"
+  else
+    ssh ec2-user@bastion-stage.lexstep.com
+  fi
 }
 
 function nv(){
