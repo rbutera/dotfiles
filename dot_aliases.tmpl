@@ -289,7 +289,7 @@ function nv(){
 }
 
 function ec2ips(){
-  aws ec2 describe-instances --query 'Reservations[*].Instances[*].{ip:PrivateIpAddress,name:Tags[?Key==`Name`].Value}' | jq '[.[][] | { name: .name[0], ip }] | sort_by(.name)'
+  aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{ip:PrivateIpAddress,name:Tags[?Key==`Name`].Value}' | jq '[.[][] | { name: .name[0], ip }] | sort_by(.name)'
 }
 
 alias infsta="cd ~/dev/lexstep/nest-infrastructure/server/staging-env"
