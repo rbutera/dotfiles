@@ -201,6 +201,7 @@ function czm() {
   command="chezmoi edit --apply $@"
   echo "$command"
   eval $command
+  rr
 }
 
 function cd() {
@@ -261,23 +262,15 @@ function chezsync(){
   cd "$CURRENT_DIR";
 }
 
-function lexstep_ssh_cleanup(){
-  ssh-keygen -R bastion-stage.lexstep.com
-  ssh-keygen -R bastion.lexstep.com
-  ssh-keygen -R bastion-dev.lexstep.com
-
-  sudo ssh-keygen -R bastion-stage.lexstep.com
-  sudo ssh-keygen -R bastion.lexstep.com
-  sudo ssh-keygen -R bastion-dev.lexstep.com
-}
-
 function lexstep_stage_bastion(){
-  COMMAND=$1
-  lexstep_ssh_cleanup;
+  COMMAND=$@
+  echo "Running '$COMMAND' on bastion"
+  lexstep_ssh_keygen;
   if [[ -z "$COMMAND" ]]; then
-    ssh ec2-user@bastion-stage.lexstep.com "$COMMAND"
-  else
     ssh ec2-user@bastion-stage.lexstep.com
+  else
+    echo "Found arguments ($COMMAND)"
+    ssh ec2-user@bastion-stage.lexstep.com -t "$COMMAND"
   fi
 }
 
@@ -285,16 +278,46 @@ function nv(){
   NV_INPUT=$@
   echo "starting neovim"
   if [[ -z "$NV_INPUT" ]] then
-    echo "nv: running neovim in current directory"
+    ## echo "nv: running neovim in current directory"
     nvim .
   else
-    echo "nv: running neovim $@"
+    ## echo "nv: running neovim $@"
     nvim $@
   fi
 }
 
-function ec2ips(){
-  aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{ip:PrivateIpAddress,name:Tags[?Key==`Name`].Value}' | jq '[.[][] | { name: .name[0], ip }] | sort_by(.name)'
+function ec2_ips(){
+  aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{ip:PrivateIpAddress,name:Tags[?Key==`Name`].Value,launched:LaunchTime}' | jq '[.[][] | { name: .name[0], ip, launched}] | sort_by(.name)'
+}
+
+function ec2_ip(){
+  NAME=$@
+  if [[ -z "$NAME" ]]; then
+    ec2_ips
+  else
+    ASG="stage-$NAME"
+    COMMAND="ec2_ips | jq '.[] | select(.name==\"$ASG\") | .ip'"
+    result=$(eval "$COMMAND")
+    echo $result
+  fi
+}
+
+function pganalyzeip(){
+  ec2_ips | jq '.[] | select(.name=="stage-pganalyze") | .ip'
+}
+
+function connect_to_pganalyze(){
+  pganalyzeip | pbcopy
+  ssh ec2-user@bastion-stage.lexstep.com
 }
 
 alias infsta="cd ~/dev/lexstep/nest-infrastructure/server/staging-env"
+
+function staging_infrastructure(){
+  infsta
+  gitroot
+  git reset HEAD --hard
+  git-secret reveal -f
+  infsta
+  terraform plan
+}
