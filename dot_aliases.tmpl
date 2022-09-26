@@ -321,3 +321,15 @@ function staging_infrastructure(){
   infsta
   terraform plan
 }
+
+
+function apply_staging() {
+  message=$@
+  if [[ -z $message ]]; then
+    echo "msising message"
+    exit 1;
+  else
+    cd /Users/rai/dev/lexstep/nest-infrastructure/server/staging-env/apply
+    /Users/rai/dev/lexstep/nest-infrastructure/server/staging-env/apply --refresh all --build --apply --silent --message "$message"
+  fi
+}
