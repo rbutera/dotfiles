@@ -336,3 +336,7 @@ function apply_staging() {
 
 alias pinger_start="/Users/rai/dev/lexstep/pinger/scripts/start.sh"
 alias pinger_stop="/Users/rai/dev/lexstep/pinger/scripts/stop.sh"
+
+function gsync() {
+  git fetch --all && for branch in $(git branch | sed '/*/{$q;h;d};$G' | tr -d '*') ; do git checkout $branch && git merge --ff-only || break ; done
+}
