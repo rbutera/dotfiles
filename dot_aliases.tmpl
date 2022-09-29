@@ -348,3 +348,12 @@ function gsync() {
 unalias gca
 alias gca="g ca"
 
+function get_ssm_dotfile() {
+	$NAME=$1
+	if [[ -z "$NAME" ]]; then
+		echo "MISSING DOTFILE NAME, EXITING!"
+		exit 1;
+	else
+		aws --region=eu-west-2 ssm get-parameters --names "/STAGE/dotfiles/$NAME" --with-decryption | jq -r '.Parameter.Value'
+	fi
+}
