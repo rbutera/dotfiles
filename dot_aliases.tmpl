@@ -326,11 +326,11 @@ function staging_infrastructure(){
 function apply_staging() {
   message=$@
   if [[ -z $message ]]; then
-    echo "msising message"
+    echo "missing message"
     exit 1;
   else
     cd /Users/rai/dev/lexstep/nest-infrastructure/server/staging-env
-    /Users/rai/dev/lexstep/nest-infrastructure/server/staging-env/apply --refresh all --build --apply --silent --message "$message"
+    /Users/rai/dev/lexstep/nest-infrastructure/server/staging-env/apply --refresh all --apply --silent --message "$message"
   fi
 }
 
@@ -338,5 +338,13 @@ alias pinger_start="/Users/rai/dev/lexstep/pinger/scripts/start.sh"
 alias pinger_stop="/Users/rai/dev/lexstep/pinger/scripts/stop.sh"
 
 function gsync() {
+  {{- if eq .chezmoi.os "darwin" }}
   git fetch --all && for branch in $(git branch | gsed '/*/{$q;h;d};$G' | tr -d '*') ; do git checkout $branch && git merge --ff-only || break ; done
+  {{else}}
+  git fetch --all && for branch in $(git branch | sed '/*/{$q;h;d};$G' | tr -d '*') ; do git checkout $branch && git merge --ff-only || break ; done
+  {{end}}
 }
+
+unalias gca
+alias gca="g ca"
+

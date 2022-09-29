@@ -1,0 +1,10 @@
+#!/bin/bash
+TARGET=$@
+function connect_to_target(){
+  if [[ -z "$TARGET" ]]; then
+    ~/bin/ssh_bastion bastion
+  else
+    ~/bin/ssh_bastion $TARGET
+  fi
+}
+connect_to_target

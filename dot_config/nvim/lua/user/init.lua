@@ -422,7 +422,7 @@ local config = {
 			vim.diagnostic.open_float()
 		end, { desc = "Floating diagnostics" })
 		-- for spectre
-		vim.keymap.set("n", "<leader>S", function()
+		vim.keymap.set("n", "<leader>fs", function()
 			require("spectre").open()
 		end, { desc = "Open Spectre (find/replace)" })
 		-- search current word
@@ -467,6 +467,10 @@ local config = {
 		vim.keymap.set("n", "<leader>rs", function()
 			vim.lsp.buf.rename()
 		end, { desc = "Rename symbol" })
+
+		vim.keymap.set("n", "<leader>rf", function()
+			vim.lsp.util.rename()
+		end, { desc = "Rename file" })
 
 		vim.keymap.set("n", "<C-p>", function()
 			require("telescope.builtin").find_files()
