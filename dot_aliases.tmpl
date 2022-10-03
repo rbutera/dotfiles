@@ -349,11 +349,26 @@ unalias gca
 alias gca="g ca"
 
 function get_ssm_dotfile() {
-	$NAME=$1
+	NAME=$1
+	ENVIRONMENT=$2
+	if [[ -z "$ENVIRONMENT" ]]; then
+    ENVIRONMENT="STAGE"
+	fi
 	if [[ -z "$NAME" ]]; then
 		echo "MISSING DOTFILE NAME, EXITING!"
-		exit 1;
+		return 1
 	else
-		aws --region=eu-west-2 ssm get-parameters --names "/STAGE/dotfiles/$NAME" --with-decryption | jq -r '.Parameter.Value'
+		aws ssm get-parameters --name "/$ENVIRONMENT/dotfiles/$NAME" --with-decryption 	
 	fi
 }
+
+
+function gcar(){
+  echo "Quickly releasing change..."
+  gca "$@" && \
+    yarn release:patch --force
+}
+
+alias nvim_config="czm ~/.config/nvim/lua/user/init.lua"
+
+alias psql_pidgey="PGPASSWORD=postgres psql -h pidgey -p 9003 -U postgres --dbname lexstep"

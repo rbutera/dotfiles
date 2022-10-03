@@ -96,6 +96,9 @@ local config = {
 			--     require("lsp_signature").setup()
 			--   end,
 			-- },
+			{
+				"nvim-treesitter/nvim-treesitter-context",
+			},
 			{ "lukas-reineke/indent-blankline.nvim" },
 			{ "j-hui/fidget.nvim" },
 			{ "VonHeikemen/searchbox.nvim" },
@@ -207,9 +210,6 @@ local config = {
 				config = function()
 					vim.api.nvim_set_var("camelcasemotion_key", "<leader>")
 				end,
-			},
-			{
-				"nvim-treesitter/nvim-treesitter-context",
 			},
 			{
 				"jose-elias-alvarez/typescript.nvim",
