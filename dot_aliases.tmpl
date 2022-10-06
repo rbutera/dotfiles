@@ -276,12 +276,9 @@ function lexstep_stage_bastion(){
 
 function nv(){
   NV_INPUT=$@
-  echo "starting neovim"
   if [[ -z "$NV_INPUT" ]] then
-    ## echo "nv: running neovim in current directory"
     nvim .
   else
-    ## echo "nv: running neovim $@"
     nvim $@
   fi
 }
@@ -346,7 +343,6 @@ function gsync() {
   {{end}}
 }
 
-unalias gca
 alias gca="g ca"
 
 function get_ssm_dotfile() {
