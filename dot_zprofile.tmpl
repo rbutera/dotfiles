@@ -85,7 +85,6 @@ export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/nu
 export PATH
 
 
-
 setopt NO_NOMATCH
 {{ if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
