@@ -18,7 +18,7 @@ local config = {
 		remote = "origin", -- remote to use
 		channel = "nightly", -- "stable" or "nightly"
 		version = "latest", -- "latest", tag name, or regex search like "v1.*" to only do updates before v2 (STABLE ONLY)
-		branch = "main", -- branch name (NIGHTLY ONLY)
+		branch = "nightly", -- branch name (NIGHTLY ONLY)
 		commit = nil, -- commit hash (NIGHTLY ONLY)
 		pin_plugins = true, -- true, false, or a string for a specific AstroNvim snapshot to use (true will only track the current version if channel is "stable")
 		skip_prompts = false, -- skip prompts about breaking changes
@@ -35,6 +35,9 @@ local config = {
 	options = {
 		opt = {
 			relativenumber = true, -- sets vim.opt.relativenumber
+			cmdheight = 0,
+			-- foldnestmax = 3,
+			-- foldcolumn = '3',
 		},
 		g = {
 			mapleader = " ", -- sets vim.g.mapleader
@@ -99,7 +102,6 @@ local config = {
 			{
 				"nvim-treesitter/nvim-treesitter-context",
 			},
-			{ "lukas-reineke/indent-blankline.nvim" },
 			{ "j-hui/fidget.nvim" },
 			{ "VonHeikemen/searchbox.nvim" },
 			{
@@ -230,7 +232,8 @@ local config = {
 				"kevinhwang91/nvim-ufo",
 				requires = "kevinhwang91/promise-async",
 				config = function()
-					vim.o.foldcolumn = "1"
+					-- vim.o.foldcolumn = "0"
+					-- vim.o.foldnestmax = 3
 					vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
 					vim.o.foldlevelstart = 99
 					vim.o.foldenable = true
@@ -271,9 +274,12 @@ local config = {
 					})
 				end,
 			},
+			{
+				"mg979/vim-visual-multi",
+			},
 		},
 		["mason-lspconfig"] = {
-			ensure_installed = { "tsserver" },
+			ensure_installed = { "tsserver", "sumneko_lua" },
 		},
 		-- All other entries override the setup() call for default plugins
 		["null-ls"] = function(config)
@@ -303,30 +309,27 @@ local config = {
 				-- null_ls.builtins.diagnostics.pylint,
 			}
 			-- set up null-ls's on_attach function
-			config.on_attach = function(client, bufnr)
-				-- NOTE: You can remove this on attach function to disable format on save
-				if client.resolved_capabilities.document_formatting then
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						desc = "Auto format before save",
-						pattern = "<buffer>",
-						callback = function()
-							return vim.lsp.buf.formatting_sync({
-								bufnr = bufnr,
-								filter = function(client)
-									return client.name == "null-ls"
-								end,
-							})
-						end,
-					})
-				end
-			end
+			-- config.on_attach = function(client, bufnr)
+			-- 	-- NOTE: You can remove this on attach function to disable format on save
+			-- 	if client.resolved_capabilities.document_formatting then
+			-- 		vim.api.nvim_create_autocmd("BufWritePre", {
+			-- 			desc = "Auto format before save",
+			-- 			pattern = "<buffer>",
+			-- 			callback = function()
+			-- 				return vim.lsp.buf.formatting_sync({
+			-- 					bufnr = bufnr,
+			-- 					filter = function(client)
+			-- 						return client.name == "null-ls"
+			-- 					end,
+			-- 				})
+			-- 			end,
+			-- 		})
+			-- 	end
+			-- end
 			return config -- return final config table
 		end,
 		treesitter = {
 			ensure_installed = { "lua" },
-		},
-		["nvim-lsp-installer"] = {
-			ensure_installed = { "sumneko_lua" },
 		},
 		packer = {
 			compile_path = vim.fn.stdpath("config") .. "/lua/packer_compiled.lua",
@@ -505,19 +508,19 @@ local config = {
 		-- enable servers that you already have installed without lsp-installer
 		servers = {},
 		-- add to the server on_attach function
-		on_attach = function(client)
-			if client.name == "pylsp" then
-				client.resolved_capabilities.document_formatting = false
-			end
-
-			if client.name == "tsserver" then
-				client.resolved_capabilities.document_formatting = false
-			end
-
-			if client.name == "terraformls" then
-				client.resolved_capabilities.document_formatting = false
-			end
-		end,
+		-- on_attach = function(client)
+		-- 	if client.name == "pylsp" then
+		-- 		client.resolved_capabilities.document_formatting = false
+		-- 	end
+		--
+		-- 	if client.name == "tsserver" then
+		-- 		client.resolved_capabilities.document_formatting = false
+		-- 	end
+		--
+		-- 	if client.name == "terraformls" then
+		-- 		client.resolved_capabilities.document_formatting = false
+		-- 	end
+		-- end,
 
 		-- override the lsp installer server-registration function
 		-- server_registration = function(server, opts)
@@ -578,6 +581,7 @@ local config = {
 				require("alpha").start(true)
 			end
 		end
+
 		vim.keymap.del("n", "<leader>c")
 		if require("core.utils").is_available("bufdelete.nvim") then
 			vim.keymap.set("n", "<leader>x", function()
