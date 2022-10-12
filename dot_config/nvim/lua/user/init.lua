@@ -258,13 +258,13 @@ local config = {
 						end
 
 						return require("ufo")
-							.getFolds("lsp", bufnr)
-							:catch(function(err)
-								return handleFallbackException(err, "treesitter")
-							end)
-							:catch(function(err)
-								return handleFallbackException(err, "indent")
-							end)
+								.getFolds("lsp", bufnr)
+								:catch(function(err)
+									return handleFallbackException(err, "treesitter")
+								end)
+								:catch(function(err)
+									return handleFallbackException(err, "indent")
+								end)
 					end
 
 					require("ufo").setup({
@@ -276,6 +276,22 @@ local config = {
 			},
 			{
 				"mg979/vim-visual-multi",
+			},
+			{
+				"axelvc/template-string.nvim",
+				config = function()
+					require("template-string").setup({
+						filetypes = {
+							"typescript",
+							"javascript",
+							"javascriptreact",
+							"typescriptreact",
+							"svelte",
+							"vue",
+						},
+						jsx_brackets = true,
+					})
+				end,
 			},
 		},
 		["mason-lspconfig"] = {
