@@ -509,17 +509,7 @@ local config = {
 		servers = {},
 		-- add to the server on_attach function
 		-- on_attach = function(client)
-		-- 	if client.name == "pylsp" then
-		-- 		client.resolved_capabilities.document_formatting = false
-		-- 	end
-		--
-		-- 	if client.name == "tsserver" then
-		-- 		client.resolved_capabilities.document_formatting = false
-		-- 	end
-		--
-		-- 	if client.name == "terraformls" then
-		-- 		client.resolved_capabilities.document_formatting = false
-		-- 	end
+		-- do something
 		-- end,
 
 		-- override the lsp installer server-registration function
