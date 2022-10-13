@@ -258,13 +258,13 @@ local config = {
 						end
 
 						return require("ufo")
-								.getFolds("lsp", bufnr)
-								:catch(function(err)
-									return handleFallbackException(err, "treesitter")
-								end)
-								:catch(function(err)
-									return handleFallbackException(err, "indent")
-								end)
+							.getFolds("lsp", bufnr)
+							:catch(function(err)
+								return handleFallbackException(err, "treesitter")
+							end)
+							:catch(function(err)
+								return handleFallbackException(err, "indent")
+							end)
 					end
 
 					require("ufo").setup({
@@ -354,6 +354,17 @@ local config = {
 			"numToStr/Comment.nvim",
 			config = function()
 				require("Comment").setup()
+			end,
+		},
+		{
+			"https://github.com/nat-418/boole.nvim",
+			config = function()
+				require("boole").setup({
+					mappings = {
+						increment = "<C-a>",
+						decrement = "<C-x>",
+					},
+				})
 			end,
 		},
 	},
@@ -611,6 +622,14 @@ local config = {
 		vim.keymap.set("n", "<C-p>", function()
 			require("telescope.builtin").find_files()
 		end, { desc = "Search files" })
+
+		vim.keymap.set("n", "<C-P>", function()
+			require("telescope.builtin").live_grep({
+				additional_args = function(args)
+					return vim.list_extend(args, { "--hidden", "--no-ignore" })
+				end,
+			})
+		end, { desc = "Search files (live grep)" })
 		-- vim.keymap.set("n", "<leader>r", function()
 		-- vim.lsp.buf.rename()
 		-- end, { desc = "Rename current symbol" })
