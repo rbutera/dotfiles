@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+'''
+    a simple script for working with lexstep infrastructure across multiple environments
+'''
+import os
+
+import click
+
+# import subprocess
+# from pathlib import Path
+
+
+class Log:
+    def success(__self__, msg):
+        return click.secho(msg, fg='green')
+
+    def error(__self__, msg):
+        return click.secho(msg, fg='red')
+
+    def log(__self__, msg):
+        return click.secho(msg)
+
+    def verbose(__self__, msg):
+        return click.secho(msg, dim=True)
+
+    def warn(__self__, msg):
+        return click.secho(msg, fg='yellow')
+
+    def info(__self__, msg):
+        return click.secho(msg, fg='blue')
+
+
+log = Log()
+
+
+@click.command()
+@click.option('--target', default='staging', help='staging or production')
+@click.option('--platform', default='server', help='client or server')
+def main(target='staging', platform='server') -> int:
+    if target not in ['staging', 'production']:
+        log.error('invalid target. must be one of "staging" or "production"')
+        raise ValueError('invalid target')
+
+    if platform not in ['client', 'server']:
+        log.error('invalid target. must be one of "staging" or "production"')
+        raise ValueError('invalid target')
+
+    log.info(f'pulling nest-infrastructure and refreshing {target} environment')
+    os.command('cd ~/dev/lexstep/nest-infrastructure')
+    os.command('git reset HEAD --hard')
+    os.command('git pull')
+    os.command('git-secret reveal -f')
+    os.command(f'cd ./{platform}/{target}')
+    os.command('terraform validate')
+    os.command('terraform init')
+    os.command('terraform refresh')
+    log.success('done. ready for tinkering')
+
+
+if __name__ == '__main__':
+    main()
