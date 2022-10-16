@@ -46,15 +46,16 @@ def main(target='staging', platform='server') -> int:
         raise ValueError('invalid target')
 
     log.info(f'pulling nest-infrastructure and refreshing {target} environment')
-    os.command('cd ~/dev/lexstep/nest-infrastructure')
-    os.command('git reset HEAD --hard')
-    os.command('git pull')
-    os.command('git-secret reveal -f')
-    os.command(f'cd ./{platform}/{target}')
-    os.command('terraform validate')
-    os.command('terraform init')
-    os.command('terraform refresh')
+    os.system('cd ~/dev/lexstep/nest-infrastructure')
+    os.system('git reset HEAD --hard')
+    os.system('git pull')
+    os.system('git-secret reveal -f')
+    os.system(f'cd ./{platform}/{target}-env/')
+    os.system('terraform validate')
+    os.system('terraform init')
+    os.system('terraform refresh')
     log.success('done. ready for tinkering')
+    return 0
 
 
 if __name__ == '__main__':
