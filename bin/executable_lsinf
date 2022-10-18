@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-'''
+"""
     a simple script for working with lexstep infrastructure across multiple environments
-'''
+"""
 import os
 
 import click
@@ -12,10 +12,10 @@ import click
 
 class Log:
     def success(__self__, msg):
-        return click.secho(msg, fg='green')
+        return click.secho(msg, fg="green")
 
     def error(__self__, msg):
-        return click.secho(msg, fg='red')
+        return click.secho(msg, fg="red")
 
     def log(__self__, msg):
         return click.secho(msg)
@@ -24,39 +24,34 @@ class Log:
         return click.secho(msg, dim=True)
 
     def warn(__self__, msg):
-        return click.secho(msg, fg='yellow')
+        return click.secho(msg, fg="yellow")
 
     def info(__self__, msg):
-        return click.secho(msg, fg='blue')
+        return click.secho(msg, fg="blue")
 
 
 log = Log()
 
 
 @click.command()
-@click.option('--target', default='staging', help='staging or production')
-@click.option('--platform', default='server', help='client or server')
-def main(target='staging', platform='server') -> int:
-    if target not in ['staging', 'production']:
+@click.option("--target", default="staging", help="staging or production")
+@click.option("--platform", default="server", help="client or server")
+def main(target="staging", platform="server") -> int:
+    if target not in ["staging", "production"]:
         log.error('invalid target. must be one of "staging" or "production"')
-        raise ValueError('invalid target')
+        raise ValueError("invalid target")
 
-    if platform not in ['client', 'server']:
+    if platform not in ["client", "server"]:
         log.error('invalid target. must be one of "staging" or "production"')
-        raise ValueError('invalid target')
+        raise ValueError("invalid target")
 
-    log.info(f'pulling nest-infrastructure and refreshing {target} environment')
-    os.system('cd ~/dev/lexstep/nest-infrastructure')
-    os.system('git reset HEAD --hard')
-    os.system('git pull')
-    os.system('git-secret reveal -f')
-    os.system(f'cd ./{platform}/{target}-env/')
-    os.system('terraform validate')
-    os.system('terraform init')
-    os.system('terraform refresh')
-    log.success('done. ready for tinkering')
+    log.info(f"pulling nest-infrastructure and refreshing {target} environment")
+    os.system(
+        f"cd ~/dev/lexstep/nest-infrastructure && git reset HEAD --hard && git pull && git-secret reveal -f && cd ./{platform}/{target}-env/ && terraform init && terraform refresh"
+    )
+    log.success("done. ready for tinkering")
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
