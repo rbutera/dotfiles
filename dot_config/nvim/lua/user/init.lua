@@ -619,10 +619,6 @@ local config = {
 			vim.lsp.util.rename()
 		end, { desc = "Rename file" })
 
-		vim.keymap.set("n", "<C-p>", function()
-			require("telescope.builtin").find_files()
-		end, { desc = "Search files" })
-
 		vim.keymap.set("n", "<C-P>", function()
 			require("telescope.builtin").live_grep({
 				additional_args = function(args)
@@ -630,6 +626,10 @@ local config = {
 				end,
 			})
 		end, { desc = "Search files (live grep)" })
+
+		vim.keymap.set("n", "<C-p>", function()
+			require("telescope.builtin").find_files()
+		end, { desc = "Search files" })
 		-- vim.keymap.set("n", "<leader>r", function()
 		-- vim.lsp.buf.rename()
 		-- end, { desc = "Rename current symbol" })
