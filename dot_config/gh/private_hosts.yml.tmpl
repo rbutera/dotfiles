@@ -1,4 +1,4 @@
 github.com:
     user: rbutera
-    oauth_token: {{ (index (lastpassRaw "github auth token 2022") 0).note }}
+    oauth_token: {{ onepasswordRead "op://dev/github_auth" }}
     git_protocol: ssh

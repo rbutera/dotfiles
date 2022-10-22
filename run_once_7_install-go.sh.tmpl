@@ -1,0 +1,6 @@
+#!/bin/bash
+
+{{ if .install_go }}
+brew update && brew install golang;
+mkdir -p $HOME/go/{bin,src,pkg}
+{{end}}
