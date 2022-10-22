@@ -323,6 +323,10 @@ local config = {
 				null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.stylua,
 				-- null_ls.builtins.diagnostics.pylint,
+				-- golang
+				null_ls.builtins.formatting.gofumpt,
+				null_ls.builtins.formatting.goimports,
+				null_ls.builtins.diagnostics.revive,
 			}
 			-- set up null-ls's on_attach function
 			-- config.on_attach = function(client, bufnr)

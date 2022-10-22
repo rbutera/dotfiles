@@ -3,4 +3,6 @@
 {{ if .install_go }}
 brew update && brew install golang;
 mkdir -p $HOME/go/{bin,src,pkg}
+go install mvdan.cc/gofumpt@latest
+go install github.com/mgechev/revive@latest
 {{end}}
