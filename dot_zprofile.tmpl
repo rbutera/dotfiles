@@ -84,7 +84,9 @@ export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/nu
 [ -d "$HOME/.poetry/bin" ] && path+=($HOME/.poetry/bin)
 export PATH
 
+{{- if eq .chezmoi.os "linux" }}
 export COLORTERM=fullcolor
+{{ end }}
 
 setopt NO_NOMATCH
 
