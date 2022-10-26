@@ -5,6 +5,8 @@ rm -rf ~/raisbrewfile
 chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrewfile
 brew bundle --file $HOME/raisbrewfile
 $(brew --prefix)/opt/fzf/install
+brew install --cask font-victor-mono-nerd-font
+brew install --cask font-jetbrains-mono-nerd-font
 
 {{ if eq .chezmoi.os "darwin" -}}
   echo "MacOS detected"
