@@ -111,6 +111,12 @@ eval "$(pyenv virtualenv-init -)"
 export PATH="$HOME/.poetry/bin:$PATH"
 eval "$(nodenv init -)"
 
+
+export GOPATH=$HOME/go  
+export GOROOT="$(brew --prefix golang)/libexec"  
+export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # starship prompt (should be last)
