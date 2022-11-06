@@ -6,8 +6,7 @@ chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrew
 brew bundle --file $HOME/raisbrewfile
 $(brew --prefix)/opt/fzf/install
 
-{{ if neq .chezmoi.osRelease.id "ubuntu" }}
-brew install --cask font-victor-mono-nerd-font
+{{ if not .wsl }}
 brew install --cask font-jetbrains-mono-nerd-font
 {{ end }}
 
