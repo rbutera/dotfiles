@@ -111,7 +111,10 @@ eval "$(pyenv virtualenv-init -)"
 export PATH="$HOME/.poetry/bin:$PATH"
 eval "$(nodenv init -)"
 
+# for rust
+path+=("$HOME/cargo/bin")
 
+# for golang
 export GOPATH=$HOME/go  
 export GOROOT="$(brew --prefix golang)/libexec"  
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
