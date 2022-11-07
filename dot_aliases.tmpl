@@ -332,6 +332,17 @@ function apply_staging() {
   fi
 }
 
+function apply_prod() {
+  message=$@
+  if [[ -z $message ]]; then
+    echo "missing message"
+    exit 1;
+  else
+    cd /Users/rai/dev/lexstep/nest-infrastructure/server/production-env
+    /Users/rai/dev/lexstep/nest-infrastructure/server/production-env/apply --apply --silent --message "$message"
+  fi
+}
+
 alias pinger_start="/Users/rai/dev/lexstep/pinger/scripts/start.sh"
 alias pinger_stop="/Users/rai/dev/lexstep/pinger/scripts/stop.sh"
 
