@@ -23,7 +23,12 @@ Host lexstep.com
 Host bastion-stage.lexstep.com
    ForwardAgent yes
    StrictHostKeyChecking no
-   IdentityFile ~/dumps/keys/lexstep-staging.pem
+   IdentityFile ~/.ssh/lexstep-staging.pem
+
+Host bastion-prod.lexstep.com
+   ForwardAgent yes
+   StrictHostKeyChecking no
+   IdentityFile ~/.ssh/lexstep-production.pem
 
 Host 100.84.231.100
  ForwardAgent yes
@@ -46,7 +51,7 @@ Host github.com
 Host lexstep.com
   StrictHostKeyChecking no
 
-Host * 
-  IdentityAgent ~/.1password/agent.sock
+## Host * 
+##   IdentityAgent ~/.1password/agent.sock
 
 Include ~/.fig/ssh
