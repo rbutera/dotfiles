@@ -7,13 +7,13 @@ smart_completion = True
 
 # Display the completions in several columns. (More completions will be
 # visible.)
-wider_completion_menu = False
+wider_completion_menu = True
 
 # Multi-line mode allows breaking up the sql statements into multiple lines. If
 # this is set to True, then the end of the statements must have a semi-colon.
 # If this is set to False then sql statements can't be split into multiple
 # lines. End of line (return) is considered as the end of the statement.
-multi_line = False
+multi_line = True
 
 # If multi_line_mode is set to "psql", in multi-line mode, [Enter] will execute
 # the current input if the input ends in a semicolon.
@@ -108,7 +108,7 @@ syntax_style = default
 # When Vi mode is enabled you can use modal editing features offered by Vi in the REPL.
 # When Vi mode is disabled emacs keybindings such as Ctrl-A for home and Ctrl-E
 # for end are available in the REPL.
-vi = False
+vi = True
 
 # Error handling
 # When one of multiple SQL statements causes an error, choose to either
@@ -200,6 +200,9 @@ output.null = "#808080"
 [alias_dsn]
 # example_dsn = postgresql://[user[:password]@][netloc][:port][/dbname]
 lexstep_pidgey = postgresql://postgres:postgres@pidgey:9003/lexstep-nest
+docker = postgresql://postgres:postgres@localhost:5432
+lexstep = postgresql://postgres:postgres@localhost:5432/lexstep
+lexstep_test = postgresql://postgres:postgres@localhost:5432/lexstep
 
 # Format for number representation
 # for decimal "d" - 12345678, ",d" - 12,345,678
