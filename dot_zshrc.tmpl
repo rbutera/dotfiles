@@ -16,27 +16,6 @@ fi
 CPU=$(uname -p)
 unamestr=$(uname)
 
-{{- if eq .chezmoi.os "darwin"}}
-# Handle Mac platforms
-if [[ "$unamestr" == "Darwin" ]]; then 
-  if [[ "$CPU" == "arm" ]]; then
-		export PATH="/opt/homebrew/bin:$PATH"
-		export EDITOR=/opt/homebrew/bin/nvim
-		export SUDO_EDITOR=/opt/homebrew/bin/nvim
-		alias nvim=/opt/homebrew/bin/nvim
-		alias oldbrew=/usr/local/bin/brew
-  else
-		export PATH="/usr/local/bin:$PATH"
-		export EDITOR=/usr/local/bin/nvim
-    alias nvim=/usr/local/bin/nvim
-  fi
-fi
-alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
-# pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-{{end}}
 
 
 # finds the process using a particular port and kills it
@@ -93,6 +72,7 @@ bindkey "^R" history-incremental-search-backward
 # load aliases
 source ~/.aliases
 
+eval "$(nodenv init -)"
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"

@@ -380,3 +380,5 @@ function gcar(){
 alias nvim_config="czm ~/.config/nvim/lua/user/init.lua"
 
 alias psql_pidgey="PGPASSWORD=postgres psql -h pidgey -p 9003 -U postgres --dbname lexstep"
+
+alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
