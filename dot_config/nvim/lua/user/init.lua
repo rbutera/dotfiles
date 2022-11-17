@@ -102,6 +102,22 @@ local config = {
 			{
 				"nvim-treesitter/nvim-treesitter-context",
 			},
+			{
+				"axelvc/template-string.nvim",
+				config = function()
+					require("template-string").setup({
+						filetypes = {
+							"typescript",
+							"javascript",
+							"javascriptreact",
+							"typescriptreact",
+							"svelte",
+							"vue",
+						},
+						jsx_brackets = true,
+					})
+				end,
+			},
 			{ "j-hui/fidget.nvim" },
 			{ "VonHeikemen/searchbox.nvim" },
 			{
@@ -276,22 +292,6 @@ local config = {
 			},
 			{
 				"mg979/vim-visual-multi",
-			},
-			{
-				"axelvc/template-string.nvim",
-				config = function()
-					require("template-string").setup({
-						filetypes = {
-							"typescript",
-							"javascript",
-							"javascriptreact",
-							"typescriptreact",
-							"svelte",
-							"vue",
-						},
-						jsx_brackets = true,
-					})
-				end,
 			},
 		},
 		["mason-lspconfig"] = {
