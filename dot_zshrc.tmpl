@@ -28,6 +28,12 @@ alias rr="source ~/.zshrc; clear"
 export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
 export PATH=$HOME/bin:$PATH
 
+{{- if eq .chezmoi.os "linux" }}
+# for wsl/linux keychain
+/usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
+source $HOME/.keychain/$HOST-sh
+{{ end }}
+
 # START CURSOR TERMINAL FIX
 # formats cursor in terminal
 function zle-keymap-select () {
