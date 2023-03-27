@@ -13,6 +13,26 @@
 
 {{ if eq .chezmoi.os "darwin" }}
 export BROWSER='open'
+# Handle Mac platforms
+unamestr=$(uname -s)
+if [[ "$unamestr" == "Darwin" ]]; then 
+  architecture=$(uname -m)
+  if [[ "$architecture" == "arm64" ]]; then
+		export PATH="/opt/homebrew/bin:$PATH"
+		export EDITOR=/opt/homebrew/bin/nvim
+		export SUDO_EDITOR=/opt/homebrew/bin/nvim
+		alias nvim=/opt/homebrew/bin/nvim
+		alias oldbrew=/usr/local/bin/brew
+  else
+		export PATH="/usr/local/bin:$PATH"
+		export EDITOR=/usr/local/bin/nvim
+    alias nvim=/usr/local/bin/nvim
+  fi
+fi
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
 {{end}}
 
 #
@@ -116,28 +136,6 @@ path+=("$HOME/cargo/bin")
 export GOPATH=$HOME/go  
 export GOROOT="$(brew --prefix golang)/libexec"  
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
-
-
-{{- if eq .chezmoi.os "darwin"}}
-# Handle Mac platforms
-if [[ "$unamestr" == "Darwin" ]]; then 
-  if [[ "$CPU" == "arm" ]]; then
-		export PATH="/opt/homebrew/bin:$PATH"
-		export EDITOR=/opt/homebrew/bin/nvim
-		export SUDO_EDITOR=/opt/homebrew/bin/nvim
-		alias nvim=/opt/homebrew/bin/nvim
-		alias oldbrew=/usr/local/bin/brew
-  else
-		export PATH="/usr/local/bin:$PATH"
-		export EDITOR=/usr/local/bin/nvim
-    alias nvim=/usr/local/bin/nvim
-  fi
-fi
-# pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-{{end}}
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
