@@ -13,6 +13,7 @@
 
 {{ if eq .chezmoi.os "darwin" }}
 export BROWSER='open'
+
 # Handle Mac platforms
 unamestr=$(uname -s)
 if [[ "$unamestr" == "Darwin" ]]; then 
