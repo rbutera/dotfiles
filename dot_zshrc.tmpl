@@ -28,6 +28,18 @@ alias rr="source ~/.zshrc; clear"
 export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
 export PATH=$HOME/bin:$PATH
 
+{{- if eq .chezmoi.os "linux" }}
+# for wsl/linux keychain
+unamestr=$(uname)
+if [[ "$unamestr" == "Linux" ]]; then
+  path+=('/home/linuxbrew/.linuxbrew/bin')
+  # For Loading the SSH key
+  /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
+  mkdir -p $HOME/.keychain
+  [[ -f "$HOME/.keychain/$HOST-sh" ]] && source $HOME/.keychain/$HOST-sh
+fi
+{{ end }}
+
 # START CURSOR TERMINAL FIX
 # formats cursor in terminal
 function zle-keymap-select () {
@@ -53,14 +65,6 @@ preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
 path+=('/users/rai/bin')
 path+=('/users/rai/go/bin')
-unamestr=$(uname)
-if [[ "$unamestr" == "Linux" ]]; then
-  path+=('/home/linuxbrew/.linuxbrew/bin')
-  # For Loading the SSH key
-  # /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
-  mkdir -p $HOME/.keychain
-  [[ -f "$HOME/.keychain/$HOST-sh" ]] && source $HOME/.keychain/$HOST-sh
-fi
 
 export PATH
 
