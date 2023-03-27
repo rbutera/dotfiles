@@ -238,7 +238,7 @@ function standup2slack(){
   osascript -e 'tell application "Keyboard Maestro Engine" to do script "standup to slack"'
 }
 
-alias nvimcfg="czm ~/.config/nvim/lua/user/init.lua"
+alias nvimcfg="nv ~/.config/nvim/lua/user/init.lua"
 
 alias gitroot='cd $(git rev-parse --show-toplevel)'
 
@@ -377,7 +377,7 @@ function gcar(){
     yarn release:patch --force
 }
 
-alias nvim_config="czm ~/.config/nvim/lua/user/init.lua"
+alias nvim_config="nv ~/.config/nvim/lua/user/init.lua"
 
 alias psql_pidgey="PGPASSWORD=postgres psql -h pidgey -p 9003 -U postgres --dbname lexstep"
 
