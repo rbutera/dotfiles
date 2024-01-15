@@ -31,7 +31,7 @@ def command(target=""):
     os.system("/bin/bash /Users/rai/bin/lexstep_ssh_keygen")
 
     if target == "bastion":
-        os.system("/usr/bin/ssh -v ec2-user@bastion-prod.lexstep.com")
+        os.system("/usr/bin/ssh ec2-user@bastion-prod.lexstep.com")
     else:
         click.secho(f"SSHing into {target} through bastion", fg="blue")
         # target_ip = subprocess.run(
@@ -40,7 +40,7 @@ def command(target=""):
         target_ip = get_ip(target)
         print(f"target ip is {target_ip}")
         os.system(
-            f'/usr/bin/ssh -v ec2-user@bastion-prod.lexstep.com -t "ssh ec2-user@{target_ip}"'
+            f'/usr/bin/ssh ec2-user@bastion-prod.lexstep.com -t "ssh ec2-user@{target_ip}"'
         )
 
 
