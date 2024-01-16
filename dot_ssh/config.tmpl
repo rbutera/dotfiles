@@ -1,3 +1,7 @@
+{{- if eq .chezmoi.os "darwin" -}}
+Include ~/.orbstack/ssh/config
+{{- end }}
+
 Host pidgey
  User rai
  HostName pidgey
@@ -54,4 +58,6 @@ Host lexstep.com
 ## Host * 
 ##   IdentityAgent ~/.1password/agent.sock
 
+{{- if eq .chezmoi.os "darwin" }}
 Include ~/.fig/ssh
+{{- end }}
