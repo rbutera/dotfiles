@@ -14,20 +14,24 @@
 {{ if eq .chezmoi.os "darwin" }}
 export BROWSER='open'
 
+# for bob
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
 # Handle Mac platforms
 unamestr=$(uname -s)
 if [[ "$unamestr" == "Darwin" ]]; then 
   architecture=$(uname -m)
   if [[ "$architecture" == "arm64" ]]; then
 		export PATH="/opt/homebrew/bin:$PATH"
-		export EDITOR=/opt/homebrew/bin/nvim
-		export SUDO_EDITOR=/opt/homebrew/bin/nvim
-		alias nvim=/opt/homebrew/bin/nvim
+		export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
+		export SUDO_EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
+		alias nvim="$HOME/.local/share/bob/nvim-bin/nvim"
 		alias oldbrew=/usr/local/bin/brew
   else
 		export PATH="/usr/local/bin:$PATH"
-		export EDITOR=/usr/local/bin/nvim
-    alias nvim=/usr/local/bin/nvim
+		export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
+		export SUDO_EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
+		alias nvim="$HOME/.local/share/bob/nvim-bin/nvim"
   fi
 fi
 # pnpm
