@@ -1,5 +1,8 @@
 #!/bin/bash
-
+brew install rustup
+cargo install --git https://github.com/MordechaiHadad/bob.git
+bob install 0.8.3
+bob use 0.8.3
 cp -Rv ~/.config/nvim/lua/user/init.lua /tmp/init.lua
 rm -rf ~/.config/nvim
 git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
