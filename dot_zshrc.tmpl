@@ -76,14 +76,25 @@ bindkey "^R" history-incremental-search-backward
 # load aliases
 source ~/.aliases
 
-eval "$(nodenv init -)"
+
+
+# pnpm
+export PNPM_HOME="/home/rai/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"
+
+
 {{ if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
 {{- end}}
+
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
