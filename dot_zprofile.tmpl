@@ -99,8 +99,7 @@ export SPACESHIP_DIR_COLOR='yellow'
 
 export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
 {{ if .wsl }}
-export LIBGL_ALWAYS_INDIRECT=1
-export DISPLAY=$(awk '/nameserver / {print $2; exit}' /etc/resolv.conf 2>/dev/null):0
+export BROWSER="wslview"
 {{ end }}
 
 [ -d "$HOME/.nodenv/bin" ] && path+=($HOME/.nodenv/bin)
@@ -141,6 +140,9 @@ path+=("$HOME/cargo/bin")
 export GOPATH=$HOME/go  
 export GOROOT="$(brew --prefix golang)/libexec"  
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+
+# for bob-nvim 
+export PATH="$HOME/.local/share/bob/nvim-bin/:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
