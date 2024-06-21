@@ -371,10 +371,19 @@ function get_ssm_dotfile() {
 }
 
 
-function gcar(){
+function gcar() {
   echo "Quickly releasing change..."
   gca "$@" && \
-    yarn release:patch --force
+  {
+    if [ -f yarn.lock ]; then
+      yarn release --force
+    elif [ -f pnpm-lock.yaml ]; then
+      pnpm release --force
+    else
+      echo "No lock file found for Yarn or PNPM. Please ensure you are in the correct project directory."
+      return 1
+    fi
+  }
 }
 
 alias nvim_config="nv ~/.config/nvim/lua/user/init.lua"
@@ -384,6 +393,15 @@ alias psql_pidgey="PGPASSWORD=postgres psql -h pidgey -p 9003 -U postgres --dbna
 alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
 
 alias restore_lexstep_db="psql -d 'postgres://postgres:postgres@localhost:5432/postgres' -c 'DROP DATABASE lexstep WITH (force);'; pg_restore --verbose -d 'postgres://postgres:postgres@localhost:5432/postgres' ~/Downloads/lexstep.dump --jobs=6 --clean --create --if-exists"
+
+function tmux_auto() {
+    if tmux ls &>/dev/null; then
+        tmux attach-session -t 0
+    else
+        tmux new-session
+    fi
+    
+}
 
 
 
