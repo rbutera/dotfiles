@@ -25,7 +25,7 @@ alias rr="source ~/.zshrc; clear"
 
 # for remote ssh code
 # alias code="${VSCODE_GIT_ASKPASS_NODE%/*}/bin/code"
-export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
+# export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
 export PATH=$HOME/bin:$PATH
 
 {{- if eq .chezmoi.os "linux" }}
@@ -68,7 +68,7 @@ path+=('/users/rai/go/bin')
 
 export PATH
 
-alias code="code-insiders"
+# alias code="code-insiders"
 
 # to enable ctrl+R in vi mode
 bindkey "^R" history-incremental-search-backward

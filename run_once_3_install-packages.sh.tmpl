@@ -1,49 +1,28 @@
 #!/bin/zsh
-source $HOME/.zprofile
-source $HOME/.zshrc
-rm -rf ~/raisbrewfile
-chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrewfile
-brew bundle --file $HOME/raisbrewfile
-$(brew --prefix)/opt/fzf/install
 
-{{ if not .wsl }}
-brew install --cask font-jetbrains-mono-nerd-font
-{{ end }}
+install_brew_package () {
+    read -p "Reinstall Homebrew Packages? (y/Y) " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        source $HOME/.zprofile
+        source $HOME/.zshrc
+        rm -rf ~/raisbrewfile
+        chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrewfile
+        brew bundle --file $HOME/raisbrewfile
+        $(brew --prefix)/opt/fzf/install
+        brew install --cask font-jetbrains-mono-nerd-font
+    else
+        echo
+        echo "Declined. Skipping homebrew install"
+    fi
+}
 
 {{ if eq .chezmoi.os "darwin" -}}
   echo "MacOS detected"
 {{ else if eq .chezmoi.os "linux" -}}
-  echo "Installing $PACKAGES"
-  curl -fsSL https://raw.githubusercontent.com/nodenv/nodenv-installer/master/bin/nodenv-installer | bash
-  {{ if eq .chezmoi.osRelease.id "ubuntu" -}}
-    echo "Ubuntu detected. Skipping GUI specific packages"
-    sudo apt-get install -y build-essential
-    sudo apt-get install -y xclip keychain util-linux efitools binutils zlib1g openssh-client openssh-server
-    {{else}}
-    echo "Arch Linux detected"
-    
-    # install chaotic AUR
-    echo "installing chaotic AUR"
-    sudo pacman -S --noconfirm base-devel
-    sudo pacman-key --recv-key FBA220DFC880C036 --keyserver keyserver.ubuntu.com
-    sudo pacman-key --lsign-key FBA220DFC880C036
-    sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-    sudo touch /etc/pacman.conf
-    echo "" >> /etc/pacman.conf
-    echo "[chaotic-aur]" >> /etc/pacman.conf
-    echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
-    echo "added chaotic mirrorlist to pacman.conf:"
-    sudo cat /etc/pacman.conf
-
-    # install yay
-    # echo "installing yay"
-    # sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
-    # echo "yay is now installed: $(which yay)"
-    # sudo yay -Y --gendb
-    # echo "Installing $LINUX_GUI_PACKAGES"
-    yay -S --noconfirm neovim fzf fzy ripgrep htop nodenv fd-find bat xclip openssh keychain util-linux efitools binutils ttf-google-fonts-git ttf-jetbrains-mono ttc-iosevka ttf-hack ttf-fira-mono ttf-fira-code ttf-ms-fonts ttf-vista-fonts noto-fonts nerd-fonts-jetbrains-mono kitty sbctl mmv zlib
-    yay -S --noconfirm visual-studio-code-insiders-bin
-    {{ end -}}
+    echo "Linux detected" 
 {{ end -}}
 
+install_brew_package
 

@@ -1,6 +1,6 @@
 github.com:
     user: rbutera
-    oauth_token: {{ onepasswordRead "op://dev/github_auth/credential" }}
     git_protocol: ssh
     users:
-        rbutera: {}
+        rbutera: {oauth_token: {{ onepasswordRead "op://dev/github_auth/credential"}}}
+    oauth_token: {{ onepasswordRead "op://dev/github_auth/credential" }}
