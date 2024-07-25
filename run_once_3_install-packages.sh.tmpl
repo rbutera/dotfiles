@@ -1,20 +1,42 @@
 #!/bin/zsh
 
-install_brew_package () {
-    read -p "Reinstall Homebrew Packages? (y/Y) " -n 1 -r
+# Specify the path to the package file
+package_file="$HOME/nix-packages.txt"
+
+install_nix () {
+  curl -L https://nixos.org/nix/install | sh
+}
+
+install_nix_packages () {
+    read -p "(Re)install Nix and Packages? (y/Y) " -n 1 -r
     echo    # (optional) move to a new line
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         source $HOME/.zprofile
         source $HOME/.zshrc
-        rm -rf ~/raisbrewfile
-        chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > ~/raisbrewfile
-        brew bundle --file $HOME/raisbrewfile
-        $(brew --prefix)/opt/fzf/install
-        brew install --cask font-jetbrains-mono-nerd-font
+        rm -rf ~/nix-packages.txt
+        chezmoi execute-template < ~/.local/share/chezmoi/nix-packages.txt.tmpl > ~/nix-packages.txt
+        nix profile install github:peterldowns/nix-search-cli --refresh
+        # Check if the package file exists
+        if [[ ! -f "$package_file" ]]; then
+            echo "Error: Package file $package_file not found."
+            exit 1
+        fi
+
+        echo "Found nix packages file. Installing each package found"
+
+        # Read each line from the package file and install the packages
+        while IFS= read -r package || [[ -n "$package" ]]; do
+            if [[ -n "$package" ]]; then
+                echo "Installing package: $package"
+                nix-env -iA "nixkpgs.$package"
+            fi
+        done < "$package_file"
+
+        echo "All packages have been installed."
     else
         echo
-        echo "Declined. Skipping homebrew install"
+        echo "Declined. Skipping nix packages"
     fi
 }
 
@@ -24,5 +46,4 @@ install_brew_package () {
     echo "Linux detected" 
 {{ end -}}
 
-install_brew_package
-
+install_nix_packages
