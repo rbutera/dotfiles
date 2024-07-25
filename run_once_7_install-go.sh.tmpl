@@ -1,8 +1,27 @@
 #!/bin/bash
 
-{{ if .install_go }}
-brew update && brew install golang;
-mkdir -p $HOME/go/{bin,src,pkg}
-go install mvdan.cc/gofumpt@latest
-go install github.com/mgechev/revive@latest
-{{end}}
+perform_install () {
+    {{ if .install_go }}
+    brew update && brew install golang;
+    mkdir -p $HOME/go/{bin,src,pkg}
+    go install mvdan.cc/gofumpt@latest
+    go install github.com/mgechev/revive@latest
+    {{ else }}
+    echo "not installing golang"
+    {{end}}
+}
+
+
+prompt_for_install () {
+    read -p "Install tmux and plugins?" -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        perform_install
+    else
+        echo
+        echo "Declined. Skipping"
+    fi
+}
+
+prompt_for_install

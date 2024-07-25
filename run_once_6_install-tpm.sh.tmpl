@@ -1,10 +1,24 @@
 #!/bin/bash
 
-touch ~/.tmux
-mkdir -p ~/.tmux/plugins
-mkdir -p ~/.tmux/resurrect
-rm -rf ~/.tmux/plugins/tpm
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-tmux source ~/.tmux.conf
+perform_install () {
+  touch ~/.tmux
+  mkdir -p ~/.tmux/plugins
+  mkdir -p ~/.tmux/resurrect
+  rm -rf ~/.tmux/plugins/tpm
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  tmux source ~/.tmux.conf
+}
 
+prompt_for_install () {
+    read -p "Install tmux and plugins?" -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        perform_install
+    else
+        echo
+        echo "Declined. Skipping"
+    fi
+}
 
+prompt_for_install

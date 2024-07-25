@@ -406,6 +406,7 @@ function tmux_auto() {
 
 
 {{ if .wsl }}
-alias pbcopy='powershell.exe -Command "Set-Clipboard -Value \$input"'
-alias pbpaste='powershell.exe -Command "Get-Clipboard"'
+alias pbcopy="~/bin/pbcopy.py"
+alias pbpaste="~/bin/pbpaste.py"
+alias komorebic="komorebic.exe"
 {{ end }}

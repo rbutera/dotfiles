@@ -462,3 +462,4 @@ set -g @plugin 'tmux-plugins/tmux-continuum'
 run '~/.tmux/plugins/tpm/tpm'
 
 set -g @continuum-restore 'on'
+set -g @continuum-save-interval '5'
