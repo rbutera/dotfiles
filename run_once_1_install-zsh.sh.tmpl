@@ -1,21 +1,5 @@
 #!/bin/bash
 
-install_brew () {
-    read -p "Install Homebrew? (y/Y) " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-      echo "reinstalling Homebrew"
-      echo "Installing Homebrew"
-      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    else
-        echo
-        echo "Declined. Skipping homebrew install"
-    fi
-}
-
-install_brew
-
 install_zsh_linux() {
   {{if eq .chezmoi.os "linux"}}
   echo "Linux detected. Installing zsh"
@@ -78,4 +62,3 @@ install_zsh() {
 }
 
 install_zsh
-
