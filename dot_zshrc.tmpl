@@ -32,7 +32,6 @@ export PATH=$HOME/bin:$PATH
 # for wsl/linux keychain
 unamestr=$(uname)
 if [[ "$unamestr" == "Linux" ]]; then
-  path+=('/home/linuxbrew/.linuxbrew/bin')
   # For Loading the SSH key
   /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
   mkdir -p $HOME/.keychain
@@ -86,10 +85,6 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# starship prompt (should be last)
-eval "$(starship init zsh)"
-
-
 {{ if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
@@ -97,6 +92,9 @@ eval "$(starship init zsh)"
 
 # for asdf
 . "$HOME/.asdf/asdf.sh"
+
+# starship prompt (should be last)
+eval "$(starship init zsh)"
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
