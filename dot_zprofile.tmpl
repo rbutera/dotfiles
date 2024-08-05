@@ -136,7 +136,6 @@ path+=("$HOME/cargo/bin")
 
 # for golang
 export GOPATH=$HOME/go
-export GOROOT=$(nix path-info nixpkgs#go)/libexec
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
 # for bob-nvim 
@@ -146,6 +145,8 @@ export PATH="$HOME/.local/share/bob/nvim-bin/:$PATH"
 if [ -e $HOME/.nix-profile/etc/profile.d/nix.sh ]; then . $HOME/.nix-profile/etc/profile.d/nix.sh; fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export NIXPKGS_ALLOW_UNFREE=1
 
 {{ if eq .chezmoi.os "darwin" }}
 # Fig post block. Keep at the bottom of this file.

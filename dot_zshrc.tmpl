@@ -75,8 +75,10 @@ bindkey "^R" history-incremental-search-backward
 # load aliases
 source ~/.aliases
 
-
-
+{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
+alias pbcopy="wl-copy"
+alias pbpaste="wl-paste"
+{{ end }}
 # pnpm
 export PNPM_HOME="/home/rai/.local/share/pnpm"
 case ":$PATH:" in
