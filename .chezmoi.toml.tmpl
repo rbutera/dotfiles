@@ -9,10 +9,6 @@
 [cd]
   command = "zsh"
 
-[diff]
-  command = "delta"
-  pager = "less"
-
 [data]
   email = {{ $email | quote }}
   {{- if eq .chezmoi.os "linux" -}}
