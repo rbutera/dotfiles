@@ -106,6 +106,10 @@
           asdf-vm
           rename
           ntfs3g
+          yabridge
+          yabridgectl
+          fastfetch
+          
         ];
       };
     };
