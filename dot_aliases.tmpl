@@ -427,10 +427,11 @@ fi
 
 # Nix profile management
 alias nix-update="cd ~/nix && nix flake update && cd -"
-alias nix-upgrade="cd ~/nix && nix profile upgrade .\#defaultPackage.x86_64-linux && cd -"
-alias nix-rebuild="cd ~/nix && nix profile remove 0 && nix profile install .#defaultPackage.x86_64-linux && cd -"
+alias nix-upgrade="nix profile upgrade nix"
+alias nix-install="nix profile install nixpkgs#"
+alias nix-init="cd ~/nix && nix profile install .#defaultPackage.x86_64-linux && cd -"
+alias nix-rebuild="cd ~/nix && nix profile remove '.*' && nix profile install .#defaultPackage.x86_64-linux && cd -"
 alias nix-edit="nvim ~/nix/flake.nix"
-alias neovim="nvim"
 
 {{ if .wsl }}
 alias komorebic="komorebic.exe"
