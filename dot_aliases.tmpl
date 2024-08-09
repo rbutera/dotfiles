@@ -156,7 +156,7 @@ function mkcd() {
   mkdir -p "$@" && cd $1;
 }
 
-alias ls=' exa --group-directories-first'
+alias ls=' eza --group-directories-first'
 alias la=' ls -a'
 alias ll=' ls --git -l'
 alias lt=' ls --tree -D -L 2 -I ${TREE_IGNORE}'
@@ -193,10 +193,10 @@ alias vim="nvim"
 alias raisync="rsync -rvzP"
 
 {{ if eq .chezmoi.os "linux" -}}
-  {{- if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
+  {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
     alias pbcopy="wl-copy"
     alias pbpaste="wl-paste"
-  {{- else -}}
+  {{ else }}
     if [[ -x ~/bin/pbcopy && -x ~/bin/pbpaste ]]; then
       alias pbcopy="~/bin/pbcopy"
       alias pbpaste="~/bin/pbpaste"
@@ -204,8 +204,8 @@ alias raisync="rsync -rvzP"
       alias pbcopy="xclip -selection clipboard"
       alias pbpaste="xclip -selection clipboard -o"
     fi
-  {{- end -}}
-{{- end }}
+  {{ end }}
+{{ end }}
 
 function czm() {
   command="chezmoi edit --apply $@"
@@ -402,31 +402,35 @@ alias psql_pidgey="PGPASSWORD=postgres psql -h pidgey -p 9003 -U postgres --dbna
 
 alias fix-spotlight="find . -type d -path './.*' -prune -o -path './Pictures*' -prune -o -path './Library*' -prune -o -path '*node_modules/*' -prune -o -type d -name 'node_modules' -exec touch '{}/.metadata_never_index' \; -print"
 
-alias restore_lexstep_db="psql -d 'postgres://postgres:postgres@localhost:5432/postgres' -c 'DROP DATABASE lexstep WITH (force);'; pg_restore --verbose -d 'postgres://postgres:postgres@localhost:5432/postgres' ~/Downloads/lexstep.dump --jobs=6 --clean --create --if-exists"
-
 function tmux_auto() {
     if tmux ls &>/dev/null; then
         tmux attach-session -t 0
     else
         tmux new-session
     fi
-    
 }
 
-{{- if eq .chezmoi.os "linux" -}}
-  {{- if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
-    alias pbcopy="wl-copy"
-    alias pbpaste="wl-paste"
-  {{- else -}}
-    if [[ -x ~/bin/pbcopy.py && -x ~/bin/pbpaste.py ]]; then
-      alias pbcopy="~/bin/pbcopy.py"
-      alias pbpaste="~/bin/pbpaste.py"
-    else
-      alias pbcopy="xclip -selection clipboard"
-      alias pbpaste="xclip -selection clipboard -o"
-    fi
-  {{- end -}}
+{{ if eq .chezmoi.os "linux" -}}
+{{- if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
+alias pbcopy="wl-copy"
+alias pbpaste="wl-paste"
+{{- else -}}
+if [[ -x ~/bin/pbcopy.py && -x ~/bin/pbpaste.py ]]; then
+alias pbcopy="~/bin/pbcopy.py"
+alias pbpaste="~/bin/pbpaste.py"
+else
+alias pbcopy="xclip -selection clipboard"
+alias pbpaste="xclip -selection clipboard -o"
+fi
 {{- end -}}
+{{- end }}
+
+# Nix profile management
+alias nix-update="cd ~/nix && nix flake update && cd -"
+alias nix-upgrade="cd ~/nix && nix profile upgrade .\#defaultPackage.x86_64-linux && cd -"
+alias nix-rebuild="cd ~/nix && nix profile remove 0 && nix profile install .#defaultPackage.x86_64-linux && cd -"
+alias nix-edit="nvim ~/nix/flake.nix"
+alias neovim="nvim"
 
 {{ if .wsl }}
 alias komorebic="komorebic.exe"
