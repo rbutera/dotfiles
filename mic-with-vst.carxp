@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CARLA-PROJECT>
+<CARLA-PROJECT VERSION='2.5'>
+ <EngineSettings>
+  <ForceStereo>false</ForceStereo>
+  <PreferPluginBridges>false</PreferPluginBridges>
+  <PreferUiBridges>true</PreferUiBridges>
+  <UIsAlwaysOnTop>false</UIsAlwaysOnTop>
+  <MaxParameters>200</MaxParameters>
+  <UIBridgesTimeout>4000</UIBridgesTimeout>
+ </EngineSettings>
+
+ <Transport>
+  <BeatsPerMinute>120</BeatsPerMinute>
+ </Transport>
+
+ <!-- Pro-C 2 -->
+ <Plugin>
+  <Info>
+   <Type>VST3</Type>
+   <Name>Pro-C 2</Name>
+   <Binary>/home/rai/.vst3/yabridge/FabFilter/FabFilter Pro-C 2.vst3</Binary>
+   <Label>Pro-C 2</Label>
+  </Info>
+
+  <Data>
+   <Active>Yes</Active>
+   <ControlChannel>1</ControlChannel>
+   <Options>0x3f9</Options>
+
+   <Chunk>
+VkMyIcsBAAA8P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJVVEYtOCI/PiA8VlNUM1BsdWdpblN0YXRlPjxJQ29tcG9uZW50PjIyNi5GRWxYRkkuLi4u
+ZkMuLi4udkkyYXNMRkh4LnhYME1HY3UwRi4uLi4udC4uLi4uLi4uLi4uLi5ZdkhKMUgrLi4uLi5ELi4ubVBKNnRoOVBmODgzQy4uLi4uLi4uLi4uLi4uLi4u
+Li4uLi4uLi4uLi4uLjlLLi4uLi4uLi5mKy4uLi4uLi4uLi4uLi4uLi4uLi4uN0MuLi4uLi4uLi4uZm1sVENELi4uRFAuLi5mKy4uLi45aTF5OFFQLi4uLi4u
+Li4uN0MuLi4uLi4uLi4uZm1sREVELi4uRFAuLi4uLi4uLi4uLi4uLjNPLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLkRQ
+Li4uZisuLi4uOVMuLi4uLkEuLi4uLjwvSUNvbXBvbmVudD48SUVkaXRDb250cm9sbGVyPjEyLkZZVFlqQS4uLi4uLi4uM088L0lFZGl0Q29udHJvbGxlcj48
+L1ZTVDNQbHVnaW5TdGF0ZT4A
+   </Chunk>
+  </Data>
+ </Plugin>
+
+ <!-- Pro-G -->
+ <Plugin>
+  <Info>
+   <Type>VST3</Type>
+   <Name>Pro-G</Name>
+   <Binary>/home/rai/.vst3/yabridge/FabFilter/FabFilter Pro-G.vst3</Binary>
+   <Label>Pro-G</Label>
+  </Info>
+
+  <Data>
+   <Active>Yes</Active>
+   <ControlChannel>1</ControlChannel>
+   <Options>0x3f9</Options>
+
+   <Chunk>
+VkMyIY0BAAA8P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJVVEYtOCI/PiA8VlNUM1BsdWdpblN0YXRlPjxJQ29tcG9uZW50PjE4MC5GRWxYRkkuLi4u
+LkQuLi4uUzAxYXVRR1pmWDBhaUVGYWZ6RFVLQS4uLi5mSC4uLi43bnZSQVNncVBFYkt4MXNPLi4uLit6TUlsNUMuLi4uUEkraGc5cnhnbDdTZG9haE8uLmZD
+QTBQazgzQy4uLjNPLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uM08uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uOUsuLi4uLi4uLi4uLi4uLi4uLi4u
+Li4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLmYrRC4uLi5QLi4uLi48L0lDb21wb25lbnQ+PElFZGl0Q29udHJvbGxlcj4xMi5GWVRZakEu
+Li4uLi4uLjNPPC9JRWRpdENvbnRyb2xsZXI+PC9WU1QzUGx1Z2luU3RhdGU+AA==
+   </Chunk>
+  </Data>
+ </Plugin>
+
+ <!-- Pro-Q 3 -->
+ <Plugin>
+  <Info>
+   <Type>VST3</Type>
+   <Name>Pro-Q 3</Name>
+   <Binary>/home/rai/.vst3/yabridge/FabFilter/FabFilter Pro-Q 3.vst3</Binary>
+   <Label>Pro-Q 3</Label>
+  </Info>
+
+  <Data>
+   <Active>Yes</Active>
+   <ControlChannel>1</ControlChannel>
+   <Options>0x3f9</Options>
+
+   <Chunk>
+VkMyIX4IAAA8P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJVVEYtOCI/PiA8VlNUM1BsdWdpblN0YXRlPjxJQ29tcG9uZW50PjE0NTYuRllqUFNFLi4u
+LmZZQS4uLi4uLmYrLi4uLjlpK0xrSlBEN3hvLkMuLi4uLi4uLjNPLi4uZisuLi4uN0MuLi4uLi4uLmYrLi4uLi5ELi4uM08uLi4uLi4uLi45Qy4uLjNPbHJV
+MC5nT3pYQ0QuLi4uLi4uLmYrLi4uLjlDLi4udk8uLi4uLi4uLi45Qy4uLi5QLi4uZisuLi4uLi4uLi4zTy4uLmYrTGJZMUNEelFlTFAuLi4uLi4uLi45Qy4u
+LjNPQjYzLisuLi4uLi4uLi4zTy4uLi4uQS4uLjlDLi4uLi4uLi5mKy4uLi45aUhpR1FQdjlQQy5DLi4uLi4uLi4zTy4uLmYrLi4uLjdDLi4uLi4uLi5mKy4u
+Li4uRC4uLjNPLi4uLi4uLi4uOUMuLi4zT1p3SUlBQXM5UCtDLi4uLi4uLi5mKy4uLi45Qy4uLnZPLi4uLi4uLi4uOUMuLi4uUC4uLmYrLi4uLi4uLi4uM08u
+Li5mKy5LRjREREg3eDR1Li4uLi4uLi4uOUMuLi4zTy4uLi4rLi4uLi4uLi4uM08uLi4uLkEuLi45Qy4uLi4uLi4uZisuLi4uOWlpbzFVUGZCZDQrQi4uLi4u
+Li4uM08uLi5mK3psYnI1Qy4uLkRQLi4uZisuLi4uLkQuLi4zTy4uLi4uLi4uLi4uLi4uM09aTzJHQUEuLi4uLi4uLi4uLi4uZisuLi4uOUMuLi52Ty4uLi4u
+Li4uLjlDLi4uLlAuLi5mKy4uLi4uLi4uLi4uLi4uZituOGJlREQuLi4uLi4uLi4uLi4uLjlDLi4uM08uLi4uKy4uLi4uLi4uLjNPLi4uLi5BLi4uOUMuLi4u
+Li4uLi4uLi4uLjlpMXk4UVAuLi4uLi4uLi4uLi4uLjNPLi4uZisuLi4uN0MuLi4uLi4uLmYrLi4uLi5ELi4uM08uLi4uLi4uLi4uLi4uLjNPWk8yR0FBLi4u
+Li4uLi4uLi4uLmYrLi4uLjlDLi4udk8uLi4uLi4uLi45Qy4uLi5QLi4uZisuLi4uLi4uLi4uLi4uLmYrbjhiZURELi4uLi4uLi4uLi4uLi45Qy4uLjNPLi4u
+LisuLi4uLi4uLi4zTy4uLi4uQS4uLjlDLi4uLi4uLi4uLi4uLi45aTF5OFFQLi4uLi4uLi4uLi4uLi4zTy4uLmYrLi4uLjdDLi4uLi4uLi5mKy4uLi4uRC4u
+LjNPLi4uLi4uLi4uLi4uLi4zT1pPMkdBQS4uLi4uLi4uLi4uLi5mKy4uLi45Qy4uLnZPLi4uLi4uLi4uOUMuLi4uUC4uLmYrLi4uLi4uLi4uLi4uLi5mK244
+YmVERC4uLi4uLi4uLi4uLi4uOUMuLi4zTy4uLi4rLi4uLi4uLi4uM08uLi4uLkEuLi45Qy4uLi4uLi4uLi4uLi4uOWkxeThRUC4uLi4uLi4uLi4uLi4uM08u
+Li5mKy4uLi43Qy4uLi4uLi4uZisuLi4uLkQuLi4zTy4uLi4uLi4uLi4uLi4uM09aTzJHQUEuLi4uLi4uLi4uLi4uZisuLi4uOUMuLi52Ty4uLi4uLi4uLjlD
+Li4uLlAuLi5mKy4uLi4uLi4uLi4uLi4uZituOGJlREQuLi4uLi4uLi4uLi4uLjlDLi4uM08uLi4uKy4uLi4uLi4uLjNPLi4uLi5BLi4uOUMuLi4uLi4uLi4u
+Li4uLjlpMXk4UVAuLi4uLi4uLi4uLi4uLjNPLi4uZisuLi4uN0MuLi4uLi4uLmYrLi4uLi5ELi4uM08uLi4uLi4uLi4uLi4uLjNPWk8yR0FBLi4uLi4uLi4u
+Li4uLmYrLi4uLjlDLi4udk8uLi4uLi4uLi45Qy4uLi5QLi4uZisuLi4uLi4uLi4uLi4uLmYrbjhiZURELi4uLi4uLi4uLi4uLi45Qy4uLjNPLi4uLisuLi4u
+Li4uLi4zTy4uLi4uQS4uLjlDLi4uLi4uLi4uLi4uLi45aTF5OFFQLi4uLi4uLi4uLi4uLi4zTy4uLmYrLi4uLjdDLi4uLi4uLi5mKy4uLi4uRC4uLjNPLi4u
+Li4uLi4uLi4uLi4zT1pPMkdBQS4uLi4uLi4uLi4uLi5mKy4uLi45Qy4uLnZPLi4uLi4uLi4uOUMuLi4uUC4uLmYrLi4uLi4uLi4uLi4uLi5mK244YmVERC4u
+Li4uLi4uLi4uLi4uOUMuLi4zTy4uLi4rLi4uLi4uLi4uM08uLi4uLkEuLi45Qy4uLi4uLi4uLi4uLi4uOUMuLi4zTy4uLi4uLi4uLi4uLi4uLi4uLi4uLi4u
+Li4uLi4uLi4uLi4uZisuLi4uOUMuLi4zdS4uLmYrLi4uLi5ELi4uLlAuLi5QLkEuLi4uLi4uLjNPLi4uZisuLi4uLkQuLi4uLi4uLi4uLi4uLi4uLi4uLi4u
+Li4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4u
+Li4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi5YalF2SVcuLi4uLi4uLi4uLjwvSUNvbXBvbmVudD48SUVkaXRDb250cm9sbGVyPjY3LkZFMEx2TS4uLi5mQi4u
+Li52STJhc0RHSHguaUx6NysrKytlLi4uLi5FLi4uLi5rYnUwUlQuLi4uLkxUY1NZVS4uLi4uLi4uLi5YalFrUUYuLi4uLi4uLmYrLjwvSUVkaXRDb250cm9s
+bGVyPjwvVlNUM1BsdWdpblN0YXRlPgA=
+   </Chunk>
+  </Data>
+ </Plugin>
+
+ <!-- Elgato Noise Removal -->
+ <Plugin>
+  <Info>
+   <Type>VST3</Type>
+   <Name>Elgato Noise Removal</Name>
+   <Binary>/home/rai/.vst3/yabridge/Elgato/ElgatoNoiseRemoval.vst3</Binary>
+   <Label>Elgato Noise Removal</Label>
+  </Info>
+
+  <Data>
+   <Active>Yes</Active>
+   <ControlChannel>1</ControlChannel>
+   <Options>0x9</Options>
+
+   <Chunk>
+VkMyIaMBAAA8P3htbCB2ZXJzaW9uPSIxLjAiIGVuY29kaW5nPSJVVEYtOCI/PiA8VlNUM1BsdWdpblN0YXRlPjxJQ29tcG9uZW50PjIzNy5WTWpMZ1RMLi4u
+Lk8rZldhckFoY2tJMmJvOGxhOEhSTHQuaUhmVGxhaThGWW80MVk4SFJVVFlUSzNIeE85LkJPUjRqU1Y4VlppVUZUZ0lXWHNNbU83LlVQUkVUU2ZqRlk4SGhV
+QVFESFJVRmFrRTFia0lCSDFFRmEwVVZPaEhTTXYzQkxoN2hPNy5VUFJFVFNmakZZOEhoVUFRREhUZ2xia01HWnV3RlloLmhjZ3dWY2swaUh2M0JOempTTjRq
+U04xUGlMeWJpTHdMU0xoN2hPNy5VUFJFVFNmakZZOEhoWDRBV1h5TW1IZlhXWHJVV1k4SEJMdC5pSHUzQ091SGtTTlkwYW9NVllQRWxiZzAxYjkuLi4uLi4u
+Li4uLi4uLi4uLi4uLi4uLkpVMFBFQWtib1lXWHpVRlFnUVdYPC9JQ29tcG9uZW50PjwvVlNUM1BsdWdpblN0YXRlPgA=
+   </Chunk>
+  </Data>
+ </Plugin>
+
+ <ExternalPatchbay>
+  <Connection>
+   <Source>EVO4 Pro:capture_AUX0</Source>
+   <Target>Elgato Noise Removal:input_1</Target>
+  </Connection>
+  <Connection>
+   <Source>EVO4 Pro:capture_AUX0</Source>
+   <Target>Elgato Noise Removal:input_2</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-G:output_1</Source>
+   <Target>MicrophoneFX Audio/Source/Virtual sink:input_FL</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-G:output_2</Source>
+   <Target>MicrophoneFX Audio/Source/Virtual sink:input_FR</Target>
+  </Connection>
+  <Connection>
+   <Source>Elgato Noise Removal:output_1</Source>
+   <Target>Pro-Q 3:input_1</Target>
+  </Connection>
+  <Connection>
+   <Source>Elgato Noise Removal:output_2</Source>
+   <Target>Pro-Q 3:input_2</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-Q 3:output_1</Source>
+   <Target>Pro-C 2:input_1</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-Q 3:output_2</Source>
+   <Target>Pro-C 2:input_2</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-C 2:output_1</Source>
+   <Target>Pro-G:input_1</Target>
+  </Connection>
+  <Connection>
+   <Source>Pro-C 2:output_2</Source>
+   <Target>Pro-G:input_2</Target>
+  </Connection>
+  <Positions>
+   <Position x1="2325" y1="1874" x2="3304" y2="1479">
+    <Name>EVO4 Pro</Name>
+   </Position>
+   <Position x1="3394" y1="1679">
+    <Name>MicrophoneFX Audio/Source/Virtual sink</Name>
+   </Position>
+   <Position x1="2961" y1="1686" pluginId="0">
+    <Name>Pro-C 2</Name>
+   </Position>
+   <Position x1="3186" y1="1686" pluginId="1">
+    <Name>Pro-G</Name>
+   </Position>
+   <Position x1="2731" y1="1684" pluginId="2">
+    <Name>Pro-Q 3</Name>
+   </Position>
+   <Position x1="2479" y1="1695" pluginId="3">
+    <Name>Elgato Noise Removal</Name>
+   </Position>
+  </Positions>
+ </ExternalPatchbay>
+</CARLA-PROJECT>

@@ -110,6 +110,10 @@ export PATH
 export COLORTERM=fullcolor
 {{ end }}
 
+{{- if eq .chezmoi.os "linux" }}
+export XDG_CONFIG_HOME=$HOME/.config
+{{ end }}
+
 setopt NO_NOMATCH
 
 
@@ -147,3 +151,5 @@ export NIXPKGS_ALLOW_UNFREE=1
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 {{- end}}
+
+export MOZ_ENABLE_WAYLAND=1

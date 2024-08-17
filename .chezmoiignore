@@ -13,7 +13,6 @@ mac
 .config/.karabiner
 .fig
 {{ end }} 
-.config/systemd
 .config/systemd/user/ssh-agent.service
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
 ~/bin/pbcopy.py
