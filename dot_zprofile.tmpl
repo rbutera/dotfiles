@@ -152,4 +152,9 @@ export NIXPKGS_ALLOW_UNFREE=1
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 {{- end}}
 
+{{ if eq .chezmoi.os "linux"}}
+{{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
 export MOZ_ENABLE_WAYLAND=1
+export PATH="/usr/lib/ccache/bin/:$PATH"
+{{ end }}
+{{ end }}

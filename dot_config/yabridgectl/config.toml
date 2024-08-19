@@ -1,0 +1,8 @@
+plugin_dirs = ['/home/rai/.wine/drive_c/Program Files/Common Files/VST3']
+vst2_location = 'centralized'
+no_verify = false
+blacklist = []
+
+[last_known_config]
+wine_version = 'wine-9.0 (Staging)'
+yabridge_host_hash = 1720112543812503384
