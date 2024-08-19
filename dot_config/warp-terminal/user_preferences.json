@@ -1,0 +1,29 @@
+{
+  "prefs": {
+    "AICommandDenylist": "\"\"",
+    "AIAutoDetectionEnabled": "false",
+    "LineHeightRatio": "1.1",
+    "AIAssistantRequestLimitInfo": "{\"limit\":40,\"num_requests_used_since_refresh\":0,\"next_refresh_time\":\"2024-09-04T16:28:33.656353Z\"}",
+    "CrashReportingEnabled": "true",
+    "Spacing": "\"Compact\"",
+    "Theme": "{\"Custom\":{\"name\":\"Catppuccin Mocha\",\"path\":\"/home/rai/.local/share/warp-terminal/themes/catppuccin_mocha.yml\"}}",
+    "ReceivedReferralTheme": "\"Inactive\"",
+    "ChangelogVersions": "{\"v0.2024.07.30.08.02.stable_01\":true,\"v0.2024.08.06.08.01.stable_00\":true}",
+    "OverrideOpacity": "90",
+    "SameLinePromptBlockState": "\"DoNotShow\"",
+    "AutosuggestionAcceptedCount": "2",
+    "FontName": "\"JetBrainsMono Nerd Font\"",
+    "WelcomeTipsFeaturesUsed": "[{\"Action\":\"ThemePicker\"},{\"Action\":\"SplitPane\"},{\"Action\":\"OpenWarpDrive\"},{\"Action\":\"CommandSearch\"},{\"Hint\":\"BlockSelect\"},{\"Hint\":\"CreateBlock\"},{\"Hint\":\"BlockAction\"}]",
+    "VimKeybindingsBannerState": "\"Dismissed\"",
+    "VimModeEnabled": "true",
+    "HasAutoOpenedWelcomeFolder": "true",
+    "NotebookFontSize": "14.0",
+    "AIRequestLimitInfo": "{\"limit\":40,\"num_requests_used_since_refresh\":4,\"next_refresh_time\":\"2024-09-04T16:28:33.656353Z\"}",
+    "AgentModeOnboardingBlockShown": "true",
+    "ExperimentId": "8b830aa3-01d3-4f8c-b44a-8a1b25cf3279",
+    "AliasExpansionBannerSeen": "true",
+    "TelemetryEnabled": "true",
+    "HonorPS1": "true",
+    "FontSize": "10.0"
+  }
+}
