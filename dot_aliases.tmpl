@@ -436,8 +436,37 @@ alias nix-edit="nvim ~/nix/flake.nix && nix-upgrade"
 alias sudonvim="sudo -E nvim"
 
 {{ if .wsl }}
+export BALDING_GATE_DIR="/x/Apps/BG3ModManager"
+{{- end }}
+{{ if (eq .chezmoi.osRelease.idLike "arch") }}
+export BALDING_GATE_DIR="/g/BaldingGate"
+{{- end }}
+
+function get_bg3_item() {
+    cat "$BALDING_GATE_DIR/items.txt" | grep -i "$1" | sed -E 's/.*?- //'
+}
+
+
+{{ if .wsl }}
 alias komorebic="komorebic.exe"
+alias mpv="mpv.exe"
 {{ end }}
+
+miru() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: miru <folder>"
+        return 1
+    fi
+
+    folder="$1"
+    if [ ! -d "$folder" ]; then
+        echo "Error: $folder is not a valid directory"
+        return 1
+    fi
+
+    mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv)
+}
+
 {{- if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
 alias wifi='nmtui'
 alias cleanup='~/.config/ml4w/scripts/cleanup.sh'
