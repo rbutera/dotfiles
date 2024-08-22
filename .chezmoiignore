@@ -24,3 +24,10 @@ mac
 home/rai/README.md
 /Users/rai/README.md
 README.md
+{{ if .wsl }}
+~/.config/kanata/*
+~/.config/kanata
+~/.config/hypr/*
+~/.config/systemd/user/kanata.service
+~/.config/pipewire
+{{ end }}
