@@ -92,8 +92,16 @@ esac
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
 {{- end}}
 
+
+
+{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
+. /opt/asdf-vm/asdf.sh
+{{ else }}
 # for asdf
 . "$HOME/.asdf/asdf.sh"
+{{ end }}
+
+
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"
