@@ -466,33 +466,3 @@ miru() {
 
     mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv)
 }
-
-{{- if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
-alias wifi='nmtui'
-alias cleanup='~/.config/ml4w/scripts/cleanup.sh'
-alias ts='~/.config/ml4w/scripts/snapshot.sh'
-alias screenshot='ts'
-alias ml4w='~/.config/ml4w/apps/ML4W_Welcome-x86_64.AppImage'
-alias ml4w-settings='~/.config/ml4w/apps/ML4W_Dotfiles_Settings-x86_64.AppImage'
-alias ml4w-sidebar='ags -t sidebar'
-alias ml4w-hyprland='~/.config/ml4w/apps/ML4W_Hyprland_Settings-x86_64.AppImage'
-alias ml4w-diagnosis='~/.config/hypr/scripts/diagnosis.sh'
-alias ml4w-hyprland-diagnosis='~/.config/hypr/scripts/diagnosis.sh'
-alias ml4w-qtile-diagnosis='~/.config/ml4w/qtile/scripts/diagnosis.sh'
-alias ml4w-update='~/.config/ml4w/update.sh'
-alias Qtile='startx'
-# -----------------------------------------------------
-# Scripts
-# -----------------------------------------------------
-alias ascii='~/.config/ml4w/scripts/figlet.sh'
-
-# -----------------------------------------------------
-# System
-# -----------------------------------------------------
-alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
-
-# -----------------------------------------------------
-# Qtile
-# -----------------------------------------------------
-alias setkb='setxkbmap gb;echo "Keyboard set back to gb."'
-{{- end }}
