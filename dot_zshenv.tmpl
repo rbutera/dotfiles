@@ -9,8 +9,4 @@
 if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
-if [ -d "$HOME/.cargo" ]; then
-    . "$HOME/.cargo/env"
-elif command -v cargo >/dev/null 2>&1; then
-    eval "$(cargo env)"
-fi
+
