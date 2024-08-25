@@ -466,3 +466,7 @@ miru() {
 
     mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv)
 }
+
+{{- if template "is_arch" . -}}
+alias install="paru -S"
+{{- end -}}
