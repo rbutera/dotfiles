@@ -467,6 +467,9 @@ miru() {
     mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv)
 }
 
-{{- if template "is_arch" . -}}
+{{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
 alias lfg="paru -S"
+alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
 {{- end -}}
+
+
