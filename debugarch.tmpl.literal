@@ -1,0 +1,12 @@
+# Debug: Is Arch?
+{{- if template "is_arch" . -}}
+true
+{{- else -}}
+false
+{{- end }}
+
+{{- if template "is_arch" . -}}
+alias lfg="paru -S"
+{{- else -}}
+# Not Arch
+{{- end -}}

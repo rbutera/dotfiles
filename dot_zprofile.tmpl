@@ -129,6 +129,7 @@ export PATH="$HOME/.poetry/bin:$PATH"
 
 # for rust
 path+=("$HOME/cargo/bin")
+path+=("$HOME/.cargo/bin")
 
 # for golang
 export GOPATH=$HOME/go
@@ -155,6 +156,9 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 {{ if eq .chezmoi.os "linux"}}
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
 export MOZ_ENABLE_WAYLAND=1
+export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
 export PATH="/usr/lib/ccache/bin/:$PATH"
+export LARIAN_PATH="/g/SteamLibrary/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios"
+export BG3_APPDATA="/g/SteamLibrary/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3"
 {{ end }}
 {{ end }}
