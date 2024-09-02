@@ -7,6 +7,16 @@ import Soup from 'gi://Soup?version=3.0';
 import { fileExists } from '../modules/.miscutils/files.js';
 
 const PROVIDERS = Object.assign({ // There's this list hmm https://github.com/zukixa/cool-ai-stuff/
+    'anthropic': {
+        'name': 'Anthropic (Claude 3.5 Sonnet)',
+        'logo_name': 'anthropic-symbolic',
+        'description': 'Official Anthropic API for Claude 3.5 Sonnet.\nPricing: Paid service, check Anthropic website for current rates.',
+        'base_url': 'https://api.anthropic.com/v1/messages',
+        'key_get_url': 'https://console.anthropic.com/',
+        'key_file': 'anthropic_key.txt',
+        'model': 'claude-3-5-sonnet-20240620',
+        'max_tokens': 4096,
+    },
     'openai': {
         'name': 'OpenAI',
         'logo_name': 'openai-symbolic',
@@ -14,7 +24,7 @@ const PROVIDERS = Object.assign({ // There's this list hmm https://github.com/zu
         'base_url': 'https://api.openai.com/v1/chat/completions',
         'key_get_url': 'https://platform.openai.com/api-keys',
         'key_file': 'openai_key.txt',
-        'model': 'gpt-3.5-turbo',
+        'model': 'gpt-4o-mini',
     },
     'ollama': {
         'name': 'Ollama (Llama 3)',
@@ -254,6 +264,7 @@ class GPTService extends Service {
             temperature: this._temperature,
             // temperature: 2, // <- Nuts
             stream: true,
+            ...(this._currentProvider === 'anthropic' ? { max_tokens: this.providers[this._currentProvider].max_tokens } : {})
         };
         const proxyResolver = new Gio.SimpleProxyResolver({ 'default-proxy': userOptions.ai.proxyUrl });
         const session = new Soup.Session({ 'proxy-resolver': proxyResolver });
@@ -261,7 +272,12 @@ class GPTService extends Service {
             method: 'POST',
             uri: this._url,
         });
-        message.request_headers.append('Authorization', `Bearer ${this._key}`);
+        if (this._currentProvider === 'anthropic') {
+            message.request_headers.append('x-api-key', `${this._key}`);
+            message.request_headers.append('anthropic-version', '2023-06-01');
+        } else {
+            message.request_headers.append('Authorization', `Bearer ${this._key}`);
+        }
         message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
 
         session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
