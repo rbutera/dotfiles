@@ -1,12 +1,9 @@
-# Debug: Is Arch?
-{{- if template "is_arch" . -}}
-true
-{{- else -}}
-false
-{{- end }}
+{{ .chezmoi.os }}
+{{ .chezmoi.osRelease.id }}
+{{ .chezmoi.osRelease.idLike }}
 
-{{- if template "is_arch" . -}}
-alias lfg="paru -S"
-{{- else -}}
-# Not Arch
+{{- if eq .chezmoi.os "linux" -}}
+Linux detected
+{{ else }}
+not detected
 {{- end -}}
