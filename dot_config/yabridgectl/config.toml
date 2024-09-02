@@ -5,4 +5,4 @@ blacklist = []
 
 [last_known_config]
 wine_version = 'wine-9.0 (Staging)'
-yabridge_host_hash = 1720112543812503384
+yabridge_host_hash = 8299452858195351618

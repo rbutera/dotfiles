@@ -5,6 +5,7 @@ Wants=pipewire.service pipewire-pulse.service
 
 [Service]
 Type=simple
+; ExecStart=/usr/bin/carla ~/mic-with-vst.carxp
 ExecStart=/usr/bin/carla ~/mic-with-vst.carxp --no-gui
 Restart=on-failure
 
