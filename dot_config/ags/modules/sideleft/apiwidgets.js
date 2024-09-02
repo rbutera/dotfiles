@@ -20,14 +20,6 @@ import { IconTabContainer } from '../.commonwidgets/tabcontainer.js';
 
 const EXPAND_INPUT_THRESHOLD = 30;
 const APILIST = {
-    'gemini': {
-        name: 'Assistant (Gemini Pro)',
-        sendCommand: geminiSendMessage,
-        contentWidget: geminiView,
-        commandBar: geminiCommands,
-        tabIcon: geminiTabIcon,
-        placeholderText: 'Message Gemini...',
-    },
     'gpt': {
         name: 'Assistant (GPTs)',
         sendCommand: chatGPTSendMessage,
@@ -35,6 +27,15 @@ const APILIST = {
         commandBar: chatGPTCommands,
         tabIcon: chatGPTTabIcon,
         placeholderText: 'Message the model...',
+    },
+
+    'gemini': {
+        name: 'Assistant (Gemini Pro)',
+        sendCommand: geminiSendMessage,
+        contentWidget: geminiView,
+        commandBar: geminiCommands,
+        tabIcon: geminiTabIcon,
+        placeholderText: 'Message Gemini...',
     },
     'waifu': {
         name: 'Waifus',

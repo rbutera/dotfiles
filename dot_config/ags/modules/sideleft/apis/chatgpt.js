@@ -170,7 +170,7 @@ const GPTSettings = () => MarginRevealer({
                     { value: 0.50, name: 'Balanced', },
                     { value: 1.00, name: 'Creative', },
                 ],
-                initIndex: 2,
+                initIndex: 1,
                 onChange: (value, name) => {
                     GPTService.temperature = value;
                 },
@@ -346,7 +346,7 @@ export const chatGPTView = Box({
                 // Always scroll to bottom with new content
                 const adjustment = scrolledWindow.get_vadjustment();
                 adjustment.connect("changed", () => {
-                    if(!chatEntry.hasFocus) return;
+                    if (!chatEntry.hasFocus) return;
                     adjustment.set_value(adjustment.get_upper() - adjustment.get_page_size());
                 })
             }
