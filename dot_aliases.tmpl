@@ -464,7 +464,7 @@ miru() {
         return 1
     fi
 
-    mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv)
+    mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv|webm)
 }
 
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}

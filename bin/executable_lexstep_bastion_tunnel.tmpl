@@ -1,0 +1,46 @@
+#!/bin/bash
+# lexstep_bastion_tunnel 
+
+SSH_KEY="$HOME/.ssh/lexstep-production.pem"
+BASTION_USER="ec2-user"
+BASTION_HOST="bastion-prod.lexstep.com"
+DB_HOST="lexstep-prod-db.cj2vfokwkz9v.eu-west-2.rds.amazonaws.com"
+DB_PORT="5432"
+LOCAL_PORT="5433"
+PID_FILE="/tmp/postgres_tunnel.pid"
+
+up() {
+    if [ -f "$PID_FILE" ]; then
+        echo "Tunnel already exists. PID: $(cat $PID_FILE)"
+        exit 1
+    fi
+
+    ssh -i $SSH_KEY -N -L $LOCAL_PORT:$DB_HOST:$DB_PORT $BASTION_USER@$BASTION_HOST &
+    echo $! > $PID_FILE
+    echo "Tunnel started. PID: $(cat $PID_FILE)"
+}
+
+down() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat $PID_FILE)
+        kill $PID
+        rm $PID_FILE
+        echo "Tunnel stopped. PID: $PID"
+    else
+        echo "No tunnel found."
+    fi
+}
+
+case "$1" in
+    up)
+        up
+        ;;
+    down)
+        down
+        ;;
+    *)
+        echo "Usage: $0 {up|down}"
+        exit 1
+        ;;
+esac
+
