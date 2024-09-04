@@ -3,11 +3,11 @@
 )
 
 (defsrc
-	F14 F15 F18  
+	F14 F15 F18 
 )
 
 (defalias 
-    mod1 (multi ralt lshft)
+    mod1 (multi lmet lalt)
     mod2 (multi lctl @mod1)
     mod3 (multi lctl lalt lmet)
     swap-master RA-S-ret
@@ -15,7 +15,7 @@
     summon-launcher M-spc 
     window1 (tap-hold 200 200 @swap-master @mod1)
     window2 (tap-hold 200 200 @tmux-combo ctl)
-    hyper (tap-hold 200 200 esc @mod3)
+    hyper (tap-hold 200 200 esc lmet)
 )
 
 (deflayer default
