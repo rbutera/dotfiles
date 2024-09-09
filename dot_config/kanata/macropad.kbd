@@ -1,0 +1,33 @@
+(defcfg
+	process-unmapped-keys no
+	linux-dev /dev/input/by-id/usb-1189_8890-event-kbd:/dev/input/by-id/usb-1189_8890-if02-event-kbd:/dev/input/event6
+)
+
+(defsrc
+  del  k    spc
+  h    j    l
+  left rght ret
+)
+
+
+(defalias 
+    mod1 (multi lmet lalt)
+    mod2 (multi lctl @mod1)
+    mod3 (multi lctl lalt lmet)
+    swap-master RA-S-ret
+    tmux-combo C-spc
+    summon-launcher M-spc 
+    window1 (tap-hold 200 200 @swap-master @mod1)
+    window2 (tap-hold 200 200 @tmux-combo ctl)
+    hyper (tap-hold 200 200 esc lmet)
+    switch-audio (multi @mod1 /)
+)
+
+(deflayer default
+    _ _ _
+    _ _ _
+    voldwn volu @switch-audio
+)
+
+
+
