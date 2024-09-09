@@ -3,3 +3,4 @@ python 3.9.18
 cmake 3.27.0
 ninja 1.11.1
 meson 1.5.1
+golang 1.19
