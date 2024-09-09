@@ -470,8 +470,9 @@ miru() {
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
 alias lfg="paru -S"
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
-alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hin
-t=auto"
+alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
+alias navi="aichat -s"
+
 {{- end -}}
 
 

@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Function to extract username and repo from URL or username/repo format
+parse_input() {
+    if [[ $1 =~ ^https://github.com/([^/]+)/(.+)$ ]]; then
+        username=${BASH_REMATCH[1]}
+        repo=${BASH_REMATCH[2]}
+    elif [[ $1 =~ ^([^/]+)/(.+)$ ]]; then
+        username=${BASH_REMATCH[1]}
+        repo=${BASH_REMATCH[2]}
+    else
+        echo "Invalid input format. Please use 'username/repo' or 'https://github.com/username/repo'"
+        exit 1
+    fi
+}
+
+# Check if an argument is provided
+if [ $# -eq 0 ]; then
+    echo "Please provide a GitHub repository as an argument."
+    exit 1
+fi
+
+# Parse the input
+parse_input "$1"
+
+# Change to the GitHub projects directory
+cd ~/dev/github || exit 1
+
+# Create the username directory if it doesn't exist
+mkdir -p "$username"
+
+# Change to the username directory
+cd "$username" || exit 1
+
+# Clone the repository
+gh repo clone "$username/$repo"
+
+# Check if the clone was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to clone the repository."
+    exit 1
+fi
+
+# Change to the cloned repository directory
+cd "$repo" || exit 1
+
+# Initialize and update submodules if any
+if [ -f ".gitmodules" ]; then
+    git submodule init
+    git submodule update
+fi
+
+# Print the README.md file if it exists
+if [ -f "README.md" ]; then
+    if command -v bat &> /dev/null; then
+        bat README.md
+    else
+        echo "bat is not installed. Using cat instead:"
+        cat README.md
+    fi
+else
+    echo "No README.md file found in the repository."
+fi
+

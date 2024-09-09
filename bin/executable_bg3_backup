@@ -1,0 +1,60 @@
+#!/bin/bash
+
+BG3_SAVE_DIR="/g/SteamLibrary/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story"
+BACKUP_DIR="/k/bg3_saves"
+
+backup() {
+    # Find the HonourMode folder with the most recently modified HonourMode.lsv file
+    latest_folder=$(find "$BG3_SAVE_DIR" -type d -name "*HonourMode" -exec test -f "{}/HonourMode.lsv" \; -print0 |
+        xargs -0 -I {} stat -c '%Y {}' "{}/HonourMode.lsv" |
+        sort -rn |
+        head -1 |
+        cut -d' ' -f2-)
+
+    if [ -z "$latest_folder" ]; then
+        echo "No HonourMode folders with HonourMode.lsv found."
+        exit 1
+    fi
+
+    # Remove "/HonourMode.lsv" from the end of the path
+    latest_folder=${latest_folder%/HonourMode.lsv}
+
+    folder_name=$(basename "$latest_folder")
+    timestamp=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+    backup_file="${BACKUP_DIR}/${folder_name}-backup-${timestamp}.7z"
+
+    # Create backup
+    7z a "$backup_file" "$latest_folder"
+
+    # Clean up old backups
+    cd "$BACKUP_DIR" || exit
+    backup_count=$(ls -1 "${folder_name}-backup-"*.7z | wc -l)
+    if [ $backup_count -gt 3 ]; then
+        ls -t "${folder_name}-backup-"*.7z | tail -n +4 | xargs rm -f
+    fi
+
+    echo "Backup created: $backup_file"
+}
+
+restore() {
+    latest_backup=$(ls -t "${BACKUP_DIR}"/*-backup-*.7z | head -1)
+
+    if [ -z "$latest_backup" ]; then
+        echo "No backups found."
+        exit 1
+    fi
+
+    7z x "$latest_backup" -o"$BG3_SAVE_DIR" -y
+
+    echo "Restored backup: $latest_backup"
+}
+
+# Main script
+if [ "$1" = "backup" ]; then
+    backup
+elif [ "$1" = "restore" ]; then
+    restore
+else
+    echo "Usage: $0 [backup|restore]"
+    exit 1
+fi
