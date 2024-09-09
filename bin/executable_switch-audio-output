@@ -1,0 +1,14 @@
+#!/bin/bash
+
+SINK1="alsa_output.usb-FiiO_DigiHug_USB_Audio-01.analog-stereo"
+SINK2="alsa_output.usb-Audient_EVO4-00.pro-output-0"
+
+CURRENT_SINK=$(pactl get-default-sink)
+
+if [ "$CURRENT_SINK" = "$SINK1" ]; then
+  pactl set-default-sink "$SINK2"
+  echo "Switched to $SINK2"
+else
+  pactl set-default-sink "$SINK1"
+  echo "Switched to $SINK1"
+fi
