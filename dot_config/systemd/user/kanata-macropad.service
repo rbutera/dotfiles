@@ -1,0 +1,14 @@
+[Unit]
+Description=Kanata keyboard remapper for Macropad
+Documentation=https://github.com/jtroo/kanata
+
+[Service]
+Environment=PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/home/rai/.cargo/bin
+Environment=DISPLAY=:0
+Environment=HOME=/home/rai
+Type=simple
+ExecStart=/usr/bin/sh -c 'exec $$(which kanata) --cfg /home/rai/.config/kanata/macropad.kbd' --debug
+Restart=no
+
+[Install]
+WantedBy=default.target
