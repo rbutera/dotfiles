@@ -10,11 +10,17 @@
 # Include xxx_API_KEY parameters and other params needed for your LLMs.
 # See https://aider.chat/docs/llms.html for details.
 
+## OpenRouter
+
+OPENROUTER_API_KEY={{ onepasswordRead "op://Private/openrouter_api/credential" }}
+
+
 ## OpenAI
 #OPENAI_API_KEY=
 
 ## Anthropic
-#ANTHROPIC_API_KEY=
+#ANTHROPIC_API_KEY={{ onepasswordRead "op://Private/anthropic claude 3.5 api key/credential" }}
+
 
 ##...
 
