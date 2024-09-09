@@ -4,6 +4,11 @@
 //   options listed in this file will override the default ones in the above file
 
 const userConfigOptions = {
-}
+  cheatsheet: {
+    keybinds: {
+      configPath: "/home/rai/.config/hypr/custom/keybinds.conf",
+    },
+  },
+};
 
 export default userConfigOptions;
