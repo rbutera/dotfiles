@@ -208,11 +208,19 @@ alias raisync="rsync -rvzP"
 {{ end }}
 
 function czm() {
-  command="chezmoi edit --apply $@"
+  local file="$1"
+  local command="chezmoi edit --apply $@"
   echo "$command"
   eval $command
-  rr
+
+  case "$file" in
+    */.aliases|*/.zshrc|*/.zprofile)
+      echo "Sourcing $file"
+      source "$HOME/${file##*/}"
+      ;;
+  esac
 }
+
 
 function cd() {
   builtin cd "$@" && echo $PWD && ls;
@@ -471,8 +479,11 @@ miru() {
 alias lfg="paru -S"
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
 alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
-alias navi="aichat -s"
+alias navi="aichat -r navi"
 alias open="xdg-open"
 {{- end -}}
+
+alias aider_sonnet="aider --model openrouter/anthropic/claude-3.5-sonnet"
+alias aider_gui="aider --gui --model openrouter/anthropic/claude-3.5-sonnet"
 
 
