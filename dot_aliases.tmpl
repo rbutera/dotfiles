@@ -476,12 +476,18 @@ miru() {
 }
 
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
-alias lfg="paru -S"
+
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
 alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
 alias navi="aichat -r navi"
 alias open="xdg-open"
-{{- end -}}
+alias restart_ags="ags -q; ags"
+
+function lfg() {
+  paru -S "$@"; restart_ags
+}
+
+{{ end }}
 
 alias aider_sonnet="aider --model openrouter/anthropic/claude-3.5-sonnet"
 alias aider_gui="aider --gui --model openrouter/anthropic/claude-3.5-sonnet"
