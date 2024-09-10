@@ -1,56 +1,42 @@
 #!/bin/bash
 
-# Name of the tmux session
-SESSION="lexstep"
+set -x
 
-# Name of the window
+SESSION="lexstep"
 WINDOW="servers"
 
-# Duplicate protection: check if ports are in use
-ports_to_check=(3001 9000 3000)
-for port in "${ports_to_check[@]}"; do
-  if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null; then
-    echo "Port $port is already in use. Aborting as Lexstep servers might be running."
-    tmux attach-session -t $SESSION
-    exit 1
-  fi
-done
+echo "Checking if session exists..."
+tmux has-session -t $SESSION 2>/dev/null || tmux new-session -d -s $SESSION
 
-# Rest of the script remains the same...
-# (Include all the tmux commands from the previous script here)
+echo "Checking if window exists..."
+tmux list-windows -t $SESSION | grep -q $WINDOW || tmux new-window -t $SESSION -n $WINDOW
 
-# Check if the session exists
-tmux has-session -t $SESSION 2>/dev/null
-
-if [ $? != 0 ]; then
-  # Session doesn't exist, create it
-  tmux new-session -d -s $SESSION
-fi
-
-# Check if the window exists
-tmux list-windows -t $SESSION | grep $WINDOW
-
-if [ $? != 0 ]; then
-  # Window doesn't exist, create it
-  tmux new-window -t $SESSION -n $WINDOW
-fi
-
-# Switch to the window
+echo "Switching to window..."
 tmux select-window -t $SESSION:$WINDOW
 
-# Clear the window of any existing panes
-tmux kill-pane -a -t $SESSION:$WINDOW
+echo "Attempting to kill extra panes..."
+tmux kill-pane -a -t $SESSION:$WINDOW.0 || echo "Failed to kill panes, continuing..."
 
-# Start angularjs-client
-tmux send-keys -t $SESSION:$WINDOW "cd ~/dev/angularjs-client && yarn start" C-m
+echo "Clearing first pane..."
+tmux send-keys -t $SESSION:$WINDOW.0 C-l Enter
 
-# Split pane horizontally and start lexstep-nest
+echo "Starting angularjs-client..."
+tmux send-keys -t $SESSION:$WINDOW.0 "cd ~/dev/angularjs-client && yarn start" C-m
+sleep 1
+
+echo "Splitting pane horizontally for lexstep-nest..."
 tmux split-window -h -t $SESSION:$WINDOW
-tmux send-keys -t $SESSION:$WINDOW.1 "cd ~/dev/lexstep-nest && yarn start:dev" C-m
+sleep 1
 
-# Split pane vertically and start lexstep-agent
+echo "Starting lexstep-nest..."
+tmux send-keys -t $SESSION:$WINDOW.1 "cd ~/dev/lexstep-nest && yarn start:dev" C-m
+sleep 1
+
+echo "Splitting pane vertically for lexstep-agent..."
 tmux split-window -v -t $SESSION:$WINDOW.1
+sleep 1
+
+echo "Starting lexstep-agent..."
 tmux send-keys -t $SESSION:$WINDOW.2 "cd ~/dev/lexstep-agent && pnpm dev" C-m
 
-# Attach to the session
-tmux attach-session -t $SESSION:$WINDOW
+echo "Script completed"
