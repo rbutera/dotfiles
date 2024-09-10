@@ -102,6 +102,9 @@ esac
 {{ end }}
 
 
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"
