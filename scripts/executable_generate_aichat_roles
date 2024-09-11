@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+import json
+import os
+import sys
+from pathlib import Path
+
+# Define paths
+config_dir = Path.home() / ".config" / "aichat"
+roles_dir = config_dir / "roles"
+common_dir = roles_dir / "common"
+prompt_dir = common_dir / "prompt"
+roles_json_path = common_dir / "roles.json"
+
+# Ensure directories exist
+roles_dir.mkdir(parents=True, exist_ok=True)
+prompt_dir.mkdir(parents=True, exist_ok=True)
+
+# Read roles.json
+with open(roles_json_path, "r") as f:
+    roles = json.load(f)
+
+
+def get_prompt_content(role_name):
+    # Check for exact match
+    prompt_path = prompt_dir / f"{role_name}.md"
+    if prompt_path.exists():
+        with open(prompt_path, "r") as f:
+            return f.read()
+
+    # Check for fallback (part before dash)
+    if "-" in role_name:
+        fallback_name = role_name.split("-")[0]
+        fallback_path = prompt_dir / f"{fallback_name}.md"
+        if fallback_path.exists():
+            with open(fallback_path, "r") as f:
+                return f.read()
+
+    # If no prompt found, log error and return None
+    print(f"Error: No prompt file found for {role_name}", file=sys.stderr)
+    return None
+
+
+# Generate role files
+for role in roles:
+    role_file = roles_dir / f"{role['name']}.md"
+
+    # Create frontmatter
+    frontmatter = f"""---
+model: {role['model']}
+temperature: {role['temperature']}
+---
+"""
+
+    # Get prompt content
+    prompt_content = get_prompt_content(role["name"])
+
+    # Combine frontmatter with prompt
+    content = frontmatter
+    if prompt_content:
+        content += prompt_content
+
+    # Write to file
+    with open(role_file, "w") as f:
+        f.write(content)
+
+    print(f"Generated {role_file}")
+
+print("Role generation complete.")
