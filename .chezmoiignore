@@ -31,3 +31,5 @@ README.md
 ~/.config/systemd/user/kanata.service
 ~/.config/pipewire
 {{ end }}
+~/.config/aichat/sessions/*
+

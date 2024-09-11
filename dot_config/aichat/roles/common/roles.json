@@ -1,0 +1,32 @@
+[
+  {
+    "name": "navi",
+    "temperature": 0.5,
+    "model": "claude:claude-3-5-sonnet-20240620"
+  },
+  {
+    "name": "navi-creative",
+    "temperature": 1,
+    "model": "claude:claude-3-5-sonnet-20240620"
+  },
+  {
+    "name": "navi-mini",
+    "temperature": 0.5,
+    "model": "openai:gpt-4o-mini"
+  },
+  {
+    "name": "navi-4o",
+    "temperature": 0.5,
+    "model": "openai:gpt-4o-2024-08-06"
+  },
+  {
+    "name": "foo",
+    "temperature": 0.5,
+    "model": "openai:gpt-4o-mini"
+  },
+  {
+    "name": "foo-bar",
+    "temperature": 0.5,
+    "model": "openai:gpt-4o-2024-08-06"
+  }
+]

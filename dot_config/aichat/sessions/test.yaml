@@ -1,0 +1,8 @@
+model: claude:claude-3-5-sonnet-20240620
+use_tools: fs,web_search
+save_session: true
+messages:
+- role: user
+  content: can you tell me what you know about my system?
+- role: assistant
+  content: As an AI language model, I don't have access to any information about your specific system or device. I don't have the ability to access or analyze your computer, network, or any other personal information. Each conversation I have is independent, and I don't retain information from previous interactions or have access to any external data beyond my training cutoff. If you have specific questions about your system, you'll need to provide that information or consult your device's documentation or settings.

@@ -1,0 +1,118 @@
+model: claude:claude-3-5-sonnet-20240620
+use_tools: fs,web_search
+messages:
+- role: user
+  content: is it possible to create a hyprland keybind that acts like ctrl+shift+v in vscode, kitty, alacritty, and warp-terminal, but ctrl+v in any other app?
+- role: assistant
+  content: |-
+    Yes, it is possible to create such a keybind in Hyprland. You can use a combination of Hyprland's window rules and keybindings to achieve this. Here's how you can set it up:
+
+    1. First, add window rules to identify the specific applications:
+
+    ```
+    windowrule = class:^(Code)$,forceinput
+    windowrule = class:^(kitty)$,forceinput
+    windowrule = class:^(Alacritty)$,forceinput
+    windowrule = class:^(warp)$,forceinput
+    ```
+
+    2. Then, create two separate keybindings:
+
+    ```
+    # For the specified applications
+    bind = , V, exec, ~/.config/hypr/paste_special.sh
+
+    # For all other applications
+    bind = CTRL, V, exec, wtype -M ctrl -P v -m ctrl
+    ```
+
+    3. Create a script named `paste_special.sh` in your `~/.config/hypr/` directory:
+
+    ```bash
+    #!/bin/bash
+
+    # Get the class of the focused window
+    FOCUSED_CLASS=$(hyprctl activewindow -j | jq -r '.class')
+
+    # Check if the focused window is one of the specified applications
+    if [[ "$FOCUSED_CLASS" =~ ^(Code|kitty|Alacritty|warp)$ ]]; then
+        # If it is, send Ctrl+Shift+V
+        wtype -M ctrl -M shift -P v -m shift -m ctrl
+    else
+        # If it's not, send Ctrl+V
+        wtype -M ctrl -P v -m ctrl
+    fi
+    ```
+
+    4. Make the script executable:
+
+    ```
+    chmod +x ~/.config/hypr/paste_special.sh
+    ```
+
+    This setup will send Ctrl+Shift+V to VSCode, Kitty, Alacritty, and Warp Terminal, but Ctrl+V to all other applications when you press Ctrl+V.
+
+    Note: This solution uses `wtype` to simulate key presses. Make sure you have it installed on your system.
+
+    Also, the window class names used in the script (`Code`, `kitty`, `Alacritty`, `warp`) should match the actual class names of these applications on your system. You can verify these using `hyprctl clients`.
+- role: user
+  content: |-
+    can i reconfigure kitty to do the following:
+
+    1. ctrl click instead of ctrl shift click to be able to open links
+    2. copy on mouse select and immediately unselect (like windows terminal)
+    3. attach to tmux session on startup. i have a function named tmux_auto already in my path that attaches to an existing tmux session if it exists, otherwise creates a new one
+    4. have transparency (95% opaque)
+- role: assistant
+  content: |-
+    Certainly! You can configure Kitty to achieve all of these requirements. Here's how you can modify your `kitty.conf` file (usually located at `~/.config/kitty/kitty.conf`) to implement these changes:
+
+    1. To use Ctrl+Click instead of Ctrl+Shift+Click for opening links:
+
+    ```
+    mouse_map ctrl+left click grabbed,ungrabbed mouse_handle_click link
+    ```
+
+    2. To copy on mouse select and immediately unselect:
+
+    ```
+    copy_on_select yes
+    mouse_map left click ungrabbed mouse_selection normal
+    ```
+
+    3. To attach to a tmux session on startup using your `tmux_auto` function:
+
+    ```
+    shell /bin/bash -c "tmux_auto"
+    ```
+
+    4. To set transparency (95% opaque):
+
+    ```
+    background_opacity 0.95
+    ```
+
+    Here's a complete section you can add to your `kitty.conf`:
+
+    ```
+    # Use Ctrl+Click to open links
+    mouse_map ctrl+left click grabbed,ungrabbed mouse_handle_click link
+
+    # Copy on select and unselect
+    copy_on_select yes
+    mouse_map left click ungrabbed mouse_selection normal
+
+    # Attach to tmux on startup
+    shell /bin/bash -c "tmux_auto"
+
+    # Set transparency
+    background_opacity 0.95
+    ```
+
+    After making these changes, save the file and restart Kitty for the changes to take effect.
+
+    Note:
+    - Make sure your `tmux_auto` function is in your PATH and is executable.
+    - The exact syntax for the shell command might vary depending on your shell and how you've defined the `tmux_auto` function. Adjust as necessary.
+    - If you're using a different shell than bash, replace `/bin/bash` with your preferred shell.
+    - The transparency feature requires a compositor to be running on your system for it to work.

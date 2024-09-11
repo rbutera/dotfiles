@@ -1,0 +1,107 @@
+model: claude:claude-3-5-sonnet-20240620
+use_tools: fs,web_search
+messages:
+- role: user
+  content: |-
+    I would like to create a script called "ghclone" which should use either bash or python
+    The sccript should accept an argument which is a github repository. I can either provide the full url, e.g. https://github.com/RoarkGit/Pedal-Mapper, or just the username/repo name so "RoarkGit/Pedal-Mapper"
+    The script should validate the argument and store the username and repo name as variables
+    The script should go into ~/dev/github and create a directory for the username if it doesn't already exist (e.g. RoarkGit in this case)
+    The script should then go into the username directory and run `gh clone <x>/<y>` where <x> is the username and <y> is the repository name
+    The script should then cd into the cloned directory, init/clone any submodules if necessary, and run `bat` to print the README.md file in the repo if it exists.
+- role: assistant
+  content: |-
+    Here's a Bash script that fulfills your requirements. Save this as `ghclone` and make it executable with `chmod +x ghclone`:
+
+    ```bash
+    #!/bin/bash
+
+    # Function to extract username and repo from URL or username/repo format
+    parse_input() {
+        if [[ $1 =~ ^https://github.com/([^/]+)/(.+)$ ]]; then
+            username=${BASH_REMATCH[1]}
+            repo=${BASH_REMATCH[2]}
+        elif [[ $1 =~ ^([^/]+)/(.+)$ ]]; then
+            username=${BASH_REMATCH[1]}
+            repo=${BASH_REMATCH[2]}
+        else
+            echo "Invalid input format. Please use 'username/repo' or 'https://github.com/username/repo'"
+            exit 1
+        fi
+    }
+
+    # Check if an argument is provided
+    if [ $# -eq 0 ]; then
+        echo "Please provide a GitHub repository as an argument."
+        exit 1
+    fi
+
+    # Parse the input
+    parse_input "$1"
+
+    # Change to the GitHub projects directory
+    cd ~/dev/github || exit 1
+
+    # Create the username directory if it doesn't exist
+    mkdir -p "$username"
+
+    # Change to the username directory
+    cd "$username" || exit 1
+
+    # Clone the repository
+    gh repo clone "$username/$repo"
+
+    # Check if the clone was successful
+    if [ $? -ne 0 ]; then
+        echo "Failed to clone the repository."
+        exit 1
+    fi
+
+    # Change to the cloned repository directory
+    cd "$repo" || exit 1
+
+    # Initialize and update submodules if any
+    if [ -f ".gitmodules" ]; then
+        git submodule init
+        git submodule update
+    fi
+
+    # Print the README.md file if it exists
+    if [ -f "README.md" ]; then
+        if command -v bat &> /dev/null; then
+            bat README.md
+        else
+            echo "bat is not installed. Using cat instead:"
+            cat README.md
+        fi
+    else
+        echo "No README.md file found in the repository."
+    fi
+    ```
+
+    This script does the following:
+
+    1. It defines a function `parse_input` to extract the username and repository name from the provided argument.
+    2. It checks if an argument is provided.
+    3. It parses the input to get the username and repository name.
+    4. It changes to the `~/dev/github` directory.
+    5. It creates a directory for the username if it doesn't exist.
+    6. It changes to the username directory.
+    7. It uses `gh clone` to clone the repository.
+    8. It changes to the cloned repository directory.
+    9. It initializes and updates submodules if any exist.
+    10. It prints the README.md file using `bat` if it's installed, or `cat` if not.
+
+    To use this script, make sure you have the GitHub CLI (`gh`) installed and authenticated. Also, ensure that the `bat` command is available if you want to use it for displaying the README.md file.
+
+    You can then run the script like this:
+
+    ```
+    ./ghclone https://github.com/RoarkGit/Pedal-Mapper
+    ```
+
+    or
+
+    ```
+    ./ghclone RoarkGit/Pedal-Mapper
+    ```
