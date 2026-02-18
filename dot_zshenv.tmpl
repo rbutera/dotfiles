@@ -10,3 +10,5 @@ if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; t
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
 
+export CLAUDE_API_KEY={{ onepasswordRead "op://Private/anthropic claude 3.5 api key/credential" }}
+export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential"}}

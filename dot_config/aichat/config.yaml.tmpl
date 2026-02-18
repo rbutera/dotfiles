@@ -1,11 +1,8 @@
-clients:
-  - type: claude
-    api_key: {{ onepasswordRead "op://Private/anthropic claude 3.5 api key/credential" }}
-
 # ---- llm ----
-model: claude
-temperature: null # Set default temperature parameter
-top_p: null # Set default top-p parameter, range (0, 1)
+#model: claude:claude-3-5-sonnet-20241022
+model: openai:gpt-4o
+# temperature: null # Set default temperature parameter
+# top_p: null # Set default top-p parameter, range (0, 1)
 
 # ---- behavior ----
 stream: true # Controls whether to use the stream-style API.
