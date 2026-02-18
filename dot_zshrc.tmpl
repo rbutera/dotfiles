@@ -1,12 +1,4 @@
-{{- if eq .chezmoi.os "darwin" -}}
-# Fig pre block. Keep at the top of this file.
-[[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.pre.zsh"
-{{- end }}
 # Executes commands at the start of an interactive session.
-#
-# Authors:
-#   Sorin Ionescu <sorin.ionescu@gmail.com>
-#
 
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
@@ -16,24 +8,17 @@ fi
 CPU=$(uname -p)
 unamestr=$(uname)
 
-
-
 # finds the process using a particular port and kills it
 killport() {  local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }'); kill -9 $PORT }
 
 alias rr="source ~/.zshrc; clear"
 
-# for remote ssh code
-# alias code="${VSCODE_GIT_ASKPASS_NODE%/*}/bin/code"
-# export PATH=${VSCODE_GIT_ASKPASS_NODE%/*}/bin/remote-cli:$PATH
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/scripts:$PATH"
-export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 
 {{- if eq .chezmoi.os "linux" }}
 # for wsl/linux keychain
-unamestr=$(uname)
 if [[ "$unamestr" == "Linux" ]]; then
   # For Loading the SSH key
   /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
@@ -61,14 +46,9 @@ zle-line-init() {
 zle -N zle-line-init
 echo -ne '\e[5 q' # Use beam shape cursor on startup.
 preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
-
-
-# END CURSOR TERMINAL FIX 
-
+# END CURSOR TERMINAL FIX
 
 export PATH
-
-# alias code="code-insiders"
 
 # to enable ctrl+R in vi mode
 bindkey "^R" history-incremental-search-backward
@@ -76,10 +56,6 @@ bindkey "^R" history-incremental-search-backward
 # load aliases
 source ~/.aliases
 
-{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
-alias pbcopy="wl-copy"
-alias pbpaste="wl-paste"
-{{ end }}
 # pnpm
 export PNPM_HOME="/home/rai/.local/share/pnpm"
 case ":$PATH:" in
@@ -88,20 +64,12 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-{{ if eq .chezmoi.os "darwin" }}
-# Fig post block. Keep at the bottom of this file.
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
-{{- end}}
-
-
-
 {{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
 . /opt/asdf-vm/asdf.sh
 {{ else }}
 # for asdf
 . "$HOME/.asdf/asdf.sh"
 {{ end }}
-
 
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
@@ -111,7 +79,6 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # starship prompt (should be last)
 eval "$(starship init zsh)"
-
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"

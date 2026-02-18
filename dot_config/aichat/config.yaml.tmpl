@@ -1,5 +1,8 @@
+clients:
+  - type: openai
+    api_key: {{ onepasswordRead "op://Private/supermaven openai api key/credential" }}
+
 # ---- llm ----
-#model: claude:claude-3-5-sonnet-20241022
 model: openai:gpt-4o
 # temperature: null # Set default temperature parameter
 # top_p: null # Set default top-p parameter, range (0, 1)

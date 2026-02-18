@@ -29,7 +29,7 @@ install_nix_packages () {
         while IFS= read -r package || [[ -n "$package" ]]; do
             if [[ -n "$package" ]]; then
                 echo "Installing package: $package"
-                nix-env -iA "nixkpgs.$package"
+                nix-env -iA "nixpkgs.$package"
             fi
         done < "$package_file"
 
