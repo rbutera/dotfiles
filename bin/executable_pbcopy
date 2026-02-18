@@ -1,0 +1,45 @@
+#!/bin/bash
+# Cross-platform clipboard copy
+
+input=$(cat)
+
+# 1. SSH session: use OSC 52 escape sequence
+if [[ -n "$SSH_CONNECTION" ]]; then
+  encoded=$(echo -n "$input" | base64 | tr -d '\n')
+  printf "\033]52;c;%s\a" "$encoded"
+  exit 0
+fi
+
+# 2. macOS native (use full path to avoid recursion)
+if [[ -x /usr/bin/pbcopy ]]; then
+  echo -n "$input" | /usr/bin/pbcopy
+  exit 0
+fi
+
+# 3. WSL2: use clip.exe
+if command -v clip.exe &> /dev/null; then
+  echo -n "$input" | clip.exe
+  exit 0
+fi
+
+# 4. Wayland: use wl-copy
+if [[ -n "$WAYLAND_DISPLAY" ]] && command -v wl-copy &> /dev/null; then
+  echo -n "$input" | wl-copy
+  exit 0
+fi
+
+# 5. X11: use xclip
+if command -v xclip &> /dev/null; then
+  echo -n "$input" | xclip -selection clipboard
+  exit 0
+fi
+
+# 6. X11: use xsel
+if command -v xsel &> /dev/null; then
+  echo -n "$input" | xsel --clipboard --input
+  exit 0
+fi
+
+# 7. Fallback: OSC 52
+encoded=$(echo -n "$input" | base64 | tr -d '\n')
+printf "\033]52;c;%s\a" "$encoded"
