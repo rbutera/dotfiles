@@ -63,6 +63,7 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export BROWSER='open'
 {{ else if .wsl }}
 export BROWSER='wslview'
+export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
 {{ end }}
 
 #
