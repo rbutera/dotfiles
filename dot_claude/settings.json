@@ -1,0 +1,25 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(chezmoi:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(which:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
+    ]
+  },
+  "cleanupPeriodDays": 30
+}
