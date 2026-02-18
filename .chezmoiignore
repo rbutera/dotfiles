@@ -1,8 +1,10 @@
 zplug/.git*
+
 {{ if eq .chezmoi.os "darwin" }}
 ~/bin/pbcopy.py
 ~/bin/pbpaste.py
 {{ end }}
+
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh
 0_install-cli-tools.sh
@@ -11,19 +13,19 @@ mac
 .config/iterm
 .config/iTerm
 .config/.karabiner
-.fig
-{{ end }} 
+{{ end }}
+
 .config/systemd/user/ssh-agent.service
+
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
 ~/bin/pbcopy.py
 ~/bin/pbpaste.py
 {{ end }}
+
 .linuxbrew
 .zprezto/modules/*
-~/README.md
-home/rai/README.md
-/Users/rai/README.md
 README.md
+
 {{ if .wsl }}
 ~/.config/kanata/*
 ~/.config/kanata
@@ -31,5 +33,5 @@ README.md
 ~/.config/systemd/user/kanata.service
 ~/.config/pipewire
 {{ end }}
-~/.config/aichat/sessions/*
 
+~/.config/aichat/sessions/*

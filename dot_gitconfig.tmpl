@@ -56,47 +56,62 @@
 	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattributes
 	# Treat spaces before tabs and all kinds of trailing whitespace as an error.
-	# [default] trailing-space: looks for spaces at the end of a line
-	# [default] space-before-tab: looks for spaces before tabs at the beginning of
-	# a line
 	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
 	# Make `git rebase` safer on OS X
-	# More info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
 	trustctime = false
 	editor = nvim
 	autocrlf = false
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[add.interactive]
+	useBuiltin = false # required for git 2.37.0
+
+[delta]
+	navigate = true    # use n and N to move between diff sections
+	light = false      # set to true if you're in a terminal w/ a light background color
 
 [color]
 	# Use colors in Git commands that are capable of colored output when
 	# outputting to the terminal. (This is the default setting in Git ≥ 1.8.4.)
 	ui = auto
+
 [color "branch"]
 	current = yellow reverse
 	local = yellow
 	remote = green
+
 [color "diff"]
 	meta = yellow bold
 	frag = magenta bold
 	old = red bold
 	new = green bold
+
 [color "status"]
 	added = yellow
 	changed = green
 	untracked = cyan
+
 [merge]
 	# Include summaries of merged commits in newly created merge commit messages
 	log = true
+	conflictstyle = diff3
 
 [url "git@github.com:"]
 	insteadOf = "gh:"
 	pushInsteadOf = "github:"
 	pushInsteadOf = "git://github.com/"
+
 [url "git://github.com/"]
 	insteadOf = "github:"
+
 [url "git@gist.github.com:"]
 	insteadOf = "gst:"
 	pushInsteadOf = "gist:"
 	pushInsteadOf = "git://gist.github.com/"
+
 [url "git://gist.github.com/"]
 	insteadOf = "gist:"
 
@@ -105,7 +120,7 @@
 	followTags = true
 
 [user]
-	name = {{- .name }} 
+	name = {{- .name }}
 	email = {{- .email }}
 
 [mergetool]
@@ -122,27 +137,15 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
+
 [fetch]
 	prune = true
+
 [init]
 	defaultBranch = main
+
 [pull]
 	rebase = false
 
-[core]
-    pager = delta
-
-[interactive]
-    diffFilter = delta --color-only
-[add.interactive]
-    useBuiltin = false # required for git 2.37.0
-
-[delta]
-    navigate = true    # use n and N to move between diff sections
-    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-
-[merge]
-    conflictstyle = diff3
-
 [diff]
-    colorMoved = default
+	colorMoved = default

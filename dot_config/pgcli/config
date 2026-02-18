@@ -199,10 +199,7 @@ output.null = "#808080"
 # DSN to call by -D option
 [alias_dsn]
 # example_dsn = postgresql://[user[:password]@][netloc][:port][/dbname]
-lexstep_pidgey = postgresql://postgres:postgres@pidgey:9003/lexstep-nest
 docker = postgresql://postgres:postgres@localhost:5432
-lexstep = postgresql://postgres:postgres@localhost:5432/lexstep
-lexstep_test = postgresql://postgres:postgres@localhost:5432/lexstep
 
 # Format for number representation
 # for decimal "d" - 12345678, ",d" - 12,345,678

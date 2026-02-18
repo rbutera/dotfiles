@@ -14,25 +14,11 @@ Host lugia
   IdentityFile ~/.ssh/id_ed25519
   ForwardAgent yes
 
-Host mew 
+Host mew
   HostName mew
   User rai
   IdentityFile ~/.ssh/id_ed25519
   ForwardAgent yes
-
-Host lexstep.com 
-  ForwardAgent yes
-  StrictHostKeyChecking no
-
-Host bastion-stage.lexstep.com
-   ForwardAgent yes
-   StrictHostKeyChecking no
-   IdentityFile ~/.ssh/lexstep-staging.pem
-
-Host bastion-prod.lexstep.com
-   ForwardAgent yes
-   StrictHostKeyChecking no
-   IdentityFile ~/.ssh/lexstep-production.pem
 
 Host 100.84.231.100
  ForwardAgent yes
@@ -51,13 +37,3 @@ Host gitlab.com
 
 Host github.com
  IdentityFile ~/.ssh/id_ed25519
-
-Host lexstep.com
-  StrictHostKeyChecking no
-
-## Host * 
-##   IdentityAgent ~/.1password/agent.sock
-
-{{- if eq .chezmoi.os "darwin" }}
-Include ~/.fig/ssh
-{{- end }}
