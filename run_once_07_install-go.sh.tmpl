@@ -1,26 +1,27 @@
 #!/bin/bash
 
-perform_install () {
-    {{ if .install_go }}
-    mkdir -p $HOME/go/{bin,src,pkg}
+perform_install() {
+  echo "Setting up Go workspace..."
+  mkdir -p $HOME/go/{bin,src,pkg}
+
+  if command -v go &> /dev/null; then
+    echo "Installing Go tools..."
     go install mvdan.cc/gofumpt@latest
     go install github.com/mgechev/revive@latest
-    {{ else }}
-    echo "not installing golang"
-    {{end}}
+    echo "Go tools installed"
+  else
+    echo "Go not found. Install Go first via asdf or your package manager."
+  fi
 }
 
-
-prompt_for_install () {
-    read -p "Install tmux and plugins?" -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        perform_install
-    else
-        echo
-        echo "Declined. Skipping"
-    fi
+prompt_for_install() {
+  read -p "Setup Go workspace and tools? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    perform_install
+  else
+    echo "Declined. Skipping"
+  fi
 }
 
 prompt_for_install

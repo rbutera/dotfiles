@@ -1,9 +1,0 @@
-{{ .chezmoi.os }}
-{{ .chezmoi.osRelease.id }}
-{{ .chezmoi.osRelease.idLike }}
-
-{{- if eq .chezmoi.os "linux" -}}
-Linux detected
-{{ else }}
-not detected
-{{- end -}}

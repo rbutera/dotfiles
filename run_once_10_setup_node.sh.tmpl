@@ -1,23 +1,25 @@
 #!/bin/bash
 
-perform_install () {
-  asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-  asdf install nodejs 14.17.1
-  asdf install nodejs 21.7.3
-  asdf install nodejs 16.17.0
+perform_install() {
+  echo "Installing Node.js via asdf..."
+  asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null || true
+  asdf install nodejs latest
+  asdf global nodejs latest
+  echo "Node.js $(node --version) installed"
 }
 
-prompt_for_install () {
-    read -p "Install nodejs using asdf?" -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        perform_install
-    else
-        echo
-        echo "Declined. Skipping"
+prompt_for_install() {
+  read -p "Install Node.js using asdf? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if ! command -v asdf &> /dev/null; then
+      echo "asdf not found. Please install asdf first."
+      exit 1
     fi
+    perform_install
+  else
+    echo "Declined. Skipping"
+  fi
 }
 
 prompt_for_install
-

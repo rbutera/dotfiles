@@ -4,61 +4,63 @@ install_zsh_linux() {
   {{if eq .chezmoi.os "linux"}}
   echo "Linux detected. Installing zsh"
 
-    {{ if or (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.osRelease.id "debian") -}}
-      sudo apt update
-      {{- if .wsl }}
-      echo "installing x11-apps for WSL"
-      sudo apt install x11-apps
-      {{end}}
-      sudo apt install zsh -y
-    {{else}}
-      echo "non-ubuntu based distro detected:"
-      cat "/etc/os-release"
-      echo "assuming arch linux..."
-      sudo pacman -S --noconfirm zsh zsh-completions
+  {{ if or (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.osRelease.id "debian") -}}
+    sudo apt update
+    {{- if .wsl }}
+    echo "installing x11-apps for WSL"
+    sudo apt install -y x11-apps
     {{end}}
-    echo "zsh has been installed at $(which zsh)"
-    {{else}}
-    echo "Not on linux."
+    sudo apt install -y zsh
+  {{ else if eq .chezmoi.osRelease.id "fedora" -}}
+    sudo dnf install -y zsh util-linux-user
+  {{ else if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
+    sudo pacman -S --noconfirm zsh zsh-completions
+  {{ else -}}
+    echo "Unknown distro, attempting to detect package manager..."
+    if command -v apt &> /dev/null; then
+      sudo apt update && sudo apt install -y zsh
+    elif command -v dnf &> /dev/null; then
+      sudo dnf install -y zsh
+    elif command -v pacman &> /dev/null; then
+      sudo pacman -S --noconfirm zsh
+    else
+      echo "Could not detect package manager. Please install zsh manually."
+      exit 1
+    fi
   {{ end -}}
-}
 
-install_zplug () {
-  # install zplug
-  rm -rf ~/.zplug
-  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+  echo "zsh has been installed at $(which zsh)"
+  {{else}}
+  echo "Not on linux."
+  {{ end -}}
 }
 
 backup_zsh_dotfiles() {
   echo "backing up zsh dotfiles..."
   mkdir -p ~/zsh_backup
-  cp -v ~/.zlogin ~/zsh_backup/.zlogin
-  cp -v ~/.zlogout ~/zsh_backup/.zlogout
-  cp -v ~/.zpreztorc ~/zsh_backup/.zpreztorc
-  cp -v ~/.zshrc ~/zsh_backup/.zshrc
-  cp -v ~/.zprofile ~/zsh_backup/.zprofile
-  cp -v ~/.zshenv ~/zsh_backup/.zshenv
+  cp -v ~/.zlogin ~/zsh_backup/.zlogin 2>/dev/null || true
+  cp -v ~/.zlogout ~/zsh_backup/.zlogout 2>/dev/null || true
+  cp -v ~/.zpreztorc ~/zsh_backup/.zpreztorc 2>/dev/null || true
+  cp -v ~/.zshrc ~/zsh_backup/.zshrc 2>/dev/null || true
+  cp -v ~/.zprofile ~/zsh_backup/.zprofile 2>/dev/null || true
+  cp -v ~/.zshenv ~/zsh_backup/.zshenv 2>/dev/null || true
   echo "finished backing up zsh dotfiles"
 }
 
-
 install_zsh() {
-    read -p "Install zsh? (y/Y) " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-      echo "(re)installing zsh etc"
-      backup_zsh_dotfiles
-      {{if eq .chezmoi.os "linux"}}
-      install_zsh_linux
-      {{end}}
-      install_zplug
-      chsh -s /bin/zsh
-      source ~/.zshrc
-    else
-        echo
-        echo "Declined. Skipping zsh install"
-    fi
+  read -p "Install zsh? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "(re)installing zsh"
+    backup_zsh_dotfiles
+    {{if eq .chezmoi.os "linux"}}
+    install_zsh_linux
+    {{end}}
+    chsh -s $(which zsh)
+    echo "zsh installed. Restart your terminal to use it."
+  else
+    echo "Declined. Skipping zsh install"
+  fi
 }
 
 install_zsh
