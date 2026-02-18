@@ -1,23 +1,20 @@
 #!/bin/bash
 
-perform_install () {
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  mkdir -p ~/dev
-  gh repo clone dteare/opbookmarks
-  cd opbookmarks
-  cargo build --release
+perform_install() {
+  echo "Installing Rust via rustup..."
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  source "$HOME/.cargo/env"
+  echo "Rust $(rustc --version) installed"
 }
 
-prompt_for_install () {
-    read -p "Install rustup and opbookmarks?" -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        perform_install
-    else
-        echo
-        echo "Declined. Skipping"
-    fi
+prompt_for_install() {
+  read -p "Install Rust via rustup? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    perform_install
+  else
+    echo "Declined. Skipping"
+  fi
 }
 
 prompt_for_install

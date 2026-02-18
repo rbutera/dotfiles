@@ -1,28 +1,28 @@
 #!/bin/bash
-## brew install rustup
 
-install_bob () {
-  cargo install --git https://github.com/MordechaiHadad/bob.git
-  bob install 0.8.3
-  bob use 0.8.3
-  cp -Rv ~/.config/nvim/lua/user/init.lua /tmp/init.lua
-  rm -rf ~/.config/nvim
-  git clone https://github.com/AstroNvim/AstroNvim ~/.config/nvim
-  git clone git@github.com:rbutera/astronvim.git ~/.config/nvim/lua/user
-  nvim  --headless -c 'quitall'
+install_bob() {
+  echo "Installing bob (neovim version manager)..."
+  cargo install bob-nvim
+
+  echo "Installing latest stable neovim..."
+  bob install stable
+  bob use stable
+
+  echo "Neovim installed at: $(bob which)"
 }
 
-
-prompt_for_install () {
-    read -p "Install bob + nvim? (y/Y) " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-      install_bob
-    else
-        echo
-        echo "Declined. Skipping bob and nvim"
+prompt_for_install() {
+  read -p "Install bob + neovim? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if ! command -v cargo &> /dev/null; then
+      echo "Rust/cargo not found. Please run the rust setup script first."
+      exit 1
     fi
+    install_bob
+  else
+    echo "Declined. Skipping bob and nvim"
+  fi
 }
 
 prompt_for_install
