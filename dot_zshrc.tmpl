@@ -5,81 +5,64 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
-CPU=$(uname -p)
-unamestr=$(uname)
-
 # finds the process using a particular port and kills it
-killport() {  local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }'); kill -9 $PORT }
+killport() { local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }'); kill -9 $PORT }
 
 alias rr="source ~/.zshrc; clear"
 
-export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/scripts:$PATH"
-export PATH="$HOME/go/bin:$PATH"
-
 {{- if eq .chezmoi.os "linux" }}
 # for wsl/linux keychain
-if [[ "$unamestr" == "Linux" ]]; then
-  # For Loading the SSH key
-  /usr/bin/keychain -q --nogui $HOME/.ssh/id_ed25519
-  mkdir -p $HOME/.keychain
-  [[ -f "$HOME/.keychain/$HOST-sh" ]] && source $HOME/.keychain/$HOST-sh
+if command -v keychain &> /dev/null; then
+  keychain -q --nogui $HOME/.ssh/id_ed25519 2>/dev/null
+  [[ -f "$HOME/.keychain/$HOST-sh" ]] && source "$HOME/.keychain/$HOST-sh"
 fi
 {{ end }}
 
-# START CURSOR TERMINAL FIX
-# formats cursor in terminal
+# Cursor shape for vi mode
 function zle-keymap-select () {
   case $KEYMAP in
     vicmd) echo -ne '\e[1 q';; # block
     viins|main) echo -ne '\e[5 q';; # beam
   esac
 }
-
 zle -N zle-keymap-select
 
 zle-line-init() {
-  zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
+  zle -K viins
   echo -ne "\e[5 q"
 }
-
 zle -N zle-line-init
-echo -ne '\e[5 q' # Use beam shape cursor on startup.
-preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
-# END CURSOR TERMINAL FIX
+echo -ne '\e[5 q'
+preexec() { echo -ne '\e[5 q' ;}
 
-export PATH
-
-# to enable ctrl+R in vi mode
+# vi mode ctrl+R
 bindkey "^R" history-incremental-search-backward
 
 # load aliases
 source ~/.aliases
 
-# pnpm
-export PNPM_HOME="/home/rai/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+# asdf version manager
+if [[ -f "/opt/asdf-vm/asdf.sh" ]]; then
+  . /opt/asdf-vm/asdf.sh
+elif [[ -f "$HOME/.asdf/asdf.sh" ]]; then
+  . "$HOME/.asdf/asdf.sh"
+elif command -v brew &> /dev/null && [[ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]]; then
+  . "$(brew --prefix asdf)/libexec/asdf.sh"
+fi
 
-{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
-. /opt/asdf-vm/asdf.sh
-{{ else }}
-# for asdf
-. "$HOME/.asdf/asdf.sh"
-{{ end }}
+# fzf
+if command -v fzf &> /dev/null; then
+  source <(fzf --zsh)
+fi
 
-# Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
+# zoxide (modern cd)
+if command -v zoxide &> /dev/null; then
+  eval "$(zoxide init zsh)"
+fi
 
-# for claude code
-export PATH="$HOME/.local/bin:$PATH"
-
-# starship prompt (should be last)
+# starship prompt
 eval "$(starship init zsh)"
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
