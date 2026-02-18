@@ -1,44 +1,49 @@
 #
 # Executes commands at login pre-zshrc.
 #
-# Authors:
-#   Sorin Ionescu <sorin.ionescu@gmail.com>
-#
 
 export LANG=en_US.UTF-8
 
 #
-# Browser
+# Paths - set early so tools are available
 #
 
+# Homebrew/Linuxbrew
 {{ if eq .chezmoi.os "darwin" }}
-export BROWSER='open'
+if [[ -f /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+{{ else }}
+if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -f $HOME/.linuxbrew/bin/brew ]]; then
+  eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+fi
+{{ end }}
 
-# for bob
+# bob-nvim
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 
-# Handle Mac platforms
-unamestr=$(uname -s)
-if [[ "$unamestr" == "Darwin" ]]; then 
-  architecture=$(uname -m)
-  if [[ "$architecture" == "arm64" ]]; then
-		export PATH="/opt/homebrew/bin:$PATH"
-		export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
-		export SUDO_EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
-		alias nvim="$HOME/.local/share/bob/nvim-bin/nvim"
-		alias oldbrew=/usr/local/bin/brew
-  else
-		export PATH="/usr/local/bin:$PATH"
-		export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
-		export SUDO_EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
-		alias nvim="$HOME/.local/share/bob/nvim-bin/nvim"
-  fi
-fi
+# Rust/Cargo
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Go
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
+
 # pnpm
+{{ if eq .chezmoi.os "darwin" }}
 export PNPM_HOME="$HOME/Library/pnpm"
+{{ else }}
+export PNPM_HOME="$HOME/.local/share/pnpm"
+{{ end }}
 export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-{{end}}
+
+# Local bin
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
 
 #
 # Editors
@@ -46,8 +51,19 @@ export PATH="$PNPM_HOME:$PATH"
 
 export EDITOR='nvim'
 export VISUAL='nvim'
+export SUDO_EDITOR='nvim'
 export PAGER='less'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+#
+# Browser
+#
+
+{{ if eq .chezmoi.os "darwin" }}
+export BROWSER='open'
+{{ else if .wsl }}
+export BROWSER='wslview'
+{{ end }}
 
 #
 # Language
@@ -58,99 +74,59 @@ if [[ -z "$LANG" ]]; then
 fi
 
 #
-# Paths
+# Paths - additional
 #
 
-# Ensure path arrays do not contain duplicates.
+# Ensure path arrays do not contain duplicates
 typeset -gU cdpath fpath mailpath path
 
-# Set the list of directories that cd searches.
-# cdpath=(
-#   $cdpath
-# )
-
-# Set the list of directories that Zsh searches for programs.
 path=(
   /usr/local/{bin,sbin}
   $path
 )
 
+[ -d "$HOME/.nodenv/bin" ] && path+=($HOME/.nodenv/bin)
+[ -d "$HOME/.pyenv/bin" ] && path+=($HOME/.pyenv/bin)
+[ -d "$HOME/.poetry/bin" ] && path+=($HOME/.poetry/bin)
+
 #
 # Less
 #
 
-# Set the default Less options.
-# Mouse-wheel scrolling has been disabled by -X (disable screen clearing).
-# Remove -X to enable it.
 export LESS='-g -i -M -R -S -w -X -z-4'
 
-# Set the Less input preprocessor.
-# Try both `lesspipe` and `lesspipe.sh` as either might exist on a system.
 if (( $#commands[(i)lesspipe(|.sh)] )); then
   export LESSOPEN="| /usr/bin/env $commands[(i)lesspipe(|.sh)] %s 2>&-"
 fi
 
-export SPACESHIP_DIR_COLOR='yellow'
-# export SPACESHIP_USER_COLOR='cyan'
+#
+# FZF
+#
 
 export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
-{{ if .wsl }}
-export BROWSER="wslview"
-{{ end }}
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-[ -d "$HOME/.nodenv/bin" ] && path+=($HOME/.nodenv/bin)
-[ -d "$HOME/.pyenv/bin" ] && path+=($HOME/.pyenv/bin)
-[ -d "$HOME/go" ] && GOPATH=$HOME/go && path+=($GOROOT/bin:$GOPATH/bin)
-[ -d "$HOME/.poetry/bin" ] && path+=($HOME/.poetry/bin)
-export PATH
+#
+# Misc
+#
+
+setopt NO_NOMATCH
+export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
 
 {{- if eq .chezmoi.os "linux" }}
 export COLORTERM=fullcolor
+export XDG_CONFIG_HOME="$HOME/.config"
 {{ end }}
-
-{{- if eq .chezmoi.os "linux" }}
-export XDG_CONFIG_HOME=$HOME/.config
-{{ end }}
-
-setopt NO_NOMATCH
-
-
-export EDITOR=nvim
-export SUDO_EDITOR=nvim
-
-
-# tabtab source for packages
-# uninstall by removing these lines
-[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
-
-export PATH="$HOME/.poetry/bin:$PATH"
-
-# for rust
-path+=("$HOME/cargo/bin")
-path+=("$HOME/.cargo/bin")
-
-# for golang
-export GOPATH=$HOME/go
-export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
-
-# for bob-nvim
-export PATH="$HOME/.local/share/bob/nvim-bin/:$PATH"
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 {{ if eq .chezmoi.os "darwin" }}
-# Added by OrbStack: command-line tools and integration
+# OrbStack
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
-{{- end}}
+{{ end }}
 
-{{ if eq .chezmoi.os "linux"}}
+{{ if eq .chezmoi.os "linux" }}
 {{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
 export MOZ_ENABLE_WAYLAND=1
 export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
 export PATH="/usr/lib/ccache/bin/:$PATH"
-export LARIAN_PATH="/g/SteamLibrary/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios"
-export BG3_APPDATA="/g/SteamLibrary/steamapps/compatdata/1086940/pfx/drive_c/users/steamuser/AppData/Local/Larian Studios/Baldur's Gate 3"
 {{ end }}
 {{ end }}
-
-export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
