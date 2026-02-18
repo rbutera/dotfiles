@@ -196,14 +196,6 @@ function tmux_auto() {
     fi
 }
 
-# Nix profile management
-alias nix-update="cd ~/nix && nix flake update && cd -"
-alias nix-upgrade="nix profile upgrade nix"
-alias nix-install="nix profile install nixpkgs#"
-alias nix-init="cd ~/nix && nix profile install .#defaultPackage.x86_64-linux && cd -"
-alias nix-rebuild="cd ~/nix && nix profile remove '.*' && nix profile install .#defaultPackage.x86_64-linux && cd -"
-alias nix-edit="nvim ~/nix/flake.nix && nix-upgrade"
-
 alias sudonvim="sudo -E nvim"
 
 {{ if .wsl }}

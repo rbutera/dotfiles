@@ -133,16 +133,10 @@ path+=("$HOME/.cargo/bin")
 export GOPATH=$HOME/go
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
-# for bob-nvim 
+# for bob-nvim
 export PATH="$HOME/.local/share/bob/nvim-bin/:$PATH"
 
-# for nix package manager
-if [ -e $HOME/.nix-profile/etc/profile.d/nix.sh ]; then . $HOME/.nix-profile/etc/profile.d/nix.sh; fi
-if [ -e $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then . $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh; fi
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-export NIXPKGS_ALLOW_UNFREE=1
 
 {{ if eq .chezmoi.os "darwin" }}
 # Added by OrbStack: command-line tools and integration
