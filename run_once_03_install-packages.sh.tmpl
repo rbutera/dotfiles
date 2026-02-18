@@ -1,0 +1,72 @@
+#!/bin/bash
+
+install_homebrew() {
+  if command -v brew &> /dev/null; then
+    echo "Homebrew already installed"
+    return 0
+  fi
+
+  echo "Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  # Add brew to PATH for this session
+  {{ if eq .chezmoi.os "darwin" }}
+  if [[ -f /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -f /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+  {{ else }}
+  if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  elif [[ -f $HOME/.linuxbrew/bin/brew ]]; then
+    eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+  fi
+  {{ end }}
+}
+
+install_linux_dependencies() {
+  {{ if eq .chezmoi.os "linux" }}
+  echo "Installing Linux build dependencies for Homebrew..."
+  {{ if or (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.osRelease.id "debian") }}
+  sudo apt update
+  sudo apt install -y build-essential procps curl file git
+  {{ else if eq .chezmoi.osRelease.id "fedora" }}
+  sudo dnf groupinstall -y 'Development Tools'
+  sudo dnf install -y procps-ng curl file git
+  {{ else if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+  sudo pacman -S --noconfirm --needed base-devel procps-ng curl file git
+  {{ end }}
+  {{ end }}
+}
+
+install_packages() {
+  echo "Installing packages via Homebrew..."
+
+  # Generate Brewfile from template
+  chezmoi execute-template < ~/.local/share/chezmoi/raisbrewfile.tmpl > /tmp/Brewfile
+
+  # Install packages
+  brew bundle --file=/tmp/Brewfile
+
+  # Cleanup
+  rm /tmp/Brewfile
+
+  echo "Packages installed successfully"
+}
+
+prompt_for_install() {
+  read -p "Install Homebrew and packages? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    {{ if eq .chezmoi.os "linux" }}
+    install_linux_dependencies
+    {{ end }}
+    install_homebrew
+    install_packages
+  else
+    echo "Declined. Skipping package installation"
+  fi
+}
+
+prompt_for_install
