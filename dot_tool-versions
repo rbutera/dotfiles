@@ -1,3 +1,4 @@
-nodejs 22.11.0
-python 3.12.7
+nodejs 25.6.1
+python 3.14.3
 golang 1.23.4
+chezmoi 2.69.4
