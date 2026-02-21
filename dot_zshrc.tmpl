@@ -10,10 +10,21 @@ killport() { local PORT=$(lsof -n -i4TCP:$1 | grep LISTEN | awk '{ print $2 }');
 
 alias rr="source ~/.zshrc; clear"
 
+{{- if and (eq .chezmoi.os "linux") .wsl }}
+# WSL: ensure keyring backend support for tools like gog (secrets keychain)
+if command -v gnome-keyring-daemon >/dev/null 2>&1; then
+  # start keyring daemon once per shell session
+  if [[ -z "${GNOME_KEYRING_CONTROL:-}" ]]; then
+    eval "$(gnome-keyring-daemon --start --components=secrets 2>/dev/null)" || true
+    export SSH_AUTH_SOCK
+  fi
+fi
+{{ end }}
+
 {{- if eq .chezmoi.os "linux" }}
-# for wsl/linux keychain
-if command -v keychain &> /dev/null; then
-  keychain -q --nogui $HOME/.ssh/id_ed25519 2>/dev/null
+# SSH key helper (separate from secrets keyring backend)
+if command -v keychain >/dev/null 2>&1; then
+  keychain -q --nogui "$HOME/.ssh/id_ed25519" 2>/dev/null
   [[ -f "$HOME/.keychain/$HOST-sh" ]] && source "$HOME/.keychain/$HOST-sh"
 fi
 {{ end }}
@@ -62,6 +73,13 @@ fi
 
 # starship prompt
 eval "$(starship init zsh)"
+
+
+# OpenClaw Completion
+source "/home/rai/.openclaw/completions/openclaw.zsh"
+
+# opencode
+export PATH=/home/rai/.opencode/bin:$PATH
 
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
