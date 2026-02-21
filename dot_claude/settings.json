@@ -21,5 +21,14 @@
       "Bash(head:*)",
       "Bash(tail:*)"
     ]
+  },
+  "model": "sonnet",
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-supermemory@supermemory-plugins": true
   }
 }
