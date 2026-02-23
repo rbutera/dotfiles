@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""
+Quickly add a 1Password API key to ~/.zshenv template.
+
+Usage: add-api-key
+"""
+
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def to_snake_case(name: str) -> str:
+    """Convert a string to UPPER_SNAKE_CASE."""
+    # Replace non-alphanumeric with underscores
+    result = re.sub(r'[^a-zA-Z0-9]+', '_', name)
+    # Remove leading/trailing underscores
+    result = result.strip('_')
+    # Convert to uppercase
+    return result.upper()
+
+
+def print_header():
+    """Print a nice header."""
+    print("\n" + "=" * 60)
+    print("  🔐 Add API Key to ~/.zshenv")
+    print("=" * 60 + "\n")
+
+
+def print_section(title: str):
+    """Print a section header."""
+    print(f"\n📋 {title}")
+    print("-" * 40)
+
+
+def print_success(message: str):
+    """Print a success message."""
+    print(f"\n✅ {message}")
+
+
+def print_info(message: str):
+    """Print an info message."""
+    print(f"   ℹ️  {message}")
+
+
+def print_error(message: str):
+    """Print an error message."""
+    print(f"\n❌ {message}", file=sys.stderr)
+
+
+def get_input(prompt: str, default: str = None) -> str:
+    """Get input from user with optional default."""
+    if default:
+        full_prompt = f"{prompt} [{default}]: "
+    else:
+        full_prompt = f"{prompt}: "
+    
+    user_input = input(full_prompt).strip()
+    
+    if not user_input and default:
+        return default
+    
+    return user_input
+
+
+def confirm(prompt: str, default: bool = True) -> bool:
+    """Ask for confirmation."""
+    if default:
+        full_prompt = f"{prompt} [Y/n]: "
+    else:
+        full_prompt = f"{prompt} [y/N]: "
+    
+    user_input = input(full_prompt).strip().lower()
+    
+    if not user_input:
+        return default
+    
+    return user_input in ('y', 'yes')
+
+
+def main():
+    print_header()
+    
+    # Get the vault item name
+    print_section("1Password Vault Item")
+    print_info("Enter the name of the 1Password vault item")
+    print_info("Example: 'Navi Discord tokens' or 'anthropic claude 3.5 api key'")
+    
+    vault_item = get_input("Vault item name")
+    
+    if not vault_item:
+        print_error("Vault item name is required")
+        sys.exit(1)
+    
+    # Convert to UPPER_SNAKE_CASE for the environment variable name
+    suggested_name = to_snake_case(vault_item)
+    
+    print_section("Environment Variable Name")
+    print_info(f"Suggested (based on vault item): {suggested_name}")
+    
+    env_var_name = get_input("Environment variable name", suggested_name)
+    
+    if not env_var_name:
+        print_error("Environment variable name is required")
+        sys.exit(1)
+    
+    # Ensure it's uppercase
+    env_var_name = env_var_name.upper()
+    
+    # Get the field name
+    print_section("1Password Field")
+    print_info("Most API keys are stored in the 'credential' field")
+    print_info("Some may use custom fields like 'token', 'api_key', etc.")
+    
+    field_name = get_input("Field name", "credential")
+    
+    if not field_name:
+        field_name = "credential"
+    
+    # Construct the 1Password path
+    op_path = f"op://Private/{vault_item}/{field_name}"
+    
+    # Show summary
+    print_section("Summary")
+    print(f"   Vault item:    {vault_item}")
+    print(f"   Env variable:  {env_var_name}")
+    print(f"   Field:         {field_name}")
+    print(f"   1Password path: {op_path}")
+    print()
+    
+    # Confirm
+    if not confirm("Add this to ~/.zshenv?"):
+        print("\n🚫 Cancelled.")
+        sys.exit(0)
+    
+    # Find the chezmoi directory and the zshenv template
+    chezmoi_dir = Path.home() / ".local" / "share" / "chezmoi"
+    zshenv_template = chezmoi_dir / "dot_zshenv.tmpl"
+    
+    if not zshenv_template.exists():
+        print_error(f"Could not find {zshenv_template}")
+        print_info("Trying to find chezmoi root...")
+        
+        # Try to find it via chezmoi command
+        try:
+            result = subprocess.run(
+                ["chezmoi", "dump-config"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            import json
+            config = json.loads(result.stdout)
+            source_dir = Path(config.get("sourceDir", chezmoi_dir))
+            zshenv_template = source_dir / "dot_zshenv.tmpl"
+        except Exception as e:
+            print_error(f"Could not determine chezmoi source directory: {e}")
+            sys.exit(1)
+    
+    # Append to the template file
+    export_line = f'export {env_var_name}={{ onepasswordRead "{op_path}" }}'
+    
+    try:
+        with open(zshenv_template, 'a') as f:
+            f.write(f"{export_line}\n")
+        print_success(f"Appended to {zshenv_template}")
+    except Exception as e:
+        print_error(f"Failed to write to {zshenv_template}: {e}")
+        sys.exit(1)
+    
+    # Run chezmoi apply
+    print_section("Applying Changes")
+    print_info("Running: chezmoi apply")
+    
+    try:
+        result = subprocess.run(
+            ["chezmoi", "apply"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        print_success("chezmoi apply completed successfully")
+        if result.stdout:
+            print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print_error(f"chezmoi apply failed: {e}")
+        if e.stderr:
+            print(e.stderr, file=sys.stderr)
+        sys.exit(1)
+    except FileNotFoundError:
+        print_error("chezmoi command not found. Is it installed and in PATH?")
+        sys.exit(1)
+    
+    # Source the zshenv file
+    print_section("Updating Current Shell")
+    print_info("Running: source ~/.zshenv")
+    
+    zshenv_path = Path.home() / ".zshenv"
+    if zshenv_path.exists():
+        try:
+            # Use zsh to source the file and print the new variable
+            result = subprocess.run(
+                ["zsh", "-c", f"source {zshenv_path} && echo 'Environment updated successfully'"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            print_success("Current shell environment updated")
+            print()
+            print("=" * 60)
+            print(f"  🎉 API key '{env_var_name}' is now ready to use!")
+            print("=" * 60)
+            print()
+            print(f"   You can verify it with: echo ${env_var_name}")
+            print()
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to source ~/.zshenv: {e}")
+            if e.stderr:
+                print(e.stderr, file=sys.stderr)
+            print_info("You may need to manually run: source ~/.zshenv")
+        except FileNotFoundError:
+            print_error("zsh command not found")
+            print_info("You may need to manually run: source ~/.zshenv")
+    else:
+        print_info(f"~/.zshenv not found at {zshenv_path}")
+        print_info("The template was updated, but you'll need to run chezmoi apply")
+
+
+if __name__ == "__main__":
+    main()
