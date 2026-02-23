@@ -225,3 +225,18 @@ function lfg() {
 
 # aider aliases
 alias aider_sonnet="aider --sonnet --cache-prompts"
+
+suche() {
+  rg -n \
+    -g '!**/node_modules/**' \
+    -g '!**/.git/**' \
+    -g '!**/dist/**' \
+    -g '!**/build/**' \
+    -g '!**/.next/**' \
+    "$@"
+}
+
+envkeys() {
+  grep -E '^\s*export\s+[A-Za-z_][A-Za-z0-9_]*=' ~/.zshenv \
+  | sed -E 's/^\s*export\s+([A-Za-z_][A-Za-z0-9_]*)=.*/\1/'
+}
