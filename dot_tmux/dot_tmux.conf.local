@@ -1,8 +1,10 @@
 # ~/.tmux.conf.local — user overrides
 # Place plain tmux commands here to override settings from ~/.tmux.conf.
 # This file is sourced after the base config but before plugins are loaded.
-#
-# Examples:
-#   set -g status-position top
-#   set -g history-limit 50000
-#   set -g base-index 0
+
+# Enable OSC52 clipboard integration, especially useful over SSH/tmux.
+set -g set-clipboard on
+set -as terminal-overrides ",*:Ms=\E]52;c;%p2%s\a"
+
+set -g mouse on
+set -g mode-keys vi
