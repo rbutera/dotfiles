@@ -357,6 +357,10 @@ tmux_conf_theme_clock_style="24"
 # on Linux, this requires xsel or xclip
 tmux_conf_copy_to_os_clipboard=true
 
+# Enable OSC52 clipboard integration, especially useful over SSH/tmux.
+set -g set-clipboard on
+set -as terminal-overrides ",*:Ms=\E]52;c;%p2%s\a"
+
 
 # -- user customizations -------------------------------------------------------
 # this is the place to override or undo settings
