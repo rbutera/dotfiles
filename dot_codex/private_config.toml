@@ -5,7 +5,42 @@ trust_level = "trusted"
 [projects."/home/rai/.local/share/chezmoi"]
 trust_level = "trusted"
 
+[projects."/home/rai/.config/nvim"]
+trust_level = "trusted"
+
 [mcp_servers.github]
 url = "https://api.githubcopilot.com/mcp/"
-# Replace with your real PAT (least-privilege scopes). Do NOT commit this.
 bearer_token_env_var = "GITHUB_LLM_PAT"
+
+[mcp_servers.Sanity]
+url = "https://mcp.sanity.io"
+bearer_token_env_var = "SANITY_MCP_TOKEN"
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+
+[mcp_servers.open-websearch]
+command = "npx"
+args = ["-y", "open-websearch@latest"]
+
+[mcp_servers.open-websearch.env]
+ALLOWED_SEARCH_ENGINES = "duckduckgo,bing,brave"
+DEFAULT_SEARCH_ENGINE = "duckduckgo"
+MODE = "stdio"
+
+[mcp_servers.spec-workflow]
+command = "npx"
+args = ["-y", "@pimzino/spec-workflow-mcp@latest"]
+
+[mcp_servers.mcp-deepwiki]
+command = "npx"
+args = ["-y", "mcp-deepwiki@latest"]
+
+[mcp_servers.Playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]
+
+[mcp_servers.serena]
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]
