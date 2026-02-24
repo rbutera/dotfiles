@@ -1,0 +1,11 @@
+personality = "pragmatic"
+[projects."/home/rai/dev/clarkecarpentry"]
+trust_level = "trusted"
+
+[projects."/home/rai/.local/share/chezmoi"]
+trust_level = "trusted"
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+# Replace with your real PAT (least-privilege scopes). Do NOT commit this.
+bearer_token_env_var = "GITHUB_LLM_PAT"

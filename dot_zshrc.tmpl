@@ -76,10 +76,13 @@ eval "$(starship init zsh)"
 
 
 # OpenClaw Completion
-source "/home/rai/.openclaw/completions/openclaw.zsh"
+[[ -f "/home/rai/.openclaw/completions/openclaw.zsh" ]] && source "/home/rai/.openclaw/completions/openclaw.zsh"
 
 # opencode
 export PATH=/home/rai/.opencode/bin:$PATH
+
+# stop windows WSL / nodejs appearing in wsl path
+export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'AppData.*npm\|nodejs' | tr '\n' ':')
 
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
