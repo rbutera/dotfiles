@@ -3,5 +3,38 @@
   "plugin": [
     "oh-my-opencode@latest",
     "opencode-supermemory@latest"
-  ]
+  ],
+  "provider": {
+    "zai-anthropic": {
+      "api": "anthropic",
+      "env": [
+        "ZAI_API_KEY"
+      ],
+      "models": {
+        "glm-5": {
+          "name": "glm-5"
+        },
+        "glm-4.7": {
+          "name": "glm-4.7"
+        }
+      },
+      "options": {
+        "baseURL": "https://api.z.ai/api/anthropic"
+      }
+    }
+  },
+  "mcp": {
+    "camofox": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "camofox-mcp@latest"
+      ],
+      "environment": {
+        "CAMOFOX_USER": "opencode"
+      },
+      "enabled": true
+    }
+  }
 }
