@@ -10,6 +10,9 @@ if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; t
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
 
+export CAMOFOX_URL="http://localhost:9377"
+export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" }}
+
 export CLAUDE_API_KEY={{ onepasswordRead "op://Private/anthropic claude 3.5 api key/credential" }}
 export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential"}}
 export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory api key/credential"}}
@@ -28,5 +31,7 @@ export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}
 export ANTHROPIC_CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/Claude Code Token/credential" }}
 export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
 export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}
+export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}
 export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
 export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
+export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
