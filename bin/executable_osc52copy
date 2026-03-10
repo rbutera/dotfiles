@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Write OSC52 directly to the outer terminal device (WezTerm over SSH),
+# bypassing tmux's stdout interception.
+buf=$(cat | base64 | tr -d '\n')
+tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null)
+echo "[osc52copy] tty='$tty' buf_len=${#buf} writable=$([ -w "$tty" ] && echo yes || echo no)" >> /tmp/osc52debug.log
+if [ -n "$tty" ] && [ -w "$tty" ]; then
+  printf "\033]52;c;%s\a" "$buf" > "$tty"
+  echo "[osc52copy] wrote to tty" >> /tmp/osc52debug.log
+else
+  printf "\033]52;c;%s\a" "$buf" > /dev/tty
+  echo "[osc52copy] fell back to /dev/tty" >> /tmp/osc52debug.log
+fi
