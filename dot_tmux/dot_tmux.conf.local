@@ -2,9 +2,19 @@
 # Place plain tmux commands here to override settings from ~/.tmux.conf.
 # This file is sourced after the base config but before plugins are loaded.
 
-# Enable OSC52 clipboard integration, especially useful over SSH/tmux.
+# OSC52 clipboard integration over SSH.
+# set-clipboard on lets tmux try native OSC52, but it's unreliable over SSH.
+# We use an explicit copy-pipe binding instead so WezTerm receives the sequence.
 set -g set-clipboard on
 set -as terminal-overrides ",*:Ms=\E]52;c;%p2%s\a"
 
 set -g mouse on
 set -g mode-keys vi
+
+# Force tmux-yank to use OSC52 instead of clip.exe or xsel.
+# clip.exe writes to lugia's clipboard, not Lancelot's. OSC52 travels through
+# the SSH tunnel back to WezTerm on Lancelot and hits the right clipboard.
+set -g @override_copy_command '~/.local/bin/osc52copy'
+
+# Keep the explicit copy-mode binding as backup.
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "~/.local/bin/osc52copy"
