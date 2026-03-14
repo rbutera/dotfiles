@@ -1,18 +1,30 @@
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "lsp": {
+    "marksman": {
+      "command": [
+        "marksman",
+        "server"
+      ],
+      "extensions": [
+        ".md"
+      ]
+    }
+  },
   "agents": {
     "sisyphus": {
-      "model": "opencode/kimi-k2.5",
+      "model": "openai/gpt-5.4",
       "ultrawork": {
-        "model": "anthropic/claude-opus-4-6", "variant": "max"
+        "model": "anthropic/claude-opus-4-6",
+        "variant": "max"
       }
     },
     "hephaestus": {
-      "model": "openai/gpt-5.3-codex",
+      "model": "openai/gpt-5.4",
       "variant": "medium"
     },
     "oracle": {
-      "model": "opencode/gpt-5.2",
+      "model": "opencode/gpt-5.4",
       "variant": "high"
     },
     "librarian": {
@@ -25,16 +37,16 @@
       "model": "opencode/gemini-3-flash"
     },
     "prometheus": {
-      "model": "opencode/kimi-k2.5"
+      "model": "openai/gpt-5.4"
     },
     "metis": {
-      "model": "opencode/kimi-k2.5"
+      "model": "openai/gpt-5.4"
     },
     "momus": {
-      "model": "opencode/gpt-5.2"
+      "model": "openai/gpt-5.4"
     },
     "atlas": {
-      "model": "opencode/kimi-k2.5"
+      "model": "openai/gpt-5.4"
     }
   },
   "categories": {
@@ -43,11 +55,11 @@
       "variant": "high"
     },
     "ultrabrain": {
-      "model": "opencode/gpt-5.3-codex",
+      "model": "openai/gpt-5.4",
       "variant": "xhigh"
     },
     "deep": {
-      "model": "opencode/gpt-5.3-codex",
+      "model": "openai/gpt-5.4",
       "variant": "medium"
     },
     "artistry": {
@@ -58,17 +70,39 @@
       "model": "opencode/claude-haiku-4-5"
     },
     "unspecified-low": {
-      "model": "opencode/claude-sonnet-4-6"
+      "model": "anthropic/claude-sonnet-4-6"
     },
     "unspecified-high": {
-      "model": "opencode/claude-sonnet-4-6",
-      "variant": "max"
+      "model": "openai/gpt-5.4",
+      "variant": "high"
     },
     "writing": {
-      "model": "opencode/gemini-3-flash"
+      "model": "anthropic/claude-sonnet-4-6"
     }
   },
+  "skills": {
+    "disable": [
+      "superpowers/using-superpowers",
+      "superpowers/systematic-debugging",
+      "superpowers/writing-skills",
+      "superpowers/requesting-code-review",
+      "superpowers/finishing-a-development-branch",
+      "superpowers/writing-plans",
+      "superpowers/brainstorming",
+      "superpowers/receiving-code-review",
+      "superpowers/verification-before-completion",
+      "superpowers/subagent-driven-development",
+      "superpowers/test-driven-development",
+      "superpowers/executing-plans",
+      "superpowers/using-git-worktrees",
+      "superpowers/dispatching-parallel-agents"
+    ]
+  },
   "disabled_hooks": [
-    "anthropic-context-window-limit-recovery"
-  ]
+    "anthropic-context-window-limit-recovery",
+    "no-sisyphus-gpt"
+  ],
+  "git-master": {
+    "include_co_authored_by": false
+  }
 }

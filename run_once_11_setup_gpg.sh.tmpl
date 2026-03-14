@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Import GPG keys from 1Password into the local keyring.
+# The key material is injected by chezmoi at apply time and piped
+# directly into gpg — nothing touches the filesystem.
+
+set -euo pipefail
+
+GPG_EMAIL="{{ .email }}"
+
+if gpg --list-secret-keys "$GPG_EMAIL" &>/dev/null; then
+  echo "GPG key for $GPG_EMAIL already imported. Skipping."
+  exit 0
+fi
+
+echo "Importing GPG keys for $GPG_EMAIL..."
+
+# Import public key
+cat <<'PUBKEY' | gpg --batch --import
+{{ onepasswordRead "op://dev/GPG_rai_at_rbutera.com/public_key_block" }}
+PUBKEY
+
+# Import private key
+cat <<'PRIVKEY' | gpg --batch --import
+{{ onepasswordRead "op://dev/GPG_rai_at_rbutera.com/private_key_block" }}
+PRIVKEY
+
+# Set ultimate trust for our own key
+FINGERPRINT=$(gpg --list-keys --with-colons "$GPG_EMAIL" | grep fpr | head -1 | cut -d: -f10)
+echo "${FINGERPRINT}:6:" | gpg --import-ownertrust
+
+echo "GPG key for $GPG_EMAIL imported and trusted."
