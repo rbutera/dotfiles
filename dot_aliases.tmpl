@@ -240,3 +240,5 @@ envkeys() {
   grep -E '^\s*export\s+[A-Za-z_][A-Za-z0-9_]*=' ~/.zshenv \
   | sed -E 's/^\s*export\s+([A-Za-z_][A-Za-z0-9_]*)=.*/\1/'
 }
+
+alias rrnavi="openclaw gateway restart"
