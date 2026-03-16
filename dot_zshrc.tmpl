@@ -84,6 +84,13 @@ export PATH=/home/rai/.opencode/bin:$PATH
 # stop windows WSL / nodejs appearing in wsl path
 export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'AppData.*npm\|nodejs' | tr '\n' ':')
 
+export SSH_ASKPASS=""
+export GIT_TERMINAL_PROMPT=0
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
+export EDITOR="/home/rai/.local/share/bob/nvim-bin/nvim"
+export VISUAL="$EDITOR"
+
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
