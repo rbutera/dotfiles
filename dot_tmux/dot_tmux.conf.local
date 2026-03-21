@@ -16,5 +16,8 @@ set -g mode-keys vi
 # the SSH tunnel back to WezTerm on Lancelot and hits the right clipboard.
 set -g @override_copy_command '~/.local/bin/osc52copy'
 
+setw -g automatic-rename off
+set -g allow-rename off
+
 # Keep the explicit copy-mode binding as backup.
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "~/.local/bin/osc52copy"

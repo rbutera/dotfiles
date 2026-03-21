@@ -1,4 +1,18 @@
 personality = "pragmatic"
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+model_reasoning_summary = "auto"
+approval_policy = "never"
+
+[sandbox]
+writable_roots = ["/home/rai", "/tmp"]
+network_access = true
+[projects."/home/rai/oc-pr"]
+trust_level = "trusted"
+
+[projects."/home/rai/oclaw"]
+trust_level = "trusted"
+
 [projects."/home/rai/dev/clarkecarpentry"]
 trust_level = "trusted"
 
@@ -9,6 +23,12 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/rai"]
+trust_level = "trusted"
+
+[projects."/home/rai/.config/opencode"]
+trust_level = "trusted"
+
+[projects."/home/rai/dev/lumiere"]
 trust_level = "trusted"
 
 [mcp_servers.github]
@@ -26,10 +46,6 @@ args = ["-y", "@upstash/context7-mcp@latest"]
 [mcp_servers.open-websearch]
 url = "http://localhost:3005/mcp"
 
-[mcp_servers.spec-workflow]
-command = "npx"
-args = ["-y", "@pimzino/spec-workflow-mcp@latest"]
-
 [mcp_servers.mcp-deepwiki]
 command = "npx"
 args = ["-y", "mcp-deepwiki@latest"]
@@ -40,4 +56,22 @@ args = ["-y", "@playwright/mcp@latest"]
 
 [mcp_servers.serena]
 command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant", "--enable-web-dashboard", "false"]
+args = [
+  "--from",
+  "git+https://github.com/oraios/serena",
+  "serena",
+  "start-mcp-server",
+  "--context",
+  "ide-assistant",
+  "--enable-web-dashboard",
+  "false",
+]
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
+
+[model_providers.zen]
+name = "OpenCode Zen"
+base_url = "https://opencode.ai/zen/v1"
+env_key = "OPENCODE_ZEN_API_KEY"
+wire_api = "responses"
