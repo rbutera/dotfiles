@@ -91,6 +91,11 @@ export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 export EDITOR="/home/rai/.local/share/bob/nvim-bin/nvim"
 export VISUAL="$EDITOR"
 
+if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
+  export OP_BIOMETRIC_UNLOCK_ENABLED=false
+  export OP_ACCOUNT=personal
+fi
+
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
