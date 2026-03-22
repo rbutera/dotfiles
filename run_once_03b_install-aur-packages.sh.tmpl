@@ -1,0 +1,75 @@
+#!/bin/bash
+# Install packages via paru (AUR) on Arch-based systems (CachyOS, Arch, Manjaro etc.)
+# Skipped entirely on non-Arch systems.
+
+{{ if not (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
+echo "Not an Arch-based system, skipping AUR package install"
+exit 0
+{{ end }}
+
+set -euo pipefail
+
+install_paru() {
+  if command -v paru &>/dev/null; then
+    echo "paru already installed"
+    return 0
+  fi
+
+  echo "Installing paru (AUR helper)..."
+  sudo pacman -S --noconfirm --needed base-devel git
+  cd /tmp
+  git clone https://aur.archlinux.org/paru.git
+  cd paru
+  makepkg -si --noconfirm
+  cd ~
+  rm -rf /tmp/paru
+}
+
+install_packages() {
+  echo "Installing packages via paru/pacman..."
+
+  # Core system packages (prefer pacman/AUR over Homebrew on Arch)
+  sudo pacman -S --noconfirm --needed \
+    zsh zsh-completions \
+    bat eza fd fzf git git-delta git-lfs \
+    ripgrep tmux tree wget curl \
+    zoxide lazygit \
+    github-cli \
+    shellcheck stylua \
+    gnupg openssl \
+    keychain \
+    wl-clipboard \
+    jq yq \
+    htop \
+    starship \
+    sbctl \
+    neovim \
+    pipewire pipewire-pulse wireplumber \
+    noto-fonts noto-fonts-emoji \
+    base-devel
+
+  # AUR packages
+  paru -S --noconfirm --needed \
+    asdf-vm \
+    1password \
+    1password-cli \
+    tldr \
+    bob-nvim \
+    yabridge \
+    yabridgectl
+
+  echo "AUR packages installed successfully"
+}
+
+prompt_for_install() {
+  read -p "Install packages via paru/pacman? (y/Y) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    install_paru
+    install_packages
+  else
+    echo "Declined. Skipping AUR package installation"
+  fi
+}
+
+prompt_for_install
