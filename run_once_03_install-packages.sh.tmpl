@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# On Arch-based systems (CachyOS etc), skip Homebrew entirely.
+# Packages are handled by run_once_03b_install-aur-packages.sh.tmpl instead.
+{{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+echo "Arch-based system detected — skipping Homebrew install. AUR packages handled separately."
+exit 0
+{{ end }}
+
 is_wsl() {
   grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null || [[ -n "${WSL_DISTRO_NAME:-}" ]]
 }
