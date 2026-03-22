@@ -1,5 +1,10 @@
 # Executes commands at the start of an interactive session.
 
+# Add system zsh vendor-completions to fpath so Ubuntu-installed completions
+# (e.g. python-argcomplete) are visible when using Homebrew's zsh.
+# Must come BEFORE prezto sources init.zsh (which calls compinit).
+[[ -d /usr/share/zsh/vendor-completions ]] && fpath=(/usr/share/zsh/vendor-completions $fpath)
+
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
