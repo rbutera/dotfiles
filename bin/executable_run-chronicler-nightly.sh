@@ -16,6 +16,12 @@ command -v pnpm || true
 command -v node || true
 command -v discord-export || true
 
+# Export vars from .env-style files
+set -a
+[ -f /home/rai/dev/lumiere/.env ] && . /home/rai/dev/lumiere/.env
+[ -f /home/rai/dev/lumiere/apps/chronicler/.env ] && . /home/rai/dev/lumiere/apps/chronicler/.env
+set +a
+
 # Refresh export first
 discord-export 1473760382387621950
 
