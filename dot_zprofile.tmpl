@@ -125,7 +125,7 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 {{ end }}
 
 {{ if eq .chezmoi.os "linux" }}
-{{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+{{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
 export MOZ_ENABLE_WAYLAND=1
 export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
 export PATH="/usr/lib/ccache/bin/:$PATH"

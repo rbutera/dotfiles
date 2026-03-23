@@ -2,7 +2,7 @@
 # Install packages via paru (AUR) on Arch-based systems (CachyOS, Arch, Manjaro etc.)
 # Skipped entirely on non-Arch systems.
 
-{{ if not (or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch")) }}
+{{ if not (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
 echo "Not an Arch-based system, skipping AUR package install"
 exit 0
 {{ end }}
