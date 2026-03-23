@@ -101,6 +101,9 @@ if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
   export OP_ACCOUNT=personal
 fi
 
+# isomorphic-copy — universal clipboard (local, SSH, Docker)
+[[ -d "$HOME/.config/isomorphic-copy/bin" ]] && export PATH="$HOME/.config/isomorphic-copy/bin:$PATH"
+
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
