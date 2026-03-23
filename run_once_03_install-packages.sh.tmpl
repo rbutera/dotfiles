@@ -2,7 +2,7 @@
 
 # On Arch-based systems (CachyOS etc), skip Homebrew entirely.
 # Packages are handled by run_once_03b_install-aur-packages.sh.tmpl instead.
-{{ if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+{{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
 echo "Arch-based system detected — skipping Homebrew install. AUR packages handled separately."
 exit 0
 {{ end }}
@@ -45,7 +45,7 @@ install_linux_dependencies() {
   {{ else if eq .chezmoi.osRelease.id "fedora" }}
   sudo dnf groupinstall -y 'Development Tools'
   sudo dnf install -y procps-ng curl file git
-  {{ else if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+  {{ else if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
   sudo pacman -S --noconfirm --needed base-devel procps-ng curl file git
   {{ end }}
   {{ end }}
@@ -63,7 +63,7 @@ install_wsl_clipboard() {
   sudo apt install -y wl-clipboard
   {{ else if eq .chezmoi.osRelease.id "fedora" }}
   sudo dnf install -y wl-clipboard
-  {{ else if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") }}
+  {{ else if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
   sudo pacman -S --noconfirm --needed wl-clipboard
   {{ else }}
   echo "Unsupported Linux distro for automatic wl-clipboard install; skipping"

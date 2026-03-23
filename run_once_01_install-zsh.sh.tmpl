@@ -13,7 +13,7 @@ install_zsh_linux() {
     sudo apt install -y zsh
   {{ else if eq .chezmoi.osRelease.id "fedora" -}}
     sudo dnf install -y zsh util-linux-user
-  {{ else if or (eq .chezmoi.osRelease.id "arch") (eq .chezmoi.osRelease.idLike "arch") -}}
+  {{ else if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) -}}
     sudo pacman -S --noconfirm zsh zsh-completions
   {{ else -}}
     echo "Unknown distro, attempting to detect package manager..."
