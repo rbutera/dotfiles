@@ -1,0 +1,7 @@
+# Host group definitions for conditional template logic.
+# To add a machine to a group, append its hostname to the array.
+# Usage in templates: {{- if has .chezmoi.hostname .host_groups.niri }}
+
+[host_groups]
+  niri = ["mondo"]
+  kde  = []

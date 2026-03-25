@@ -1,13 +1,48 @@
 #!/usr/bin/env bash
-# Write OSC52 directly to the outer terminal device (WezTerm over SSH),
-# bypassing tmux's stdout interception.
-buf=$(cat | base64 | tr -d '\n')
-tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null)
-echo "[osc52copy] tty='$tty' buf_len=${#buf} writable=$([ -w "$tty" ] && echo yes || echo no)" >> /tmp/osc52debug.log
-if [ -n "$tty" ] && [ -w "$tty" ]; then
-  printf "\033]52;c;%s\a" "$buf" > "$tty"
-  echo "[osc52copy] wrote to tty" >> /tmp/osc52debug.log
-else
-  printf "\033]52;c;%s\a" "$buf" > /dev/tty
-  echo "[osc52copy] fell back to /dev/tty" >> /tmp/osc52debug.log
+# Smart clipboard for tmux: OSC52 over SSH, native clipboard locally.
+buf=$(cat)
+encoded=$(printf '%s' "$buf" | base64 | tr -d '\n')
+
+log() { echo "[osc52copy] $*" >> /tmp/osc52debug.log; }
+
+osc52_to_tty() {
+  tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null)
+  log "osc52 tty='$tty' writable=$([ -w "$tty" ] && echo yes || echo no)"
+  if [ -n "$tty" ] && [ -w "$tty" ]; then
+    printf "\033]52;c;%s\a" "$encoded" > "$tty"
+    log "wrote OSC52 to tty"
+  else
+    printf "\033]52;c;%s\a" "$encoded" > /dev/tty
+    log "wrote OSC52 to /dev/tty (fallback)"
+  fi
+}
+
+log "SSH_CONNECTION='$SSH_CONNECTION' SSH_TTY='$SSH_TTY' WAYLAND_DISPLAY='$WAYLAND_DISPLAY'"
+
+# SSH: send OSC52 so the remote terminal (e.g. Kitty on mondo) sets the clipboard.
+if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
+  osc52_to_tty
+  exit 0
 fi
+
+# Wayland: use wl-copy.
+if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
+  printf '%s' "$buf" | wl-copy
+  log "used wl-copy"
+  exit 0
+fi
+
+# X11: use xclip or xsel.
+if command -v xclip >/dev/null 2>&1; then
+  printf '%s' "$buf" | xclip -selection clipboard
+  log "used xclip"
+  exit 0
+fi
+if command -v xsel >/dev/null 2>&1; then
+  printf '%s' "$buf" | xsel --clipboard --input
+  log "used xsel"
+  exit 0
+fi
+
+# Fallback: OSC52 directly to tty.
+osc52_to_tty
