@@ -1,5 +1,40 @@
 # tmux config changes log
 
+## 2026-03-25 — Fix clipboard: context-aware osc52copy + mouse drag binding
+
+### Problem
+Local clipboard copy (both keyboard and mouse) was silently broken.
+
+Two root causes:
+
+1. **Wrong path**: `.tmux.conf.local` referenced `~/.local/bin/osc52copy` but
+   chezmoi deploys the script to `~/bin/osc52copy`. Every copy invocation failed
+   silently — no error, no clipboard write.
+
+2. **osc52copy was SSH-only**: the script always sent an OSC52 sequence to the
+   client TTY regardless of context. Locally on Wayland this had no effect
+   (Kitty handled it inconsistently), whereas over SSH it correctly travelled
+   through the tunnel to the terminal on mondo. Mouse highlight copy also
+   lacked an explicit binding — it fell through to `set-clipboard on` + the `Ms`
+   terminal override, which worked over SSH but not locally.
+
+### Solution
+
+**`bin/executable_osc52copy`** — rewrote to be context-aware:
+- `$SSH_CONNECTION` / `$SSH_TTY` set → OSC52 to `#{client_tty}` (SSH path, unchanged)
+- `$WAYLAND_DISPLAY` set + `wl-copy` available → `wl-copy` (new)
+- X11 fallback → `xclip` → `xsel` (new)
+- Final fallback → OSC52 to TTY
+
+**`dot_tmux/dot_tmux.conf.local`**:
+- Fixed `@override_copy_command` and `copy-mode-vi y` paths:
+  `~/.local/bin/osc52copy` → `~/bin/osc52copy`
+- Added `MouseDragEnd1Pane` bindings in `copy-mode-vi` and `copy-mode` tables
+  so mouse highlight copy goes through `osc52copy` (and therefore `wl-copy`
+  locally)
+- Added `WAYLAND_DISPLAY` and `XDG_RUNTIME_DIR` to `update-environment` so
+  Wayland context propagates when attaching to existing sessions
+
 ## 2026-02-24 — Replace gpakosz with plain TPM + catppuccin
 
 ### Problem

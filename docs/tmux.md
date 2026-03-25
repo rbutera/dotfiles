@@ -63,6 +63,49 @@ After the first save you can restore manually with:
 <prefix> Ctrl-r
 ```
 
+## Clipboard integration
+
+Copy works via `~/bin/osc52copy`, a context-aware script invoked by tmux-yank
+(`@override_copy_command`) and explicit copy-mode bindings.
+
+| Context | Method |
+|---------|--------|
+| Local — Wayland | `wl-copy` |
+| Local — X11 | `xclip` → `xsel` → OSC52 fallback |
+| Over SSH | OSC52 written directly to `#{client_tty}`, travels through the tunnel to the terminal on the local machine |
+
+### What triggers a copy
+
+| Action | Binding |
+|--------|---------|
+| `y` in copy mode | `copy-pipe-and-cancel "~/bin/osc52copy"` |
+| Mouse drag release | `MouseDragEnd1Pane` → `copy-pipe-and-cancel "~/bin/osc52copy"` |
+| tmux-yank (e.g. `prefix + y`) | `@override_copy_command '~/bin/osc52copy'` |
+
+`set-clipboard on` with a `Ms` terminal override handles OSC52 passthrough for
+any remaining cases (e.g. native tmux buffer operations).
+
+### Debugging
+
+`osc52copy` logs every invocation to `/tmp/osc52debug.log`:
+
+```
+[osc52copy] SSH_CONNECTION='' SSH_TTY='' WAYLAND_DISPLAY='wayland-0'
+[osc52copy] used wl-copy
+```
+
+Check this first if copy stops working. Common culprits:
+
+- **Wrong path**: the script must be at `~/bin/osc52copy` (deployed by chezmoi
+  from `bin/executable_osc52copy`). If `.tmux.conf.local` references a different
+  path the command silently fails.
+- **`WAYLAND_DISPLAY` not set in tmux**: happens when attaching to a session
+  started before the Wayland session. `update-environment` in `.tmux.conf.local`
+  mitigates this, but detach/reattach is the reliable fix.
+- **SSH detection**: relies on `$SSH_CONNECTION` or `$SSH_TTY` being set in the
+  pane environment. New panes in a session started over SSH inherit this
+  automatically.
+
 ## Plugin management (ongoing)
 
 | Action | Keys |
