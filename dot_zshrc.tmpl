@@ -104,6 +104,8 @@ fi
 # isomorphic-copy — universal clipboard (local, SSH, Docker)
 [[ -d "$HOME/.config/isomorphic-copy/bin" ]] && export PATH="$HOME/.config/isomorphic-copy/bin:$PATH"
 
+export PATH="$HOME/.asdf/shims:$PATH"
+
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
