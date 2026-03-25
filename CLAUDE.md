@@ -2,6 +2,10 @@
 
 Personal dotfiles managed with [chezmoi](https://chezmoi.io). Owner: Rai Butera (`rai@rbutera.com`).
 
+## Agent requirements
+
+- **Always update the relevant log file** in `logs/` after making changes. Each file is a dated changelog for a topic (e.g. `logs/tmux.md`). If no log exists for the topic yet, create one. Entries must include today's date, a summary of the problem/motivation, and what was changed. Use the existing entries in `logs/tmux.md` as a style reference.
+
 ## Critical Constraint: chezmoi apply requires 1Password
 
 **Agents cannot run `chezmoi apply` without prior user action.**
