@@ -14,10 +14,13 @@ set -g mode-keys vi
 # Force tmux-yank to use OSC52 instead of clip.exe or xsel.
 # clip.exe writes to lugia's clipboard, not Lancelot's. OSC52 travels through
 # the SSH tunnel back to WezTerm on Lancelot and hits the right clipboard.
-set -g @override_copy_command '~/.local/bin/osc52copy'
+set -g @override_copy_command '~/bin/osc52copy'
+
+# Propagate Wayland env into tmux sessions on attach.
+set -g update-environment "WAYLAND_DISPLAY XDG_RUNTIME_DIR DISPLAY"
 
 setw -g automatic-rename off
 set -g allow-rename off
 
 # Keep the explicit copy-mode binding as backup.
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "~/.local/bin/osc52copy"
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "~/bin/osc52copy"
