@@ -22,7 +22,7 @@ gtk-toolbar-style = flat
 gtk-custom-css = style.css
 
 # ── Background ────────────────────────────────────────────────────────────
-background-opacity = 0.95
+background-opacity = 0.85
 
 # ── Cursor ─────────────────────────────────────────────────────────────────────
 cursor-style = bar
