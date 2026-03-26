@@ -4,12 +4,12 @@ command = /usr/bin/zsh
 theme = Catppuccin Mocha
 
 # ── Font ───────────────────────────────────────────────────────────────────────
-font-size = 10
+font-size = 8
 # JetBrains Mono (built-in) with ligatures on by default
 
 # ── Window ─────────────────────────────────────────────────────────────────────
 window-padding-x = 4
-window-padding-y = 2
+window-padding-y = 4
 window-padding-color = extend
 
 # Use Ghostty's own titlebar/tab styling instead of GTK's
@@ -17,6 +17,12 @@ window-theme = ghostty
 # Match the titlebar to Catppuccin Mocha base/text colors
 window-titlebar-background = 1e1e2e
 window-titlebar-foreground = cdd6f4
+gtk-wide-tabs = false
+gtk-toolbar-style = flat
+gtk-custom-css = style.css
+
+# ── Background ────────────────────────────────────────────────────────────
+background-opacity = 0.95
 
 # ── Cursor ─────────────────────────────────────────────────────────────────────
 cursor-style = bar
