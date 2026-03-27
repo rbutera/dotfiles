@@ -26,4 +26,7 @@ set +a
 discord-export 1473760382387621950
 
 # Run Chronicler using ~/.chronicler.json
-pnpm nx run chronicler:dev
+# Only process yesterday and today (yesterday hits cache, today is the real work)
+YESTERDAY=$(date -d 'yesterday' +%Y-%m-%d)
+TODAY=$(date +%Y-%m-%d)
+pnpm nx run chronicler:dev -- --from "$YESTERDAY" --to "$TODAY"
