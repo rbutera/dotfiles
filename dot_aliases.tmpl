@@ -207,7 +207,8 @@ miru() {
     mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv|webm)
 }
 
-{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) -}}
+{{ if eq .chezmoi.os "linux" -}}
+{{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) -}}
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
 alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
 alias navi="aichat -r navi"
@@ -217,6 +218,7 @@ alias restart_ags="killall ags ydotool; ags > /dev/null 2>&1 &"
 function lfg() {
   paru -S "$@"
 }
+{{ end }}
 {{ end }}
 
 # aider aliases

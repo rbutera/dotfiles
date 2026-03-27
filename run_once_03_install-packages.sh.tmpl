@@ -2,9 +2,11 @@
 
 # On Arch-based systems (CachyOS etc), skip Homebrew entirely.
 # Packages are handled by run_once_03b_install-aur-packages.sh.tmpl instead.
-{{ if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
+{{ if eq .chezmoi.os "linux" }}
+{{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
 echo "Arch-based system detected — skipping Homebrew install. AUR packages handled separately."
 exit 0
+{{ end }}
 {{ end }}
 
 is_wsl() {
