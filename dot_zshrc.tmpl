@@ -109,4 +109,7 @@ export LANG="en_GB.UTF-8"
 
 # SDKMAN (must be at end)
 export SDKMAN_DIR="$HOME/.sdkman"
+
+[[ -o interactive ]] || unalias cd 2>/dev/null
+
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
