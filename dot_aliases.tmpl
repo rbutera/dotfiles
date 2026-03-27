@@ -106,10 +106,6 @@ function czm() {
   esac
 }
 
-function cd() {
-  builtin cd "$@" && echo $PWD && ls;
-}
-
 alias czd="chezmoi diff"
 alias czu="chezmoi update"
 
@@ -245,5 +241,7 @@ alias rrnavi="openclaw gateway restart"
 alias ocfg="nvim ~/.openclaw/openclaw.json"
 
 alias yoloclaude="claude --dangerously-skip-permissions"
-alias yolocodex="codex --dangerously-skip-permissions"
+alias yolocodex="codex --dangerously-bypass-approvals-and-sandbox"
 
+
+alias updatenavi="cd ~/oclaw && git checkout main && git pull && pnpm install && pnpm build && pnpm ui:build && rrnavi"
