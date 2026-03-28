@@ -81,10 +81,10 @@ eval "$(starship init zsh)"
 
 
 # OpenClaw Completion
-[[ -f "/home/rai/.openclaw/completions/openclaw.zsh" ]] && source "/home/rai/.openclaw/completions/openclaw.zsh"
+[[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]] && source "$HOME/.openclaw/completions/openclaw.zsh"
 
 # opencode
-export PATH=/home/rai/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # stop windows WSL / nodejs appearing in wsl path
 export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'AppData.*npm\|nodejs' | tr '\n' ':')
@@ -93,7 +93,7 @@ export SSH_ASKPASS=""
 export GIT_TERMINAL_PROMPT=0
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 
-export EDITOR="/home/rai/.local/share/bob/nvim-bin/nvim"
+export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
 export VISUAL="$EDITOR"
 
 if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
@@ -115,7 +115,7 @@ export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 {{- if eq .chezmoi.os "darwin" }}
-if [[ ":$PATH:" != *":/Users/rai/Library/pnpm:"* ]]; then
-  export PATH="/Users/rai/Library/pnpm:$PATH"
+if [[ ":$PATH:" != *":$HOME/Library/pnpm:"* ]]; then
+  export PATH="$HOME/Library/pnpm:$PATH"
 fi
 {{ end }}
