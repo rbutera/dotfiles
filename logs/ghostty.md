@@ -1,5 +1,16 @@
 # Ghostty config changes log
 
+## 2026-03-28 — Template Ghostty shell path for macOS vs Linux
+
+### Problem
+Ghostty config was a plain file, but the shell path differs by platform. Linux should continue using `/usr/bin/zsh`, while macOS should use Homebrew's zsh at `/opt/homebrew/bin/zsh`.
+
+### Changes
+- Renamed `dot_config/ghostty/config` to `dot_config/ghostty/config.tmpl`.
+- Replaced the hardcoded `command` line with a chezmoi template conditional:
+  - macOS: `/opt/homebrew/bin/zsh`
+  - Linux: `/usr/bin/zsh`
+
 ## 2026-03-26 — Add transparent background (80% opacity)
 
 ### Problem

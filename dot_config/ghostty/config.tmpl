@@ -1,4 +1,4 @@
-command = /usr/bin/zsh
+command = {{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin/zsh{{ else }}/usr/bin/zsh{{ end }}
 
 # ── Theme ──────────────────────────────────────────────────────────────────────
 theme = Catppuccin Mocha
