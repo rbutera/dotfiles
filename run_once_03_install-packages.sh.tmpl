@@ -38,8 +38,8 @@ install_homebrew() {
   {{ end }}
 }
 
+{{ if eq .chezmoi.os "linux" }}
 install_linux_dependencies() {
-  {{ if eq .chezmoi.os "linux" }}
   echo "Installing Linux build dependencies for Homebrew..."
   {{ if or (eq .chezmoi.osRelease.id "ubuntu") (eq .chezmoi.osRelease.id "debian") }}
   sudo apt update
@@ -50,11 +50,9 @@ install_linux_dependencies() {
   {{ else if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
   sudo pacman -S --noconfirm --needed base-devel procps-ng curl file git
   {{ end }}
-  {{ end }}
 }
 
 install_wsl_clipboard() {
-  {{ if eq .chezmoi.os "linux" }}
   if ! is_wsl; then
     return 0
   fi
@@ -70,8 +68,8 @@ install_wsl_clipboard() {
   {{ else }}
   echo "Unsupported Linux distro for automatic wl-clipboard install; skipping"
   {{ end }}
-  {{ end }}
 }
+{{ end }}
 
 install_packages() {
   echo "Installing packages via Homebrew..."
