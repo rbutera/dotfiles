@@ -15,6 +15,8 @@ if [[ -f /opt/homebrew/bin/brew ]]; then
 elif [[ -f /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
+export PATH=/opt/homebrew/bin:$PATH
+export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 {{ else }}
 if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -50,9 +52,10 @@ export PATH="$HOME/bin:$PATH"
 # Editors
 #
 
-export EDITOR='nvim'
-export VISUAL='nvim'
-export SUDO_EDITOR='nvim'
+{{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
+export EDITOR={{ $nvim | quote }}
+export VISUAL="$EDITOR"
+export SUDO_EDITOR="$EDITOR"
 export PAGER='less'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
