@@ -113,3 +113,9 @@ export SDKMAN_DIR="$HOME/.sdkman"
 [[ -o interactive ]] || unalias cd 2>/dev/null
 
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+{{- if eq .chezmoi.os "darwin" }}
+if [[ ":$PATH:" != *":/Users/rai/Library/pnpm:"* ]]; then
+  export PATH="/Users/rai/Library/pnpm:$PATH"
+fi
+{{ end }}
