@@ -1,0 +1,6 @@
+# Global ignore: OpenSpec directories
+openspec/
+*.log
+.claude
+.codex
+
