@@ -1,0 +1,33 @@
+{
+  "defaultAgent": "navi",
+  "agents": {
+    "navi": {
+      "channelId": "1473760382387621950",
+      "inputPath": {{ joinPath .chezmoi.homeDir "dev" "transcripts" "navi.json" | quote }},
+      "outputDir": {{ joinPath .chezmoi.homeDir "dev" "lumiere" "apps" "chronicler" "output" | quote }},
+      "summaryContextFiles": [
+        {{ joinPath .chezmoi.homeDir ".openclaw" "workspace-navi" "SOUL.md" | quote }},
+        {{ joinPath .chezmoi.homeDir ".openclaw" "workspace-navi" "memory" "navi-continuity-document.md" | quote }}
+      ]
+    }
+  },
+  "inputPath": {{ joinPath .chezmoi.homeDir "dev" "transcripts" "navi.json" | quote }},
+  "model": "kimi-k2.5",
+  "apiBase": "https://opencode.ai/zen/go/v1",
+  "apiKeyEnv": "OPENCODE_ZEN_API_KEY",
+  "apiFormat": "chat-completions",
+  "timezone": "Europe/London",
+  "concurrency": 5,
+  "promptVersion": "1",
+  "adminBulletsMin": 2,
+  "adminBulletsMax": 20,
+  "maxDayChars": 40000,
+  "verbose": true,
+  "failFast": false,
+  "outputDir": {{ joinPath .chezmoi.homeDir "dev" "lumiere" "apps" "chronicler" "output" | quote }},
+  "exportDefaultDirectory": {{ joinPath .chezmoi.homeDir "dev" "transcripts" | quote }},
+  "summaryContextFiles": [
+    {{ joinPath .chezmoi.homeDir ".openclaw" "workspace-navi" "SOUL.md" | quote }},
+    {{ joinPath .chezmoi.homeDir ".openclaw" "workspace-navi" "memory" "navi-continuity-document.md" | quote }}
+  ]
+}
