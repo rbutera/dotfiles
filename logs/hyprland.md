@@ -1,5 +1,86 @@
 # Hyprland / end-4 (NaviDE) config changes log
 
+## 2026-04-04 — Keybind overhaul (NaviDE keyboard-no-jutsu)
+
+### Motivation
+Comprehensive keybind redesign to eliminate upstream conflicts from end-4/dots-hyprland,
+remove duplicates, and build a coherent mental model grounded in gaming muscle memory.
+See `docs/keybind-philosophy.md` for the full design rationale.
+
+### Changes
+
+#### Unbinds
+- Unbound all conflicting upstream `Super+*` keys (D, F, K, J, T, E, C, S, Tab, Slash, V, Period, A, N, G, Q, Return, grave, B, H, Semicolon, L, Equal, Minus)
+- Unbound `Super+Alt+S/F/A/M/R/Space` (upstream resize/workspace conflicts)
+- Unbound `Super+Shift+S` (upstream screenshot conflict with our movewindow)
+- Unbound `Super+J/K/M`, `Super+Shift+M`, `Super+Alt+M` (upstream bar/osk/media/mute)
+
+#### App layer (Hyper = focus-or-launch)
+- All app launchers on Hyper (Ctrl+Alt+Super): B=browser, C=code, D=Discord, K=calendar, O=file manager, P=1Password
+- `Super+Return` = focus/launch terminal (smart); `Hyper+Return` = always new instance
+- Focus-or-launch script: checks `hyprctl clients` for class regex, focuses if found, launches if not
+
+#### Navigation (ESDF)
+- `Super+ESDF` = focus up/left/down/right
+- `Super+Shift+ESDF` = move window up/left/down/right
+- `Super+Alt+ESDF` = resize (dwindle layout)
+- Removed Hyper+ESDF nav mirrors (redundant)
+
+#### Master layout
+- Switched default layout to master (`dot_config/hypr/custom/general.conf`)
+- mfact=0.5; workspace orientation rules per monitor: center for A/C, top for B (vertical)
+- `Super+H/L` = shrink/grow master split ratio
+- `Super+J/K` = cyclenext/cycleprev (focus cycle)
+- `Super+Shift+J/K` = swapnext/swapprev
+- `Super+M` = `swapwithmaster auto` — toggle: promotes slave to master, or cycles master out if already master
+- `Super+Shift+M` = focusmaster
+
+#### Workspace navigation
+- `Super+1-4` = local workspace (relative to current monitor via `local-workspace.sh`)
+- `Super+Shift+1-4` = move window to local workspace
+- Monitor mapping: A (DP-1) ws1-4, B (HDMI-A-2) ws5-7, C (DP-2) ws8-10
+- `Hyper+ESDF` = focus monitor spatially (E=above/C, S=left/B, F=main/A)
+- `Hyper+Shift+ESDF` = send window to monitor
+
+#### Scratchpad (grave key family — CS:GO console muscle memory)
+- `Super+grave` = toggle scratchpad (auto-seeds ghostty terminal if empty)
+- `Shift+grave` = send current window to scratchpad
+- `Hyper+grave` = quickshell overlay toggle
+
+#### Sidebar pair
+- `Super+A` = left sidebar, `Super+G` = right sidebar (spatial: keys mirror panel positions)
+
+#### Layout toggle
+- `Hyper+Tab` = toggle between master and dwindle layouts
+
+#### Shell / system
+- `Super+Tab` = workspace overview; `Super+Slash` = cheatsheet
+- `Super+V` = clipboard; `Super+Period` = emoji picker
+- `Hyper+M` / `Hyper+Shift+M` = mute output / mute mic
+
+#### Scripts (new)
+- `focus-or-launch.sh`: focus existing window by class regex or launch
+- `local-workspace.sh`: relative workspace navigation per monitor
+- `toggle-scratchpad.sh`: scratchpad with terminal auto-seed
+- `toggle-layout.sh`: master/dwindle toggle
+- All scripts fixed with `executable_` prefix in chezmoi source (were non-executable — root cause of Super+Shift+1-4 not working)
+
+#### Dock "appearing on all monitors" non-issue
+- `Hyper+E` (focusmonitor DP-2) caused dock to appear on all monitors when C was empty
+- Root cause: `Dock.qml` `reveal` condition includes `!ToplevelManager.activeToplevel?.activated`
+- Expected quickshell behavior — dock shows when no active toplevel. Accepted as-is.
+
+#### Documentation added
+- `docs/keybind-philosophy.md`: design principles, key families, modifier semantics
+- `docs/navide-monitor-usage.md`: per-monitor layout intent and WM-agnostic philosophy
+
+## 2026-04-04 — Switch default browser binding to Brave; simplify kanata config
+
+### Changes
+
+- `dot_config/hypr/custom/keybinds.conf`: Super+B now launches `brave` first (was `vivaldi-stable --force-dark-mode`)
+- `dot_config/kanata/kanata.kbd`: stripped down to a single purpose — F16 → tap Esc / hold Ctrl+Alt+Super (hyper key). Removed F14/F15/F18 mappings, mod1/mod2/mod3 aliases, and tmux-combo/summon-launcher bindings. Added header comment explaining the Dygma F16 setup.
+
 ## 2026-03-26 — Initial Hyprland setup with end-4/dots-hyprland (NaviDE)
 
 ### Problem

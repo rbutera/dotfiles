@@ -1,5 +1,11 @@
 # shell config changes log
 
+## 2026-04-04 — Remove miru() alias
+
+### Changes
+
+- `dot_aliases.tmpl`: removed `miru()` function (mpv loop-playlist helper for video folders). No longer needed.
+
 ## 2026-03-28 — Fix ~5min `ls ~` hang caused by unreachable SSHFS automount
 
 ### Problem

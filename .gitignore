@@ -1,3 +1,8 @@
 .aider*
 .claude/
+.codex/
+.cursor/
+.gemini/
+.kilocode/
+.opencode/
 .env
