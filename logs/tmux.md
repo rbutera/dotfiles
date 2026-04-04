@@ -1,5 +1,33 @@
 # tmux config changes log
 
+## 2026-03-31 — Stop macOS panes from being named reattach-to-user-namespace
+
+### Problem
+On macOS, tmux windows were being named `reattach-to-user-namespace` instead of
+the interactive shell or active program.
+
+The root cause was `tmux-sensible`, which sets:
+
+```tmux
+set-option -g default-command "reattach-to-user-namespace -l $SHELL"
+```
+
+when running on macOS and the wrapper is installed. That made new panes start
+through the wrapper process, so tmux and tmux-resurrect treated
+`reattach-to-user-namespace` as the pane command/window name.
+
+### Solution
+
+**`dot_tmux/dot_tmux.conf`**:
+- Added a macOS-only post-plugin override:
+  `if-shell '[ "$(uname)" = Darwin ]' 'set -gu default-command'`
+- Placed it after `run '~/.tmux/plugins/tpm/tpm'` so it wins over
+  `tmux-sensible`
+
+Clipboard behavior remains intact because this setup already uses explicit copy
+bindings plus `@override_copy_command '~/bin/osc52copy'`, rather than relying on
+`reattach-to-user-namespace` as the pane launch wrapper.
+
 ## 2026-03-25 — Fix clipboard: context-aware osc52copy + mouse drag binding
 
 ### Problem

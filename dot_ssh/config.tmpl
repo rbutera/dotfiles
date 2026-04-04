@@ -1,5 +1,10 @@
-{{- if eq .chezmoi.os "darwin" -}}
+{{- if eq .chezmoi.os "darwin" }}
+{{- if stat "/Users/rai/.colima/ssh_config" }}
+Include /Users/rai/.colima/ssh_config
+{{- end }}
+{{- if stat "/Users/rai/.orbstack/ssh/config" }}
 Include ~/.orbstack/ssh/config
+{{- end }}
 {{- end }}
 
 Host pidgey
