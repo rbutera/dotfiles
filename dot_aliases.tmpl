@@ -201,9 +201,27 @@ function get_bg3_item() {
     cat "$BALDING_GATE_DIR/items.txt" | grep -i "$1" | sed -E 's/.*?- //'
 }
 
+{{ if eq .chezmoi.os "darwin" -}}
+# code: when SSH'd in from a remote machine, open VS Code on that machine via Remote SSH
+# rather than opening VS Code locally on this Mac.
+# Requires SSH access from this machine back to the connecting host.
+function code() {
+    if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$VSCODE_IPC_HOOK_CLI" ]]; then
+        local client_ip=$(echo $SSH_CONNECTION | awk '{print $1}')
+        local target_path="$(realpath "${1:-.}")"
+        local hostname=$(hostname -s)
+        ssh -o StrictHostKeyChecking=no "$client_ip" \
+            "code --remote ssh-remote+${hostname} ${target_path}" 2>/dev/null
+    else
+        command code "$@"
+    fi
+}
+{{- end }}
+
 {{ if eq .chezmoi.os "linux" -}}
 {{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) -}}
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"
+alias rrop="pkill -f 1password; sleep 1; 1password --ozone-platform-hint=wayland --silent &"
 alias code="code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto"
 alias navi="aichat -r navi"
 alias open="xdg-open"
