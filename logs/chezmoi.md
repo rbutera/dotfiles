@@ -1,5 +1,15 @@
 # chezmoi config changes log
 
+## 2026-04-04 — Ignore AI tool workspace dirs in .gitignore
+
+### Problem
+
+AI tools (Cursor, Codex CLI, Gemini CLI, Kilocode, OpenCode) create their own `.cursor/`, `.codex/`, `.gemini/`, `.kilocode/`, `.opencode/` directories when run inside the chezmoi source dir, polluting `git status`.
+
+### Fix
+
+Added the five directories to `.gitignore`. Follows the same pattern as `.claude/` which was already ignored. The chezmoi-managed `dot_codex/` (and `dot_claude/`) source dirs are unaffected.
+
 ## 2026-03-28 — Fix empty bash function bodies crashing chezmoi apply on macOS
 
 ### Problem

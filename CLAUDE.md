@@ -43,8 +43,20 @@ The proper non-interactive solution is a 1Password Service Account + new vault, 
 ```bash
 chezmoi diff                        # Preview what would change — always safe, no 1Password needed
 chezmoi execute-template < file.tmpl  # Render a template for inspection (requires 1Password session)
-chezmoi apply                       # Apply changes (requires active 1Password session)
+chezmoi apply                       # Apply ALL changes (requires active 1Password session)
 chezmoi apply --dry-run             # Dry run (still requires 1Password to render templates)
+
+# Apply a specific target file — only triggers 1Password if THAT file uses onepasswordRead
+chezmoi apply ~/.config/hypr/custom/keybinds.conf
+chezmoi apply ~/.config/hypr/custom/general.conf
+```
+
+**Applying individual files without 1Password:** `chezmoi apply <target-path>` processes only that file. If the source file contains no `onepasswordRead` calls, 1Password is never invoked. This is safe to do at any time for plain config files (e.g. anything under `dot_config/hypr/`).
+
+**To check whether a source file uses 1Password before applying:**
+```bash
+grep -l onepasswordRead $(chezmoi source-path ~/.config/hypr/custom/keybinds.conf)
+# No output = safe to apply without a session
 ```
 
 **Editing source files** (anything in `~/.local/share/chezmoi/`) is always safe. No auth required. Always edit source files, never the deployed targets directly.
