@@ -55,9 +55,17 @@ Field notes on how this 3-monitor setup is actually used, and the reasoning behi
 - Rarely needs more than 2 windows. Often just 1 full-height window (Discord).
 - This monitor is ambient — it should never demand focus, just support it.
 
+**Preferred layout: dwindle.** Master layout on a vertical monitor produces awkward
+results — the center-master orientation doesn't make sense with top/bottom stacking, and
+promoting/demoting windows on B is rarely needed. Dwindle splits more naturally here.
+
+**Known limitation:** Hyprland layout is global — you cannot have dwindle on B while
+master runs on A simultaneously. `Hyper+Tab` toggles the global layout. Accepted as a
+pain point; see `docs/hyprland.md`. This is a candidate reason to eventually try MangoWC.
+
 **Hyprland specifics:**
 - `orientation = top` via workspace rules
-- mfact tuning TBD — default 0.5 gives two equal halves which is a reasonable start
+- Preferred layout: dwindle (but can't be enforced per-monitor — global limitation)
 
 ---
 

@@ -1,5 +1,48 @@
 # Hyprland / end-4 (NaviDE) config changes log
 
+## 2026-04-04 — Post-overhaul fixes and additions
+
+### Changes
+
+#### Media key play/pause fixed
+- `XF86AudioPlay` and `XF86AudioPause` were bound twice (upstream + custom), causing
+  play-pause to toggle twice and cancel itself out. Symptom: key appeared to do nothing.
+  Fixed by adding unbinds for `XF86AudioPlay`, `XF86AudioPause`, `XF86AudioNext`, `XF86AudioPrev`
+  to the custom unbind section. Back/forward worked because doubling a skip is idempotent.
+
+#### Hyper+N → Obsidian (focus-or-launch)
+- Added `Control+Alt+Super, N` → `focus-or-launch.sh "obsidian" obsidian`
+- Window class confirmed as `obsidian`
+
+#### Master layout: swapwithmaster auto
+- `Super+M` updated to `layoutmsg swapwithmaster auto` — toggles intelligently:
+  promotes slave to master if slave, cycles master out if already master
+- `Super+Shift+M` = focusmaster
+
+#### Master layout J/K binds
+- `Super+J/K` = cyclenext/cycleprev (focus cycle through layout order)
+- `Super+Shift+J/K` = swapnext/swapprev (reorder in stack)
+- Unbound upstream `Super+J` (barToggle), `Super+K` (oskToggle), `Super+M` (mediaControlsToggle),
+  `Super+Shift+M` (mute), `Super+Alt+M` (mic mute)
+
+#### Scripts: executable_ prefix fix
+- All custom scripts were non-executable — root cause of Super+Shift+1-4 doing nothing
+- Renamed all `*.sh` to `executable_*.sh` in chezmoi source
+
+#### Scratchpad toggle fix
+- `workspace.name == "special"` check was never matching; fixed to `workspace.id < 0`
+- Added flock to prevent race on rapid key presses
+- Revised to use `[workspace special silent]` + poll + 200ms settling pause before toggle
+
+#### tmux: allow-passthrough on
+- Added `set -g allow-passthrough on` to `dot_tmux/dot_tmux.conf.local`
+- Required for opencode and other tools that emit OSC sequences directly
+
+#### Documentation added
+- `docs/hyprland.md`: pain points, upstream unbind gotchas, chezmoi/scripts tips
+- `docs/quickshell.md`: IPC action names, dock reveal behaviour, config location
+- `docs/zellij.md`: research notes and deferred implementation decisions
+
 ## 2026-04-04 — Keybind overhaul (NaviDE keyboard-no-jutsu)
 
 ### Motivation
