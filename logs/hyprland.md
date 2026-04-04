@@ -1,5 +1,42 @@
 # Hyprland / end-4 (NaviDE) config changes log
 
+## 2026-04-04 — Parsec passthrough submap, misc fixes, mouse speed
+
+### Changes
+
+#### Parsec passthrough submap
+- Added `parsec-submap.sh` daemon to `custom/scripts/` + `exec-once` in `execs.conf`
+- Daemon watches Hyprland socket for `activewindow>>` events; switches to `parsec`
+  submap when `parsecd` is focused, resets on focus-out or window close
+- Submap defined in `keybinds.conf` with one escape-hatch bind (`Ctrl+Alt+Escape → reset`)
+  so Hyprland registers it (empty submaps are silently dropped)
+- Fixes: XDG_RUNTIME_DIR socket path (not /tmp/hypr on CachyOS), flock single-instance
+  lock to prevent racing daemons, closewindow handler for when Parsec exits ungracefully
+- Motivation: Parsec maps Ctrl→Cmd on Mac clients; Super keypresses from host Hyprland
+  were being intercepted before reaching Parsec
+
+#### focus-or-launch: prefer normal workspace over scratchpad
+- Added `select(.workspace.id > 0)` filter — when the same app class exists on both
+  a normal workspace and the scratchpad, the normal workspace window is focused first
+- Fallback still focuses scratchpad window if nothing on a normal workspace
+
+#### SSH config: mondo host added
+- Added `Host mondo` entry (100.111.98.78, Tailscale)
+
+#### Mouse speed reduced to 80%
+- `sensitivity` changed from `-0.25` to `-0.4`
+- Effective libinput speed: `1 + sensitivity`; 0.75 → 0.60 (≈80%)
+
+#### Keybinds: various fixes
+- Unbound `XF86AudioPlay/Pause/Next/Prev` upstream duplicates (double-firing cancelled out)
+- Added `Hyper+N` → Obsidian focus-or-launch
+- `rrop` alias (arch): restart 1Password when tray/quick-access degrades
+
+#### Debugging note: hyprctl reload required after submap work
+- After parsec submap work, Super/Hyper keybinds stopped firing despite
+  `hyprctl binds` showing them registered and `hyprctl submap` showing "default"
+- Fix: `hyprctl reload` — stale runtime state, not a config error
+
 ## 2026-04-04 — Post-overhaul fixes and additions
 
 ### Changes
