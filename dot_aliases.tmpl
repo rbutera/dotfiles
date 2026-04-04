@@ -210,8 +210,13 @@ function code() {
         local client_ip=$(echo $SSH_CONNECTION | awk '{print $1}')
         local target_path="$(realpath "${1:-.}")"
         local hostname=$(hostname -s)
+        # Linux needs systemd-run to inherit WAYLAND_DISPLAY; macOS can call code directly
         ssh -o StrictHostKeyChecking=no "$client_ip" \
-            "systemd-run --user --no-block -- code --ozone-platform-hint=auto --remote ssh-remote+${hostname} ${target_path}"
+            "if command -v systemd-run >/dev/null 2>&1; then
+                systemd-run --user --no-block -- code --ozone-platform-hint=auto --remote ssh-remote+${hostname} ${target_path}
+             else
+                code --remote ssh-remote+${hostname} ${target_path}
+             fi"
     else
         command code "$@"
     fi
