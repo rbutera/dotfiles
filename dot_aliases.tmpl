@@ -192,21 +192,6 @@ function get_bg3_item() {
     cat "$BALDING_GATE_DIR/items.txt" | grep -i "$1" | sed -E 's/.*?- //'
 }
 
-miru() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: miru <folder>"
-        return 1
-    fi
-
-    folder="$1"
-    if [ ! -d "$folder" ]; then
-        echo "Error: $folder is not a valid directory"
-        return 1
-    fi
-
-    mpv --loop-playlist "$folder"/*.(mp4|mkv|avi|mov|flv|wmv|webm)
-}
-
 {{ if eq .chezmoi.os "linux" -}}
 {{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) -}}
 alias hyprcfg="cd ~/.config/hypr; nvim . && chezmoi re-add ~/.config/hypr && cd -"

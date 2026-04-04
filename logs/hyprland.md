@@ -1,5 +1,12 @@
 # Hyprland / end-4 (NaviDE) config changes log
 
+## 2026-04-04 — Switch default browser binding to Brave; simplify kanata config
+
+### Changes
+
+- `dot_config/hypr/custom/keybinds.conf`: Super+B now launches `brave` first (was `vivaldi-stable --force-dark-mode`)
+- `dot_config/kanata/kanata.kbd`: stripped down to a single purpose — F16 → tap Esc / hold Ctrl+Alt+Super (hyper key). Removed F14/F15/F18 mappings, mod1/mod2/mod3 aliases, and tmux-combo/summon-launcher bindings. Added header comment explaining the Dygma F16 setup.
+
 ## 2026-03-26 — Initial Hyprland setup with end-4/dots-hyprland (NaviDE)
 
 ### Problem
