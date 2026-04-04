@@ -1,64 +1,58 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ghclone — clone a GitHub repo to a consistent location and print the path.
+# Usage:
+#   ghclone org/repo     → clones to ~/dev/github/org/repo
+#   ghclone repo         → clones to ~/dev/repo (assumes your own GitHub account)
+#
+# Designed to be called from a shell function that cds to the printed path.
+# All messages go to stderr; only the target directory goes to stdout.
 
-# Function to extract username and repo from URL or username/repo format
-parse_input() {
-    if [[ $1 =~ ^https://github.com/([^/]+)/(.+)$ ]]; then
-        username=${BASH_REMATCH[1]}
-        repo=${BASH_REMATCH[2]}
-    elif [[ $1 =~ ^([^/]+)/(.+)$ ]]; then
-        username=${BASH_REMATCH[1]}
-        repo=${BASH_REMATCH[2]}
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+    echo "usage: ghclone [org/]repo" >&2
+    exit 1
+fi
+
+ARG="$1"
+GH_USER=$(git config --global github.user 2>/dev/null || echo "rbutera")
+
+if [[ "$ARG" == */* ]]; then
+    ORG="${ARG%%/*}"
+    REPO="${ARG##*/}"
+    TARGET="$HOME/dev/github/$ORG/$REPO"
+    CLONE_URL="https://github.com/$ORG/$REPO"
+else
+    REPO="$ARG"
+    ORG="$GH_USER"
+    TARGET="$HOME/dev/$REPO"
+    CLONE_URL="https://github.com/$GH_USER/$REPO"
+fi
+
+if [[ -d "$TARGET" ]]; then
+    # Check if it's a git repo pointing at the right remote
+    existing=$(git -C "$TARGET" remote get-url origin 2>/dev/null || echo "")
+    if [[ "$existing" == *"$ORG/$REPO"* ]]; then
+        echo "repository '$ORG/$REPO' already cloned at $TARGET" >&2
+        echo "$TARGET"
+        exit 0
     else
-        echo "Invalid input format. Please use 'username/repo' or 'https://github.com/username/repo'"
+        echo "error: '$TARGET' exists but has a different origin: $existing" >&2
         exit 1
     fi
-}
-
-# Check if an argument is provided
-if [ $# -eq 0 ]; then
-    echo "Please provide a GitHub repository as an argument."
-    exit 1
 fi
 
-# Parse the input
-parse_input "$1"
+mkdir -p "$(dirname "$TARGET")"
 
-# Change to the GitHub projects directory
-cd ~/dev/github || exit 1
-
-# Create the username directory if it doesn't exist
-mkdir -p "$username"
-
-# Change to the username directory
-cd "$username" || exit 1
-
-# Clone the repository
-gh repo clone "$username/$repo"
-
-# Check if the clone was successful
-if [ $? -ne 0 ]; then
-    echo "Failed to clone the repository."
-    exit 1
-fi
-
-# Change to the cloned repository directory
-cd "$repo" || exit 1
-
-# Initialize and update submodules if any
-if [ -f ".gitmodules" ]; then
-    git submodule init
-    git submodule update
-fi
-
-# Print the README.md file if it exists
-if [ -f "README.md" ]; then
-    if command -v bat &> /dev/null; then
-        bat README.md
-    else
-        echo "bat is not installed. Using cat instead:"
-        cat README.md
-    fi
+if command -v gh &>/dev/null; then
+    gh repo clone "$ORG/$REPO" "$TARGET" >&2
 else
-    echo "No README.md file found in the repository."
+    git clone "$CLONE_URL" "$TARGET" >&2
 fi
 
+# Initialise submodules if present
+if [[ -f "$TARGET/.gitmodules" ]]; then
+    git -C "$TARGET" submodule update --init --recursive >&2
+fi
+
+echo "$TARGET"
