@@ -1,5 +1,11 @@
 zplug/.git*
 
+# Repo-meta files — exist for the chezmoi repo itself, not dotfiles
+CLAUDE.md
+docs/
+logs/
+openspec/
+
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh
 0_install-cli-tools.sh
