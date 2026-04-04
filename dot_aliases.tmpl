@@ -211,7 +211,7 @@ function code() {
         local target_path="$(realpath "${1:-.}")"
         local hostname=$(hostname -s)
         ssh -o StrictHostKeyChecking=no "$client_ip" \
-            "code --remote ssh-remote+${hostname} ${target_path}" 2>/dev/null
+            "systemd-run --user --no-block -- code --ozone-platform-hint=auto --remote ssh-remote+${hostname} ${target_path}"
     else
         command code "$@"
     fi
