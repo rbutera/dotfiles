@@ -193,7 +193,7 @@ alias komorebic="komorebic.exe"
 alias mpv="mpv.exe"
 {{- end }}
 
-{{ if (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+{{ if and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch") }}
 export BALDING_GATE_DIR="/g/BaldingGate"
 {{- end }}
 

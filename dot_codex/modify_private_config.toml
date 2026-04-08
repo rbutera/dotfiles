@@ -8,8 +8,21 @@ Free: projects, notice (machine-specific, added by Codex at runtime)
 
 import os
 import sys
-import tomllib
-import tomli_w
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        print("ERROR: need tomllib (Python 3.11+) or tomli backport (`pip3 install tomli`)", file=sys.stderr)
+        sys.exit(1)
+
+try:
+    import tomli_w
+except ModuleNotFoundError:
+    print("ERROR: need tomli_w (`pip3 install tomli-w`)", file=sys.stderr)
+    sys.exit(1)
 
 # ── Base config: fields we want on all machines ──────────────────────────────
 HOME = os.environ["HOME"]
@@ -41,7 +54,6 @@ BASE = {
             "args": ["-y", "@upstash/context7-mcp@latest"],
         },
         "open-websearch": {
-            "url": "http://localhost:3005/mcp",
             "command": "npx",
             "args": ["-y", "open-websearch"],
         },
@@ -69,10 +81,6 @@ BASE = {
         "mcp-alchemy": {
             "command": "uvx",
             "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"],
-        },
-        "mcp-redis": {
-            "command": "uvx",
-            "args": ["redis-mcp-server"],
         },
         "tempograph": {
             "command": "uvx",
@@ -154,5 +162,11 @@ else:
 
 # Merge: base wins for managed keys, current adds free keys (projects, notice, etc.)
 merged = deep_merge(BASE, current)
+
+# Authoritative keys: base is the sole source of truth for these.
+# Removals from base are reflected in deployed config.
+for key in ("mcp_servers", "model_providers", "plugins"):
+    if key in BASE:
+        merged[key] = BASE[key]
 
 sys.stdout.buffer.write(tomli_w.dumps(merged).encode())
