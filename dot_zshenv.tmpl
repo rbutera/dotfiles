@@ -57,6 +57,11 @@ export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
 export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
 export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
+{{- if has .chezmoi.hostname .host_groups.dev_infra }}
+
+# ── Local infrastructure (dev_infra machines only) ───────────────────────────
+export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
+{{- end }}
 
 if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"

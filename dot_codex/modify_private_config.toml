@@ -39,6 +39,8 @@ BASE = {
         },
         "open-websearch": {
             "url": "http://localhost:3005/mcp",
+            "command": "npx",
+            "args": ["-y", "open-websearch"],
         },
         "mcp-deepwiki": {
             "command": "npx",
@@ -61,6 +63,38 @@ BASE = {
                 "false",
             ],
         },
+        "mcp-alchemy": {
+            "command": "uvx",
+            "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"],
+        },
+        "mcp-redis": {
+            "command": "uvx",
+            "args": ["redis-mcp-server"],
+        },
+        "tempograph": {
+            "command": "uvx",
+            "args": ["--from", "tempograph[full]", "tempograph"],
+        },
+        "oss-autopilot": {
+            "command": "npx",
+            "args": ["-y", "@oss-autopilot/mcp@latest"],
+        },
+        "pty-mcp": {
+            "command": "pty-mcp",
+            "args": [],
+        },
+        "chisel": {
+            "command": "chisel",
+            "args": ["--stdio", "--root", "/"],
+        },
+        "better-notion-mcp": {
+            "command": "npx",
+            "args": ["@n24q02m/better-notion-mcp"],
+        },
+        "obsidian": {
+            "command": "npx",
+            "args": ["@bitbonsai/mcpvault@latest", f"{HOME}/notes"],
+        },
     },
     "model_providers": {
         "zen": {
@@ -77,6 +111,24 @@ BASE = {
         "google-drive@openai-curated": {"enabled": True},
     },
 }
+
+
+# ── Arch-only MCP servers ────────────────────────────────────────────────────
+_is_arch = False
+try:
+    with open("/etc/os-release") as f:
+        for line in f:
+            if line.startswith(("ID=arch", "ID_LIKE=arch")):
+                _is_arch = True
+                break
+except FileNotFoundError:
+    pass
+
+if _is_arch:
+    BASE["mcp_servers"]["arch-linux"] = {
+        "command": "uvx",
+        "args": ["arch-ops-server"],
+    }
 
 
 def deep_merge(base: dict, override: dict) -> dict:

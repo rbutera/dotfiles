@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "open-websearch": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "open-websearch"
+      ],
+      "tools": [
+        "*"
+      ]
+    }
+  }
+}

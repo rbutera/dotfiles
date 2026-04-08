@@ -18,7 +18,16 @@ read -r -d '' base << 'BASE' || true
     "typescript-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
-    "claude-supermemory@supermemory-plugins": true
+    "claude-supermemory@supermemory-plugins": true,
+    "superpowers@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true,
+    "slack@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "mcp-server-dev@claude-plugins-official": true
   }
 }
 BASE
