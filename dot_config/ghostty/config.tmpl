@@ -9,7 +9,7 @@ theme = Catppuccin Mocha
 
 # ── Font ───────────────────────────────────────────────────────────────────────
 font-size = 8
-{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+{{- if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
 font-family = GeistMono Nerd Font Mono
 {{- end }}
 # JetBrains Mono (built-in) fallback on non-Arch systems

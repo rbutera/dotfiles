@@ -1,5 +1,43 @@
 # chezmoi modify scripts changelog
 
+## 2026-04-08 -- Make MCP server lists authoritative (replace, not merge)
+
+### Problem
+The modify scripts for both Claude Code and Codex used additive merge for MCP servers. Removing an MCP server from the chezmoi source had no effect on the deployed config because the old key survived the merge. Stale entries like `mcp-redis` and `url` fields persisted forever.
+
+### Solution/Fix
+- **Claude Code** (`modify_dot_claude.json.tmpl`): changed jq from `'.mcpServers = ((.mcpServers // {}) * $base)'` to `'.mcpServers = $base'`. Base is now the sole source of truth for MCP servers.
+- **Codex CLI** (`dot_codex/modify_private_config.toml`): after the deep_merge, override `mcp_servers`, `model_providers`, and `plugins` keys entirely from BASE. Free keys (`projects`, `notice`) still survive the merge as before.
+
+This means: add an MCP server to chezmoi source, it appears. Remove it, it disappears. No more stale ghosts.
+
+## 2026-04-08 -- Fix tomllib import on macOS (Python 3.9) in Codex modify script
+
+### Problem
+`dot_codex/modify_private_config.toml` imports `tomllib` which requires Python 3.11+. macOS system Python is 3.9.6, so `chezmoi apply` fails with `ModuleNotFoundError: No module named 'tomllib'`.
+
+### Solution/Fix
+Added try/except fallback chain: try `tomllib` (3.11+) first, then `tomli` backport, then fail with a clear error message. Installed `tomli` and `tomli-w` via pip for macOS system Python (`/usr/bin/python3 -m pip install tomli tomli-w`). On Arch this was fine because `python-tomli-w` package was already installed and Python is 3.12+.
+
+## 2026-04-08 -- Fix osRelease crashes on macOS across multiple templates
+
+### Problem
+Several templates accessed `.chezmoi.osRelease.id` or `.chezmoi.osRelease.idLike` without first checking if `.chezmoi.os == "linux"`. On macOS, `.chezmoi.osRelease` doesn't exist at all (it's a Linux-only map), causing `chezmoi apply` to fail with: `map has no entry for key "id"`.
+
+### Solution/Fix
+Added `eq .chezmoi.os "linux"` as the outer guard in `and` chains before any `.chezmoi.osRelease` access. Go templates short-circuit `and`, so the `osRelease` access is never evaluated on macOS.
+
+Files fixed:
+- `modify_dot_claude.json.tmpl:58` (arch-linux MCP server block)
+- `dot_config/ghostty/config.tmpl:12` (GeistMono font on Arch)
+- `dot_aliases.tmpl:196` (BALDING_GATE_DIR on Arch)
+
+Files already safe (already inside `{{ if eq .chezmoi.os "linux" }}` blocks):
+- `dot_aliases.tmpl:227`, `dot_zprofile.tmpl:132`
+
+Files not fixed (run_once scripts are broken/ignored anyway):
+- `run_once_01`, `run_once_03`, `run_once_03b` (all already gated or never run on macOS)
+
 ## 2026-04-08 — Add Tier 1 MCP servers + Chisel to modify scripts
 
 ### Changes

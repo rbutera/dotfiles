@@ -19,10 +19,6 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "uvx",
     "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"]
   },
-  "mcp-redis": {
-    "command": "uvx",
-    "args": ["redis-mcp-server"]
-  },
   "context7": {
     "command": "npx",
     "args": ["-y", "@upstash/context7-mcp@latest"]
@@ -55,7 +51,7 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "npx",
     "args": ["@bitbonsai/mcpvault@latest", "~/notes"]
   }
-{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+{{- if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
   ,"arch-linux": {
     "command": "uvx",
     "args": ["arch-ops-server"]
@@ -64,6 +60,6 @@ read -r -d '' base_mcps << 'MCPS' || true
 }
 MCPS
 
-# Merge: base MCP servers are always present, extras preserved.
-# All other fields in ~/.claude.json are untouched.
-echo "$current" | jq --argjson base "$base_mcps" '.mcpServers = ((.mcpServers // {}) * $base)'
+# Replace: base is authoritative for MCP servers. Removals from base
+# are reflected in the deployed config. All other fields untouched.
+echo "$current" | jq --argjson base "$base_mcps" '.mcpServers = $base'
