@@ -20,6 +20,9 @@ BASE = {
     "model_reasoning_effort": "medium",
     "model_reasoning_summary": "auto",
     "approval_policy": "never",
+    "features": {
+        "multi_agent": True,
+    },
     "sandbox": {
         "writable_roots": [HOME, "/tmp"],
         "network_access": True,

@@ -1,5 +1,19 @@
 # chezmoi config changes log
 
+## 2026-04-08 — Resolve stash conflicts (zshenv, codex config)
+
+### Problem
+
+`git stash pop` conflicted with recent commits:
+- `dot_zshenv.tmpl`: stash added `CLAUDE_CODE_OAUTH_TOKEN` and `OPENCLAW_DISCORD_READA`; HEAD added a `dev_infra` DB_URL block. Both modified.
+- `dot_codex/private_config.toml.tmpl`: stash added `[features] multi_agent = true`, but HEAD had replaced the template with a `modify_private_config.toml` Python script (commit 9f5aed3).
+
+### Fix
+
+- `dot_zshenv.tmpl`: kept both changes — new env vars from stash plus the `dev_infra` conditional block from HEAD.
+- Codex: accepted the template deletion, ported `features.multi_agent = True` into the new `modify_private_config.toml` BASE dict.
+- Also includes `dot_chronicler.json.tmpl` update (paths moved from `.openclaw/workspace-navi` to `navi/` directory structure).
+
 ## 2026-04-08 — Track Claude plugin and MCP configs in chezmoi
 
 ### Problem
