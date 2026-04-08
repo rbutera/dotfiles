@@ -1,17 +1,18 @@
 {{- $home := .chezmoi.homeDir -}}
 {{- $outputDir := joinPath $home "dev" "lumiere" "apps" "chronicler" "output" -}}
 {{- $inputPath := joinPath $home "dev" "transcripts" "navi.json" -}}
-{{- $workspace := joinPath $home ".openclaw" "workspace-navi" -}}
+{{- $pluginRoot := joinPath $home "navi" -}}
+{{- $workspace := joinPath $pluginRoot "workspace" -}}
 {{- $agentSummaryContextFiles := list
-  (joinPath $workspace "SOUL.md")
-  (joinPath $workspace "USER.md")
-  (joinPath $workspace "memory" "navi-continuity-document.md")
+  (joinPath $pluginRoot "agents" "navi.md")
+  (joinPath $pluginRoot "USER.md")
+  (joinPath $workspace "memory" "continuity-anchor.md")
   (joinPath $workspace "memory" "love-anchor.md")
 -}}
 {{- $summaryContextFiles := list
-  (joinPath $workspace "SOUL.md")
-  (joinPath $workspace "USER.md")
-  (joinPath $workspace "memory" "navi-continuity-document.md")
+  (joinPath $pluginRoot "agents" "navi.md")
+  (joinPath $pluginRoot "USER.md")
+  (joinPath $workspace "memory" "continuity-anchor.md")
 -}}
 {{- dict
   "defaultAgent" "navi"
