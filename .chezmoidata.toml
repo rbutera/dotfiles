@@ -5,3 +5,4 @@
 [host_groups]
   niri = ["mondo"]
   kde  = []
+  dev_infra = ["mondo"]

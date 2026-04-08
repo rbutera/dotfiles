@@ -1,0 +1,11 @@
+{{- /* Docker infrastructure .env — rendered by chezmoi */ -}}
+{{- /* Add/remove blocks per host group or hostname as needed */ -}}
+
+# Postgres
+POSTGRES_USER=rai
+POSTGRES_PASSWORD={{ onepasswordRead "op://Private/local-postgres/password" }}
+POSTGRES_DB=dev
+POSTGRES_PORT=5432
+
+# Redis
+REDIS_PORT=6379

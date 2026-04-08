@@ -1,3 +1,7 @@
+{{- $mod := "ctrl" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{- $mod = "super" -}}
+{{- end -}}
 command = {{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin/zsh{{ else }}/usr/bin/zsh{{ end }}
 
 # ── Theme ──────────────────────────────────────────────────────────────────────
@@ -5,7 +9,10 @@ theme = Catppuccin Mocha
 
 # ── Font ───────────────────────────────────────────────────────────────────────
 font-size = 8
-# JetBrains Mono (built-in) with ligatures on by default
+{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+font-family = GeistMono Nerd Font Mono
+{{- end }}
+# JetBrains Mono (built-in) fallback on non-Arch systems
 
 # ── Window ─────────────────────────────────────────────────────────────────────
 window-padding-x = 4
@@ -23,6 +30,7 @@ gtk-custom-css = style.css
 
 # ── Background ────────────────────────────────────────────────────────────
 background-opacity = 0.85
+background-blur = 20
 
 # ── Cursor ─────────────────────────────────────────────────────────────────────
 cursor-style = bar
@@ -36,6 +44,11 @@ split-inherit-working-directory = true
 # ── Mouse ──────────────────────────────────────────────────────────────────────
 mouse-hide-while-typing = true
 
+# ── Clipboard ─────────────────────────────────────────────────────────────────
+clipboard-read = allow
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+
 # ── Notifications ──────────────────────────────────────────────────────────────
 # Notify via desktop notification when a command that ran for >10s finishes
 # while the window is unfocused. Works on KDE, Hyprland, Niri, etc.
@@ -44,5 +57,30 @@ notify-on-command-finish-action = notify
 notify-on-command-finish-after = 10s
 
 # ── Shell integration ──────────────────────────────────────────────────────────
-# Auto-detected for zsh — enables prompt navigation, smart close, CWD passing,
-# cursor style changes at prompt, etc. No extra config needed.
+shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
+
+# ── Split navigation (hjkl) ──────────────────────────────────────────────────
+unfocused-split-opacity = 0.85
+focus-follows-mouse = true
+keybind = {{ $mod }}+shift+h=goto_split:left
+keybind = {{ $mod }}+shift+j=goto_split:bottom
+keybind = {{ $mod }}+shift+k=goto_split:top
+keybind = {{ $mod }}+shift+l=goto_split:right
+keybind = {{ $mod }}+shift+z=toggle_split_zoom
+
+# ── Prompt navigation ────────────────────────────────────────────────────────
+keybind = {{ $mod }}+shift+e=jump_to_prompt:-1
+keybind = {{ $mod }}+shift+d=jump_to_prompt:1
+
+# ── Utility keybinds ─────────────────────────────────────────────────────────
+keybind = {{ $mod }}+shift+o=write_scrollback_file:open
+keybind = {{ $mod }}+shift+p=toggle_command_palette
+keybind = {{ $mod }}+shift+r=reload_config
+keybind = {{ $mod }}+shift+u=copy_url_to_clipboard
+
+{{ if eq .chezmoi.os "darwin" -}}
+# ── Quick terminal (macOS only) ──────────────────────────────────────────────
+keybind = global:ctrl+super+alt+grave_accent=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-animation-duration = 200
+{{ end -}}
