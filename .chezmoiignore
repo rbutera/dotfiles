@@ -5,6 +5,8 @@ CLAUDE.md
 docs/
 logs/
 openspec/
+skills/
+.claude-plugin/
 
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh

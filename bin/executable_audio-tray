@@ -1,0 +1,118 @@
+#!/usr/bin/python3
+"""System tray audio switcher — click to toggle EVO4 headphones / FiiO speakers.
+
+EasyEffects auto-profile switching handles the preset (evo4-eq vs flat).
+This just toggles the default PipeWire sink.
+"""
+
+import re
+import subprocess
+import sys
+
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+
+EVO4_MATCH = "EVO4"
+FIIO_MATCH = "Fiio"
+
+
+def run(*cmd):
+    return subprocess.run(cmd, capture_output=True, text=True).stdout.strip()
+
+
+def get_sink_id(match):
+    """Find sink node ID from wpctl status by matching description."""
+    for line in run("wpctl", "status").splitlines():
+        if match in line and "vol:" in line:
+            m = re.search(r"(\d+)\.", line)
+            if m:
+                return m.group(1)
+    return None
+
+
+def get_default_sink_name():
+    out = run("wpctl", "inspect", "@DEFAULT_AUDIO_SINK@")
+    for line in out.splitlines():
+        if "node.description" in line:
+            return line.split("=")[-1].strip().strip('"')
+    return ""
+
+
+def is_headphones():
+    return EVO4_MATCH in get_default_sink_name()
+
+
+def switch_to(match):
+    nid = get_sink_id(match)
+    if nid:
+        run("wpctl", "set-default", nid)
+
+
+class AudioTray:
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.app.setQuitOnLastWindowClosed(False)
+
+        QIcon.setThemeName("Papirus-Dark")
+        self.icon_hp = QIcon.fromTheme(
+            "audio-headphones",
+            QIcon("/usr/share/icons/Papirus-Dark/16x16/devices/audio-headphones.svg"),
+        )
+        self.icon_spk = QIcon.fromTheme(
+            "audio-speakers",
+            QIcon("/usr/share/icons/Papirus-Dark/16x16/devices/audio-speakers.svg"),
+        )
+
+        self.tray = QSystemTrayIcon()
+        self.tray.activated.connect(self.on_activated)
+
+        menu = QMenu()
+        hp_action = menu.addAction("Headphones (EVO4)")
+        hp_action.triggered.connect(self.set_headphones)
+        spk_action = menu.addAction("Speakers (FiiO)")
+        spk_action.triggered.connect(self.set_speakers)
+        menu.addSeparator()
+        quit_action = menu.addAction("Quit")
+        quit_action.triggered.connect(self.app.quit)
+
+        self.tray.setContextMenu(menu)
+        self.update_icon()
+        self.tray.show()
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_icon)
+        self.timer.start(5000)
+
+    def update_icon(self):
+        if is_headphones():
+            self.tray.setIcon(self.icon_hp)
+            self.tray.setToolTip("Audio: Headphones (EVO4)")
+        else:
+            self.tray.setIcon(self.icon_spk)
+            self.tray.setToolTip("Audio: Speakers (FiiO)")
+
+    def on_activated(self, reason):
+        if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
+            self.toggle()
+
+    def toggle(self):
+        if is_headphones():
+            self.set_speakers()
+        else:
+            self.set_headphones()
+
+    def set_headphones(self):
+        switch_to(EVO4_MATCH)
+        self.update_icon()
+
+    def set_speakers(self):
+        switch_to(FIIO_MATCH)
+        self.update_icon()
+
+    def run(self):
+        sys.exit(self.app.exec_())
+
+
+if __name__ == "__main__":
+    AudioTray().run()

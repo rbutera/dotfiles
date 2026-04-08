@@ -1,0 +1,69 @@
+#!/bin/bash
+# Modify script for ~/.claude.json
+# Merges managed MCP servers into existing Claude global config.
+# Managed: mcpServers
+# Free: everything else (numStartups, tipsHistory, installMethod, cachedGrowthBookFeatures, etc.)
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+# ── Base MCP servers: shared across all machines ─────────────────────────────
+read -r -d '' base_mcps << 'MCPS' || true
+{
+  "open-websearch": {
+    "command": "npx",
+    "args": ["-y", "open-websearch"]
+  },
+  "mcp-alchemy": {
+    "command": "uvx",
+    "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"]
+  },
+  "mcp-redis": {
+    "command": "uvx",
+    "args": ["redis-mcp-server"]
+  },
+  "context7": {
+    "command": "npx",
+    "args": ["-y", "@upstash/context7-mcp@latest"]
+  },
+  "mcp-deepwiki": {
+    "command": "npx",
+    "args": ["-y", "mcp-deepwiki@latest"]
+  },
+  "tempograph": {
+    "command": "uvx",
+    "args": ["--from", "tempograph[full]", "tempograph"]
+  },
+  "oss-autopilot": {
+    "command": "npx",
+    "args": ["-y", "@oss-autopilot/mcp@latest"]
+  },
+  "pty-mcp": {
+    "command": "pty-mcp",
+    "args": []
+  },
+  "chisel": {
+    "command": "chisel",
+    "args": ["--stdio", "--root", "/"]
+  },
+  "better-notion-mcp": {
+    "command": "npx",
+    "args": ["@n24q02m/better-notion-mcp"]
+  },
+  "obsidian": {
+    "command": "npx",
+    "args": ["@bitbonsai/mcpvault@latest", "~/notes"]
+  }
+{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+  ,"arch-linux": {
+    "command": "uvx",
+    "args": ["arch-ops-server"]
+  }
+{{- end }}
+}
+MCPS
+
+# Merge: base MCP servers are always present, extras preserved.
+# All other fields in ~/.claude.json are untouched.
+echo "$current" | jq --argjson base "$base_mcps" '.mcpServers = ((.mcpServers // {}) * $base)'

@@ -1,0 +1,36 @@
+#!/bin/bash
+# Switch audio output between EVO4 headphones and FiiO speakers.
+# EasyEffects auto-profile switching handles preset loading.
+
+get_sink_id() {
+  wpctl status | grep "$1" | grep "vol:" | head -1 | grep -oP '\d+(?=\.)'
+}
+
+get_current() {
+  wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep "node.description" | head -1 | sed 's/.*= *//' | tr -d '"'
+}
+
+set_headphones() {
+  local id=$(get_sink_id "EVO4")
+  [ -n "$id" ] && wpctl set-default "$id"
+  echo "Switched to: EVO4 (headphones)"
+}
+
+set_speakers() {
+  local id=$(get_sink_id "Fiio")
+  [ -n "$id" ] && wpctl set-default "$id"
+  echo "Switched to: FiiO (speakers)"
+}
+
+case "${1:-toggle}" in
+  headphones|hp|evo4) set_headphones ;;
+  speakers|spk|fiio)  set_speakers ;;
+  toggle)
+    if [[ "$(get_current)" == *"EVO4"* ]]; then
+      set_speakers
+    else
+      set_headphones
+    fi
+    ;;
+  *) echo "Usage: audio-switch [headphones|speakers|toggle]" ;;
+esac

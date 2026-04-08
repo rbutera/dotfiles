@@ -1,5 +1,18 @@
 # chezmoi config changes log
 
+## 2026-04-08 — Track Claude plugin and MCP configs in chezmoi
+
+### Problem
+
+Serena MCP plugin was opening a browser window on every Claude Code startup (`web_dashboard_open_on_launch: true`). Fixed the setting, but the config at `~/.serena/serena_config.yml` wasn't tracked in chezmoi, nor were other Claude plugin/MCP configs.
+
+### Fix
+
+Added three new files to chezmoi:
+- `dot_serena/serena_config.yml` — Serena plugin config (with `web_dashboard_open_on_launch: false`)
+- `dot_config/mcp-config.json` — global MCP server registry (currently has open-websearch)
+- `dot_claude/settings.local.json` — machine-specific Claude Code permission overrides
+
 ## 2026-04-04 — Ignore AI tool workspace dirs in .gitignore
 
 ### Problem

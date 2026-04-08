@@ -1,5 +1,35 @@
 # chezmoi modify scripts changelog
 
+## 2026-04-08 — Add Tier 1 MCP servers + Chisel to modify scripts
+
+### Changes
+Added the following MCP servers to both `modify_dot_claude.json` and `dot_codex/modify_private_config.toml`:
+- **mcp-alchemy** — SQLAlchemy-based multi-DB (Postgres, MySQL, SQLite). Needs `DB_URL` env var.
+- **mcp-redis** — Official Redis MCP. Defaults to localhost:6379.
+- **tempograph** — Code graph context engine, 24 tools, tree-sitter for 170+ languages. No API keys.
+- **oss-autopilot** — Open source contribution manager, PR tracking, CI diagnosis. Uses `gh` auth.
+- **pty-mcp** — Persistent PTY/SSH sessions. Single Go binary installed to ~/bin.
+- **chisel** — File ops with 20-100x token savings via diffs. Rust binary in ~/bin, `--stdio` mode (no HTTP/auth).
+- **better-notion-mcp** — Notion integration with 77% token reduction. Needs `NOTION_TOKEN`.
+
+Also updated `dot_claude/modify_settings.json` with newly enabled plugins (superpowers, skill-creator, claude-md-management, commit-commands, serena, plugin-dev, slack, chrome-devtools-mcp, mcp-server-dev).
+
+### Binaries installed
+- `~/bin/pty-mcp` + `~/bin/ai-tmux` (from pty-mcp installer)
+- `~/bin/chisel` (from GitHub releases, linux-x86_64)
+
+## 2026-04-08 — Add modify script for ~/.claude.json (global MCP servers)
+
+### Problem
+Claude Code stores global MCP servers in `~/.claude.json`, not `~/.claude/settings.json`. The `add-mcp` tool writes to this file, but it also contains runtime state (numStartups, tipsHistory, etc.) that shouldn't be tracked.
+
+### Changes
+- Created `modify_dot_claude.json` — shell script using `jq` to merge managed `mcpServers` into `~/.claude.json`
+- Managed fields: `mcpServers` only
+- Free fields: everything else (runtime state)
+- Also updated `dot_codex/modify_private_config.toml` to include `command`/`args` for open-websearch (was missing, only had `url`)
+- Updated `docs/mcp.md` to document the new modify script
+
 ## 2026-04-08 — Convert Claude Code and Codex CLI configs to modify scripts
 
 ### Problem

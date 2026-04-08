@@ -1,0 +1,32 @@
+#!/bin/bash
+# A/B mic test: record raw then processed, play both back
+set -euo pipefail
+
+RAW=$(mktemp /tmp/mic-raw-XXXX.wav)
+FX=$(mktemp /tmp/mic-fx-XXXX.wav)
+trap 'rm -f "$RAW" "$FX"' EXIT
+
+REC_ARGS=(--rate 48000 --channels 2 --format s16)
+
+echo "=== RECORDING RAW (no effects) ==="
+echo "Press Enter to stop..."
+pw-record "${REC_ARGS[@]}" --target "EVO4 Analog Surround 4.0" "$RAW" &
+PID=$!
+read -r
+kill "$PID" 2>/dev/null; wait "$PID" 2>/dev/null || true
+
+echo ""
+echo "=== RECORDING PROCESSED (EasyEffects) ==="
+echo "Press Enter to stop..."
+pw-record "${REC_ARGS[@]}" --target "Easy Effects Source" "$FX" &
+PID=$!
+read -r
+kill "$PID" 2>/dev/null; wait "$PID" 2>/dev/null || true
+
+echo ""
+echo "=== PLAYBACK: RAW ==="
+mpv --no-video "$RAW"
+
+echo ""
+echo "=== PLAYBACK: PROCESSED ==="
+mpv --no-video "$FX"
