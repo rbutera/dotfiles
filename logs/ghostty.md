@@ -1,5 +1,29 @@
 # Ghostty config changes log
 
+## 2026-04-08 — Fix write_scrollback_file keybind
+
+`write_scrollback_file` requires an argument (`:open` or `:paste`). Changed to `write_scrollback_file:open` to fix `keybind: unknown error error.InvalidFormat` validation error.
+
+## 2026-04-08 — Power user config overhaul
+
+### Changes
+- **Background blur**: `background-blur = 20` (complements existing 0.85 opacity)
+- **Clipboard**: `clipboard-read/write = allow` (silent OSC 52 for neovim etc), `clipboard-trim-trailing-spaces = true`
+- **Shell integration**: Explicitly enabled `cursor,sudo,title,ssh-env,ssh-terminfo` (sudo + SSH features were off by default)
+- **Split navigation**: hjkl via `ctrl+shift` (Linux) / `cmd+shift` (macOS), plus zoom toggle (`+z`), unfocused split dimming (0.85), focus-follows-mouse
+- **Prompt jumping**: `ctrl/cmd+shift+e` (prev) / `+d` (next)
+- **Utility keybinds**: scrollback-to-file (`+o`), command palette (`+p`), reload config (`+r`), copy URL (`+u`)
+- **Quick terminal**: macOS only, `ctrl+cmd+alt+grave` — dropdown/quake mode
+- **Template refactor**: Added `$mod` variable (`ctrl` on Linux, `super` on macOS) for all keybinds
+
+## 2026-04-08 — Set GeistMono Nerd Font on Arch systems
+
+### Problem
+Ghostty was using the built-in JetBrains Mono. User wanted GeistMono Nerd Font Mono instead (already installed via system packages).
+
+### Changes
+- Added Arch-conditional `font-family = GeistMono Nerd Font Mono` to `dot_config/ghostty/config.tmpl`. Non-Arch platforms still fall back to the built-in JetBrains Mono.
+
 ## 2026-03-28 — Template Ghostty shell path for macOS vs Linux
 
 ### Problem

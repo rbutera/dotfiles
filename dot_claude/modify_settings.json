@@ -1,0 +1,31 @@
+#!/bin/bash
+# Modify script for ~/.claude/settings.json
+# Merges managed base config into existing settings.
+# Managed: cleanupPeriodDays, enabledPlugins
+# Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+# ── Base config: fields we want on all machines ──────────────────────────────
+read -r -d '' base << 'BASE' || true
+{
+  "cleanupPeriodDays": 30,
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-supermemory@supermemory-plugins": true
+  }
+}
+BASE
+
+# Merge: base wins for managed keys, existing wins for everything else.
+# enabledPlugins is additive — base plugins always present, extras preserved.
+echo "$current" | jq --argjson base "$base" '
+  .cleanupPeriodDays = $base.cleanupPeriodDays |
+  .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins)
+'

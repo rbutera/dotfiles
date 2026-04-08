@@ -1,0 +1,103 @@
+#!/usr/bin/python3
+"""Modify script for ~/.codex/config.toml
+
+Merges managed base config into existing Codex settings.
+Managed: top-level settings, sandbox, mcp_servers, model_providers, plugins
+Free: projects, notice (machine-specific, added by Codex at runtime)
+"""
+
+import os
+import sys
+import tomllib
+import tomli_w
+
+# ── Base config: fields we want on all machines ──────────────────────────────
+HOME = os.environ["HOME"]
+
+BASE = {
+    "personality": "pragmatic",
+    "model": "gpt-5.4",
+    "model_reasoning_effort": "medium",
+    "model_reasoning_summary": "auto",
+    "approval_policy": "never",
+    "sandbox": {
+        "writable_roots": [HOME, "/tmp"],
+        "network_access": True,
+    },
+    "mcp_servers": {
+        "github": {
+            "url": "https://api.githubcopilot.com/mcp/",
+            "bearer_token_env_var": "GITHUB_LLM_PAT",
+        },
+        "Sanity": {
+            "url": "https://mcp.sanity.io",
+            "bearer_token_env_var": "SANITY_MCP_TOKEN",
+        },
+        "context7": {
+            "command": "npx",
+            "args": ["-y", "@upstash/context7-mcp@latest"],
+        },
+        "open-websearch": {
+            "url": "http://localhost:3005/mcp",
+        },
+        "mcp-deepwiki": {
+            "command": "npx",
+            "args": ["-y", "mcp-deepwiki@latest"],
+        },
+        "Playwright": {
+            "command": "npx",
+            "args": ["-y", "@playwright/mcp@latest"],
+        },
+        "serena": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/oraios/serena",
+                "serena",
+                "start-mcp-server",
+                "--context",
+                "ide-assistant",
+                "--enable-web-dashboard",
+                "false",
+            ],
+        },
+    },
+    "model_providers": {
+        "zen": {
+            "name": "OpenCode Zen",
+            "base_url": "https://opencode.ai/zen/v1",
+            "env_key": "OPENCODE_ZEN_API_KEY",
+            "wire_api": "responses",
+        },
+    },
+    "plugins": {
+        "google-calendar@openai-curated": {"enabled": True},
+        "gmail@openai-curated": {"enabled": True},
+        "github@openai-curated": {"enabled": True},
+        "google-drive@openai-curated": {"enabled": True},
+    },
+}
+
+
+def deep_merge(base: dict, override: dict) -> dict:
+    """Merge two dicts. base wins for shared keys, override adds new keys."""
+    result = dict(base)
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        elif key not in result:
+            result[key] = value
+    return result
+
+
+# Read current config from stdin
+raw = sys.stdin.buffer.read()
+if raw.strip():
+    current = tomllib.loads(raw.decode())
+else:
+    current = {}
+
+# Merge: base wins for managed keys, current adds free keys (projects, notice, etc.)
+merged = deep_merge(BASE, current)
+
+sys.stdout.buffer.write(tomli_w.dumps(merged).encode())
