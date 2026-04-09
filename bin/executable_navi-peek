@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+TMUX_BIN="${TMUX_BIN:-/opt/homebrew/bin/tmux}"
+TMUX_SOCKET="${TMUX_SOCKET:-navi}"
+TMUX_SESSION="${TMUX_SESSION:-navi}"
+NAVI_LAUNCH="${NAVI_LAUNCH:-$HOME/navi/bin/launch.sh}"
+
+if [[ ! -x "$TMUX_BIN" ]]; then
+  echo "navi-peek: tmux is not available at $TMUX_BIN" >&2
+  exit 1
+fi
+
+if ! "$TMUX_BIN" -L "$TMUX_SOCKET" has-session -t "$TMUX_SESSION" 2>/dev/null; then
+  echo "navi-peek: Navi session '$TMUX_SESSION' is not running on tmux socket '$TMUX_SOCKET'." >&2
+  if [[ -x "$NAVI_LAUNCH" ]]; then
+    echo "Start it with: $NAVI_LAUNCH" >&2
+  else
+    echo "Expected launcher: $NAVI_LAUNCH" >&2
+  fi
+  exit 1
+fi
+
+if [[ ! -t 0 || ! -t 1 ]]; then
+  echo "navi-peek: canonical inspection surface is tmux socket '$TMUX_SOCKET', session '$TMUX_SESSION'." >&2
+  echo "Attach from a terminal with: $TMUX_BIN -L $TMUX_SOCKET attach -t $TMUX_SESSION" >&2
+  exit 0
+fi
+
+exec "$TMUX_BIN" -L "$TMUX_SOCKET" attach -t "$TMUX_SESSION"

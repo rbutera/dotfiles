@@ -1,0 +1,13 @@
+// Default layout — Rai Butera
+// Clean single-pane layout with compact status bar.
+// Mirrors the tmux experience: one pane, split as needed.
+
+layout {
+    // Main editing area
+    pane
+
+    // Compact status bar at the bottom (like tmux status line)
+    pane size=1 borderless=true {
+        plugin location="compact-bar"
+    }
+}

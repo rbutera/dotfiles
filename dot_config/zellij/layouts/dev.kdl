@@ -1,0 +1,14 @@
+// Dev layout — Rai Butera
+// Two-pane layout: main editor top, terminal bottom.
+// Launch with: zellij --layout dev
+
+layout {
+    pane split_direction="horizontal" {
+        pane size="70%"
+        pane size="30%"
+    }
+
+    pane size=1 borderless=true {
+        plugin location="compact-bar"
+    }
+}

@@ -78,13 +78,9 @@ BASE = {
                 "false",
             ],
         },
-        "mcp-alchemy": {
-            "command": "uvx",
-            "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"],
-        },
         "tempograph": {
             "command": "uvx",
-            "args": ["--from", "tempograph[full]", "tempograph"],
+            "args": ["--from", "tempograph[full]", "tempograph-server"],
         },
         "oss-autopilot": {
             "command": "npx",

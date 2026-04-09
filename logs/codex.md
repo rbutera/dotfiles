@@ -37,3 +37,17 @@ macOS shell startup needed explicit Homebrew bin precedence and a Colima-backed 
 ### Changes
 - Updated `dot_zprofile.tmpl` to add `export PATH=/opt/homebrew/bin:$PATH` on macOS.
 - Updated `dot_zprofile.tmpl` to add `export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock` on macOS.
+
+## 2026-04-08 — Fix MCP startup failures in Codex CLI
+
+### Problem
+Six MCP servers were failing on startup: `chisel` and `pty-mcp` (missing binaries), `Sanity` (missing env var), `mcp-alchemy` (missing `DB_URL`), `better-notion-mcp` (missing `NOTION_TOKEN`), `tempograph` (missing repo arg).
+
+### Changes
+- Installed `chisel` MCP server from `ckanthony/Chisel` GitHub repo via `cargo install --git`.
+- Installed `pty-mcp` v0.3.0 from crates.io via `cargo install`.
+- Reshimmed asdf so both binaries are on PATH.
+- Removed `mcp-alchemy` from `dot_codex/modify_private_config.toml` (no database to connect to).
+- Applied updated config via `chezmoi apply ~/.codex/config.toml`.
+- Fixed `tempograph`: changed entrypoint from `tempograph` (CLI, requires `repo` arg) to `tempograph-server` (MCP stdio server). The package exposes three entrypoints: `tempograph` (CLI), `tempograph-server` (MCP), and `tempo` (alias).
+- Remaining unfixed: `Sanity` (needs `SANITY_MCP_TOKEN`), `better-notion-mcp` (needs `NOTION_TOKEN`).

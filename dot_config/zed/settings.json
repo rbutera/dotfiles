@@ -1,0 +1,282 @@
+// Zed settings — Rai Butera
+// Ported from VSCode settings + tmux workflow on 2026-04-09
+//
+// Zed docs: https://zed.dev/docs/reference/all-settings
+// Vim mode: https://zed.dev/docs/vim
+{
+  // -- Vim mode --
+  "vim_mode": true,
+  "vim": {
+    "use_system_clipboard": "always",
+    "use_smartcase_find": true,
+    "toggle_relative_line_numbers": true,
+    "highlight_on_yank_duration": 200
+  },
+
+  // -- Theme --
+  "theme": {
+    "mode": "dark",
+    "dark": "Catppuccin Mocha",
+    "light": "Catppuccin Latte"
+  },
+  "icon_theme": "Catppuccin Mocha",
+
+  // -- Fonts --
+  // Primary: Monaspace Neon (from VSCode config)
+  // Fallback chain matches VSCode setup
+  "buffer_font_family": "Monaspace Neon",
+  "buffer_font_size": 13,
+  "buffer_font_weight": 450,
+  "buffer_font_features": {
+    "calt": true,
+    "liga": true,
+    "ss01": true,
+    "ss02": true,
+    "ss03": true,
+    "ss04": true,
+    "ss05": true,
+    "ss06": true,
+    "ss07": true,
+    "ss08": true,
+    "ss09": true
+  },
+  "buffer_line_height": "comfortable",
+  "ui_font_family": "Inter",
+  "ui_font_size": 14,
+
+  // -- Editor display --
+  "relative_line_numbers": true,
+  "current_line_highlight": "gutter",
+  "cursor_blink": true,
+  "cursor_shape": "bar",
+  "show_whitespaces": "boundary",
+
+  // -- Minimap (disabled, matching VSCode) --
+  "minimap": {
+    "show": "never"
+  },
+
+  // -- Scrollbar --
+  "scrollbar": {
+    "show": "auto",
+    "git_diff": true,
+    "search_results": true,
+    "cursors": false
+  },
+
+  // -- Indentation (tabs, size 2, matching VSCode) --
+  "hard_tabs": true,
+  "tab_size": 2,
+
+  // -- Formatting --
+  "format_on_save": "on",
+  "remove_trailing_whitespace_on_save": false,
+  "ensure_final_newline_on_save": true,
+
+  // -- Semantic highlighting --
+  "semantic_tokens": "full",
+
+  // -- Search --
+  "use_smartcase_search": true,
+  "search_wrap": true,
+
+  // -- Sticky scroll (matching VSCode stickyScroll.enabled) --
+  "sticky_scroll": {
+    "enabled": true
+  },
+
+  // -- Inlay hints --
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // -- Git --
+  "git": {
+    "git_gutter": "tracked_files",
+    "inline_blame": {
+      "enabled": true,
+      "delay_ms": 500
+    }
+  },
+
+  // -- Tabs --
+  "tab_bar": {
+    "show": true,
+    "show_nav_history_buttons": false
+  },
+  "tabs": {
+    "close_position": "right",
+    "file_icons": true,
+    "git_status": true
+  },
+  "preview_tabs": {
+    "enabled": true,
+    "enable_preview_from_project_panel": true
+  },
+
+  // -- Toolbar --
+  "toolbar": {
+    "breadcrumbs": false
+  },
+
+  // -- Pane splitting (mirrors tmux - and _ split behavior) --
+  "pane_split_direction_horizontal": "down",
+  "pane_split_direction_vertical": "right",
+
+  // -- Session --
+  "restore_on_startup": "last_workspace",
+  "autosave": "on_focus_change",
+  "confirm_quit": false,
+
+  // -- Terminal --
+  "terminal": {
+    "font_family": "JetBrainsMono Nerd Font",
+    "font_size": 12,
+    "line_height": "comfortable",
+    "blinking": "on",
+    "copy_on_select": true,
+    "shell": {
+      "program": "zsh"
+    },
+    "toolbar": {
+      "breadcrumbs": false
+    }
+  },
+
+  // -- Completions --
+  "show_completions_on_input": true,
+  "show_completion_documentation": true,
+
+  // -- AI / Edit predictions --
+  "features": {
+    "edit_predictions": {
+      "provider": "zed"
+    }
+  },
+  "show_edit_predictions": true,
+
+  // -- External agents (Claude Code, Codex) --
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    },
+    "codex-acp": {
+      "type": "registry"
+    }
+  },
+
+  // -- Project panel (sidebar right, matching VSCode) --
+  "project_panel": {
+    "dock": "right",
+    "file_icons": true,
+    "folder_icons": true,
+    "git_status": true,
+    "auto_fold_dirs": true,
+    "auto_reveal_entries": true
+  },
+
+  // -- Linked editing (matching VSCode editor.linkedEditing) --
+  "linked_edits": true,
+
+  // -- Bracket pair guides (matching VSCode) --
+  "indent_guides": {
+    "enabled": true,
+    "coloring": "indent_aware"
+  },
+
+  // -- Multi-cursor modifier (cmd, matching VSCode ctrlCmd) --
+  "multi_cursor_modifier": "cmd_or_ctrl",
+
+  // -- File scan exclusions --
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.next",
+    "**/target",
+    "**/.trunk/*out"
+  ],
+
+  // -- Language-specific overrides --
+  "languages": {
+    "JavaScript": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "TypeScript": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "TSX": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "JSON": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "JSONC": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "HTML": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "CSS": {
+      "tab_size": 2,
+      "formatter": "prettier"
+    },
+    "Markdown": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "soft_wrap": "preferred_line_length",
+      "preferred_line_length": 100
+    },
+    "Python": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "formatter": "language_server"
+    },
+    "Go": {
+      "tab_size": 4,
+      "hard_tabs": true,
+      "format_on_save": "on"
+    },
+    "Lua": {
+      "tab_size": 2,
+      "formatter": "language_server"
+    },
+    "Shell Script": {
+      "tab_size": 2,
+      "formatter": "language_server"
+    },
+    "SQL": {
+      "tab_size": 2,
+      "formatter": "language_server"
+    },
+    "Rust": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "format_on_save": "on"
+    }
+  },
+
+  // -- LSP settings --
+  "lsp": {
+    "typescript-language-server": {
+      "initialization_options": {
+        "preferences": {
+          "importModuleSpecifierPreference": "relative",
+          "includeCompletionsForModuleExports": true,
+          "includeCompletionsWithInsertText": true
+        }
+      }
+    }
+  }
+}

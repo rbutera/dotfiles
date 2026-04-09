@@ -1,0 +1,169 @@
+// Zed keymap — Rai Butera
+// Ported from VSCode vim keybindings on 2026-04-09
+//
+// Zed vim docs: https://zed.dev/docs/vim
+// Leader is space (set via vim::Leader action or context)
+[
+  // ============================================================
+  // Normal mode keybindings
+  // ============================================================
+  {
+    "context": "vim_mode == normal",
+    "bindings": {
+      // -- Leader mappings (space as leader) --
+
+      // File finder / search (ported from VSCode <leader>ff, <leader>fw, etc.)
+      "space f f": "file_finder::Toggle",
+      "space f w": "pane::DeploySearch",
+      "space f b": "tab_switcher::Toggle",
+      "space f o": "projects::OpenRecent",
+      "space f s": "workspace::DeploySearch",
+
+      // Buffer management (ported from VSCode <leader>bb, <leader>bd, etc.)
+      "space b b": "tab_switcher::Toggle",
+      "space b d": "pane::CloseActiveItem",
+      "space b c": "pane::CloseInactiveItems",
+      "space b C": "pane::CloseAllItems",
+
+      // Close current editor (ported from VSCode <leader>c)
+      "space c": "pane::CloseActiveItem",
+
+      // Split panes (ported from VSCode <leader>\ and <leader>|)
+      "space \\": "pane::SplitRight",
+      "space |": "pane::SplitDown",
+
+      // Toggle sidebar (ported from VSCode <leader>`)
+      "space `": "workspace::ToggleRightDock",
+
+      // Reveal in project panel (ported from VSCode <leader>kh and <leader>ff)
+      "space k h": "pane::RevealInProjectPanel",
+      "space k l": "workspace::ToggleRightDock",
+
+      // Line navigation (ported from VSCode <leader>H and <leader>h)
+      // <leader>H = go to column 0, <leader>h = go to first non-blank
+      // These are handled natively by 0 and ^ in vim mode
+
+      // LSP actions (ported from VSCode <leader>la, <leader>lr, <leader>lf, etc.)
+      "space l a": "editor::ToggleCodeActions",
+      "space l r": "editor::Rename",
+      "space l f": "editor::Format",
+      "space l d": "editor::Hover",
+      "space l R": "editor::FindAllReferences",
+
+      // Diagnostics (ported from VSCode <leader>q and <leader>Q)
+      "space q": "editor::ToggleCodeActions",
+      "space Q": "editor::QuickFix",
+
+      // Comment toggle (ported from VSCode <leader>/)
+      "space /": "editor::ToggleComments",
+
+      // Clear search highlight (ported from VSCode <leader><leader>/)
+      "space space /": "vim::ClearSearch",
+
+      // Duplicate lines (ported from VSCode <leader>yj and <leader>yk)
+      "space y j": "editor::DuplicateLineDown",
+      "space y k": "editor::DuplicateLineUp",
+
+      // Peek definition (ported from VSCode <leader>p)
+      "space p": "editor::PeekDefinition",
+
+      // Hover / show info (ported from VSCode K and gl)
+      "K": "editor::Hover",
+      "g l": "editor::Hover",
+
+      // Go to definition/references (ported from VSCode gd, gr)
+      "g d": "editor::GoToDefinition",
+      "g r": "editor::FindAllReferences",
+      "g D": "editor::GoToDeclaration",
+      "g y": "editor::GoToTypeDefinition",
+      "g I": "editor::GoToImplementation",
+
+      // Next/prev diagnostic (ported from VSCode ]d, [d)
+      "] d": "editor::GoToDiagnostic",
+      "[ d": "editor::GoToPreviousDiagnostic",
+
+      // Next/prev buffer (ported from VSCode ]b, [b)
+      "] b": "pane::ActivateNextItem",
+      "[ b": "pane::ActivatePreviousItem",
+
+      // Symbol search (ported from VSCode <leader>T and <leader>t)
+      "space T": "project_symbols::Toggle",
+      "space t": "outline::Toggle",
+
+      // Open link under cursor (ported from VSCode <leader>enter)
+      "space enter": "editor::OpenUrl",
+
+      // Fold all / unfold all (ported from VSCode zC, zO)
+      "z C": "editor::FoldAll",
+      "z O": "editor::UnfoldAll",
+
+      // New blank line below without entering insert (ported from VSCode <leader>o)
+      "space o": ["editor::NewlineBelow", "vim::NormalBefore"],
+
+      // New blank line above without entering insert (ported from VSCode <leader>O)
+      "space O": ["editor::NewlineAbove", "vim::NormalBefore"],
+
+      // Toggle editor group layout (ported from VSCode <leader>5)
+      "space 5": "workspace::TogglePanelPositions",
+
+      // -- Agent shortcuts --
+      "space a c": ["agent::NewExternalAgentThread", { "agent": { "registry": { "name": "claude-acp" } } }],
+      "space a x": ["agent::NewExternalAgentThread", { "agent": { "registry": { "name": "codex-acp" } } }]
+    }
+  },
+
+  // ============================================================
+  // Visual mode keybindings
+  // ============================================================
+  {
+    "context": "vim_mode == visual",
+    "bindings": {
+      // Comment toggle (ported from VSCode <leader>/)
+      "space /": "editor::ToggleComments",
+
+      // Block comment (ported from VSCode <leader><leader>/)
+      "space space /": "editor::ToggleBlockComment",
+
+      // Duplicate selection (ported from VSCode <leader>yy)
+      "space y y": "editor::DuplicateLineDown",
+      "space y j": "editor::DuplicateLineDown",
+      "space y k": "editor::DuplicateLineUp"
+    }
+  },
+
+  // ============================================================
+  // Dock navigation with ctrl-w (vim-like window movement)
+  // Extends default ctrl-w pane splitting to include dock panels
+  // ============================================================
+  {
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"]
+    }
+  },
+
+  // ============================================================
+  // Global keybindings (all contexts)
+  // ============================================================
+  {
+    "bindings": {
+      // Terminal toggle (familiar from VSCode ctrl+`)
+      "ctrl-`": "workspace::ToggleBottomDock",
+
+      // Quick file finder
+      "cmd-p": "file_finder::Toggle",
+
+      // Command palette
+      "cmd-shift-p": "command_palette::Toggle",
+
+      // Project-wide search
+      "cmd-shift-f": "pane::DeploySearch",
+
+      // Save
+      "cmd-s": "workspace::Save"
+    }
+  }
+]
