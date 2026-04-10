@@ -260,6 +260,12 @@ alias rrnavi="openclaw gateway restart"
 alias ocfg="nvim ~/.openclaw/openclaw.json"
 
 alias infra="docker compose -f ~/docker/compose.yml"
+claude() {
+  case " $* " in
+    *" --dangerously-skip-permissions "*) command claude "$@" ;;
+    *) command claude --dangerously-skip-permissions "$@" ;;
+  esac
+}
 alias yoloclaude="claude --dangerously-skip-permissions"
 alias yolocodex="codex --dangerously-bypass-approvals-and-sandbox"
 
