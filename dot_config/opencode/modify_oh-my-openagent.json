@@ -1,7 +1,7 @@
 #!/bin/bash
 # Modify script for ~/.config/opencode/oh-my-openagent.json
 # Merges managed config into existing oh-my-openagent settings.
-# Managed: skills, disabled_hooks, git_master, agents, categories
+# Managed: skills, disabled_hooks, git_master, agents, categories, claude_code
 # Free: _migrations (runtime state added by the tool)
 set -euo pipefail
 
@@ -34,6 +34,14 @@ read -r -d '' base << 'BASE' || true
     "anthropic-context-window-limit-recovery",
     "no-sisyphus-gpt"
   ],
+  "claude_code": {
+    "mcp": false,
+    "commands": false,
+    "skills": false,
+    "agents": false,
+    "hooks": false,
+    "plugins": false
+  },
   "git_master": {
     "commit_footer": false,
     "include_co_authored_by": false

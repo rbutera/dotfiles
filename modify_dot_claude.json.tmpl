@@ -15,10 +15,6 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "npx",
     "args": ["-y", "open-websearch"]
   },
-  "mcp-alchemy": {
-    "command": "uvx",
-    "args": ["--from", "mcp-alchemy", "--with", "psycopg2-binary", "--with", "pymysql", "mcp-alchemy"]
-  },
   "context7": {
     "command": "npx",
     "args": ["-y", "@upstash/context7-mcp@latest"]
@@ -29,7 +25,7 @@ read -r -d '' base_mcps << 'MCPS' || true
   },
   "tempograph": {
     "command": "uvx",
-    "args": ["--from", "tempograph[full]", "tempograph"]
+    "args": ["--from", "tempograph[full]", "tempograph-server"]
   },
   "oss-autopilot": {
     "command": "npx",
@@ -42,10 +38,6 @@ read -r -d '' base_mcps << 'MCPS' || true
   "chisel": {
     "command": "chisel",
     "args": ["--stdio", "--root", "/"]
-  },
-  "better-notion-mcp": {
-    "command": "npx",
-    "args": ["@n24q02m/better-notion-mcp"]
   },
   "obsidian": {
     "command": "npx",

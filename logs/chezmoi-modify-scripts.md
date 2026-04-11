@@ -1,5 +1,28 @@
 # chezmoi modify scripts changelog
 
+## 2026-04-10 — Force open-websearch to stdio-only in Codex
+
+### Problem
+
+`open-websearch` defaults to `MODE=both`, which starts MCP stdio and also an HTTP server on port `3000`.
+When another process already owns `3000`, startup crashes with `EADDRINUSE` after stdio connects, and Codex reports a closed connection during MCP initialize.
+
+### Changes
+
+- `dot_codex/modify_private_config.toml`: added `env.MODE = "stdio"` for the `open-websearch` MCP entry so Codex launches it without the extra HTTP listener
+
+## 2026-04-10 — Fix tempograph entrypoint, remove mcp-alchemy from Claude config
+
+### Problem
+Three MCP servers were failing with `-32000: connection closed` in Claude Code (and opencode):
+- **tempograph** — wrong entrypoint `tempograph` (CLI, requires `repo` arg) instead of `tempograph-server` (MCP stdio server). Same bug was already fixed in the codex config on 2026-04-08 but never applied to the claude config.
+- **mcp-alchemy** — no `DB_URL` env var set, so it starts and immediately exits. Already removed from codex for the same reason.
+- **open-websearch** — was actually working fine, likely a transient npx issue.
+
+### Changes
+- `modify_dot_claude.json.tmpl`: changed tempograph args from `["--from", "tempograph[full]", "tempograph"]` to `["--from", "tempograph[full]", "tempograph-server"]`
+- `modify_dot_claude.json.tmpl`: removed `mcp-alchemy` entry entirely (no database to connect to)
+
 ## 2026-04-08 -- Make MCP server lists authoritative (replace, not merge)
 
 ### Problem
