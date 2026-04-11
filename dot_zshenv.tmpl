@@ -10,6 +10,77 @@ if [[ ( "$SHLVL" -eq 1 && ! -o LOGIN ) && -s "${ZDOTDIR:-$HOME}/.zprofile" ]]; t
   source "${ZDOTDIR:-$HOME}/.zprofile"
 fi
 
+# ── Locale ────────────────────────────────────────────────────────────────────
+export LANG="en_GB.UTF-8"
+
+# ── Editors ───────────────────────────────────────────────────────────────────
+{{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
+export EDITOR={{ $nvim | quote }}
+export VISUAL="$EDITOR"
+export SUDO_EDITOR="$EDITOR"
+export PAGER='less'
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+export PATH="$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.asdf/shims:$PATH"
+
+# Go
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
+
+# pnpm
+{{ if eq .chezmoi.os "darwin" -}}
+export PNPM_HOME="$HOME/Library/pnpm"
+{{ else -}}
+export PNPM_HOME="$HOME/.local/share/pnpm"
+{{ end -}}
+export PATH="$PNPM_HOME:$PATH"
+
+{{- if eq .chezmoi.os "darwin" }}
+# Docker (Colima)
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+export BROWSER='open'
+{{- end }}
+
+{{- if and (eq .chezmoi.os "linux") .wsl }}
+# WSL: Windows system tools
+export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
+export BROWSER='wslview'
+{{- end }}
+
+# ── Tool config ───────────────────────────────────────────────────────────────
+export LESS='-g -i -M -R -S -w -X -z-4'
+export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
+export SDKMAN_DIR="$HOME/.sdkman"
+export SSH_ASKPASS=""
+export GIT_TERMINAL_PROMPT=0
+
+# ── SSH session overrides ─────────────────────────────────────────────────────
+if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
+  export OP_BIOMETRIC_UNLOCK_ENABLED=false
+  export OP_ACCOUNT=personal
+fi
+
+# ── Platform-specific ─────────────────────────────────────────────────────────
+{{- if eq .chezmoi.os "linux" }}
+export COLORTERM=fullcolor
+export XDG_CONFIG_HOME="$HOME/.config"
+{{- end }}
+
+{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+export MOZ_ENABLE_WAYLAND=1
+export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
+export PATH="/usr/lib/ccache/bin/:$PATH"
+{{- end }}
+{{- end }}
+
+# ── Secrets (1Password) ──────────────────────────────────────────────────────
 export CAMOFOX_URL="http://localhost:9377"
 export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" }}
 
@@ -18,6 +89,7 @@ export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory
 export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential"}}
 export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
 export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
+export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
 export CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/claude code token/credential" }}
 export TAILSCALE_NOCODB_CLIENT_ID={{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}
 export TAILSCALE_NOCODB_CLIENT_SECRET={{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}
@@ -65,6 +137,7 @@ export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved 
 export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
 {{- end }}
 
+# ── Rust ──────────────────────────────────────────────────────────────────────
 if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi

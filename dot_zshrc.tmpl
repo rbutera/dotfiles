@@ -79,43 +79,16 @@ fi
 # starship prompt
 eval "$(starship init zsh)"
 
-
 # OpenClaw Completion
 [[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]] && source "$HOME/.openclaw/completions/openclaw.zsh"
-
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"
 
 # stop windows WSL / nodejs appearing in wsl path
 export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'AppData.*npm\|nodejs' | tr '\n' ':')
 
-export SSH_ASKPASS=""
-export GIT_TERMINAL_PROMPT=0
-export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
-
-export EDITOR="$HOME/.local/share/bob/nvim-bin/nvim"
-export VISUAL="$EDITOR"
-
-if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
-  export OP_BIOMETRIC_UNLOCK_ENABLED=false
-  export OP_ACCOUNT=personal
-fi
-
 # isomorphic-copy — universal clipboard (local, SSH, Docker)
 [[ -d "$HOME/.config/isomorphic-copy/bin" ]] && export PATH="$HOME/.config/isomorphic-copy/bin:$PATH"
 
-export PATH="$HOME/.asdf/shims:$PATH"
-export LANG="en_GB.UTF-8"
-
-# SDKMAN (must be at end)
-export SDKMAN_DIR="$HOME/.sdkman"
-
 [[ -o interactive ]] || unalias cd 2>/dev/null
 
+# SDKMAN (must be at end)
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-{{- if eq .chezmoi.os "darwin" }}
-if [[ ":$PATH:" != *":$HOME/Library/pnpm:"* ]]; then
-  export PATH="$HOME/Library/pnpm:$PATH"
-fi
-{{ end }}

@@ -2,8 +2,6 @@
 # Executes commands at login pre-zshrc.
 #
 
-export LANG=en_US.UTF-8
-
 #
 # Paths - set early so tools are available
 #
@@ -16,7 +14,6 @@ elif [[ -f /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
 export PATH=/opt/homebrew/bin:$PATH
-export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 {{ else }}
 if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -25,58 +22,8 @@ elif [[ -f $HOME/.linuxbrew/bin/brew ]]; then
 fi
 {{ end }}
 
-# bob-nvim
-export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
-
-# Rust/Cargo
-export PATH="$HOME/.cargo/bin:$PATH"
-
-# Go
-export GOPATH="$HOME/go"
-export PATH="$PATH:$GOPATH/bin"
-
-# pnpm
-{{ if eq .chezmoi.os "darwin" }}
-export PNPM_HOME="$HOME/Library/pnpm"
-{{ else }}
-export PNPM_HOME="$HOME/.local/share/pnpm"
-{{ end }}
-export PATH="$PNPM_HOME:$PATH"
-
-# Local bin
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/bin:$PATH"
+# Tailscale
 [[ -x /usr/local/bin/tailscale ]] && export PATH="/usr/local/bin:$PATH"
-
-#
-# Editors
-#
-
-{{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
-export EDITOR={{ $nvim | quote }}
-export VISUAL="$EDITOR"
-export SUDO_EDITOR="$EDITOR"
-export PAGER='less'
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-
-#
-# Browser
-#
-
-{{ if eq .chezmoi.os "darwin" }}
-export BROWSER='open'
-{{ else if .wsl }}
-export BROWSER='wslview'
-export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
-{{ end }}
-
-#
-# Language
-#
-
-if [[ -z "$LANG" ]]; then
-  export LANG='en_US.UTF-8'
-fi
 
 #
 # Paths - additional
@@ -98,8 +45,6 @@ path=(
 # Less
 #
 
-export LESS='-g -i -M -R -S -w -X -z-4'
-
 if (( $#commands[(i)lesspipe(|.sh)] )); then
   export LESSOPEN="| /usr/bin/env $commands[(i)lesspipe(|.sh)] %s 2>&-"
 fi
@@ -108,7 +53,6 @@ fi
 # FZF
 #
 
-export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 #
@@ -116,22 +60,8 @@ export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38b
 #
 
 setopt NO_NOMATCH
-export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
-
-{{- if eq .chezmoi.os "linux" }}
-export COLORTERM=fullcolor
-export XDG_CONFIG_HOME="$HOME/.config"
-{{ end }}
 
 {{ if eq .chezmoi.os "darwin" }}
 # OrbStack
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
-{{ end }}
-
-{{ if eq .chezmoi.os "linux" }}
-{{ if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
-export MOZ_ENABLE_WAYLAND=1
-export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
-export PATH="/usr/lib/ccache/bin/:$PATH"
-{{ end }}
 {{ end }}

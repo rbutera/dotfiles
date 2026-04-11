@@ -51,3 +51,22 @@ Six MCP servers were failing on startup: `chisel` and `pty-mcp` (missing binarie
 - Applied updated config via `chezmoi apply ~/.codex/config.toml`.
 - Fixed `tempograph`: changed entrypoint from `tempograph` (CLI, requires `repo` arg) to `tempograph-server` (MCP stdio server). The package exposes three entrypoints: `tempograph` (CLI), `tempograph-server` (MCP), and `tempo` (alias).
 - Remaining unfixed: `Sanity` (needs `SANITY_MCP_TOKEN`), `better-notion-mcp` (needs `NOTION_TOKEN`).
+
+## 2026-04-11 — Remove open-websearch MCP server
+
+### Problem
+Rai requested global removal of the `open-websearch` MCP server from Codex CLI.
+
+### Solution/Fix
+- Removed the `open-websearch` entry from the `mcp_servers` dict in `dot_codex/modify_private_config.toml`.
+- Applied via `chezmoi apply ~/.codex/config.toml`. No 1Password session needed (no secrets in this file).
+
+## 2026-04-11 — Remove Sanity and better-notion-mcp MCP servers
+
+### Problem
+Rai requested global removal of `Sanity` and `better-notion-mcp` MCP servers. Neither had working credentials configured (Sanity needed `SANITY_MCP_TOKEN`, better-notion-mcp needed `NOTION_TOKEN`).
+
+### Solution/Fix
+- Removed `Sanity` and `better-notion-mcp` entries from `dot_codex/modify_private_config.toml`.
+- Removed `better-notion-mcp` from `modify_dot_claude.json.tmpl` (Sanity was not present there).
+- Applied both via `chezmoi apply`.

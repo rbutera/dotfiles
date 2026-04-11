@@ -45,17 +45,9 @@ BASE = {
             "url": "https://api.githubcopilot.com/mcp/",
             "bearer_token_env_var": "GITHUB_LLM_PAT",
         },
-        "Sanity": {
-            "url": "https://mcp.sanity.io",
-            "bearer_token_env_var": "SANITY_MCP_TOKEN",
-        },
         "context7": {
             "command": "npx",
             "args": ["-y", "@upstash/context7-mcp@latest"],
-        },
-        "open-websearch": {
-            "command": "npx",
-            "args": ["-y", "open-websearch"],
         },
         "mcp-deepwiki": {
             "command": "npx",
@@ -93,10 +85,6 @@ BASE = {
         "chisel": {
             "command": "chisel",
             "args": ["--stdio", "--root", "/"],
-        },
-        "better-notion-mcp": {
-            "command": "npx",
-            "args": ["@n24q02m/better-notion-mcp"],
         },
         "obsidian": {
             "command": "npx",

@@ -1,5 +1,31 @@
 # shell config changes log
 
+## 2026-04-11 — Consolidate env vars and PATH into zshenv
+
+### Problem
+Environment variables and PATH entries were scattered across `dot_zshenv.tmpl`, `dot_zprofile.tmpl`, and `dot_zshrc.tmpl` with duplicates and a LANG conflict (`en_US.UTF-8` in zprofile vs `en_GB.UTF-8` in zshrc). Non-interactive shells and scripts couldn't see vars like EDITOR, GOPATH, XDG_CONFIG_HOME, or tool PATHs because those were only set in login-shell (zprofile) or interactive-shell (zshrc) files.
+
+### Changes
+
+**`dot_zshenv.tmpl`** — added 21 env vars and 10 PATH entries, organized into sections:
+- **Locale**: LANG=en_GB.UTF-8 (resolved conflict, user confirmed en_GB)
+- **Editors**: EDITOR, VISUAL, SUDO_EDITOR, PAGER, MANPAGER (from zprofile)
+- **Paths**: bob-nvim, opencode, ~/.local/bin, ~/bin, asdf shims, Go, pnpm (from zprofile+zshrc)
+- **Platform paths**: DOCKER_HOST (macOS), BROWSER (macOS/WSL), Windows System32 PATH (WSL), ccache (Arch)
+- **Tool config**: LESS, FZF_DEFAULT_OPTS, CHEZMOI_DIR, SDKMAN_DIR, SSH_ASKPASS, GIT_TERMINAL_PROMPT (from zprofile+zshrc)
+- **SSH overrides**: OP_BIOMETRIC_UNLOCK_ENABLED, OP_ACCOUNT (from zshrc)
+- **Platform-specific**: COLORTERM, XDG_CONFIG_HOME (Linux), MOZ_ENABLE_WAYLAND, XDG_DATA_DIRS (Arch)
+
+**`dot_zprofile.tmpl`** — removed all items moved to zshenv. Kept: Homebrew shellenv (eval, runtime-dependent), Tailscale PATH check, typeset -gU dedup, nodenv/pyenv/poetry conditional checks, LESSOPEN, fzf.zsh source, setopt NO_NOMATCH, OrbStack init. Also removed redundant `PATH="$HOME/.cargo/bin"` (already handled by `.cargo/env` in zshenv).
+
+**`dot_zshrc.tmpl`** — removed all items moved to zshenv. Kept: WSL PATH filter (expensive pipeline, interactive-only), isomorphic-copy PATH (conditional dir check), SDKMAN init sourcing, all interactive setup. Removed duplicate EDITOR/VISUAL, bob-nvim PATH, pnpm PATH (macOS).
+
+### Items deliberately NOT moved (runtime-dependent)
+- Homebrew `eval "$(brew shellenv)"` — runs subshell, too heavy for zshenv
+- Tailscale, nodenv, pyenv, poetry PATH checks — filesystem probes on every invocation
+- LESSOPEN — uses `$#commands` zsh expansion
+- WSL PATH filter — expensive pipeline, interactive fix only
+
 ## 2026-04-04 — Remove miru() alias
 
 ### Changes
