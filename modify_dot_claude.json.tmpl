@@ -54,4 +54,19 @@ MCPS
 
 # Replace: base is authoritative for MCP servers. Removals from base
 # are reflected in the deployed config. All other fields untouched.
-echo "$current" | jq --argjson base "$base_mcps" '.mcpServers = $base'
+#
+# Also scrub the poisoned 1M-context entitlement cache keys on every apply.
+# See anthropics/claude-code#45449 and logs/claude.md. The server emits a
+# stale `org_level_disabled` reason header on Max personal plans, which the
+# client caches and uses to block /model opus[1m] even though the 1M
+# entitlement is actually valid. Deleting these keys (plus the env var in
+# dot_zshenv.tmpl) keeps the slash command from tripping on stale state.
+echo "$current" | jq --argjson base "$base_mcps" '
+  .mcpServers = $base
+  | del(.cachedExtraUsageDisabledReason)
+  | del(.hasAvailableSubscription)
+  | del(.s1mAccessCache)
+  | del(.passesEligibilityCache)
+  | del(.clientDataCache)
+  | if .oauthAccount then .oauthAccount |= del(.hasExtraUsageEnabled) else . end
+'
