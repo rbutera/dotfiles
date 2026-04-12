@@ -1,5 +1,34 @@
 # shell config changes log
 
+## 2026-04-12 — Adopt Vite+ in system-first mode (asdf keeps owning node)
+
+### Problem
+Installed [Vite+](https://viteplus.dev) (`~/.vite-plus/`) to try the toolchain. The installer prompted "would you like Vite+ to manage your Node.js versions?" and the answer was an unintentional yes, which:
+
+1. Created shadow shims at `~/.vite-plus/bin/{node,npm,npx}` → all symlinked to `vp`. Because `~/.vite-plus/env` prepends `~/.vite-plus/bin` to `PATH`, any new shell would resolve `node`/`npm` to vp's wrapper instead of the asdf shims.
+2. Appended an unconditional `. "$HOME/.vite-plus/env"` block to **both** `~/.zshrc` and `~/.zshenv` (drift vs chezmoi source — the zshrc one showed in `chezmoi diff`; the zshenv one was hidden behind the 1Password prompt).
+
+Goal: keep Vite+ installed for project tooling (`vp dev`, `vp build`, etc.) but continue using asdf as the node version manager.
+
+### Solution
+
+1. **`vp env off`** — flips the shims into "system-first" mode. They still exist, but vp's wrapper now defers to whatever non-vp `node` it finds on PATH (asdf's shim) and only falls back to vp's bundled node if nothing else is available. Verified with `vp env doctor`:
+   ```
+   Node.js mode      system-first
+   System Node.js    /Users/rai/.asdf/shims/node
+   ```
+   No separate config file — the mode IS the shim behavior.
+
+2. **`dot_zshrc.tmpl`** — added the Vite+ source block at the end (after SDKMAN, matching where the installer placed it), but wrapped in `[[ -s "$HOME/.vite-plus/env" ]] && ...` so other machines without Vite+ installed don't error on shell startup. Applied with `chezmoi apply --force ~/.zshrc` (force needed because the deployed file had drifted from what chezmoi last wrote).
+
+3. **`dot_zshenv.tmpl`** — added the same conditional block at the end (after the Rust/cargo block). Vite+ installs to `.zshenv` as well as `.zshrc` so that IDE / non-interactive shells also get vp on PATH; matching that behavior in the template avoids future drift on every machine where Vite+ is installed. Not applied this session because `dot_zshenv.tmpl` uses `onepasswordRead` and there was no active op session — will reconcile on the next `chezmoi apply` after signin.
+
+### Notes for future me
+
+- To fully remove Vite+: `~/.vite-plus/bin/vp implode -y`, then strip the conditional blocks from `dot_zshrc.tmpl` and `dot_zshenv.tmpl`.
+- `vp env doctor` warns about asdf as a "conflict" — this is informational only; system-first mode is exactly what makes the two coexist.
+- `vp env which node` reports vp's bundled `js_runtime/node/24.14.1` because that's the *managed* fallback. The actually-resolved binary in shells is still asdf's, as confirmed by `which node`.
+
 ## 2026-04-11 — Consolidate env vars and PATH into zshenv
 
 ### Problem
