@@ -1,5 +1,28 @@
 # Hyprland / end-4 (NaviDE) config changes log
 
+## 2026-04-12 — Fix Hyper keybindings stolen by Super bindings
+
+### Problem
+Hyper+Tab (layout toggle) was opening the workspace overview (Super+Tab) instead
+of toggling between master/dwindle. Root cause: Kanata's `multi lctl lalt lmet`
+sends modifiers sequentially; Hyprland matches top-to-bottom and the less-specific
+Super+Tab binding fired before all three Hyper modifiers were registered.
+
+### Fix
+Hyprland processes bindings in definition order — first match wins. Reordered all
+Hyper (Ctrl+Alt+Super) bindings to appear **before** their Super-only counterparts
+for the same key. Added an ordering rule comment at the top of `keybinds.conf`.
+
+### Affected keys
+- **Adjacent swaps** (same section): Return, T, Tab
+- **Cross-section moves** (Hyper binding moved before Super binding):
+  - `grave`: Overlay (Hyper+grave) moved before Scratchpad (Super+grave)
+  - `M` / `Shift+M`: Mute (Hyper+M) moved before swapwithmaster (Super+M)
+  - `E, S, F` + Shift variants: Monitors section moved before Focus & Move section
+
+### Files changed
+- `dot_config/hypr/custom/keybinds.conf`
+
 ## 2026-04-04 — Parsec passthrough submap, misc fixes, mouse speed
 
 ### Changes
