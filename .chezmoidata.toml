@@ -6,3 +6,4 @@
   niri = ["mondo"]
   kde  = []
   dev_infra = ["mondo"]
+  work = ["latios"]
