@@ -1,5 +1,20 @@
 # chezmoi config changes log
 
+## 2026-04-14 — Work/personal split for Anthropic OAuth token
+
+### Problem
+
+Started a new job (`latios` is the work machine). The `CLAUDE_CODE_OAUTH_TOKEN` in `dot_zshenv.tmpl` was a single personal credential rendered on all machines.
+
+### Fix
+
+- Added `work = ["latios"]` to `[host_groups]` in `.chezmoidata.toml`
+- Wrapped `CLAUDE_CODE_OAUTH_TOKEN` in `dot_zshenv.tmpl` with a host group conditional:
+  - `work` machines → `op://focused/claude code oauth token/credential`
+  - all other machines → existing personal path `op://Private/Anthropic/Saved on console.anthropic.com/token`
+
+To add more work machines later: append the hostname to `work = [...]` in `.chezmoidata.toml`.
+
 ## 2026-04-08 — Resolve stash conflicts (zshenv, codex config)
 
 ### Problem
