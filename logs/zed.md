@@ -60,6 +60,26 @@ porting all relevant settings from the existing VSCode configuration on nimbus.
 - Ctrl+w h/j/k/l for pane navigation (vim window movement)
 - Global: ctrl+` for terminal, cmd+p for file finder
 
+## 2026-04-15 — Fix 7 broken keymap actions + deprecation renames
+
+### Problem
+Zed was logging errors on startup for actions that don't exist (were renamed
+or never existed). All 7 were in `dot_config/zed/keymap.json`.
+
+### What was changed
+
+| Binding | Broken action | Replacement | Rationale |
+|---|---|---|---|
+| `space f s` | `workspace::DeploySearch` | `buffer_search::Deploy` | In-file search (`space f w` already covers project search) |
+| `space Q` | `editor::QuickFix` | `diagnostics::Deploy` | Opens diagnostics panel (closest equivalent) |
+| `space space /` (normal) | `vim::ClearSearch` | `["workspace::SendKeystrokes", ": n o h enter"]` | Simulates `:noh` — Zed has no dedicated clear-highlight action |
+| `space p` | `editor::PeekDefinition` | `editor::GoToDefinitionSplit` | Opens definition in a split pane (Zed has no peek window) |
+| `space 5` | `workspace::TogglePanelPositions` | `workspace::ToggleZoom` | Zoom/restore current pane (no panel position toggle in Zed) |
+| `space a c/x` | `{ "registry": ... }` | `{ "custom": ... }` | Zed agent API uses `custom` variant, not `registry` |
+| `space space /` (visual) | `editor::ToggleBlockComment` | `editor::ToggleComments` | Zed has no separate block comment action |
+| `space k h` | `pane::RevealInProjectPanel` | `project_panel::ToggleFocus` | Toggle + focus project panel (open/close sidebar) |
+| `ctrl-w h/l/k/j` | `workspace::ActivatePaneInDirection` + arg | `workspace::ActivatePane{Left,Right,Up,Down}` | Deprecated parameterized action → dedicated actions (auto-migrated by Zed) |
+
 ### VSCode settings NOT ported (Zed equivalent doesn't exist or N/A)
 - APC custom CSS/electron tweaks (VSCode-specific UI hacks)
 - Peacock color per-workspace

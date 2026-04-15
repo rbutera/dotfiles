@@ -17,7 +17,7 @@
       "space f w": "pane::DeploySearch",
       "space f b": "tab_switcher::Toggle",
       "space f o": "projects::OpenRecent",
-      "space f s": "workspace::DeploySearch",
+      "space f s": "buffer_search::Deploy",
 
       // Buffer management (ported from VSCode <leader>bb, <leader>bd, etc.)
       "space b b": "tab_switcher::Toggle",
@@ -36,7 +36,7 @@
       "space `": "workspace::ToggleRightDock",
 
       // Reveal in project panel (ported from VSCode <leader>kh and <leader>ff)
-      "space k h": "pane::RevealInProjectPanel",
+      "space k h": "project_panel::ToggleFocus",
       "space k l": "workspace::ToggleRightDock",
 
       // Line navigation (ported from VSCode <leader>H and <leader>h)
@@ -52,20 +52,20 @@
 
       // Diagnostics (ported from VSCode <leader>q and <leader>Q)
       "space q": "editor::ToggleCodeActions",
-      "space Q": "editor::QuickFix",
+      "space Q": "diagnostics::Deploy",
 
       // Comment toggle (ported from VSCode <leader>/)
       "space /": "editor::ToggleComments",
 
       // Clear search highlight (ported from VSCode <leader><leader>/)
-      "space space /": "vim::ClearSearch",
+      "space space /": ["workspace::SendKeystrokes", ": n o h enter"],
 
       // Duplicate lines (ported from VSCode <leader>yj and <leader>yk)
       "space y j": "editor::DuplicateLineDown",
       "space y k": "editor::DuplicateLineUp",
 
       // Peek definition (ported from VSCode <leader>p)
-      "space p": "editor::PeekDefinition",
+      "space p": "editor::GoToDefinitionSplit",
 
       // Hover / show info (ported from VSCode K and gl)
       "K": "editor::Hover",
@@ -104,11 +104,11 @@
       "space O": ["editor::NewlineAbove", "vim::NormalBefore"],
 
       // Toggle editor group layout (ported from VSCode <leader>5)
-      "space 5": "workspace::TogglePanelPositions",
+      "space 5": "workspace::ToggleZoom",
 
       // -- Agent shortcuts --
-      "space a c": ["agent::NewExternalAgentThread", { "agent": { "registry": { "name": "claude-acp" } } }],
-      "space a x": ["agent::NewExternalAgentThread", { "agent": { "registry": { "name": "codex-acp" } } }]
+      "space a c": ["agent::NewExternalAgentThread", { "agent": { "custom": { "name": "claude-acp" } } }],
+      "space a x": ["agent::NewExternalAgentThread", { "agent": { "custom": { "name": "codex-acp" } } }]
     }
   },
 
@@ -121,8 +121,8 @@
       // Comment toggle (ported from VSCode <leader>/)
       "space /": "editor::ToggleComments",
 
-      // Block comment (ported from VSCode <leader><leader>/)
-      "space space /": "editor::ToggleBlockComment",
+      // Block comment (ported from VSCode <leader><leader>/) — Zed has no separate block comment action
+      "space space /": "editor::ToggleComments",
 
       // Duplicate selection (ported from VSCode <leader>yy)
       "space y y": "editor::DuplicateLineDown",
@@ -138,10 +138,10 @@
   {
     "context": "vim_mode == normal && !menu",
     "bindings": {
-      "ctrl-w h": ["workspace::ActivatePaneInDirection", "Left"],
-      "ctrl-w l": ["workspace::ActivatePaneInDirection", "Right"],
-      "ctrl-w k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-w j": ["workspace::ActivatePaneInDirection", "Down"]
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w j": "workspace::ActivatePaneDown"
     }
   },
 
