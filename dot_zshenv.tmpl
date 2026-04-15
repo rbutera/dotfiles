@@ -105,6 +105,8 @@ export ANTHROPIC_CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/Claude Code 
 # cachedExtraUsageDisabledReason in ~/.claude.json despite Max 20x entitlement.
 # See logs/claude.md.
 export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
+# Alt-screen rendering to eliminate terminal flickering (requires v2.1.89+)
+export CLAUDE_CODE_NO_FLICKER=1
 export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
 export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}
 export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}
@@ -160,3 +162,7 @@ fi
 # shells also get vp on PATH. Node management is in system-first mode
 # (`vp env off`), so node/npm still resolve via asdf.
 [[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
+
+
+export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
+export HONCHO_PEER_NAME="Rai"

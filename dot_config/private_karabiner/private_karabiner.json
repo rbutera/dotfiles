@@ -20,7 +20,7 @@
                                         "type": "device_if"
                                     }
                                 ],
-                                "description": "(Dygma Defy) F18 -> ctrl on hold, ctrl+space on tap",
+                                "description": "(Dygma Defy) F18 -> Hyper+Space",
                                 "from": {
                                     "key_code": "f18",
                                     "modifiers": {
@@ -31,14 +31,11 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "left_control"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
                                         "key_code": "spacebar",
                                         "modifiers": [
-                                            "left_control"
+                                            "left_command",
+                                            "left_control",
+                                            "left_option"
                                         ]
                                     }
                                 ],

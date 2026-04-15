@@ -1,5 +1,21 @@
 # karabiner config changes log
 
+## 2026-04-15 — Dygma Defy F18: replace ctrl/ctrl+space with Hyper+Space
+
+### Problem
+
+The Dygma Defy F18 complex modification was mapped as ctrl-on-hold, ctrl+space-on-tap. User wanted F18 to produce Hyper+Space instead — a single unambiguous chord that tools like Raycast, Alfred, or custom Hammerspoon bindings can hook without clashing with plain `ctrl+space` (which IMEs, Spotlight, and many apps bind).
+
+### Changes
+
+Replaced the `(Dygma Defy) F18` manipulator in `dot_config/private_karabiner/private_karabiner.json`:
+
+- **Before**: `to: left_control` + `to_if_alone: ctrl+space` (hold/tap split)
+- **After**: `to: spacebar` with modifiers `[left_command, left_control, left_option]` — a straight Hyper+Space on key-down, no hold/tap split
+- Description updated from `(Dygma Defy) F18 -> ctrl on hold, ctrl+space on tap` to `(Dygma Defy) F18 -> Hyper+Space`
+
+Hyper = `cmd+ctrl+opt` matches the convention used elsewhere in this file (F14, F19, CAPS_LOCK mappings, and all "Hyper app switching" rules).
+
 ## 2026-04-13 — Hyper app-switching shortcuts
 
 ### Problem
