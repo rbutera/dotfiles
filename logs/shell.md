@@ -1,5 +1,30 @@
 # shell config changes log
 
+## 2026-04-16 — Fix Atlassian env var names for mcp-atlassian
+
+### Problem
+Installed `mcp-atlassian` (sooperset/mcp-atlassian) as an MCP server in Claude Code for authenticated JIRA/Confluence API access. The server expects `JIRA_API_TOKEN` and `CONFLUENCE_API_TOKEN`, but the env vars were named `JIRA_API_KEY` and `CONFLUENCE_API_KEY`. Confluence URL also needed `/wiki` suffix.
+
+### Changes
+
+**`dot_zshenv.tmpl`**:
+- Renamed `JIRA_API_KEY` to `JIRA_API_TOKEN`
+- Renamed `CONFLUENCE_API_KEY` to `CONFLUENCE_API_TOKEN`
+- Appended `/wiki` to `CONFLUENCE_URL` (Confluence API requires it)
+
+## 2026-04-16 — Fix tmux_auto and add flaude alias
+
+### Problem
+`tmux_auto` always failed with "can't find session 0" when sessions existed but weren't named `0` (e.g. after killing session 0 and creating new ones, or when sessions have custom names). The function hardcoded `-t 0`.
+
+Also needed a quick alias to open Claude Code in the `~/focused` directory.
+
+### Changes
+
+**`dot_aliases.tmpl`**:
+- `tmux_auto`: removed `-t 0` from `tmux attach-session`. Bare `tmux attach` connects to the most recently used session regardless of name.
+- Added `alias flaude='cd ~/focused && claude'`.
+
 ## 2026-04-12 — Adopt Vite+ in system-first mode (asdf keeps owning node)
 
 ### Problem

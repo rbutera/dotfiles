@@ -140,6 +140,17 @@ export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cl
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
 {{- if has .chezmoi.hostname .host_groups.work }}
 export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export ATLASSIAN_BASE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
+
+export JIRA_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export JIRA_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export JIRA_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
+
+export CONFLUENCE_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export CONFLUENCE_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}/wiki
 {{- else }}
 export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
 {{- end }}

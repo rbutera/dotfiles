@@ -179,7 +179,7 @@ function gcar() {
 
 function tmux_auto() {
     if tmux ls &>/dev/null; then
-        tmux attach-session -t 0
+        tmux attach-session -t 0 2>/dev/null || tmux attach-session
     else
         tmux new-session
     fi
@@ -271,3 +271,5 @@ alias yolocodex="codex --dangerously-bypass-approvals-and-sandbox"
 
 
 alias updatenavi="cd ~/oclaw && git checkout main && git pull && pnpm install && pnpm build && pnpm ui:build && rrnavi"
+
+alias flaude='cd ~/focused && claude'
