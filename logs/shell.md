@@ -25,6 +25,21 @@ Also needed a quick alias to open Claude Code in the `~/focused` directory.
 - `tmux_auto`: removed `-t 0` from `tmux attach-session`. Bare `tmux attach` connects to the most recently used session regardless of name.
 - Added `alias flaude='cd ~/focused && claude'`.
 
+## 2026-04-12 — Export `ARK_WORKSPACE` so `ark attach`/`ark run` work from anywhere
+
+### Problem
+
+`ark` CLI commands (`ark attach`, `ark run`, etc.) resolve the workspace root from `process.cwd()`, which means they only work when invoked from inside `~/navi` (or another workspace dir). Running them from anywhere else fails to find the workspace.
+
+### Solution
+
+Earlier today, lumiere commit `d55035f` (`feat(ark): add resolveWorkspaceRoot with ARK_WORKSPACE env fallback`) added a new `resolveWorkspaceRoot()` helper in `apps/ark/src/config.ts` that falls back to `$ARK_WORKSPACE` when no explicit path is passed, before finally defaulting to `cwd`.
+
+Added `export ARK_WORKSPACE="$HOME/navi"` to `dot_zshenv.tmpl` under a new `── Ark ──` section so every shell picks it up. Now `ark attach` / `ark run` work from any directory.
+
+### Verification
+
+After `chezmoi apply` and a shell reload, `cd /tmp && ark attach` should target the `~/navi` workspace instead of failing.
 ## 2026-04-12 — Adopt Vite+ in system-first mode (asdf keeps owning node)
 
 ### Problem

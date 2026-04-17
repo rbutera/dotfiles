@@ -13,6 +13,11 @@ fi
 # ── Locale ────────────────────────────────────────────────────────────────────
 export LANG="en_GB.UTF-8"
 
+# ── Ark ───────────────────────────────────────────────────────────────────────
+# Default workspace for `ark attach` / `ark run` etc. when invoked outside a
+# workspace directory. See lumiere/apps/ark commit d55035f (resolveWorkspaceRoot).
+export ARK_WORKSPACE="$HOME/navi"
+
 # ── Editors ───────────────────────────────────────────────────────────────────
 {{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
 export EDITOR={{ $nvim | quote }}
@@ -161,6 +166,14 @@ export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
 
 # ── Local infrastructure (dev_infra machines only) ───────────────────────────
 export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
+{{- end }}
+
+{{- if eq .chezmoi.hostname "nimbus" }}
+
+# ── Expedition pipeline DB (nimbus only) ─────────────────────────────────────
+# Used by Cortex MCP for claim storage and execution logs.
+# Hardcoded here so subagent processes (Tatls) inherit it via the shell env.
+export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
 {{- end }}
 
 # ── Rust ──────────────────────────────────────────────────────────────────────

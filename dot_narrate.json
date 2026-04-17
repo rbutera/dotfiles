@@ -7,8 +7,6 @@
   "enableLlmAttribution": true,
   "enableLlmEmotionAnnotation": true,
   "llmModel": "openai-codex/gpt-5.2",
-  "llmApiBase": "https://opencode.ai/zen/v1",
-  "llmApiKeyEnv": "OPENCODE_ZEN_API_KEY",
   "speakerVoices": {
     "rai": {
       "elevenlabs": "${ELEVENLABS_RAI}",
