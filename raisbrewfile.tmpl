@@ -12,6 +12,15 @@ brew "reattach-to-user-namespace"
 # Fonts
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
+
+{{ if has .chezmoi.hostname .host_groups.work }}
+# Docker (Colima-backed — work machines only). `DOCKER_HOST` in
+# dot_zshenv.tmpl already points at ~/.colima/default/docker.sock.
+brew "colima"
+brew "docker"
+brew "docker-compose"
+brew "docker-buildx"
+{{ end }}
 {{ end }}
 
 # Core CLI tools

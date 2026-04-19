@@ -1,5 +1,37 @@
 # chezmoi config changes log
 
+## 2026-04-14 — Work/personal split for Anthropic OAuth token
+
+### Problem
+
+Started a new job (`latios` is the work machine). The `CLAUDE_CODE_OAUTH_TOKEN` in `dot_zshenv.tmpl` was a single personal credential rendered on all machines.
+
+### Fix
+
+- Added `work = ["latios"]` to `[host_groups]` in `.chezmoidata.toml`
+- Wrapped `CLAUDE_CODE_OAUTH_TOKEN` in `dot_zshenv.tmpl` with a host group conditional:
+  - `work` machines → `op://focused/claude code oauth token/credential`
+  - all other machines → existing personal path `op://Private/Anthropic/Saved on console.anthropic.com/token`
+
+To add more work machines later: append the hostname to `work = [...]` in `.chezmoidata.toml`.
+
+## 2026-04-12 — Untrack `opencode/package.json` and `picom` config
+
+### Problem
+
+Two sources were being managed by chezmoi but shouldn't be:
+
+- `dot_config/opencode/package.json` — node package manifest tracked in chezmoi by accident; should live alongside the opencode install, not in dotfiles.
+- `dot_config/symlink_picom` — a chezmoi-managed symlink pointing `~/.config/picom` → `../dotfiles/.config/picom`. No longer wanted.
+
+### Fix
+
+Removed both source files directly from `~/.local/share/chezmoi/`:
+
+- `dot_config/opencode/package.json`
+- `dot_config/symlink_picom`
+
+(Equivalent to `chezmoi forget`, which couldn't be used here because it prompts interactively and the agent has no TTY.) Deleting the source untracks the target without touching the deployed files in `~/.config/`.
 ## 2026-04-08 — Resolve stash conflicts (zshenv, codex config)
 
 ### Problem

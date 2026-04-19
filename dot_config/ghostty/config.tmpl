@@ -8,11 +8,16 @@ command = {{ if eq .chezmoi.os "darwin" }}/opt/homebrew/bin/zsh{{ else }}/usr/bi
 theme = Catppuccin Mocha
 
 # ── Font ───────────────────────────────────────────────────────────────────────
-font-size = 8
-{{- if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
+font-size = {{ if eq .chezmoi.os "darwin" }}10{{ else }}8{{ end }}
+{{- if eq .chezmoi.os "darwin" }}
+font-family = JetBrainsMono NFM
+# Thicken glyphs on macOS — Ghostty's CoreText rendering is otherwise
+# noticeably thinner than Apple's Terminal/iTerm and reads as washed-out.
+font-thicken = true
+{{- else if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
 font-family = GeistMono Nerd Font Mono
 {{- end }}
-# JetBrains Mono (built-in) fallback on non-Arch systems
+# JetBrains Mono (built-in) fallback on non-Arch Linux systems
 
 # ── Window ─────────────────────────────────────────────────────────────────────
 window-padding-x = 4
@@ -83,4 +88,15 @@ keybind = {{ $mod }}+shift+u=copy_url_to_clipboard
 keybind = global:ctrl+super+alt+grave_accent=toggle_quick_terminal
 quick-terminal-position = top
 quick-terminal-animation-duration = 200
+
+# ── Muscle-memory aliases: Cmd → Ctrl for shell control chars (macOS only) ──
+# Make Cmd+<key> send the same control byte as Ctrl+<key> so Windows/Linux
+# muscle memory carries over. Ghostty's `text:` action sends raw bytes.
+#   0x04 = EOT   (Ctrl-D, shell logout / readline delete-char)
+#   0x03 = ETX   (Ctrl-C, SIGINT)
+# Cmd+C is rebound away from copy_to_clipboard → Cmd+Shift+C picks up copy,
+# matching the Linux terminal convention (Ctrl+C = interrupt, Ctrl+Shift+C = copy).
+keybind = super+d=text:\x04
+keybind = super+c=text:\x03
+keybind = super+shift+c=copy_to_clipboard
 {{ end -}}

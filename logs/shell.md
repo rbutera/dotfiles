@@ -1,5 +1,45 @@
 # shell config changes log
 
+## 2026-04-16 — Fix Atlassian env var names for mcp-atlassian
+
+### Problem
+Installed `mcp-atlassian` (sooperset/mcp-atlassian) as an MCP server in Claude Code for authenticated JIRA/Confluence API access. The server expects `JIRA_API_TOKEN` and `CONFLUENCE_API_TOKEN`, but the env vars were named `JIRA_API_KEY` and `CONFLUENCE_API_KEY`. Confluence URL also needed `/wiki` suffix.
+
+### Changes
+
+**`dot_zshenv.tmpl`**:
+- Renamed `JIRA_API_KEY` to `JIRA_API_TOKEN`
+- Renamed `CONFLUENCE_API_KEY` to `CONFLUENCE_API_TOKEN`
+- Appended `/wiki` to `CONFLUENCE_URL` (Confluence API requires it)
+
+## 2026-04-16 — Fix tmux_auto and add flaude alias
+
+### Problem
+`tmux_auto` always failed with "can't find session 0" when sessions existed but weren't named `0` (e.g. after killing session 0 and creating new ones, or when sessions have custom names). The function hardcoded `-t 0`.
+
+Also needed a quick alias to open Claude Code in the `~/focused` directory.
+
+### Changes
+
+**`dot_aliases.tmpl`**:
+- `tmux_auto`: removed `-t 0` from `tmux attach-session`. Bare `tmux attach` connects to the most recently used session regardless of name.
+- Added `alias flaude='cd ~/focused && claude'`.
+
+## 2026-04-12 — Export `ARK_WORKSPACE` so `ark attach`/`ark run` work from anywhere
+
+### Problem
+
+`ark` CLI commands (`ark attach`, `ark run`, etc.) resolve the workspace root from `process.cwd()`, which means they only work when invoked from inside `~/navi` (or another workspace dir). Running them from anywhere else fails to find the workspace.
+
+### Solution
+
+Earlier today, lumiere commit `d55035f` (`feat(ark): add resolveWorkspaceRoot with ARK_WORKSPACE env fallback`) added a new `resolveWorkspaceRoot()` helper in `apps/ark/src/config.ts` that falls back to `$ARK_WORKSPACE` when no explicit path is passed, before finally defaulting to `cwd`.
+
+Added `export ARK_WORKSPACE="$HOME/navi"` to `dot_zshenv.tmpl` under a new `── Ark ──` section so every shell picks it up. Now `ark attach` / `ark run` work from any directory.
+
+### Verification
+
+After `chezmoi apply` and a shell reload, `cd /tmp && ark attach` should target the `~/navi` workspace instead of failing.
 ## 2026-04-12 — Adopt Vite+ in system-first mode (asdf keeps owning node)
 
 ### Problem

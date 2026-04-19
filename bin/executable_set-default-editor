@@ -1,0 +1,44 @@
+#!/usr/bin/env swift
+// set-default-editor — set VSCode as default editor for code file types on macOS
+// Uses NSWorkspace API which handles dynamic UTIs that duti cannot.
+// Run: ~/bin/set-default-editor
+
+import UniformTypeIdentifiers
+import AppKit
+
+let app = URL(fileURLWithPath: "/Applications/Visual Studio Code.app")
+
+let extensions = [
+    // JS/TS ecosystem
+    "js", "jsx", "ts", "tsx", "mjs", "cjs", "mts", "cts",
+    // Web
+    "html", "css", "scss", "less", "svelte", "vue",
+    // Data / config
+    "json", "yaml", "yml", "toml", "xml", "csv", "tsv",
+    // Markdown
+    "md", "mdx",
+    // Languages
+    "py", "go", "rs", "lua", "rb", "swift", "sh", "zsh", "bash",
+    // DB / API
+    "sql", "graphql", "gql", "prisma", "proto",
+    // Infra
+    "tf", "dockerfile",
+    // Dotfiles / config
+    "conf", "cfg", "ini", "env", "tmpl", "hbs", "vim", "log",
+    "gitignore", "editorconfig", "prettierrc", "eslintrc",
+]
+
+var ok = 0
+var fail = 0
+
+for ext in extensions {
+    if let utType = UTType(filenameExtension: ext) {
+        NSWorkspace.shared.setDefaultApplication(at: app, toOpen: utType)
+        ok += 1
+    } else {
+        print("⚠ .\(ext): no UTType found, skipping")
+        fail += 1
+    }
+}
+
+print("Done: \(ok) set, \(fail) skipped")
