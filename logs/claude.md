@@ -72,3 +72,27 @@ scrub block can both be removed. Track the upstream issue for
 resolution.
 
 [issue]: https://github.com/anthropics/claude-code/issues/45449
+
+## 2026-04-16 -- Add cortex MCP to user-level config for subagent inheritance
+
+### Problem
+
+Tatl subagents (dispatched via Claude Code's Agent tool) couldn't claim cortex tasks. The cortex MCP was only configured in Navi's project-level `.mcp.json` at `~/navi/.mcp.json`. Subagents appear not to inherit project-level MCP connections reliably, causing `cortex_claim` to fail with "Task claim storage is unavailable." This blocked all autonomous Continue ticks overnight (7 consecutive skips).
+
+### Solution
+
+Added cortex MCP server to the user-level modify script (`modify_dot_claude.json.tmpl`) with a `nimbus` hostname guard so it only deploys on the Mac Mini where the Expedition infrastructure runs. The cortex config includes DATABASE_URL, CORTEX_CONFIG, and CORTEX_DRIZZLE_PATH pointing to the local postgres (port 5433) and lumiere vendor paths.
+
+Applied via `chezmoi apply ~/.claude.json`. Cortex is now available to all Claude Code sessions and subagents on nimbus, regardless of which project they spawn in.
+
+Note: the `automation` MCP server (`http://localhost:3010/stream`) that was previously in `~/.claude.json` (likely added manually) was not in the chezmoi base definition and was removed by this apply. If needed, it should be added to the modify script's base.
+
+## 2026-04-16 -- Add DATABASE_URL to zshenv for Tatl subagent inheritance
+
+### Problem
+
+Cortex MCP claim storage requires DATABASE_URL. The env var was set in Navi's `.mcp.json` and in the user-level `~/.claude.json` (via chezmoi modify script), which made claims work from the main session. However, Tatl subagents spawned via Claude Code's Agent tool start their own MCP server processes and do not reliably inherit the parent session's MCP env vars. Every autonomous Continue tick dispatched to a Tatl failed with "Task claim storage is unavailable" because the Tatl's cortex MCP instance had no DATABASE_URL.
+
+### Solution
+
+Added `DATABASE_URL` as a shell-level env var in `dot_zshenv.tmpl` with a nimbus hostname guard. This ensures all child processes (including Tatl subagent MCP servers) inherit the var from the shell environment, regardless of how they were spawned. Also edited the live `~/.zshenv` directly so the fix takes effect in the current session without requiring `chezmoi apply` (which needs 1Password).

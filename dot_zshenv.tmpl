@@ -13,6 +13,11 @@ fi
 # ── Locale ────────────────────────────────────────────────────────────────────
 export LANG="en_GB.UTF-8"
 
+# ── Ark ───────────────────────────────────────────────────────────────────────
+# Default workspace for `ark attach` / `ark run` etc. when invoked outside a
+# workspace directory. See lumiere/apps/ark commit d55035f (resolveWorkspaceRoot).
+export ARK_WORKSPACE="$HOME/navi"
+
 # ── Editors ───────────────────────────────────────────────────────────────────
 {{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
 export EDITOR={{ $nvim | quote }}
@@ -105,6 +110,8 @@ export ANTHROPIC_CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/Claude Code 
 # cachedExtraUsageDisabledReason in ~/.claude.json despite Max 20x entitlement.
 # See logs/claude.md.
 export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
+# Alt-screen rendering to eliminate terminal flickering (requires v2.1.89+)
+export CLAUDE_CODE_NO_FLICKER=1
 export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
 export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}
 export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}
@@ -120,6 +127,7 @@ export OPENCLAW_DISCORD_PLANA={{ onepasswordRead "op://Private/Navi Discord toke
 export OPENCLAW_DISCORD_CODA={{ onepasswordRead "op://Private/Navi Discord tokens/coda"}}
 export OPENCLAW_DISCORD_READA={{ onepasswordRead "op://Private/Navi Discord tokens/reada"}}
 export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
+export GITHUB_TOKEN={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
 export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
 export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
 export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
@@ -135,11 +143,37 @@ export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
 export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
 export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
+{{- if has .chezmoi.hostname .host_groups.work }}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export ATLASSIAN_BASE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
+
+export JIRA_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export JIRA_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export JIRA_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
+
+export CONFLUENCE_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
+export CONFLUENCE_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
+export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}/wiki
+{{- else }}
 export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
+{{- end }}
+export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
+export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
+
 {{- if has .chezmoi.hostname .host_groups.dev_infra }}
 
 # ── Local infrastructure (dev_infra machines only) ───────────────────────────
 export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
+{{- end }}
+
+{{- if eq .chezmoi.hostname "nimbus" }}
+
+# ── Expedition pipeline DB (nimbus only) ─────────────────────────────────────
+# Used by Cortex MCP for claim storage and execution logs.
+# Hardcoded here so subagent processes (Tatls) inherit it via the shell env.
+export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
 {{- end }}
 
 # ── Rust ──────────────────────────────────────────────────────────────────────
@@ -152,3 +186,7 @@ fi
 # shells also get vp on PATH. Node management is in system-first mode
 # (`vp env off`), so node/npm still resolve via asdf.
 [[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
+
+
+export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
+export HONCHO_PEER_NAME="Rai"

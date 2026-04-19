@@ -25,6 +25,13 @@ if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
   exit 0
 fi
 
+# macOS: use pbcopy.
+if [ "$(uname)" = Darwin ] && command -v pbcopy >/dev/null 2>&1; then
+  printf '%s' "$buf" | pbcopy
+  log "used pbcopy"
+  exit 0
+fi
+
 # Wayland: use wl-copy.
 if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy >/dev/null 2>&1; then
   printf '%s' "$buf" | wl-copy
