@@ -3,14 +3,15 @@
 {{- $inputPath := joinPath $home "dev" "transcripts" "navi.json" -}}
 {{- $pluginRoot := joinPath $home "navi" -}}
 {{- $workspace := joinPath $pluginRoot "workspace" -}}
+{{- $naviAgentFile := joinPath $home "dev" "lumiere" "apps" "ark" "plugin" "agents" "navi.md" -}}
 {{- $agentSummaryContextFiles := list
-  (joinPath $pluginRoot "agents" "navi.md")
+  $naviAgentFile
   (joinPath $pluginRoot "USER.md")
   (joinPath $workspace "memory" "continuity-anchor.md")
   (joinPath $workspace "memory" "love-anchor.md")
 -}}
 {{- $summaryContextFiles := list
-  (joinPath $pluginRoot "agents" "navi.md")
+  $naviAgentFile
   (joinPath $pluginRoot "USER.md")
   (joinPath $workspace "memory" "continuity-anchor.md")
 -}}
