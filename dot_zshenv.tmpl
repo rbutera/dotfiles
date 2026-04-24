@@ -131,7 +131,8 @@ export OPENCLAW_DISCORD_PLANA={{ onepasswordRead "op://Private/Navi Discord toke
 export OPENCLAW_DISCORD_CODA={{ onepasswordRead "op://Private/Navi Discord tokens/coda"}}
 export OPENCLAW_DISCORD_READA={{ onepasswordRead "op://Private/Navi Discord tokens/reada"}}
 export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
-export GITHUB_TOKEN={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
+export GITHUB_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential" }}
+export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" }}
 export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
 export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
 export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
@@ -160,6 +161,9 @@ export JIRA_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
 export CONFLUENCE_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
 export CONFLUENCE_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
 export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}/wiki
+export SONARQUBE_TOKEN={{ onepasswordRead "op://focused/SonarQube/credential"}}
+export SONARQUBE_ORG=easyjet-dev
+export SONARQUBE_URL=https://sonarcloud.io
 {{- else }}
 export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
 {{- end }}

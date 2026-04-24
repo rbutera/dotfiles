@@ -29,8 +29,8 @@ HOME = os.environ["HOME"]
 
 BASE = {
     "personality": "pragmatic",
-    "model": "gpt-5.4",
-    "model_reasoning_effort": "medium",
+    "model": "gpt-5.5",
+    "model_reasoning_effort": "high",
     "model_reasoning_summary": "auto",
     "approval_policy": "never",
     "features": {
@@ -78,17 +78,13 @@ BASE = {
             "command": "npx",
             "args": ["-y", "@oss-autopilot/mcp@latest"],
         },
-        "pty-mcp": {
-            "command": "pty-mcp",
-            "args": [],
-        },
         "chisel": {
             "command": "chisel",
             "args": ["--stdio", "--root", "/"],
         },
-        "obsidian": {
+        "perplexity": {
             "command": "npx",
-            "args": ["@bitbonsai/mcpvault@latest", f"{HOME}/notes"],
+            "args": ["-y", "@perplexity-ai/mcp-server"],
         },
     },
     "model_providers": {
