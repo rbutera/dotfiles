@@ -45,8 +45,8 @@ read -r -d '' base_mcps << 'MCPS' || true
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"automation": {
-    "type": "http",
-    "url": "http://localhost:3010/stream"
+    "command": "bun",
+    "args": ["run", "/Users/rai/dev/github/ashwwwin/automation-mcp/index.ts", "--stdio"]
   }
   ,"cortex": {
     "command": "node",

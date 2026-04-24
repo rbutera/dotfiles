@@ -1,5 +1,15 @@
 # shell config changes log
 
+## 2026-04-23 — Make ARK_WORKSPACE conditional on work/personal machine
+
+### Problem
+`ARK_WORKSPACE` was hardcoded to `$HOME/navi` for all machines. Work machines should use `$HOME/focused` instead.
+
+### Changes
+
+**`dot_zshenv.tmpl`**:
+- Made `ARK_WORKSPACE` conditional using `host_groups.work`: work machines (currently `latios`) get `$HOME/focused`, all others (including `nimbus`) keep `$HOME/navi`.
+
 ## 2026-04-16 — Fix Atlassian env var names for mcp-atlassian
 
 ### Problem

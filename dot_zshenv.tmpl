@@ -16,7 +16,11 @@ export LANG="en_GB.UTF-8"
 # ── Ark ───────────────────────────────────────────────────────────────────────
 # Default workspace for `ark attach` / `ark run` etc. when invoked outside a
 # workspace directory. See lumiere/apps/ark commit d55035f (resolveWorkspaceRoot).
+{{- if has .chezmoi.hostname .host_groups.work }}
+export ARK_WORKSPACE="$HOME/focused"
+{{- else }}
 export ARK_WORKSPACE="$HOME/navi"
+{{- end }}
 
 # ── Editors ───────────────────────────────────────────────────────────────────
 {{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
