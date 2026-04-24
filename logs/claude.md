@@ -1,5 +1,15 @@
 # Claude Code config changes log
 
+## 2026-04-24 — Switch automation MCP from HTTP to stdio
+
+### Problem
+The automation MCP server on nimbus was configured as an HTTP streaming connection (`http://localhost:3010/stream`), requiring the server to be running independently before Claude Code could connect.
+
+### Changes
+
+**`modify_dot_claude.json.tmpl`**:
+- Changed automation MCP from `{"type": "http", "url": "http://localhost:3010/stream"}` to a stdio command: `bun run /Users/rai/dev/github/ashwwwin/automation-mcp/index.ts --stdio`. Claude Code now spawns the process directly instead of connecting to a pre-running HTTP server.
+
 ## 2026-04-12 — Unblock Opus 1M context on Max 20x
 
 ### Problem
