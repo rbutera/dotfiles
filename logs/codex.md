@@ -70,3 +70,13 @@ Rai requested global removal of `Sanity` and `better-notion-mcp` MCP servers. Ne
 - Removed `Sanity` and `better-notion-mcp` entries from `dot_codex/modify_private_config.toml`.
 - Removed `better-notion-mcp` from `modify_dot_claude.json.tmpl` (Sanity was not present there).
 - Applied both via `chezmoi apply`.
+
+## 2026-04-21 — Remove pty-mcp MCP server
+
+### Problem
+pty-mcp's `ssh_connect` tool registers a schema with `oneOf`/`anyOf` at the top level, which violates the OpenAI tools API spec. This blocks ALL Codex threads from starting, making the Codex plugin unusable. The server was a fork that Rai installed but is not maintained.
+
+### Changes
+- Removed `pty-mcp` entry from `mcp_servers` in `dot_codex/modify_private_config.toml`
+- Uninstalled `pty-mcp` cargo binary (`cargo uninstall pty-mcp`)
+- Reshimmed asdf rust to clean up the stale shim
