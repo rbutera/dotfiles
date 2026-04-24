@@ -1,5 +1,23 @@
 # chezmoi config changes log
 
+## 2026-04-24 — Drift triage: Zed, settings.local.json modify script, serena untrack, codex apply
+
+### Problem
+
+`chezmoi status` revealed 5 drifted files across the repo. Triaged each:
+
+- **`.config/zed/settings.json`** — chezmoi source was already correct (theme object, Monaspace Neon font, `relative_line_numbers: true`). Zed had re-injected stale agent settings into the deployed file. Just needed `chezmoi apply --force`.
+- **`.claude/settings.local.json`** — static source file caused constant drift because each machine accumulates different local permissions. Converted to a `modify_settings.local.json` script that merges a baseline permission set (`WebFetch(domain:ghostty.org)`) with existing machine-specific permissions.
+- **`.codex/config.toml`** — modify script already had `model_reasoning_effort = "high"` but deployed file still had `"medium"`. Applied.
+- **`.serena/serena_config.yml`** — upstream Serena rewrites this file on every launch (comment changes, removed `web_dashboard_interface` key). Not worth tracking. Untracked by deleting source file.
+- **`.claude.json`** — modify script already strips `cachedExtraUsageDisabledReason` on apply. No source change needed.
+
+### Fix
+
+- Applied `~/.config/zed/settings.json` and `~/.codex/config.toml` (no 1Password needed).
+- Replaced `dot_claude/settings.local.json` (static) → `dot_claude/modify_settings.local.json` (merge script). Base perms go first, then existing on-disk perms are unioned via `jq unique`.
+- Deleted `dot_serena/serena_config.yml` source to untrack.
+
 ## 2026-04-14 — Work/personal split for Anthropic OAuth token
 
 ### Problem

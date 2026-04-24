@@ -1,0 +1,18 @@
+#!/bin/bash
+# Modify script for ~/.claude/settings.local.json
+# Merges baseline permissions into existing local settings.
+# Baseline permissions are always present; machine-specific permissions are preserved.
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{"permissions":{"allow":[]}}'
+
+read -r -d '' base_perms << 'PERMS' || true
+[
+  "WebFetch(domain:ghostty.org)"
+]
+PERMS
+
+echo "$current" | jq --argjson base "$base_perms" '
+  .permissions.allow = (($base + (.permissions.allow // [])) | unique)
+'
