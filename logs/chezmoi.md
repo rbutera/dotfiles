@@ -1,5 +1,24 @@
 # chezmoi config changes log
 
+## 2026-04-24 — Add claude-codex-bridge MCP (bidirectional Claude <-> Codex)
+
+### Problem
+
+The existing Codex Claude Code plugin (`codex:rescue`, etc.) felt unwieldy for quick cross-assistant collaboration. Wanted structured MCP tools for code reviews, plan critiques, and explanations that work in both directions — Claude calling Codex and Codex calling Claude.
+
+### Solution
+
+Forked [Dunqing/claude-codex-bridge](https://github.com/Dunqing/claude-codex-bridge) to `rbutera/claude-codex-bridge`. The bridge is a thin MCP translation layer: two stdio servers that shell out to `codex exec` / `claude -p` and parse JSON output.
+
+Added to chezmoi:
+- **Claude side**: `codex` MCP server in `modify_dot_claude.json.tmpl` running `npx claude-codex-bridge@0.3.1 serve codex`. Gives Claude 6 tools: `codex_query`, `codex_review_code`, `codex_review_plan`, `codex_explain_code`, `codex_plan_perf`, `codex_implement`.
+- **Codex side**: `claude` MCP server in `modify_private_config.toml` running `serve claude`. Mirrors the 6 tools for the other direction.
+- **Skill**: `dot_claude/skills/codex/SKILL.md` — `/codex` slash command that routes to the right bridge tool.
+- **Agent**: `dot_claude/agents/codex-teammate.md` — spawnable agent for longer Codex collaboration.
+- **Codex skill**: `dot_agents/skills/claude/SKILL.md` — `/claude` slash command for the Codex side.
+
+Pinned at `@0.3.1` to avoid supply chain drift from `npx` fetching latest.
+
 ## 2026-04-24 — Drift triage: Zed, settings.local.json modify script, serena untrack, codex apply
 
 ### Problem
