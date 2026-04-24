@@ -78,10 +78,6 @@ BASE = {
             "command": "npx",
             "args": ["-y", "@oss-autopilot/mcp@latest"],
         },
-        "pty-mcp": {
-            "command": "pty-mcp",
-            "args": [],
-        },
         "chisel": {
             "command": "chisel",
             "args": ["--stdio", "--root", "/"],
