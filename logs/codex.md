@@ -80,3 +80,11 @@ pty-mcp's `ssh_connect` tool registers a schema with `oneOf`/`anyOf` at the top 
 - Removed `pty-mcp` entry from `mcp_servers` in `dot_codex/modify_private_config.toml`
 - Uninstalled `pty-mcp` cargo binary (`cargo uninstall pty-mcp`)
 - Reshimmed asdf rust to clean up the stale shim
+
+## 2026-04-24 — Remove obsidian, add Perplexity MCP, bump model to gpt-5.5
+
+### Changes
+- Removed `obsidian` (`@bitbonsai/mcpvault`) from `dot_codex/modify_private_config.toml`
+- Added `perplexity` (`@perplexity-ai/mcp-server`) MCP server — API key inherited from shell env
+- Bumped default model from `gpt-5.4` to `gpt-5.5`
+- Changed `model_reasoning_effort` from `medium` to `high`
