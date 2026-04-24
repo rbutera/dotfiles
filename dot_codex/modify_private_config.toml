@@ -86,6 +86,10 @@ BASE = {
             "command": "npx",
             "args": ["-y", "@perplexity-ai/mcp-server"],
         },
+        "claude": {
+            "command": "npx",
+            "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "claude"],
+        },
     },
     "model_providers": {
         "zen": {
