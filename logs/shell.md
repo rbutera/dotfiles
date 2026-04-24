@@ -1,5 +1,18 @@
 # shell config changes log
 
+## 2026-04-24 — Fix GITHUB_TOKEN source and add SonarQube env vars
+
+### Problem
+`GITHUB_TOKEN` was reading from `op://Private/github llm personal access token/credential` — the same item as `GITHUB_LLM_PAT`. This is a restricted-scope LLM-specific token, not a general-purpose `gh` CLI token. Tools expecting a standard GitHub PAT (e.g. `gh`, MCP servers) got the wrong token.
+
+Also needed SonarQube/SonarCloud credentials exported for the EasyJet work profile so SonarQube tooling works in that context.
+
+### Changes
+
+**`dot_zshenv.tmpl`**:
+- Changed `GITHUB_TOKEN` to read from `op://Private/github gh PAT/credential` (matches `GITHUB_API_PERSONAL_ACCESS_TOKEN`)
+- Added `SONARQUBE_TOKEN`, `SONARQUBE_ORG` (`easyjet-dev`), and `SONARQUBE_URL` (`https://sonarcloud.io`) under the work host group block
+
 ## 2026-04-23 — Make ARK_WORKSPACE conditional on work/personal machine
 
 ### Problem

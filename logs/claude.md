@@ -106,3 +106,10 @@ Cortex MCP claim storage requires DATABASE_URL. The env var was set in Navi's `.
 ### Solution
 
 Added `DATABASE_URL` as a shell-level env var in `dot_zshenv.tmpl` with a nimbus hostname guard. This ensures all child processes (including Tatl subagent MCP servers) inherit the var from the shell environment, regardless of how they were spawned. Also edited the live `~/.zshenv` directly so the fix takes effect in the current session without requiring `chezmoi apply` (which needs 1Password).
+
+## 2026-04-24 — Remove pty-mcp and obsidian, add Perplexity MCP
+
+### Changes
+- Removed `pty-mcp` from `modify_dot_claude.json.tmpl` (broken `oneOf` schema, already removed from Codex on 2026-04-21)
+- Removed `obsidian` (`@bitbonsai/mcpvault`) from `modify_dot_claude.json.tmpl` (also removed from Codex config)
+- Added `perplexity` (`@perplexity-ai/mcp-server`) MCP server — API key inherited from shell env
