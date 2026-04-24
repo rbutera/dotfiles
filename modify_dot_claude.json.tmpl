@@ -31,17 +31,13 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "npx",
     "args": ["-y", "@oss-autopilot/mcp@latest"]
   },
-  "pty-mcp": {
-    "command": "pty-mcp",
-    "args": []
-  },
   "chisel": {
     "command": "chisel",
     "args": ["--stdio", "--root", "/"]
   },
-  "obsidian": {
+  "perplexity": {
     "command": "npx",
-    "args": ["@bitbonsai/mcpvault@latest", "/Users/rai/notes"]
+    "args": ["-y", "@perplexity-ai/mcp-server"]
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"automation": {
