@@ -1,5 +1,25 @@
 # Claude Code config changes log
 
+## 2026-04-26 — Enable computer-use MCP across all Claude projects
+
+### Problem
+
+The `computer-use` built-in MCP server is disabled by default in Claude Code and must be opted in per-project via `.projects[path].enabledMcpServers` in `~/.claude.json`. Manually enabling it for each project is tedious.
+
+### Changes
+
+- **`modify_dot_claude.json.tmpl`**: Extended the jq transform to iterate all entries in `.projects` and merge `["computer-use"]` into each project's `enabledMcpServers` array (with `unique` dedup). Runs on every `chezmoi apply`, so new projects pick it up automatically.
+
+## 2026-04-24 — Remove all stale Claude auth tokens from zshenv
+
+### Problem
+
+Claude Code CLI was potentially misidentifying the auth mode (API key vs Max subscription) despite valid OAuth credentials in `~/.claude/.credentials.json` showing `subscriptionType: "max"`. Multiple shell-exported tokens from 1Password — `CLAUDE_CODE_TOKEN`, `ANTHROPIC_CLAUDE_CODE_TOKEN`, and `CLAUDE_CODE_OAUTH_TOKEN` — could conflict with the proper credential file auth flow managed by `claude auth login`.
+
+### Changes
+
+- **`dot_zshenv.tmpl`**: Removed `CLAUDE_CODE_TOKEN`, `ANTHROPIC_CLAUDE_CODE_TOKEN`, and `CLAUDE_CODE_OAUTH_TOKEN` (both work and personal variants). Authentication is handled by `claude auth login` which stores tokens in `~/.claude/.credentials.json` — the env vars were unnecessary and potentially interfering with `getAuthTokenSource()`.
+
 ## 2026-04-24 — Switch automation MCP from HTTP to stdio
 
 ### Problem
