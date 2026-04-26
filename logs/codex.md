@@ -88,3 +88,19 @@ pty-mcp's `ssh_connect` tool registers a schema with `oneOf`/`anyOf` at the top 
 - Added `perplexity` (`@perplexity-ai/mcp-server`) MCP server — API key inherited from shell env
 - Bumped default model from `gpt-5.4` to `gpt-5.5`
 - Changed `model_reasoning_effort` from `medium` to `high`
+
+## 2026-04-26 — Add codex wrapper alias, caveman plugin, fix perplexity MCP
+
+### Changes
+
+- **`dot_aliases.tmpl`**: Added `codex()` shell wrapper that auto-injects `--dangerously-bypass-approvals-and-sandbox` (mirrors the existing `claude()` wrapper pattern). The `yolocodex` alias remains as a shorter alternative.
+- **`dot_codex/modify_private_config.toml`**: Added `caveman@caveman-repo` plugin and `caveman-repo` marketplace source (git from `JuliusBrussee/caveman`).
+- **`dot_codex/modify_private_config.toml`**: Fixed Perplexity MCP server startup — changed from bare `npx -y @perplexity-ai/mcp-server` to `zsh -c "exec npx -yq @perplexity-ai/mcp-server"` to ensure clean process lifecycle.
+
+## 2026-04-24 -- Reasoning effort lowered to "low"
+
+### Problem
+Codex (Tael) calls were taking 5-10 minutes each, and one timed out entirely. Config had `model_reasoning_effort = "high"` which causes GPT-5.5 to overthink code tasks it's already strong at.
+
+### Solution/Fix
+Changed `model_reasoning_effort` from `"high"` to `"low"` in `dot_codex/modify_private_config.toml` BASE dict. Applied via `chezmoi apply`. Should significantly reduce Tael dispatch latency.
