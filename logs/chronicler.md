@@ -1,5 +1,11 @@
 # chronicler config changes log
 
+## 2026-04-26 — Bump chronicler model to gpt-5.5
+
+### Changes
+
+- **`dot_chronicler.json.tmpl`**: Updated model from `openai-codex/gpt-5.4` to `openai-codex/gpt-5.5`, aligning with the Codex CLI model bump from 2026-04-24.
+
 ## 2026-04-19 — Fix navi.md path in .chronicler.json template
 
 ### Problem
