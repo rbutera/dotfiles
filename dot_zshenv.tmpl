@@ -99,7 +99,6 @@ export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/creden
 export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
 export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
-export CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/claude code token/credential" }}
 export TAILSCALE_NOCODB_CLIENT_ID={{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}
 export TAILSCALE_NOCODB_CLIENT_SECRET={{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}
 export SUPERMEMORY_CC_API_KEY={{ onepasswordRead "op://Private/supermemory api key/claude" }}
@@ -108,7 +107,6 @@ export REED_API_KEY={{ onepasswordRead "op://Private/Reed API Key/credential" }}
 export ADZUNA_APPLICATION_ID={{ onepasswordRead "op://Private/Adzuna API Key/username" }}
 export ADZUNA_API_KEY={{ onepasswordRead "op://Private/Adzuna API Key/credential" }}
 export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}
-export ANTHROPIC_CLAUDE_CODE_TOKEN={{ onepasswordRead "op://Private/Claude Code Token/credential" }}
 # Force Opus 1M context in Claude Code. Works around anthropics/claude-code#45449
 # where the client-side /model opus[1m] gate is blocked by a stale/poisoned
 # cachedExtraUsageDisabledReason in ~/.claude.json despite Max 20x entitlement.
@@ -149,7 +147,6 @@ export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault P
 export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
 {{- if has .chezmoi.hostname .host_groups.work }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
 export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
 export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
 export ATLASSIAN_BASE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
@@ -164,8 +161,6 @@ export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname
 export SONARQUBE_TOKEN={{ onepasswordRead "op://focused/SonarQube/credential"}}
 export SONARQUBE_ORG=easyjet-dev
 export SONARQUBE_URL=https://sonarcloud.io
-{{- else }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
 {{- end }}
 export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
 export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
