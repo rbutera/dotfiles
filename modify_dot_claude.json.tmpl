@@ -1,7 +1,7 @@
 #!/bin/bash
 # Modify script for ~/.claude.json
 # Merges managed MCP servers into existing Claude global config.
-# Managed: mcpServers
+# Managed: mcpServers, projects[*].enabledMcpServers
 # Free: everything else (numStartups, tipsHistory, installMethod, cachedGrowthBookFeatures, etc.)
 set -euo pipefail
 
@@ -76,7 +76,12 @@ MCPS
 # client caches and uses to block /model opus[1m] even though the 1M
 # entitlement is actually valid. Deleting these keys (plus the env var in
 # dot_zshenv.tmpl) keeps the slash command from tripping on stale state.
-echo "$current" | jq --argjson base "$base_mcps" '
+# ── Built-in MCP servers to enable across all projects ──────────────────────
+# computer-use is a default-disabled built-in; opt-in stored per-project in
+# .projects[path].enabledMcpServers inside ~/.claude.json.
+builtin_mcps='["computer-use"]'
+
+echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mcps" '
   .mcpServers = $base
   | del(.cachedExtraUsageDisabledReason)
   | del(.hasAvailableSubscription)
@@ -84,4 +89,7 @@ echo "$current" | jq --argjson base "$base_mcps" '
   | del(.passesEligibilityCache)
   | del(.clientDataCache)
   | if .oauthAccount then .oauthAccount |= del(.hasExtraUsageEnabled) else . end
+  | if .projects then .projects |= with_entries(
+      .value.enabledMcpServers = ((.value.enabledMcpServers // []) + $builtins | unique)
+    ) else . end
 '
