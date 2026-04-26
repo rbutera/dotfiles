@@ -1,5 +1,13 @@
 # Zellij config changes log
 
+## 2026-04-26 — Enable zellij-forgot keybind cheatsheet plugin
+
+### Problem
+The `zellij-forgot` plugin was configured but commented out, requiring a manual `.wasm` download. Plugins should be managed by chezmoi, not manually installed.
+
+### Changes
+- **`dot_config/zellij/config.kdl`**: Switched `forgot` plugin from a local `file:` path to a GitHub release URL (same pattern as `monocle` and `worktree`). Uncommented the plugin declaration and the `Alt+/` keybind that launches it as a floating overlay.
+
 ## 2026-04-09 — Initial Zellij setup, ported from tmux
 
 ### Motivation

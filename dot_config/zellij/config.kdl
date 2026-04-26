@@ -45,8 +45,7 @@ plugins {
     // harpoon location="file:/Users/rai/.config/zellij/plugins/harpoon.wasm"
 
     // zellij-forgot: keybind reminder / cheatsheet
-    // NOTE: must be downloaded from releases
-    // forgot location="file:/Users/rai/.config/zellij/plugins/zellij_forgot.wasm"
+    forgot location="https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm"
 
     // zellij-attention: notification icons on tabs
     // NOTE: must be downloaded from releases
@@ -176,13 +175,13 @@ keybinds clear-defaults=true {
         //     };
         // }
 
-        // Keybind reminder (uncomment after installing zellij-forgot)
-        // bind "Alt /" {
-        //     LaunchOrFocusPlugin "file:/Users/rai/.config/zellij/plugins/zellij_forgot.wasm" {
-        //         "LOAD_ZELLIJ_BINDINGS" "true"
-        //         floating true
-        //     };
-        // }
+        // Keybind reminder
+        bind "Alt /" {
+            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm" {
+                "LOAD_ZELLIJ_BINDINGS" "true"
+                floating true
+            };
+        }
     }
 
     // -- Locked mode --
