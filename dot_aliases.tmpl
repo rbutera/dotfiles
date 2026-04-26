@@ -267,6 +267,12 @@ claude() {
   esac
 }
 alias yoloclaude="claude --dangerously-skip-permissions"
+codex() {
+  case " $* " in
+    *" --dangerously-bypass-approvals-and-sandbox "*) command codex "$@" ;;
+    *) command codex --dangerously-bypass-approvals-and-sandbox "$@" ;;
+  esac
+}
 alias yolocodex="codex --dangerously-bypass-approvals-and-sandbox"
 
 

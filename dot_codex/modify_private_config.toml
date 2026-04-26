@@ -2,7 +2,7 @@
 """Modify script for ~/.codex/config.toml
 
 Merges managed base config into existing Codex settings.
-Managed: top-level settings, sandbox, mcp_servers, model_providers, plugins
+Managed: top-level settings, sandbox, mcp_servers, model_providers, plugins, marketplaces
 Free: projects, notice (machine-specific, added by Codex at runtime)
 """
 
@@ -30,7 +30,7 @@ HOME = os.environ["HOME"]
 BASE = {
     "personality": "pragmatic",
     "model": "gpt-5.5",
-    "model_reasoning_effort": "high",
+    "model_reasoning_effort": "low",
     "model_reasoning_summary": "auto",
     "approval_policy": "never",
     "features": {
@@ -83,8 +83,8 @@ BASE = {
             "args": ["--stdio", "--root", "/"],
         },
         "perplexity": {
-            "command": "npx",
-            "args": ["-y", "@perplexity-ai/mcp-server"],
+            "command": "zsh",
+            "args": ["-c", "exec npx -yq @perplexity-ai/mcp-server"],
         },
         "claude": {
             "command": "npx",
@@ -104,6 +104,13 @@ BASE = {
         "gmail@openai-curated": {"enabled": True},
         "github@openai-curated": {"enabled": True},
         "google-drive@openai-curated": {"enabled": True},
+        "caveman@caveman-repo": {"enabled": True},
+    },
+    "marketplaces": {
+        "caveman-repo": {
+            "source_type": "git",
+            "source": "https://github.com/JuliusBrussee/caveman.git",
+        },
     },
 }
 
