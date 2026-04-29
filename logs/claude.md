@@ -1,5 +1,28 @@
 # Claude Code config changes log
 
+## 2026-04-29 — Add shared OAuth toggle
+
+### Problem
+
+The Claude Code OAuth selection needed a repo-level switch so the same credential source can optionally be used across machines without changing host group membership.
+
+### Changes
+
+- **`.chezmoidata.toml`**: Added `feature_flags.shared_claude_oauth` as a repo-level switch.
+- **`dot_zshenv.tmpl`**: Claude Code OAuth selection now uses the shared flag or the existing host group match.
+
+## 2026-04-29 — Restore host-aware OAuth token selection
+
+### Problem
+
+`CLAUDE_CODE_OAUTH_TOKEN` had been removed from `dot_zshenv.tmpl`, but the environment still needs host-aware Claude Code OAuth credential selection.
+
+### Changes
+
+- **`dot_zshenv.tmpl`**: Restored the `CLAUDE_CODE_OAUTH_TOKEN` host group conditional:
+  - matching hosts read the grouped credential source
+  - all other hosts read the default credential source
+
 ## 2026-04-26 — Enable computer-use MCP across all Claude projects
 
 ### Problem

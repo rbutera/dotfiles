@@ -146,6 +146,12 @@ export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
 export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
 export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
+{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
+{{- if $useSharedClaudeOAuth }}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+{{- else }}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
+{{- end }}
 {{- if has .chezmoi.hostname .host_groups.work }}
 export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
 export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}

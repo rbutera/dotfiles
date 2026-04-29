@@ -7,3 +7,6 @@
   kde  = []
   dev_infra = ["mondo"]
   work = ["latios"]
+
+[feature_flags]
+  shared_claude_oauth = true
