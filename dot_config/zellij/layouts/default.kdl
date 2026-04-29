@@ -6,8 +6,9 @@ layout {
     // Main editing area
     pane
 
-    // Compact status bar at the bottom (like tmux status line)
-    pane size=1 borderless=true {
-        plugin location="compact-bar"
+    // Status bar — shows current mode and contextual keybind hints
+    // Switch back to compact-bar (size=1) once comfortable with keybinds
+    pane size=2 borderless=true {
+        plugin location="status-bar"
     }
 }
