@@ -1,5 +1,32 @@
 # chezmoi config changes log
 
+## 2026-05-01 — Fix `chezmoi apply` failing with multiple 1Password accounts on WSL
+
+### Problem
+
+After adding a work 1Password account (`focusedlabs.1password.com`) on the WSL machine, `chezmoi apply` broke:
+
+```
+[ERROR] multiple accounts found. Use the --account flag or set the OP_ACCOUNT environment variable
+chezmoi: template: dot_aider.conf.yml.tmpl:1:21: error calling onepasswordRead: /usr/bin/op signin --raw: exit status 1
+```
+
+chezmoi was calling `op signin --raw` without specifying `--account`. With only one account this was fine; with two accounts `op` refuses to guess. The `account = "my.1password.com"` setting in the local config wasn't being picked up — the URL format (`my.1password.com`) was wrong; `op` expects the shorthand domain (`my`).
+
+### Fix
+
+Edited `~/.config/chezmoi/chezmoi.toml` (local config, not the source template):
+
+```toml
+[onepassword]
+account = "my"      # was "my.1password.com" — op uses the domain shorthand, not full URL
+prompt = false      # skip op signin entirely; call op read directly using existing app sessions
+```
+
+`prompt = false` is the key change: it prevents chezmoi from calling `op signin --raw` and instead relies on existing 1Password sessions. Direct `op read` already works for both the personal (`op://Private/...`) and work (`op://focused/...`) vaults because the 1Password Windows app maintains sessions for both accounts.
+
+The `/usr/bin/op` on this WSL machine is the Windows-app-integrated 1Password CLI (auth goes via a Windows GUI prompt), not a standalone Linux keychain binary.
+
 ## 2026-04-24 — Add claude-codex-bridge MCP (bidirectional Claude <-> Codex)
 
 ### Problem
