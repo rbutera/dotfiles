@@ -1,0 +1,43 @@
+{
+{{- if eq .chezmoi.hostname "nimbus" }}
+  "environment": "nimbus",
+  "timezone": "Europe/London",
+  "paths": {
+    "workspaceRoot": "/Users/rai/navi",
+    "repoRoot": "/Users/rai/dev/lumiere",
+    "stateRoot": "/Users/rai/navi/state"
+  },
+  "hatchet": {
+    "namespace": "navi",
+    "workerName": "impulse-nimbus"
+  },
+  "capabilities": {
+    "cronEnabled": true,
+    "sensorsEnabled": true,
+    "heartbeatsEnabled": true,
+    "narrateQueueEnabled": true,
+    "stewardshipEnabled": true,
+    "openclawProbeEnabled": true
+  }
+{{- else }}
+  "environment": "{{ .chezmoi.hostname }}",
+  "timezone": "Europe/London",
+  "paths": {
+    "workspaceRoot": "{{ .chezmoi.homeDir }}/navi",
+    "repoRoot": "{{ .chezmoi.homeDir }}/dev/lumiere",
+    "stateRoot": "{{ .chezmoi.homeDir }}/navi/state"
+  },
+  "hatchet": {
+    "namespace": "{{ .chezmoi.hostname }}",
+    "workerName": "impulse-{{ .chezmoi.hostname }}"
+  },
+  "capabilities": {
+    "cronEnabled": false,
+    "sensorsEnabled": false,
+    "heartbeatsEnabled": false,
+    "narrateQueueEnabled": false,
+    "stewardshipEnabled": false,
+    "openclawProbeEnabled": false
+  }
+{{- end }}
+}

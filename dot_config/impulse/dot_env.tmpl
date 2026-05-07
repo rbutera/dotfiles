@@ -1,0 +1,50 @@
+# Impulse XDG environment — managed by chezmoi
+# Secrets and host-specific config for the Impulse worker
+
+# ── Hatchet (local infrastructure) ──────────────────────────────────────────
+# Locally-generated tokens for the self-hosted Hatchet instance.
+# ACTION REQUIRED: Store the nimbus Hatchet token and tenant ID in 1Password:
+#   op://Private/Hatchet Nimbus/token        → HATCHET_CLIENT_TOKEN
+#   op://Private/Hatchet Nimbus/tenant_id    → HATCHET_CLIENT_TENANT_ID
+{{- if eq .chezmoi.hostname "nimbus" }}
+HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Private/Hatchet Nimbus/token" }}
+HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Private/Hatchet Nimbus/tenant_id" }}
+HATCHET_CLIENT_API_URL=http://127.0.0.1:18888
+HATCHET_CLIENT_HOST_PORT=127.0.0.1:17077
+{{- else }}
+HATCHET_CLIENT_TOKEN=
+HATCHET_CLIENT_TENANT_ID=
+HATCHET_CLIENT_API_URL=http://127.0.0.1:8888
+HATCHET_CLIENT_HOST_PORT=127.0.0.1:7077
+{{- end }}
+HATCHET_CLIENT_TLS_STRATEGY=none
+
+# ── Scheduler paths ─────────────────────────────────────────────────────────
+NAVI_SCHEDULER_RUNTIME_CONFIG={{ .chezmoi.homeDir }}/navi/state/runtime-config.json
+NAVI_SCHEDULER_STATE_ROOT={{ .chezmoi.homeDir }}/navi/state
+NAVI_SCHEDULER_REPO_ROOT={{ .chezmoi.homeDir }}/dev/lumiere
+NAVI_SCHEDULER_LOG_LEVEL=INFO
+NAVI_SCHEDULER_NAMESPACE=navi
+
+# ── Discord (Navi's token, sourced from 1Password) ──────────────────────────
+OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
+
+# ── Narrate pipeline ────────────────────────────────────────────────────────
+NAVI_SCHEDULER_NARRATE_DAILY_ROOT={{ .chezmoi.homeDir }}/dev/expedition/blog
+NAVI_SCHEDULER_NARRATE_WEEKLY_ROOT={{ .chezmoi.homeDir }}/dev/expedition/blog/weekly
+NAVI_SCHEDULER_NARRATE_QUEUE_DB={{ .chezmoi.homeDir }}/dev/lumiere/apps/navi-scheduler/state/narrate-queue/queue.db
+NAVI_SCHEDULER_NARRATE_QUEUE_INTERVAL_MS=60000
+NAVI_SCHEDULER_NARRATE_RECENT_LOOKBACK_MS=21600000
+NAVI_SCHEDULER_NARRATE_NOTIFY_CHANNEL_ID=1473760382387621950
+
+# ── Temperature sensor ──────────────────────────────────────────────────────
+NAVI_SCHEDULER_TEMPERATURE_CHANNEL_ID=
+NAVI_SCHEDULER_RAI_USER_ID=124046285308166146
+
+# ── Claude Code OAuth (for ark-spawn jobs) ──────────────────────────────────
+{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
+{{- if $useSharedClaudeOAuth }}
+CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+{{- else }}
+CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token" }}
+{{- end }}
