@@ -196,6 +196,7 @@ fi
 # (`vp env off`), so node/npm still resolve via asdf.
 [[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
 
+export OPENSPEC_TELEMETRY=0
 
 export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
 export HONCHO_PEER_NAME="Rai"
