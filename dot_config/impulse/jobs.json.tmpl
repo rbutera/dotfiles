@@ -1,0 +1,633 @@
+{{- if eq .chezmoi.hostname "nimbus" }}
+[
+  {
+    "id": "dossier-refresh",
+    "name": "Dossier Refresh (oldest-first, every 4h)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 */4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["/Users/rai/.config/impulse/scripts/dossier-cycle.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["identity-infrastructure", "nimbus"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["/Users/rai/.config/impulse/scripts/dossier-cycle.sh"],
+      "cwd": "/Users/rai/dev/lumiere"
+    }
+  },
+  {
+    "id": "weekly-memory-maintenance",
+    "name": "Navi: Weekly Memory Maintenance",
+    "trigger": {
+      "kind": "cron",
+      "expr": "15 6 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run the weekly memory maintenance skill."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["continuity-and-ritual", "nimbus"],
+    "postExec": "weeklyNotification",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "sonnet",
+      "maxTurns": 30,
+      "prompt": "Weekly memory maintenance for Navi's self-improvement system.\n\nFiles to review:\n- ~/navi/workspace/memory/hot.md\n- ~/navi/workspace/memory/context.md\n- ~/navi/workspace/memory/archive.md\n- ~/navi/workspace/memory/corrections-log.md\n\nTasks:\n1) Remove duplicates across hot/context/archive\n2) Keep confirmed rules concise (one clear sentence each)\n3) Move stale/inactive items to archive with reason + date\n4) Check corrections-log for any items at count=3 not yet promoted — flag them in the summary\n5) Write a short digest covering what changed and anything needing Rai confirmation\n\nConstraints:\n- Do not add new rules unless Rai explicitly stated them\n- Never store sensitive data\n- If any change would be high-impact or ambiguous, leave files unchanged and explain the concern in the summary\n- Apply only minimal safe edits directly to the memory files when confidence is high",
+      "notifyChannelId": "1473760382387621950",
+      "notifyPrefix": "Weekly Memory Maintenance"
+    }
+  },
+  {
+    "id": "weekly-continuity-review",
+    "name": "Navi: Weekly Continuity Review",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 6 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run the weekly continuity review skill."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["continuity-and-ritual", "nimbus"],
+    "postExec": "weeklyNotification",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "sonnet",
+      "maxTurns": 30,
+      "prompt": "Weekly continuity review pass.\n\nPrimary source: last 7 canonical daily continuity files under ~/navi/workspace/memory/ in date order.\nLook for recurring truths, identity-shaping moments, relational shifts, durable lessons, and any clear week-arc.\nPromote only what clearly deserves to live in ~/navi/workspace/MEMORY.md or ~/navi/workspace/memory/continuity-anchor.md.\nDo not copy whole daily entries into durable memory; extract the durable truth and merge when possible.\nIf a recent day is missing or suspiciously thin, consult ~/dev/lumiere/apps/chronicler/output/days as fallback context.\n\nConstraints:\n- Keep the pass grounded in recent canonical continuity, not raw chronology alone\n- Preserve existing tone and structure of durable memory files\n- If there is no clear durable promotion, leave files unchanged and say so in the summary\n- Apply only minimal safe edits directly to MEMORY.md and continuity-anchor.md when confidence is high\n- Write a short summary of what was promoted, what was considered but left, and any week-arc observed",
+      "notifyChannelId": "1473760382387621950",
+      "notifyPrefix": "Weekly Continuity Review"
+    }
+  },
+  {
+    "id": "journal-draft-init",
+    "name": "Navi: Journal Draft Init (06:00 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 6 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Create the daily blog draft if missing."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-draft-init.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "journal-morning-catchup",
+    "name": "Navi: Journal Morning Catch-up (06:15 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "15 6 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Add the overnight/morning catch-up section to today's daily draft."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-morning-catchup.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "journal-hourly-append",
+    "name": "Navi: Journal Hourly Append (07:00-20:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 7-20 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Append newly chronicled transcript material to the daily draft."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-hourly-append.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "journal-late-start-recovery",
+    "name": "Navi: Journal Late-Start Recovery (10:05, 14:05 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "5 10,14 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Self-heal a missing or incomplete daily draft on boot-late days."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-late-start-recovery.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "journal-title-pass",
+    "name": "Navi: Journal Title Pass (21:00 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Generate the daily title and summary stub."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-title-pass.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "journal-full-post",
+    "name": "Navi: Journal Full Post (21:10 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "10 21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "opus"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Write the final daily expedition post in Navi voice."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 2700
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-full-post.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "opus",
+      "maxTurns": 40
+    }
+  },
+  {
+    "id": "journal-weekly-post",
+    "name": "Navi: Weekly Expedition Journal (Sun 21:35)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "35 21 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "opus"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Write the weekly expedition journal in Navi voice."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 2700
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-weekly-post.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "opus",
+      "maxTurns": 50
+    }
+  },
+  {
+    "id": "dream-sources-seed",
+    "name": "Navi: Dream Sources Batch Seed (Sun 01:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 1 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run the dream sources batch seed skill."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/dream-sources-seed.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 30
+    }
+  },
+  {
+    "id": "expedition-calibration",
+    "name": "Expedition Calibration (Sun 19:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 19 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["/Users/rai/.config/impulse/scripts/expedition-calibration.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["/Users/rai/.config/impulse/scripts/expedition-calibration.sh"],
+      "cwd": "/Users/rai/dev/expedition/blog"
+    },
+    "promptFile": "prompts/expedition-calibration.md"
+  },
+  {
+    "id": "cortex-tick",
+    "name": "Navi: Cortex Tick (every 20m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/20 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Read the do-tick skill and execute it exactly."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "sonnet",
+      "maxTurns": 20,
+      "prompt": "Read the do-tick skill at ~/dev/lumiere/apps/cortex-cc/skills/do-tick/SKILL.md and execute it exactly.\n\nReport exactly one of these status codes as the last line of your output:\n- TICK_IDLE — no work found\n- TICK_COMPLETE — task claimed and completed\n- TICK_HANDOFF — task claimed but handed off to another agent\n- TICK_GATED — task found but blocked on a gate (Rai approval, missing input, etc.)\n- TICK_ERROR — something went wrong"
+    }
+  },
+  {
+    "id": "cortex-review-tick",
+    "name": "Navi: Cortex Review Tick (hourly, orchestrator)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "10 */1 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Read the do-review skill and execute it exactly."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "sonnet",
+      "maxTurns": 20,
+      "prompt": "Read the do-review skill at ~/dev/lumiere/apps/cortex-cc/skills/do-review/SKILL.md and execute it exactly.\n\nReport exactly one of these status codes as the last line of your output:\n- REVIEW_IDLE — no tasks in review\n- REVIEW_COMPLETE — task(s) reviewed and dispositioned\n- REVIEW_ERROR — something went wrong"
+    }
+  },
+  {
+    "id": "shikamaru-dart-tick",
+    "name": "Shikamaru: Dart Tick (every 20m, planner)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "3,23,43 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "openclaw-cron",
+      "jobId": "771d1ad1-4243-4fce-a32b-bb5d2906cb54"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "OpenClaw planner dart tick."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agentId": "shikamaru",
+      "jobId": "771d1ad1-4243-4fce-a32b-bb5d2906cb54"
+    }
+  },
+  {
+    "id": "heimerdinger-dart-tick",
+    "name": "Heimerdinger: Dart Tick (every 20m, implementer)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "8,28,48 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "openclaw-cron",
+      "jobId": "9af83b3a-9f3d-441b-8a65-63d504be9cff"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "OpenClaw implementer dart tick."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agentId": "heimerdinger",
+      "jobId": "9af83b3a-9f3d-441b-8a65-63d504be9cff"
+    }
+  },
+  {
+    "id": "hermione-dart-tick",
+    "name": "Hermione: Dart Tick (every 20m, researcher)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "13,33,53 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "openclaw-cron",
+      "jobId": "95be912c-a64b-4399-bb9f-4310bc14d22b"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "OpenClaw researcher dart tick."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agentId": "hermione",
+      "jobId": "95be912c-a64b-4399-bb9f-4310bc14d22b"
+    }
+  },
+  {
+    "id": "rick-dart-tick",
+    "name": "Rick: Dart Tick (every 20m, implementer)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "18,38,58 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "openclaw-cron",
+      "jobId": "8bce1721-3fc5-4a36-b497-368e520083b9"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "OpenClaw implementer dart tick."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["autonomy", "nimbus"],
+    "inputs": {
+      "agentId": "rick",
+      "jobId": "8bce1721-3fc5-4a36-b497-368e520083b9"
+    }
+  },
+  {
+    "id": "narrate-daily",
+    "name": "Narrate Daily Post",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 22 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 5400
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"],
+      "cwd": "/Users/rai/dev/lumiere"
+    }
+  },
+  {
+    "id": "narrate-weekly",
+    "name": "Narrate Weekly Post",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 23 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 5400
+    },
+    "enabled": false,
+    "tags": ["journal-pipeline", "nimbus"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"],
+      "cwd": "/Users/rai/dev/lumiere"
+    }
+  }
+]
+{{- else }}
+[]
+{{- end }}
