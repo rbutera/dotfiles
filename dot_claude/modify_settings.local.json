@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Modify script for ~/.claude/settings.local.json
 # Merges baseline permissions into existing local settings.
 # Baseline permissions are always present; machine-specific permissions are preserved.
