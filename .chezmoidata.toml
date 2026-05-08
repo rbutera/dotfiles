@@ -9,4 +9,4 @@
   work = ["latios"]
 
 [feature_flags]
-  shared_claude_oauth = true
+  shared_claude_oauth = false
