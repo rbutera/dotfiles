@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, enabledPlugins
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, enabledPlugins
 # Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
 set -euo pipefail
 
@@ -12,6 +12,7 @@ current=$(cat)
 read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
+  "skillListingBudgetFraction": 0.02,
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
@@ -24,10 +25,7 @@ read -r -d '' base << 'BASE' || true
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "serena@claude-plugins-official": true,
-    "plugin-dev@claude-plugins-official": true,
-    "slack@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true,
-    "mcp-server-dev@claude-plugins-official": true
+    "chrome-devtools-mcp@claude-plugins-official": true
   }
 }
 BASE
@@ -36,5 +34,9 @@ BASE
 # enabledPlugins is additive — base plugins always present, extras preserved.
 echo "$current" | jq --argjson base "$base" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
-  .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins)
+  .skillListingBudgetFraction = $base.skillListingBudgetFraction |
+  .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
+    del(.["plugin-dev@claude-plugins-official"],
+        .["mcp-server-dev@claude-plugins-official"],
+        .["slack@claude-plugins-official"]))
 '
