@@ -82,9 +82,9 @@ BASE = {
             "command": "chisel",
             "args": ["--stdio", "--root", "/"],
         },
-        "perplexity": {
-            "command": "zsh",
-            "args": ["-c", "exec npx -yq @perplexity-ai/mcp-server"],
+        "exa": {
+            "url": "https://mcp.exa.ai/mcp?enableAdvancedSearch=true",
+            "headers": {"x-api-key": os.environ.get("EXA_API_KEY", "")},
         },
         "claude": {
             "command": "npx",
