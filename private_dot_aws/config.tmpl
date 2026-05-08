@@ -1,0 +1,25 @@
+{{- if has .chezmoi.hostname .host_groups.work }}
+[profile ej-dev]
+sso_start_url = https://ej-aws.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 319629019722
+sso_role_name = EasyJet-App-PowerUser
+region = eu-west-1
+output = json
+
+[profile ej-test]
+sso_start_url = https://ej-aws.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 786703335102
+sso_role_name = EasyJet-App-PowerUser
+region = eu-west-1
+output = json
+
+[profile ej-prod]
+sso_start_url = https://ej-aws.awsapps.com/start
+sso_region = eu-west-1
+sso_account_id = 695159714685
+sso_role_name = EasyJet-App-PowerUser
+region = eu-west-1
+output = json
+{{- end }}

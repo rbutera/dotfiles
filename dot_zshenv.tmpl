@@ -167,6 +167,9 @@ export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname
 export SONARQUBE_TOKEN={{ onepasswordRead "op://focused/SonarQube/credential"}}
 export SONARQUBE_ORG=easyjet-dev
 export SONARQUBE_URL=https://sonarcloud.io
+
+# AWS (easyJet SSO)
+export AWS_PROFILE=ej-dev
 {{- end }}
 export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
 export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
