@@ -35,10 +35,6 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "chisel",
     "args": ["--stdio", "--root", "/"]
   },
-  "perplexity": {
-    "command": "npx",
-    "args": ["-y", "@perplexity-ai/mcp-server"]
-  },
   "codex": {
     "command": "npx",
     "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "codex"]
@@ -66,6 +62,10 @@ read -r -d '' base_mcps << 'MCPS' || true
 {{- end }}
 }
 MCPS
+
+# Inject exa MCP (HTTP mode) with API key from environment
+base_mcps=$(echo "$base_mcps" | jq --arg key "${EXA_API_KEY:-}" \
+  '.exa = {"type": "http", "url": "https://mcp.exa.ai/mcp?enableAdvancedSearch=true", "headers": {"x-api-key": $key}}')
 
 # Replace: base is authoritative for MCP servers. Removals from base
 # are reflected in the deployed config. All other fields untouched.

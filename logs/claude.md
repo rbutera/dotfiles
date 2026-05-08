@@ -1,5 +1,27 @@
 # Claude Code config changes log
 
+## 2026-05-08 — Replace Perplexity MCP with Exa (HTTP mode)
+
+### Problem
+
+Switching from Perplexity MCP to Exa MCP for web search across Claude Code and Codex CLI.
+
+### Changes
+
+- **`modify_dot_claude.json.tmpl`**: Removed `perplexity` npx entry from the heredoc. Added a post-heredoc jq step that injects `exa` as an HTTP MCP server (`{"type": "http", "url": "https://mcp.exa.ai/mcp?enableAdvancedSearch=true", "headers": {"x-api-key": ...}}`). The `type` field is required by Claude Code's schema for HTTP transport. API key read from `$EXA_API_KEY` at apply time — no 1Password dependency in this script.
+- **`dot_codex/modify_private_config.toml`**: Replaced `perplexity` (zsh/npx command) with `exa` using HTTP mode (`url` + `headers`), API key read from `os.environ.get("EXA_API_KEY")` at apply time.
+- `EXA_API_KEY` was already exported in `dot_zshenv.tmpl` (line 134, via `op://Private/EXA API Key/credential`).
+
+## 2026-05-08 — Raise skill budget, disable unused plugins
+
+### Problem
+
+Skill listing was truncated at startup — 70 descriptions dropped at 1% budget. Plugins like slack, plugin-dev, and mcp-server-dev contribute 12 skills that are irrelevant for most sessions.
+
+### Changes
+
+- **`dot_claude/modify_settings.json`**: Set `skillListingBudgetFraction` to 0.02 (2%, ~6k tokens). Removed `plugin-dev`, `mcp-server-dev`, `slack` from the base `enabledPlugins`. Added `del()` in the jq merge to actively strip these three plugins from existing settings on apply.
+
 ## 2026-04-29 — Add shared OAuth toggle
 
 ### Problem
