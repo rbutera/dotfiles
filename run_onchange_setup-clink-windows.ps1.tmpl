@@ -1,0 +1,43 @@
+{{- /*
+   Clink (cmd.exe enhancement) setup — managed by chezmoi.
+   run_onchange_: re-runs whenever this file's content changes.
+   Idempotent. Requires chrisant996.Clink to be installed first.
+*/ -}}
+# revision: 2 (2026-05-01: refresh PATH so clink installed in same apply is found)
+$ErrorActionPreference = 'Continue'
+
+# Pull a fresh PATH from the registry — clink may have been installed earlier
+# in this same `chezmoi apply` and not yet propagated to this script's env.
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+
+$clinkExe = $null
+$cmd = Get-Command clink -ErrorAction SilentlyContinue
+if ($cmd) {
+    $clinkExe = $cmd.Source
+} elseif (Test-Path "$env:ProgramFiles\clink\clink.bat") {
+    $clinkExe = "$env:ProgramFiles\clink\clink.bat"
+}
+
+if (-not $clinkExe) {
+    Write-Host "[skip ] clink not found; install it via winget first" -ForegroundColor DarkGray
+    return
+}
+
+$clinkDir = "$env:LocalAppData\clink"
+New-Item -ItemType Directory -Path $clinkDir -Force | Out-Null
+
+# Starship as the cmd.exe prompt via Clink
+$starshipLua = Join-Path $clinkDir 'starship.lua'
+$starshipBody = @'
+-- managed by chezmoi: Clink loads Starship as cmd.exe's prompt
+load(io.popen('starship init cmd'):read("*a"))()
+'@
+if ((-not (Test-Path $starshipLua)) -or ((Get-Content $starshipLua -Raw) -ne $starshipBody)) {
+    Set-Content -Path $starshipLua -Value $starshipBody -Encoding UTF8
+    Write-Host "[write] $starshipLua" -ForegroundColor Cyan
+} else {
+    Write-Host "[skip ] $starshipLua" -ForegroundColor DarkGray
+}
+
+& $clinkExe autorun install --quiet 2>$null
+Write-Host "[done ] cmd.exe will load Clink + Starship in new sessions" -ForegroundColor Green

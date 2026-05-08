@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """Modify script for ~/.codex/config.toml
 
 Merges managed base config into existing Codex settings.
@@ -25,7 +25,7 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 # ── Base config: fields we want on all machines ──────────────────────────────
-HOME = os.environ["HOME"]
+HOME = os.environ.get("HOME") or os.environ.get("USERPROFILE", "")
 
 BASE = {
     "personality": "pragmatic",

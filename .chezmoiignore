@@ -32,3 +32,101 @@ README.md
 {{ end }}
 
 ~/.config/aichat/sessions/*
+
+{{ if eq .chezmoi.os "windows" }}
+# Patterns below are gitignore-style and match against TARGET paths
+# (i.e. dot_X.tmpl deploys to .X, so we ignore .X here).
+
+# === Unix-only shells / multiplexers / Brewfile ===
+.aliases
+.zlogin
+.zlogout
+.zpreztorc
+.zprofile
+.zshenv
+.zshrc
+.tmux/
+.tmux.conf
+.tmux.conf.local
+raisbrewfile
+
+# === Unix-only run_once scripts (also match the post-script target) ===
+run_once_*.sh
+run_once_*.sh.tmpl
+*_install-zsh.sh
+*_install_prezto_and_contrib.sh
+*_install-packages.sh
+*_install-aur-packages.sh
+*_install-editor.sh
+*_install-tpm.sh
+*_install-go.sh
+*_setup_1password_alias.sh
+*_setup_rust.sh
+*_setup_node.sh
+*_setup_gpg.sh
+*_install_node.sh
+
+# === Linux/macOS-specific .config subdirs ===
+.config/kitty/
+.config/ghostty/
+.config/warp-terminal/
+.config/zellij/
+.config/alacritty
+.config/hypr/
+.config/kanata/
+.config/karabiner/
+.config/paru/
+.config/systemd/
+.config/pipewire/
+.config/yabridgectl/
+.config/virt-manager/
+.config/duti/
+.config/fastfetch/
+.config/opencode/
+.config/vim-easycomplete/
+.config/pgcli/
+.config/tealdeer/
+.config/pycodestyle
+
+# === 1Password-using configs we don't need yet on Windows ===
+.aider.conf.yml
+.env
+.chronicler.json
+.narrate.json
+.todoist.config.json
+.ssh/
+.config/aichat/
+.config/gh/
+.config/github-copilot/
+
+# === Unix shell scripts dropped to home ===
+bin/
+docker/
+scripts/
+
+# modify_dot_claude.json.tmpl is excluded on Windows: chezmoi maps both
+# dot_claude/ (directory) and modify_dot_claude.json.tmpl to target .claude,
+# causing "inconsistent state". Windows uses run_onchange_apply-claude-json-windows.ps1
+# instead (same jq logic, PowerShell wrapper).
+.claude.json
+
+# === Misc ===
+mic-with-vst.carxp
+state/
+{{ end }}
+
+{{ if ne .chezmoi.os "windows" }}
+# Windows-only sources — ignored on non-Windows
+Documents/
+AppData/
+install-windows-packages.ps1
+setup-clink-windows.ps1
+install-nvim-windows.ps1
+run_onchange_install-windows-packages.ps1
+run_onchange_install-windows-packages.ps1.tmpl
+run_onchange_setup-clink-windows.ps1
+run_onchange_setup-clink-windows.ps1.tmpl
+run_onchange_install-nvim-windows.ps1
+run_onchange_install-nvim-windows.ps1.tmpl
+run_onchange_apply-claude-json-windows.ps1
+{{ end }}

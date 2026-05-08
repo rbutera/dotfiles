@@ -1,0 +1,141 @@
+{{- /*
+   Windows package bootstrap — managed by chezmoi.
+   run_onchange_: re-runs whenever this file's content changes.
+   Idempotent: skips packages already installed.
+*/ -}}
+# revision: 5 (2026-05-08: added uv for uvx MCP servers + mise install for
+#                          .tool-versions runtimes)
+$ErrorActionPreference = 'Continue'
+
+function Test-WingetInstalled {
+    param([Parameter(Mandatory)][string]$Id)
+    $output = winget list --id $Id --exact --accept-source-agreements 2>$null
+    return ($LASTEXITCODE -eq 0 -and ($output -join "`n") -match [regex]::Escape($Id))
+}
+
+function Install-WingetIfMissing {
+    param([Parameter(Mandatory)][string]$Id, [string]$Note = '')
+    if (Test-WingetInstalled -Id $Id) {
+        Write-Host ("[skip ] {0,-40} {1}" -f $Id, $Note) -ForegroundColor DarkGray
+        return
+    }
+    Write-Host ("[get  ] {0,-40} {1}" -f $Id, $Note) -ForegroundColor Cyan
+    winget install --id $Id --exact --silent --accept-package-agreements --accept-source-agreements | Out-Host
+}
+
+$packages = @(
+    @{ Id='Microsoft.PowerToys';             Note='FancyZones, Run, key remap'    },
+    @{ Id='Neovim.Neovim';                   Note='primary editor'                 },
+    @{ Id='ZedIndustries.Zed';               Note='Zed editor (Windows preview)'   },
+    @{ Id='uutils.coreutils';                Note='GNU-flavored cat/ls/etc'        },
+    @{ Id='jdx.mise';                        Note='asdf replacement; reads .tool-versions' },
+    @{ Id='Starship.Starship';               Note='cross-platform prompt'          },
+    @{ Id='ajeetdsouza.zoxide';              Note='z command'                      },
+    @{ Id='junegunn.fzf';                    Note='fuzzy finder'                   },
+    @{ Id='BurntSushi.ripgrep.MSVC';         Note='rg'                             },
+    @{ Id='sharkdp.fd';                      Note='find replacement'               },
+    @{ Id='sharkdp.bat';                     Note='cat with syntax highlighting'   },
+    @{ Id='eza-community.eza';               Note='modern ls'                      },
+    @{ Id='dandavison.delta';                Note='git diff viewer'                },
+    @{ Id='jqlang.jq';                       Note='JSON query'                     },
+    @{ Id='MikeFarah.yq';                    Note='YAML query'                     },
+    @{ Id='JesseDuffield.lazygit';           Note='git TUI'                        },
+    @{ Id='GitHub.cli';                      Note='gh'                             },
+    @{ Id='chrisant996.Clink';               Note='makes cmd.exe sane'             },
+    @{ Id='Python.Python.3.13';              Note='Python (codex modify script)'   },
+    @{ Id='astral-sh.uv';                   Note='uvx for MCP servers (tempograph)' }
+)
+
+foreach ($pkg in $packages) {
+    Install-WingetIfMissing -Id $pkg.Id -Note $pkg.Note
+}
+
+# Refresh PATH so subsequent steps see freshly-installed CLIs
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+
+# --- Scoop (for Nerd Fonts; winget Nerd Font coverage is patchy) ---
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Write-Host "[get  ] scoop (for Nerd Fonts)" -ForegroundColor Cyan
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Invoke-RestMethod -Uri https://get.scoop.sh -UseBasicParsing | Invoke-Expression
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+} else {
+    Write-Host "[skip ] scoop" -ForegroundColor DarkGray
+}
+
+if (Get-Command scoop -ErrorAction SilentlyContinue) {
+    if (-not ((scoop bucket list 2>$null) -match 'nerd-fonts')) {
+        Write-Host "[add  ] scoop bucket: nerd-fonts" -ForegroundColor Cyan
+        scoop bucket add nerd-fonts | Out-Host
+    }
+    if (-not ((scoop list 2>$null) -match 'JetBrainsMono-NF')) {
+        Write-Host "[get  ] JetBrainsMono Nerd Font" -ForegroundColor Cyan
+        scoop install nerd-fonts/JetBrainsMono-NF | Out-Host
+    } else {
+        Write-Host "[skip ] JetBrainsMono Nerd Font" -ForegroundColor DarkGray
+    }
+}
+
+# --- PSReadLine + PSFzf modules ---
+foreach ($mod in @('PSReadLine','PSFzf')) {
+    if (-not (Get-Module -ListAvailable -Name $mod)) {
+        Write-Host "[get  ] PSGallery module: $mod" -ForegroundColor Cyan
+        Install-Module -Name $mod -Scope CurrentUser -Force -AllowClobber -AcceptLicense -ErrorAction Continue
+    } else {
+        Write-Host "[skip ] PSGallery module: $mod" -ForegroundColor DarkGray
+    }
+}
+
+# --- Make `bash` resolve to Git's real bash (not the WSL stub in WindowsApps) ---
+# Without this, chezmoi modify_ scripts with `#!/usr/bin/env bash` shebangs will
+# launch the WSL stub instead of executing. Side effect: typing `bash` in this
+# PowerShell session now launches Git Bash; use `wsl` for WSL.
+$gitBin  = "$env:ProgramFiles\Git\bin"
+$userBin = "$HOME\bin"
+$userPath = [System.Environment]::GetEnvironmentVariable('Path','User')
+$userPathEntries = $userPath -split ';' | Where-Object { $_ }
+$prepends = @()
+if ((Test-Path $gitBin) -and ($userPathEntries -notcontains $gitBin)) {
+    $prepends += $gitBin
+}
+New-Item -ItemType Directory -Path $userBin -Force | Out-Null
+if ($userPathEntries -notcontains $userBin) {
+    $prepends += $userBin
+}
+if ($prepends.Count -gt 0) {
+    $newUserPath = ($prepends -join ';') + ';' + $userPath
+    [System.Environment]::SetEnvironmentVariable('Path', $newUserPath, 'User')
+    Write-Host ("[set  ] user PATH prepended: " + ($prepends -join ', ')) -ForegroundColor Cyan
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + $newUserPath
+} else {
+    Write-Host "[skip ] user PATH already has Git bin and ~/bin" -ForegroundColor DarkGray
+}
+
+# --- python3.cmd shim (Windows Python ships python.exe + py.exe but no python3.exe) ---
+$python3Cmd  = Join-Path $userBin 'python3.cmd'
+$python3Body = "@py -3 %*`r`n"
+if ((-not (Test-Path $python3Cmd)) -or ((Get-Content $python3Cmd -Raw) -ne $python3Body)) {
+    Set-Content -Path $python3Cmd -Value $python3Body -Encoding ASCII -NoNewline
+    Write-Host "[write] $python3Cmd" -ForegroundColor Cyan
+} else {
+    Write-Host "[skip ] $python3Cmd" -ForegroundColor DarkGray
+}
+
+# --- pip install (user) tomli + tomli_w (used by modify_codex script) ---
+if (Get-Command py -ErrorAction SilentlyContinue) {
+    & py -3 -m pip install --user --quiet --disable-pip-version-check tomli tomli_w 2>&1 | Out-Host
+    Write-Host "[ok   ] pip --user install: tomli, tomli_w" -ForegroundColor Cyan
+} else {
+    Write-Host "[skip ] py launcher not found yet — rerun after a new shell" -ForegroundColor DarkGray
+}
+
+# --- mise install (.tool-versions runtimes: node, bun, go, pnpm, rust, python) ---
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    Write-Host "[run  ] mise install (runtimes from .tool-versions)" -ForegroundColor Cyan
+    & mise install --yes 2>&1 | Out-Host
+    Write-Host "[ok   ] mise runtimes installed" -ForegroundColor Cyan
+} else {
+    Write-Host "[skip ] mise not found" -ForegroundColor DarkGray
+}
+
+Write-Host "`nDone. Open a new PowerShell window for profile changes to take effect." -ForegroundColor Green

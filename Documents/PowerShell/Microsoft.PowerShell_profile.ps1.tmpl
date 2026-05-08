@@ -1,0 +1,264 @@
+{{- /*
+   PowerShell 7 profile — managed by chezmoi.
+   Source: Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl
+   Target: $PROFILE.CurrentUserCurrentHost
+   Edit the source, not the deployed file.
+
+   Mirrors the subset of dot_zshenv.tmpl + dot_aliases.tmpl that makes sense
+   on Windows. Secret env vars are rendered via onepasswordRead at apply time —
+   chezmoi must have an active 1Password CLI session to apply this file.
+*/ -}}
+# === suppress update nag ===
+$env:POWERSHELL_UPDATECHECK = 'Off'
+
+# === editor / pager / locale ===
+$env:LANG    = 'en_GB.UTF-8'
+$env:EDITOR  = 'nvim'
+$env:VISUAL  = 'nvim'
+$env:PAGER   = 'less'
+$env:LESS    = '-g -i -M -R -S -w -X -z-4'
+$env:GIT_TERMINAL_PROMPT = '0'
+
+# === XDG (so ~/.config-style configs work for nvim/mpv/starship/etc) ===
+$env:XDG_CONFIG_HOME = "$HOME\.config"
+$env:XDG_DATA_HOME   = "$HOME\.local\share"
+$env:XDG_CACHE_HOME  = "$HOME\.cache"
+
+# === paths: ~/bin, ~/.local/bin, $GOPATH/bin, pnpm ===
+$env:GOPATH    = "$HOME\go"
+$env:PNPM_HOME = "$env:LOCALAPPDATA\pnpm"
+$env:CHEZMOI_DIR = "$HOME\.local\share\chezmoi"
+
+foreach ($p in @("$HOME\bin", "$HOME\.local\bin", "$env:GOPATH\bin", $env:PNPM_HOME)) {
+    if ($p -and (Test-Path $p) -and ($env:Path -notlike "*$p*")) {
+        $env:Path = "$p;$env:Path"
+    }
+}
+
+# === fzf catppuccin theme ===
+$env:FZF_DEFAULT_OPTS = '--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
+
+# === Claude Code tweaks (mirrors dot_zshenv) ===
+$env:ANTHROPIC_DEFAULT_OPUS_MODEL = 'claude-opus-4-6[1m]'
+$env:CLAUDE_CODE_NO_FLICKER = '1'
+
+# === non-secret API endpoints / app config ===
+$env:CAMOFOX_URL                     = 'http://localhost:9377'
+$env:OPENCODE_DISABLE_EXTERNAL_SKILLS = 'true'
+$env:HONCHO_PEER_NAME                = 'Rai'
+$env:EXPEDITION_EMAIL                = 'raibutera91@gmail.com'
+
+# Ark workspace (work-host gated)
+{{- if has .chezmoi.hostname .host_groups.work }}
+$env:ARK_WORKSPACE = "$HOME\focused"
+{{- else }}
+$env:ARK_WORKSPACE = "$HOME\navi"
+{{- end }}
+
+# === secrets via 1Password (rendered at chezmoi apply time) ===
+$env:CAMOFOX_API_KEY                = '{{ onepasswordRead "op://Private/Camofox API Key/credential" }}'
+$env:FIRECRAWL_API_KEY              = '{{ onepasswordRead "op://Private/firecrawl/credential" }}'
+$env:SUPERMEMORY_OPENCLAW_API_KEY   = '{{ onepasswordRead "op://Private/supermemory api key/credential" }}'
+$env:GROQ_API_KEY                   = '{{ onepasswordRead "op://Private/groq whisper api key/credential" }}'
+$env:OPENCODE_ZEN_API_KEY           = '{{ onepasswordRead "op://Private/OpenCode Zen/credential" }}'
+$env:OPENCODE_API_KEY               = '{{ onepasswordRead "op://Private/OpenCode Zen/credential" }}'
+$env:TAILSCALE_NOCODB_CLIENT_ID     = '{{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}'
+$env:TAILSCALE_NOCODB_CLIENT_SECRET = '{{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}'
+$env:SUPERMEMORY_CC_API_KEY         = '{{ onepasswordRead "op://Private/supermemory api key/claude" }}'
+$env:SUPERMEMORY_API_KEY            = '{{ onepasswordRead "op://Private/supermemory api key/opencode" }}'
+$env:REED_API_KEY                   = '{{ onepasswordRead "op://Private/Reed API Key/credential" }}'
+$env:ADZUNA_APPLICATION_ID          = '{{ onepasswordRead "op://Private/Adzuna API Key/username" }}'
+$env:ADZUNA_API_KEY                 = '{{ onepasswordRead "op://Private/Adzuna API Key/credential" }}'
+$env:ZAI_API_KEY                    = '{{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}'
+$env:OPENCLAW_DISCORD_NAVI          = '{{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}'
+$env:OPENCLAW_DISCORD_HERMIONE      = '{{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}'
+$env:OPENCLAW_DISCORD_ZELDA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}'
+$env:OPENCLAW_DISCORD_HEIMERDINGER  = '{{ onepasswordRead "op://Private/Navi Discord tokens/heimerdinger" }}'
+$env:OPENCLAW_DISCORD_ROCKY         = '{{ onepasswordRead "op://Private/Navi Discord tokens/rocky" }}'
+$env:OPENCLAW_DISCORD_RICK          = '{{ onepasswordRead "op://Private/Navi Discord tokens/rick" }}'
+$env:OPENCLAW_DISCORD_SHIKAMARU     = '{{ onepasswordRead "op://Private/Navi Discord tokens/shikamaru" }}'
+$env:OPENCLAW_DISCORD_HEDWIG        = '{{ onepasswordRead "op://Private/Navi Discord tokens/hedwig" }}'
+$env:OPENCLAW_DISCORD_DOBBY         = '{{ onepasswordRead "op://Private/Navi Discord tokens/dobby" }}'
+$env:OPENCLAW_DISCORD_DUMBLEDORE    = '{{ onepasswordRead "op://Private/Navi Discord tokens/dumbledore" }}'
+$env:OPENCLAW_DISCORD_ORCA          = '{{ onepasswordRead "op://Private/Navi Discord tokens/orca" }}'
+$env:OPENCLAW_DISCORD_PLANA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/plana" }}'
+$env:OPENCLAW_DISCORD_CODA          = '{{ onepasswordRead "op://Private/Navi Discord tokens/coda" }}'
+$env:OPENCLAW_DISCORD_READA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/reada" }}'
+$env:GITHUB_LLM_PAT                 = '{{ onepasswordRead "op://Private/github llm personal access token/credential" }}'
+$env:GITHUB_TOKEN                   = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
+$env:GITHUB_API_PERSONAL_ACCESS_TOKEN = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
+$env:GITHUB_PERSONAL_ACCESS_TOKEN   = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
+$env:PERPLEXITY_API_KEY             = '{{ onepasswordRead "op://dev/perplexity_api_key/credential" }}'
+$env:EXA_API_KEY                    = '{{ onepasswordRead "op://Private/EXA API Key/credential" }}'
+$env:GOG_KEYRING_PASSWORD           = '{{ onepasswordRead "op://Private/GOG Keyring Password/credential" }}'
+$env:EXPEDITION_EMAIL_APP_PASSWORD  = '{{ onepasswordRead "op://Private/google raibutera91/app_password" }}'
+$env:EXPEDITION_EMAIL_AUTHENTICATOR = '{{ onepasswordRead "op://Private/google raibutera91/one-time password" }}'
+$env:DART_API_KEY                   = '{{ onepasswordRead "op://Private/dart ai api key/credential" }}'
+$env:RAPIDAPI_API_KEY               = '{{ onepasswordRead "op://Private/RapidAPI Token/credential" }}'
+$env:ELEVENLABS_RAI                 = '{{ onepasswordRead "op://Private/Elevenlabs API/rai" }}'
+$env:ELEVENLABS_API_KEY             = '{{ onepasswordRead "op://Private/Elevenlabs API/credential" }}'
+$env:ELEVENLABS_NAVI                = '{{ onepasswordRead "op://Private/Elevenlabs API/navi" }}'
+$env:OBSIDIAN_VAULT_PASSWORD        = '{{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}'
+$env:E8N_CLOUDFLARE_API_TOKEN       = '{{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}'
+$env:CLI_PROXY_API_TOKEN            = '{{ onepasswordRead "op://Private/CLIProxyAPI/credential" }}'
+{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
+{{- if $useSharedClaudeOAuth }}
+$env:CLAUDE_CODE_OAUTH_TOKEN        = '{{ onepasswordRead "op://focused/claude code oauth token/credential" }}'
+{{- else }}
+$env:CLAUDE_CODE_OAUTH_TOKEN        = '{{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token" }}'
+{{- end }}
+{{- if has .chezmoi.hostname .host_groups.work }}
+$env:ATLASSIAN_API_KEY    = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
+$env:ATLASSIAN_EMAIL      = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
+$env:ATLASSIAN_BASE_URL   = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}'
+$env:JIRA_API_TOKEN       = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
+$env:JIRA_USERNAME        = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
+$env:JIRA_URL             = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}'
+$env:CONFLUENCE_API_TOKEN = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
+$env:CONFLUENCE_USERNAME  = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
+$env:CONFLUENCE_URL       = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}/wiki'
+$env:SONARQUBE_TOKEN      = '{{ onepasswordRead "op://focused/SonarQube/credential" }}'
+$env:SONARQUBE_ORG        = 'easyjet-dev'
+$env:SONARQUBE_URL        = 'https://sonarcloud.io'
+{{- end }}
+$env:NOTION_TOKEN         = '{{ onepasswordRead "op://Private/_focused notion token/credential" }}'
+$env:TODOIST_API_TOKEN    = '{{ onepasswordRead "op://dev/todoist_api/credential" }}'
+$env:HONCHO_API_KEY       = '{{ onepasswordRead "op://Private/honcho.dev/credential" }}'
+
+# === PSReadLine: vi mode, prediction ===
+# UpArrow/DownArrow use scriptblocks that fall back to PreviousHistory/NextHistory
+# when the buffer is empty — works around a PSReadLine null-ref in
+# HistorySearchBackward when no matching history exists.
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    Set-PSReadLineOption -EditMode Vi
+    Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+    Set-PSReadLineOption -PredictionViewStyle ListView
+    Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+    Set-PSReadLineOption -BellStyle None
+    Set-PSReadLineKeyHandler -Key 'Ctrl+r' -Function ReverseSearchHistory
+    Set-PSReadLineKeyHandler -Key UpArrow -ScriptBlock {
+        $line = $null; $cursor = $null
+        [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+        if ([string]::IsNullOrEmpty($line)) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::PreviousHistory()
+        } else {
+            [Microsoft.PowerShell.PSConsoleReadLine]::HistorySearchBackward()
+        }
+    }
+    Set-PSReadLineKeyHandler -Key DownArrow -ScriptBlock {
+        $line = $null; $cursor = $null
+        [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
+        if ([string]::IsNullOrEmpty($line)) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::NextHistory()
+        } else {
+            [Microsoft.PowerShell.PSConsoleReadLine]::HistorySearchForward()
+        }
+    }
+}
+
+# === prompt, jump, runtimes, fuzzy ===
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& starship init powershell)
+}
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& zoxide init powershell --cmd cd | Out-String)
+}
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    mise activate pwsh | Out-String | Invoke-Expression
+}
+if (Get-Module -ListAvailable -Name PSFzf) {
+    Import-Module PSFzf
+    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+}
+
+# === aliases & functions ported from ~/.aliases ===
+function .. { Set-Location .. }
+function ... { Set-Location ..\.. }
+function .... { Set-Location ..\..\.. }
+function ..... { Set-Location ..\..\..\.. }
+
+Set-Alias -Name g -Value git -ErrorAction SilentlyContinue
+function gca { git add -A; git commit -av -m @args }
+function gcap { gca @args; git push }
+function gitroot {
+    $root = git rev-parse --show-toplevel
+    if ($LASTEXITCODE -eq 0) { Set-Location $root }
+}
+function gsync {
+    git fetch --all
+    git branch --format='%(refname:short)' | Where-Object { $_ } | ForEach-Object {
+        git checkout $_
+        if ($LASTEXITCODE -ne 0) { return }
+        git merge --ff-only
+        if ($LASTEXITCODE -ne 0) { return }
+    }
+}
+
+if (Get-Command eza -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
+    function ls { eza --group-directories-first --icons @args }
+    function la { ls -a @args }
+    function ll { ls -l @args }
+    function lt { ls --tree -D -L 2 @args }
+    function ltt { ls --tree -D -L 3 @args }
+    function lttt { ls --tree -D -L 4 @args }
+}
+
+if (Get-Command bat -ErrorAction SilentlyContinue) {
+    Remove-Item Alias:cat -Force -ErrorAction SilentlyContinue
+    Set-Alias -Name cat -Value bat -Option AllScope
+}
+
+function vim { nvim @args }
+function nv { if ($args.Count -eq 0) { nvim . } else { nvim @args } }
+function nvimcfg { nvim "$HOME\.config\nvim\lua\user" }
+
+function czd { chezmoi diff @args }
+function czu { chezmoi update @args }
+function chezup {
+    $cwd = Get-Location
+    Set-Location (chezmoi source-path)
+    git add -A
+    git commit -av -m @args
+    git push
+    Set-Location $cwd
+}
+function chezsync {
+    $cwd = Get-Location
+    Set-Location (chezmoi source-path)
+    git stash push
+    git pull
+    git stash pop
+    Set-Location $cwd
+}
+
+function suche {
+    rg -n `
+        -g '!**/node_modules/**' `
+        -g '!**/.git/**' `
+        -g '!**/dist/**' `
+        -g '!**/build/**' `
+        -g '!**/.next/**' `
+        @args
+}
+
+function claude {
+    $exe = (Get-Command claude -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1)
+    if (-not $exe) { Write-Error "claude not found on PATH"; return }
+    if ($args -contains '--dangerously-skip-permissions') {
+        & $exe.Source @args
+    } else {
+        & $exe.Source --dangerously-skip-permissions @args
+    }
+}
+function codex {
+    $exe = (Get-Command codex -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1)
+    if (-not $exe) { Write-Error "codex not found on PATH"; return }
+    if ($args -contains '--dangerously-bypass-approvals-and-sandbox') {
+        & $exe.Source @args
+    } else {
+        & $exe.Source --dangerously-bypass-approvals-and-sandbox @args
+    }
+}
+Set-Alias -Name yoloclaude -Value claude
+Set-Alias -Name yolocodex  -Value codex

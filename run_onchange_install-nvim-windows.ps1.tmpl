@@ -1,0 +1,63 @@
+{{- /*
+   Neovim config bootstrap for Windows — managed by chezmoi.
+   run_onchange_: re-runs whenever this file's content changes.
+   Idempotent: clones the personal AstroNvim config to the directory nvim
+   actually uses for stdpath('config'). When XDG_CONFIG_HOME is set (our PS
+   profile sets it to $HOME\.config), nvim looks in $XDG_CONFIG_HOME/nvim
+   instead of %LOCALAPPDATA%\nvim. We mirror that logic here so the clone
+   always lands where nvim expects it.
+   Plugins are synced via `nvim --headless "+Lazy! sync" "+qa"`.
+*/ -}}
+# revision: 2
+$ErrorActionPreference = 'Continue'
+
+$repoUrl = 'https://github.com/rbutera/astronvim_config.git'
+
+# Mirror XDG_CONFIG_HOME from our PS profile so this script targets the same
+# config directory nvim will use at runtime, regardless of whether the profile
+# has already been sourced in this session.
+if (-not $env:XDG_CONFIG_HOME) {
+    $env:XDG_CONFIG_HOME = "$HOME\.config"
+}
+$nvimDir = "$env:XDG_CONFIG_HOME\nvim"
+
+# Legacy clone location — if the config exists there from a previous run,
+# move it to the correct XDG path instead of re-cloning.
+$legacyDir = "$env:LocalAppData\nvim"
+
+# Refresh PATH — git/nvim may have just been installed in this same apply
+$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "[skip ] git not on PATH; install it first" -ForegroundColor DarkGray
+    return
+}
+if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+    Write-Host "[skip ] nvim not on PATH; install it first" -ForegroundColor DarkGray
+    return
+}
+
+# Ensure the parent directory exists
+$parentDir = Split-Path $nvimDir -Parent
+if (-not (Test-Path $parentDir)) {
+    New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+}
+
+if (Test-Path $nvimDir) {
+    Write-Host "[skip ] $nvimDir already exists; pull manually if you want updates" -ForegroundColor DarkGray
+} elseif ((Test-Path $legacyDir) -and (Test-Path "$legacyDir\.git")) {
+    Write-Host "[move ] migrating $legacyDir -> $nvimDir" -ForegroundColor Yellow
+    Move-Item -Path $legacyDir -Destination $nvimDir -Force
+    Write-Host "[done ] config moved to XDG-compatible path" -ForegroundColor Green
+} else {
+    Write-Host "[get  ] cloning $repoUrl -> $nvimDir" -ForegroundColor Cyan
+    & git clone $repoUrl $nvimDir | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[fail ] clone failed" -ForegroundColor Red
+        return
+    }
+}
+
+Write-Host "[run  ] nvim --headless '+Lazy! sync' '+qa' (may take a moment)" -ForegroundColor Cyan
+& nvim --headless "+Lazy! sync" "+qa" 2>&1 | Out-Host
+Write-Host "[done ] Neovim plugins synced" -ForegroundColor Green
