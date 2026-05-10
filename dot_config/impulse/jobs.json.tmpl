@@ -122,7 +122,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-draft-init.md",
     "inputs": {
@@ -154,7 +154,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-morning-catchup.md",
     "inputs": {
@@ -186,7 +186,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-hourly-append.md",
     "inputs": {
@@ -218,7 +218,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-late-start-recovery.md",
     "inputs": {
@@ -250,7 +250,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-title-pass.md",
     "inputs": {
@@ -283,13 +283,45 @@
       "dedupe": "skip-if-running",
       "timeout": 2700
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-full-post.md",
     "inputs": {
       "agent": "navi",
       "workingDir": "/Users/rai/dev/expedition/blog",
       "model": "opus",
+      "maxTurns": 40
+    }
+  },
+  {
+    "id": "journal-gap-check",
+    "name": "Navi: Journal Gap Check (23:00 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 23 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Check if today's journal post is missing and recover if needed."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/journal-gap-check.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
       "maxTurns": 40
     }
   },
@@ -316,7 +348,7 @@
       "dedupe": "skip-if-running",
       "timeout": 2700
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/journal-weekly-post.md",
     "inputs": {
@@ -348,7 +380,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "promptFile": "prompts/dream-sources-seed.md",
     "inputs": {
@@ -380,7 +412,7 @@
       "quotaAware": false,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
@@ -411,7 +443,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["autonomy", "nimbus"],
     "inputs": {
       "agent": "navi",
@@ -443,7 +475,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["autonomy", "nimbus"],
     "inputs": {
       "agent": "navi",
@@ -588,7 +620,7 @@
       "dedupe": "skip-if-running",
       "timeout": 5400
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
@@ -619,7 +651,7 @@
       "dedupe": "skip-if-running",
       "timeout": 5400
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
