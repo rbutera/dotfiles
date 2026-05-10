@@ -30,3 +30,32 @@
 
 - `chezmoi apply` not run (requires active 1Password session).
 - Hatchet credentials need to be stored in 1Password before the `.env` template will produce working values on nimbus.
+
+## 2026-05-10 — Fix journal job enablement gap in jobs.json.tmpl
+
+### Problem
+
+All 7 journal pipeline jobs (`journal-draft-init`, `journal-morning-catchup`, `journal-hourly-append`, `journal-late-start-recovery`, `journal-title-pass`, `journal-full-post`, `journal-weekly-post`) were set to `"enabled": false` in the template, causing a 32-hour blackout of journal posts on nimbus (May 2-5).
+
+Additionally, a stash conflict existed: the deployed `~/.config/impulse/jobs.json` had 6 additional jobs enabled (`dream-sources-seed`, `expedition-calibration`, `cortex-tick`, `cortex-review-tick`, `narrate-daily`, `narrate-weekly`) that the template had as `false`. Applying the template without fixing this would have reverted those 6 jobs.
+
+### Solution/Fix
+
+- Set `"enabled": true` for all 7 journal pipeline jobs in `dot_config/impulse/jobs.json.tmpl`.
+- Also set `"enabled": true` for the 6 additional jobs that were already enabled in the deployed file, syncing template to deployed state.
+- Jobs intentionally left disabled: `dossier-refresh`, `weekly-memory-maintenance`, `weekly-continuity-review`, `shikamaru-dart-tick`, `heimerdinger-dart-tick`, `hermione-dart-tick`, `rick-dart-tick`.
+- `chezmoi apply` not run — no 1Password session active. Rai needs to run `eval $(op signin --account personal)` then `chezmoi apply ~/.config/impulse/jobs.json` to deploy. Remaining diff is cosmetic formatting only (no enabled values change).
+
+## 2026-05-10 — Add journal-gap-check job and full-post resilience note
+
+### Problem
+
+The 21:00-21:10 BST journal finalization window (title-pass + full-post) is frequently missed when the Impulse worker crashes. There was no recovery mechanism — if the worker came back at 23:44 (as on May 8), the cron window had passed and the post was simply lost.
+
+### Solution/Fix
+
+- Added a new `journal-gap-check` job to `dot_config/impulse/jobs.json.tmpl` (cron `0 23 * * *`, Europe/London, ark-spawn, navi, sonnet, `enabled: true`, tags: journal-pipeline/nimbus, maxTurns: 40).
+- Also deployed the same job to the live `~/.config/impulse/jobs.json` for immediate effect before next `chezmoi apply`.
+- Created new prompt file at `dot_config/impulse/prompts/journal-gap-check.md` (and live `~/.config/impulse/prompts/journal-gap-check.md`). The prompt checks for a titled post (YYYY-MM-DD Title.md in ~/dev/expedition/blog/); if missing but draft exists, runs title-pass then full-post sequentially.
+- Added a resilience note to `dot_config/impulse/prompts/journal-full-post.md` (and live equivalent): before writing, check whether the titled file exists; if not, run title-pass first. Guards against the independent cron race condition where full-post fires before title-pass completes.
+- `chezmoi apply` not run — no 1Password session active. Deployed files were edited directly for immediate effect.

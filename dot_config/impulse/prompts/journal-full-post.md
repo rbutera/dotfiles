@@ -5,6 +5,8 @@ If an exact Rai quote cannot be recovered from the available transcript or canon
 Use only filesystem sources available to you.
 Prefer minimal safe edits.
 
+Resilience check: Before proceeding, confirm that a titled daily file exists for today (a file at ~/dev/expedition/blog/ matching `YYYY-MM-DD <Title>.md` with today's date). If no titled file exists yet — the title-pass cron may have been missed — run `title-pass` mode first (read editorial-spine.md, honor the dedup-title check, create the titled file), then proceed with `full-post` mode below.
+
 Mode: `full-post`.
 Before writing, read ~/navi/skills/navi-journal-autowriter/technical-material-translation.md and ~/navi/skills/navi-journal-autowriter/editorial-spine.md for this run.
 Use ~/dev/lumiere/apps/chronicler/output/days, ~/navi/workspace/memory, ~/navi/workspace/memory/navi-continuity-document.md, the live draft, and the titled daily file as the skill requires.
