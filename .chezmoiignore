@@ -119,6 +119,8 @@ state/
 # Windows-only sources — ignored on non-Windows
 Documents/
 AppData/
+.config/mpv/scripts/uosc/bin/ziggy-windows.exe
+apply-claude-json-windows.ps1
 install-windows-packages.ps1
 setup-clink-windows.ps1
 install-nvim-windows.ps1
