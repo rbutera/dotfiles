@@ -1,16 +1,25 @@
 {
-{{- if eq .chezmoi.hostname "nimbus" }}
-  "environment": "nimbus",
+  "environment": "{{ .chezmoi.hostname }}",
   "timezone": "Europe/London",
   "paths": {
-    "workspaceRoot": "/Users/rai/navi",
-    "repoRoot": "/Users/rai/dev/lumiere",
-    "stateRoot": "/Users/rai/navi/state"
+{{- if has .chezmoi.hostname .host_groups.work }}
+    "workspaceRoot": "{{ .chezmoi.homeDir }}/focused",
+{{- else }}
+    "workspaceRoot": "{{ .chezmoi.homeDir }}/navi",
+{{- end }}
+    "repoRoot": "{{ .chezmoi.homeDir }}/dev/lumiere",
+    "stateRoot": "{{ .chezmoi.homeDir }}/.local/state/impulse"
   },
   "hatchet": {
+{{- if eq .chezmoi.hostname "nimbus" }}
     "namespace": "navi",
     "workerName": "impulse-nimbus"
+{{- else }}
+    "namespace": "{{ .chezmoi.hostname }}",
+    "workerName": "impulse-{{ .chezmoi.hostname }}"
+{{- end }}
   },
+{{- if eq .chezmoi.hostname "nimbus" }}
   "capabilities": {
     "cronEnabled": true,
     "sensorsEnabled": true,
@@ -20,21 +29,10 @@
     "openclawProbeEnabled": true
   }
 {{- else }}
-  "environment": "{{ .chezmoi.hostname }}",
-  "timezone": "Europe/London",
-  "paths": {
-    "workspaceRoot": "{{ .chezmoi.homeDir }}/navi",
-    "repoRoot": "{{ .chezmoi.homeDir }}/dev/lumiere",
-    "stateRoot": "{{ .chezmoi.homeDir }}/navi/state"
-  },
-  "hatchet": {
-    "namespace": "{{ .chezmoi.hostname }}",
-    "workerName": "impulse-{{ .chezmoi.hostname }}"
-  },
   "capabilities": {
-    "cronEnabled": false,
-    "sensorsEnabled": false,
-    "heartbeatsEnabled": false,
+    "cronEnabled": true,
+    "sensorsEnabled": true,
+    "heartbeatsEnabled": true,
     "narrateQueueEnabled": false,
     "stewardshipEnabled": false,
     "openclawProbeEnabled": false
