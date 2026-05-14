@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "accounts": {
+    "personal": {
+      "email": "rai@rbutera.com",
+      "orgId": "45f7df46-2a8c-4f1b-a131-c321063d6dc9",
+      "cookiesPath": "~/.camofox/cookies/claude.txt",
+      "oauthTokenEnv": "CLAUDE_OAUTH_TOKEN_PERSONAL"
+    },
+    "work": {
+      "email": "rai.butera@easyjet.com",
+      "orgId": "ef8c99db-f432-4644-80fd-662497d6644e",
+      "cookiesPath": "~/.camofox/cookies/flaude.txt",
+      "oauthTokenEnv": "CLAUDE_OAUTH_TOKEN_WORK"
+    }
+  },
+{{- if has .chezmoi.hostname .host_groups.work }}
+  "activeAccount": "work"
+{{- else }}
+  "activeAccount": "work"
+{{- end }}
+}
