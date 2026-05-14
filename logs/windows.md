@@ -232,3 +232,24 @@ Lazy.nvim, and the `Lazy!` command didn't exist.
 `XDG_CONFIG_HOME` to `$HOME\.config` if unset (matching the PS profile default),
 so the clone destination is deterministic. If the profile changes its XDG_CONFIG_HOME
 value in the future, the script follows suit.
+
+## 2026-05-15 — Fix Windows scripts running on macOS/Linux
+
+**Why:** `chezmoi apply` on macOS hit `exec format error` on
+`apply-claude-json-windows.ps1` — the PowerShell script was being
+executed despite the non-Windows ignore block in `.chezmoiignore`.
+
+**Root cause:** `.chezmoiignore` patterns match against **target** paths.
+For `run_onchange_*` scripts, chezmoi strips the `run_onchange_` prefix
+to derive the target name. The ignore block listed the source name
+(`run_onchange_apply-claude-json-windows.ps1`) but not the target name
+(`apply-claude-json-windows.ps1`). The other three Windows scripts
+worked because they had both forms listed.
+
+**What changed:**
+
+- `.chezmoiignore` non-Windows block: added `apply-claude-json-windows.ps1`
+  (target name) so it's properly ignored alongside the source-name pattern.
+- Also added `.config/mpv/scripts/uosc/bin/ziggy-windows.exe` — the
+  Windows binary for mpv's uosc plugin was being deployed unnecessarily
+  on macOS/Linux.
