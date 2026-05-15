@@ -1,3 +1,4 @@
+{{- if eq .chezmoi.hostname "nimbus" }}
 {
   "agents": [
     {
@@ -81,3 +82,27 @@
     }
   ]
 }
+{{- else if has .chezmoi.hostname .host_groups.work }}
+{
+  "agents": [
+    {
+      "agentId": "flaude",
+      "adapter": "ark",
+      "strategy": "base",
+      "temperatureEnabled": false,
+      "diceEnabled": false,
+      "warmFollowupEnabled": false,
+      "compactThresholdEnabled": false,
+      "openclawTickEnabled": false,
+      "openclawProbeEnabled": false,
+      "stewardshipEnabled": false,
+      "coldModeIntervalMs": 1200000,
+      "heartbeats": []
+    }
+  ]
+}
+{{- else }}
+{
+  "agents": []
+}
+{{- end }}
