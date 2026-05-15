@@ -23,9 +23,6 @@ $baseMcpsJson = @'
   "open-websearch": { "command": "npx", "args": ["-y", "open-websearch"] },
   "context7":       { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] },
   "mcp-deepwiki":   { "command": "npx", "args": ["-y", "mcp-deepwiki@latest"] },
-  "tempograph":     { "command": "uvx", "args": ["--from", "tempograph[full]", "tempograph-server"] },
-  "oss-autopilot":  { "command": "npx", "args": ["-y", "@oss-autopilot/mcp@latest"] },
-  "chisel":         { "command": "chisel", "args": ["--stdio", "--root", "/"] },
   "perplexity":     { "command": "npx", "args": ["-y", "@perplexity-ai/mcp-server"] },
   "codex":          { "command": "npx", "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "codex"] }
 }
