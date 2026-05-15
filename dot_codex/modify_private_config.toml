@@ -132,6 +132,12 @@ if _is_arch:
         "args": ["arch-ops-server"],
     }
 
+# chisel (Unix-only binary), tempograph (Rust build fails), oss-autopilot
+# don't work on Windows — remove them.
+if sys.platform == "win32":
+    for _srv in ("chisel", "tempograph", "oss-autopilot"):
+        BASE["mcp_servers"].pop(_srv, None)
+
 
 def deep_merge(base: dict, override: dict) -> dict:
     """Merge two dicts. base wins for shared keys, override adds new keys."""
