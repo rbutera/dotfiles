@@ -59,3 +59,24 @@ The 21:00-21:10 BST journal finalization window (title-pass + full-post) is freq
 - Created new prompt file at `dot_config/impulse/prompts/journal-gap-check.md` (and live `~/.config/impulse/prompts/journal-gap-check.md`). The prompt checks for a titled post (YYYY-MM-DD Title.md in ~/dev/expedition/blog/); if missing but draft exists, runs title-pass then full-post sequentially.
 - Added a resilience note to `dot_config/impulse/prompts/journal-full-post.md` (and live equivalent): before writing, check whether the titled file exists; if not, run title-pass first. Guards against the independent cron race condition where full-post fires before title-pass completes.
 - `chezmoi apply` not run — no 1Password session active. Deployed files were edited directly for immediate effect.
+
+## 2026-05-15 — Add latios host-branching for agents.json template
+
+### Problem
+
+`agents.json.tmpl` shipped nimbus-specific OpenClaw agent definitions (navi + shikamaru/heimerdinger/hermione/rick) to ALL hosts. Latios (Flaude's work Mac) should not receive OpenClaw agents — Flaude uses Ark only.
+
+### Solution/Fix
+
+- Added three-way hostname branching to `dot_config/impulse/agents.json.tmpl`:
+  - `nimbus`: full agent registry (navi + 4 openclaw agents) — unchanged behavior
+  - `host_groups.work` (latios): minimal `flaude` agent entry with `adapter: "ark"`, `strategy: "base"`, all advanced features disabled (temperature, dice, warmFollowup, compactThreshold, stewardship, openclawTick, openclawProbe)
+  - All other hosts: empty agents array
+- Uses `has .chezmoi.hostname .host_groups.work` from `.chezmoidata.toml` (where `work = ["latios"]`), matching the branching pattern in `config.json.tmpl` and `dot_env.tmpl`.
+
+### Note on config.json.tmpl
+
+The research brief (workspace-r44y) flagged `config.json.tmpl` as needing a latios-specific `workspaceRoot` branch. This was already fixed in commit `a17694b` — the template uses `host_groups.work` to set `workspaceRoot` to `~/focused` for work hosts. No change needed.
+
+- Template validation: `chezmoi execute-template` renders valid JSON for nimbus branch. Cannot test latios branch from nimbus, but template syntax is correct.
+- `chezmoi apply` not run — no 1Password session active. Ready for deployment on latios when Mac Mini arrives.
