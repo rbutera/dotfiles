@@ -97,6 +97,17 @@ pty-mcp's `ssh_connect` tool registers a schema with `oneOf`/`anyOf` at the top 
 - **`dot_codex/modify_private_config.toml`**: Added `caveman@caveman-repo` plugin and `caveman-repo` marketplace source (git from `JuliusBrussee/caveman`).
 - **`dot_codex/modify_private_config.toml`**: Fixed Perplexity MCP server startup — changed from bare `npx -y @perplexity-ai/mcp-server` to `zsh -c "exec npx -yq @perplexity-ai/mcp-server"` to ensure clean process lifecycle.
 
+## 2026-05-15 — Add global AGENTS.md custom instructions
+
+### Problem
+GPT 5.x models in the Codex desktop app exhibit frustrating default behaviors: stopping mid-task and asking "would you like me to continue?", excessive bullet-point formatting, verbose filler phrases, false completion claims, and silent scope expansion. These are well-documented across Reddit, Hacker News, and Codex GitHub issues (#14414, #13799, #14341, #13950).
+
+### Changes
+- Created `dot_codex/AGENTS.md` — a global custom instructions file that Codex loads at session start.
+- Covers six behavioral areas: autonomy/persistence, communication style (anti-verbosity, prose over bullets), code generation (complete implementations, no placeholders), planning/reasoning, formatting rules, honesty/accuracy, and scope discipline.
+- Uses XML tag patterns (`<persistence>`, `<output_style>`, etc.) recommended by OpenAI's own GPT-5 prompting guide for strong instruction adherence.
+- Deployed to both Linux (`~/.codex/AGENTS.md`) and Windows (`C:\Users\Rai\.codex\AGENTS.md`).
+
 ## 2026-04-24 -- Reasoning effort lowered to "low"
 
 ### Problem
