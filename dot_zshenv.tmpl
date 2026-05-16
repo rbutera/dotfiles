@@ -203,3 +203,8 @@ export OPENSPEC_TELEMETRY=0
 
 export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
 export HONCHO_PEER_NAME="Rai"
+
+# ── RunPod (GPU Cloud) ────────────────────────────────────────────────────────
+export RUNPOD_API_KEY={{ onepasswordRead "op://Private/RunPod API Key/credential" }}
+export RUNPOD_S3_ACCESS_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}
+export RUNPOD_S3_SECRET_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}
