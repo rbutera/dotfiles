@@ -125,6 +125,11 @@ $env:NOTION_TOKEN         = '{{ onepasswordRead "op://Private/_focused notion to
 $env:TODOIST_API_TOKEN    = '{{ onepasswordRead "op://dev/todoist_api/credential" }}'
 $env:HONCHO_API_KEY       = '{{ onepasswordRead "op://Private/honcho.dev/credential" }}'
 
+# === RunPod (GPU Cloud) ===
+$env:RUNPOD_API_KEY       = '{{ onepasswordRead "op://Private/RunPod API Key/credential" }}'
+$env:RUNPOD_S3_ACCESS_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}'
+$env:RUNPOD_S3_SECRET_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}'
+
 # === PSReadLine: vi mode, prediction ===
 # UpArrow/DownArrow use scriptblocks that fall back to PreviousHistory/NextHistory
 # when the buffer is empty — works around a PSReadLine null-ref in
