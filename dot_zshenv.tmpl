@@ -204,6 +204,7 @@ export ADZUNA_API_KEY={{ onepasswordRead "op://Private/Adzuna API Key/credential
 export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" }}
 export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" }}
 export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
+export NTFY_TOKEN={{ onepasswordRead "op://Private/ntfy.sh/credential" }}
 
 # ── Work (easyJet) ──────────────────────────────────────────────────────────
 {{- if has .chezmoi.hostname .host_groups.work }}
@@ -240,3 +241,5 @@ export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:
 export RUNPOD_API_KEY={{ onepasswordRead "op://Private/RunPod API Key/credential" }}
 export RUNPOD_S3_ACCESS_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}
 export RUNPOD_S3_SECRET_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}
+
+export CIVITAI_API_KEY={{ onepasswordRead "op://Private/Civitai/credential" }}
