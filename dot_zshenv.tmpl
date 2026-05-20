@@ -13,24 +13,16 @@ fi
 # ── Locale ────────────────────────────────────────────────────────────────────
 export LANG="en_GB.UTF-8"
 
-# ── Ark ───────────────────────────────────────────────────────────────────────
-# Default workspace for `ark attach` / `ark run` etc. when invoked outside a
-# workspace directory. See lumiere/apps/ark commit d55035f (resolveWorkspaceRoot).
-{{- if has .chezmoi.hostname .host_groups.work }}
-export ARK_WORKSPACE="$HOME/focused"
-{{- else }}
-export ARK_WORKSPACE="$HOME/navi"
-{{- end }}
-
-# ── Editors ───────────────────────────────────────────────────────────────────
+# ── Editors & pagers ─────────────────────────────────────────────────────────
 {{- $nvim := printf "%s/.local/share/bob/nvim-bin/nvim" .chezmoi.homeDir }}
 export EDITOR={{ $nvim | quote }}
 export VISUAL="$EDITOR"
 export SUDO_EDITOR="$EDITOR"
 export PAGER='less'
+export LESS='-g -i -M -R -S -w -X -z-4'
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
+# ── PATH ─────────────────────────────────────────────────────────────────────
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
@@ -49,33 +41,22 @@ export PNPM_HOME="$HOME/.local/share/pnpm"
 {{ end -}}
 export PATH="$PNPM_HOME:$PATH"
 
+{{- if eq .chezmoi.os "linux" }}
+{{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
+export PATH="/usr/lib/ccache/bin/:$PATH"
+{{- end }}
+{{- end }}
+
+{{- if and (eq .chezmoi.os "linux") .wsl }}
+export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
+{{- end }}
+
+# ── Platform-specific ─────────────────────────────────────────────────────────
 {{- if eq .chezmoi.os "darwin" }}
-# Docker (Colima)
 export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
 export BROWSER='open'
 {{- end }}
 
-{{- if and (eq .chezmoi.os "linux") .wsl }}
-# WSL: Windows system tools
-export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
-export BROWSER='wslview'
-{{- end }}
-
-# ── Tool config ───────────────────────────────────────────────────────────────
-export LESS='-g -i -M -R -S -w -X -z-4'
-export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
-export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
-export SDKMAN_DIR="$HOME/.sdkman"
-export SSH_ASKPASS=""
-export GIT_TERMINAL_PROMPT=0
-
-# ── SSH session overrides ─────────────────────────────────────────────────────
-if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
-  export OP_BIOMETRIC_UNLOCK_ENABLED=false
-  export OP_ACCOUNT=personal
-fi
-
-# ── Platform-specific ─────────────────────────────────────────────────────────
 {{- if eq .chezmoi.os "linux" }}
 export COLORTERM=fullcolor
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -85,35 +66,98 @@ export XDG_CONFIG_HOME="$HOME/.config"
 {{- if or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch")) }}
 export MOZ_ENABLE_WAYLAND=1
 export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
-export PATH="/usr/lib/ccache/bin/:$PATH"
 {{- end }}
 {{- end }}
 
-# ── Secrets (1Password) ──────────────────────────────────────────────────────
-export CAMOFOX_URL="http://localhost:9377"
-export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" }}
+{{- if and (eq .chezmoi.os "linux") .wsl }}
+export BROWSER='wslview'
+{{- end }}
 
-export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential"}}
-export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory api key/credential"}}
-export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential"}}
-export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
-export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
-export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
-export TAILSCALE_NOCODB_CLIENT_ID={{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}
-export TAILSCALE_NOCODB_CLIENT_SECRET={{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}
-export SUPERMEMORY_CC_API_KEY={{ onepasswordRead "op://Private/supermemory api key/claude" }}
-export SUPERMEMORY_API_KEY={{ onepasswordRead "op://Private/supermemory api key/opencode"}}
-export REED_API_KEY={{ onepasswordRead "op://Private/Reed API Key/credential" }}
-export ADZUNA_APPLICATION_ID={{ onepasswordRead "op://Private/Adzuna API Key/username" }}
-export ADZUNA_API_KEY={{ onepasswordRead "op://Private/Adzuna API Key/credential" }}
-export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}
-# Force Opus 1M context in Claude Code. Works around anthropics/claude-code#45449
-# where the client-side /model opus[1m] gate is blocked by a stale/poisoned
+# ── SSH session overrides ─────────────────────────────────────────────────────
+if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
+  export OP_BIOMETRIC_UNLOCK_ENABLED=false
+  export OP_ACCOUNT=personal
+fi
+
+# ── Tool config ──────────────────────────────────────────────────────────────
+export FZF_DEFAULT_OPTS="--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+export CHEZMOI_DIR="$HOME/.local/share/chezmoi"
+export SDKMAN_DIR="$HOME/.sdkman"
+export SSH_ASKPASS=""
+export GIT_TERMINAL_PROMPT=0
+export OPENSPEC_TELEMETRY=0
+
+# ── Ark ──────────────────────────────────────────────────────────────────────
+{{- if has .chezmoi.hostname .host_groups.work }}
+export ARK_WORKSPACE="$HOME/focused"
+{{- else }}
+export ARK_WORKSPACE="$HOME/navi"
+{{- end }}
+
+# ── Claude Code ──────────────────────────────────────────────────────────────
+# Force Opus 1M context. Works around anthropics/claude-code#45449 where the
+# client-side /model opus[1m] gate is blocked by a stale/poisoned
 # cachedExtraUsageDisabledReason in ~/.claude.json despite Max 20x entitlement.
 # See logs/claude.md.
 export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
-# Alt-screen rendering to eliminate terminal flickering (requires v2.1.89+)
 export CLAUDE_CODE_NO_FLICKER=1
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+
+# ── Runtime environments ─────────────────────────────────────────────────────
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
+
+# https://viteplus.dev — sourced here (not just .zshrc) so IDE / non-interactive
+# shells also get vp on PATH. Node management is in system-first mode
+# (`vp env off`), so node/npm still resolve via asdf.
+[[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Secrets (1Password)
+# ═════════════════════════════════════════════════════════════════════════════
+
+# Claude Code
+{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
+{{- if $useSharedClaudeOAuth }}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+{{- else }}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
+{{- end }}
+
+# GitHub
+export GITHUB_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential" }}
+export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
+export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
+export GITHUB_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
+
+# AI & LLM services
+export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" }}
+export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
+export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential"}}
+export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}
+export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential"}}
+export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
+
+# Supermemory
+export SUPERMEMORY_CC_API_KEY={{ onepasswordRead "op://Private/supermemory api key/claude" }}
+export SUPERMEMORY_API_KEY={{ onepasswordRead "op://Private/supermemory api key/opencode"}}
+export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory api key/credential"}}
+
+# OpenCode
+export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
+export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
+export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
+
+# Honcho
+export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
+export HONCHO_PEER_NAME="Rai"
+
+# Camofox
+export CAMOFOX_URL="http://localhost:9377"
+export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" }}
+
+# OpenClaw Discord bots
 export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
 export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}
 export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}
@@ -128,30 +172,40 @@ export OPENCLAW_DISCORD_ORCA={{ onepasswordRead "op://Private/Navi Discord token
 export OPENCLAW_DISCORD_PLANA={{ onepasswordRead "op://Private/Navi Discord tokens/plana"}}
 export OPENCLAW_DISCORD_CODA={{ onepasswordRead "op://Private/Navi Discord tokens/coda"}}
 export OPENCLAW_DISCORD_READA={{ onepasswordRead "op://Private/Navi Discord tokens/reada"}}
-export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
-export GITHUB_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential" }}
-export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" }}
-export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
-export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
-export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
-export GITHUB_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
+
+# Elevenlabs
+export ELEVENLABS_API_KEY={{ onepasswordRead "op://Private/Elevenlabs API/credential"}}
+export ELEVENLABS_RAI={{ onepasswordRead "op://Private/Elevenlabs API/rai"}}
+export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
+
+# Expedition
 export EXPEDITION_EMAIL=raibutera91@gmail.com
 export EXPEDITION_EMAIL_APP_PASSWORD={{ onepasswordRead "op://Private/google raibutera91/app_password" }}
 export EXPEDITION_EMAIL_AUTHENTICATOR="{{ onepasswordRead "op://Private/google raibutera91/one-time password"}}"
+
+# Notion & Todoist
+export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
+export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
+
+# Obsidian
+export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
+
+# Cloudflare
+export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
+
+# Tailscale
+export TAILSCALE_NOCODB_CLIENT_ID={{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}
+export TAILSCALE_NOCODB_CLIENT_SECRET={{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}
+
+# Other services
+export REED_API_KEY={{ onepasswordRead "op://Private/Reed API Key/credential" }}
+export ADZUNA_APPLICATION_ID={{ onepasswordRead "op://Private/Adzuna API Key/username" }}
+export ADZUNA_API_KEY={{ onepasswordRead "op://Private/Adzuna API Key/credential" }}
 export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" }}
 export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" }}
-export ELEVENLABS_RAI={{ onepasswordRead "op://Private/Elevenlabs API/rai"}}
-export ELEVENLABS_API_KEY={{ onepasswordRead "op://Private/Elevenlabs API/credential"}}
-export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
-export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
-export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
-export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
-{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
-{{- if $useSharedClaudeOAuth }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
-{{- else }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
-{{- end }}
+export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
+
+# ── Work (easyJet) ──────────────────────────────────────────────────────────
 {{- if has .chezmoi.hostname .host_groups.work }}
 export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
 export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
@@ -164,47 +218,25 @@ export JIRA_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
 export CONFLUENCE_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
 export CONFLUENCE_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
 export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}/wiki
+
 export SONARQUBE_TOKEN={{ onepasswordRead "op://focused/SonarQube/credential"}}
 export SONARQUBE_ORG=easyjet-dev
 export SONARQUBE_URL=https://sonarcloud.io
 
-# AWS (easyJet SSO)
 export AWS_PROFILE=ej-dev
 {{- end }}
-export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
-export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
 
+# ── Host-specific infrastructure ─────────────────────────────────────────────
 {{- if has .chezmoi.hostname .host_groups.dev_infra }}
-
-# ── Local infrastructure (dev_infra machines only) ───────────────────────────
 export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
 {{- end }}
-
 {{- if eq .chezmoi.hostname "nimbus" }}
-
-# ── Expedition pipeline DB (nimbus only) ─────────────────────────────────────
 # Used by Cortex MCP for claim storage and execution logs.
-# Hardcoded here so subagent processes (Tatls) inherit it via the shell env.
+# Hardcoded so subagent processes (Tatls) inherit it via the shell env.
 export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
 {{- end }}
 
-# ── Rust ──────────────────────────────────────────────────────────────────────
-if [ -f "$HOME/.cargo/env" ]; then
-  . "$HOME/.cargo/env"
-fi
-
-# ── Vite+ ─────────────────────────────────────────────────────────────────────
-# https://viteplus.dev — sourced here (not just .zshrc) so IDE / non-interactive
-# shells also get vp on PATH. Node management is in system-first mode
-# (`vp env off`), so node/npm still resolve via asdf.
-[[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
-
-export OPENSPEC_TELEMETRY=0
-
-export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
-export HONCHO_PEER_NAME="Rai"
-
-# ── RunPod (GPU Cloud) ────────────────────────────────────────────────────────
+# RunPod (GPU Cloud)
 export RUNPOD_API_KEY={{ onepasswordRead "op://Private/RunPod API Key/credential" }}
 export RUNPOD_S3_ACCESS_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}
 export RUNPOD_S3_SECRET_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}
