@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, skillListingBudgetFraction, enabledPlugins
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins
 # Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
 set -euo pipefail
 
@@ -13,6 +13,7 @@ read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
+  "teammateMode": "in-process",
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
@@ -35,6 +36,8 @@ BASE
 echo "$current" | jq --argjson base "$base" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
+  .teammateMode = $base.teammateMode |
+  del(.env) |
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
