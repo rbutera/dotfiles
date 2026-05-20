@@ -1,5 +1,15 @@
 # Docker infrastructure changelog
 
+## 2026-05-20 — Add Docker Hub PAT to zshenv
+
+### Motivation
+Need `DOCKER_TOKEN` env var for Docker Hub authentication (personal access token for the `raigasm` account).
+
+### Changes
+
+**Modified files:**
+- `dot_zshenv.tmpl` — added `export DOCKER_TOKEN` using `onepasswordRead "op://Private/docker raigasm/credential"` in the "Other services" section.
+
 ## 2026-04-15 — Install Colima + Docker CLI on latios
 
 ### Motivation
