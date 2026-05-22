@@ -14,6 +14,11 @@ read -r -d '' base << 'BASE' || true
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
   "teammateMode": "in-process",
+  "tui": "fullscreen",
+  "editorMode": "vim",
+  "attribution": {"commit": "", "pr": ""},
+  "showThinkingSummaries": false,
+  "viewMode": "verbose",
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
@@ -33,10 +38,20 @@ BASE
 
 # Merge: base wins for managed keys, existing wins for everything else.
 # enabledPlugins is additive — base plugins always present, extras preserved.
-echo "$current" | jq --argjson base "$base" '
+# Ghostty notifications on macOS/Linux only, not Windows
+notif_channel="auto"
+case "$(uname -s)" in Darwin|Linux) notif_channel="ghostty" ;; esac
+
+echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
   .teammateMode = $base.teammateMode |
+  .tui = $base.tui |
+  .editorMode = $base.editorMode |
+  .preferredNotifChannel = $notif |
+  .attribution = $base.attribution |
+  .showThinkingSummaries = $base.showThinkingSummaries |
+  .viewMode = $base.viewMode |
   del(.env) |
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
