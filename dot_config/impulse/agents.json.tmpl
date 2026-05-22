@@ -1,3 +1,23 @@
+{{- if eq .chezmoi.hostname "kinto" }}
+{
+  "agents": [
+    {
+      "agentId": "florence",
+      "adapter": "ark",
+      "strategy": "WORK",
+      "temperatureEnabled": false,
+      "diceEnabled": false,
+      "warmFollowupEnabled": false,
+      "compactThresholdEnabled": false,
+      "openclawTickEnabled": false,
+      "openclawProbeEnabled": false,
+      "stewardshipEnabled": false,
+      "coldModeIntervalMs": 1200000,
+      "heartbeats": []
+    }
+  ]
+}
+{{- else }}
 {
   "agents": [
     {
@@ -81,3 +101,4 @@
     }
   ]
 }
+{{- end }}
