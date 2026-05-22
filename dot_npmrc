@@ -1,0 +1,17 @@
+# Supply-chain protection
+min-release-age=7
+minimum-release-age=10080
+save-exact=true
+engine-strict=true
+package-lock=true
+strict-ssl=true
+audit=true
+audit-level=high
+fund=false
+ignore-scripts=true
+prefer-dedupe=true
+update-notifier=false
+loglevel=warn
+manage-package-manager-versions=true
+dedupe-peer-dependents=true
+resolve-peers-from-workspace-root=true
