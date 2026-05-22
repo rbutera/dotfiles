@@ -93,6 +93,7 @@ echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mc
   | del(.passesEligibilityCache)
   | del(.clientDataCache)
   | if .oauthAccount then .oauthAccount |= del(.hasExtraUsageEnabled) else . end
+  | .remoteControlAtStartup = true
   | if .projects then .projects |= with_entries(
       .value.enabledMcpServers = ((.value.enabledMcpServers // []) + $builtins | unique)
     ) else . end
