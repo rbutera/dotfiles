@@ -1,8 +1,8 @@
 #!/bin/bash
 # Modify script for ~/.config/opencode/oh-my-opencode-slim.json
 # Merges managed config into existing oh-my-opencode-slim settings.
-# Managed: $schema, preset, presets
-# Free: tmux, disabled_agents, runtime additions
+# Managed: $schema, preset, presets, interview, multiplexer, todoContinuation
+# Free: disabled_agents, agents, fallback, council, sessionManager, runtime additions
 set -euo pipefail
 
 current=$(cat)
@@ -31,12 +31,26 @@ read -r -d '' base << 'BASE' || true
       "fixer": { "model": "opencode-go/deepseek-v4-flash", "variant": "high", "skills": [], "mcps": [] },
       "observer": { "model": "opencode-go/kimi-k2.6", "skills": [], "mcps": [] }
     }
+  },
+  "interview": {
+    "autoOpenBrowser": false
+  },
+  "multiplexer": {
+    "type": "tmux",
+    "layout": "main-vertical",
+    "main_pane_size": 60
+  },
+  "todoContinuation": {
+    "autoEnable": true,
+    "autoEnableThreshold": 4,
+    "maxContinuations": 10,
+    "cooldownMs": 3000
   }
 }
 BASE
 
-# Replace managed keys from base, preserve free keys (tmux, disabled_agents, etc.)
+# Replace managed keys from base, preserve free keys
 echo "$current" | jq --argjson base "$base" '
   . as $cur |
-  $base + ($cur | del(."$schema", .preset, .presets))
+  $base + ($cur | del(."$schema", .preset, .presets, .interview, .multiplexer, .todoContinuation))
 '
