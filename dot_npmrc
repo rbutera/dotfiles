@@ -7,7 +7,6 @@ strict-ssl=true
 audit=true
 audit-level=high
 fund=false
-ignore-scripts=true
 prefer-dedupe=true
 update-notifier=false
 loglevel=warn
