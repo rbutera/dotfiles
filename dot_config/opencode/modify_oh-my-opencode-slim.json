@@ -1,0 +1,42 @@
+#!/bin/bash
+# Modify script for ~/.config/opencode/oh-my-opencode-slim.json
+# Merges managed config into existing oh-my-opencode-slim settings.
+# Managed: $schema, preset, presets
+# Free: tmux, disabled_agents, runtime additions
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+read -r -d '' base << 'BASE' || true
+{
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
+  "preset": "openai",
+  "presets": {
+    "openai": {
+      "orchestrator": { "model": "openai/gpt-5.5", "skills": ["*"], "mcps": ["*", "!context7"] },
+      "oracle": { "model": "openai/gpt-5.5", "variant": "high", "skills": [], "mcps": [] },
+      "librarian": { "model": "openai/gpt-5.4-mini", "variant": "low", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
+      "explorer": { "model": "openai/gpt-5.4-mini", "variant": "low", "skills": [], "mcps": [] },
+      "designer": { "model": "openai/gpt-5.4-mini", "variant": "medium", "skills": [], "mcps": [] },
+      "fixer": { "model": "openai/gpt-5.4-mini", "variant": "low", "skills": [], "mcps": [] }
+    },
+    "opencode-go": {
+      "orchestrator": { "model": "opencode-go/glm-5.1", "skills": ["*"], "mcps": ["*", "!context7"] },
+      "oracle": { "model": "opencode-go/deepseek-v4-pro", "variant": "max", "skills": [], "mcps": [] },
+      "council": { "model": "opencode-go/deepseek-v4-pro", "variant": "high", "skills": [], "mcps": [] },
+      "librarian": { "model": "opencode-go/minimax-m2.7", "skills": [], "mcps": ["websearch", "context7", "grep_app"] },
+      "explorer": { "model": "opencode-go/minimax-m2.7", "skills": [], "mcps": [] },
+      "designer": { "model": "opencode-go/kimi-k2.6", "variant": "medium", "skills": [], "mcps": [] },
+      "fixer": { "model": "opencode-go/deepseek-v4-flash", "variant": "high", "skills": [], "mcps": [] },
+      "observer": { "model": "opencode-go/kimi-k2.6", "skills": [], "mcps": [] }
+    }
+  }
+}
+BASE
+
+# Replace managed keys from base, preserve free keys (tmux, disabled_agents, etc.)
+echo "$current" | jq --argjson base "$base" '
+  . as $cur |
+  $base + ($cur | del(."$schema", .preset, .presets))
+'
