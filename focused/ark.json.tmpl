@@ -1,0 +1,69 @@
+{
+  "name": "florence",
+  "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark/plugin",
+  "additionalPlugins": ["{{ .chezmoi.homeDir }}/focused"],
+  "mainOnlyPlugins": [
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin"
+  ],
+  "extraClaudeArgs": [
+    "--dangerously-load-development-channels",
+    "server:plugin:discord-voice:discord-voice"
+  ],
+  "model": "opus",
+
+  "boot": {
+    "files": [
+      { "path": "vault/{today} Breadcrumb.md", "when": "if-exists", "label": "today's breadcrumb" },
+      { "path": "vault/{yesterday} Breadcrumb.md", "when": "before-midday-or-today-thin", "thinThreshold": 10 },
+      { "path": "vault/Workstreams.md", "when": "always", "label": "active workstreams" },
+      { "path": "OBSIDIAN.md", "when": "if-exists", "label": "vault operating manual" }
+    ],
+    "commands": [
+      { "cmd": "bd ready", "when": "if-available", "label": "available work" },
+      { "cmd": "bd list --status=in_progress", "when": "if-available", "label": "active work" }
+    ],
+    "morningSkill": "morning-sweep",
+    "postBootSignal": true
+  },
+
+  "continuity": {
+    "writeback": {
+      "target": "vault/{today} Breadcrumb.md",
+      "mode": "append",
+      "format": "breadcrumb",
+      "promote": []
+    },
+    "refreshOnStop": true
+  },
+
+  "sensors": {
+    "contextPressure": {
+      "budgets": {
+        "opus": { "standard": 150000, "1m": 700000 },
+        "sonnet": { "standard": 150000, "1m": 500000 }
+      },
+      "modelCapacity": {
+        "claude-opus-4-6": 1000000,
+        "claude-sonnet-4-6": 1000000
+      }
+    }
+  },
+
+  "discord": {
+    "botToken": "${FLORENCE_DISCORD_TOKEN}",
+    "guildId": "1473757777078911016",
+    "channelId": "1507371381623488562",
+    "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-text-plugin" },
+    "access": {
+      "dmPolicy": "allowlist",
+      "allowFrom": ["124046285308166146"],
+      "replyToMode": "first",
+      "textChunkLimit": 2000,
+      "chunkMode": "newline"
+    }
+  },
+
+  "textPlugin": {
+    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle"
+  }
+}
