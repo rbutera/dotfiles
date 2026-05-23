@@ -1,7 +1,7 @@
 #!/bin/bash
 # Modify script for ~/.config/opencode/opencode.json
 # Merges managed config into existing opencode settings.
-# Managed: provider, mcp, plugin, skills
+# Managed: provider, mcp, skills
 # Free: everything else (future runtime state)
 set -euo pipefail
 
@@ -34,13 +34,12 @@ read -r -d '' base << 'BASE' || true
   },
   "skills": {
     "paths": ["~/.config/opencode/skills"]
-  },
-  "plugin": ["oh-my-openagent"]
+  }
 }
 BASE
 
 # Replace managed keys from base, preserve any unknown runtime keys
 echo "$current" | jq --argjson base "$base" '
   . as $current |
-  $base * ($current | del(.provider, .mcp, .plugin, .skills, ."$schema"))
+  $base * ($current | del(.provider, .mcp, .skills, ."$schema"))
 '
