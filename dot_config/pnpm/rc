@@ -1,0 +1,5 @@
+# Supply-chain protection (7 days in minutes)
+minimum-release-age=10080
+manage-package-manager-versions=true
+dedupe-peer-dependents=true
+resolve-peers-from-workspace-root=true
