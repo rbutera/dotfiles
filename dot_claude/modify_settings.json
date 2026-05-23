@@ -42,7 +42,11 @@ BASE
 notif_channel="auto"
 case "$(uname -s)" in Darwin|Linux) notif_channel="ghostty" ;; esac
 
-echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" '
+# rtk hook on macOS only
+is_mac=false
+[ "$(uname -s)" = "Darwin" ] && is_mac=true
+
+echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjson mac "$is_mac" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
   .teammateMode = $base.teammateMode |
@@ -56,5 +60,8 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" '
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
-        .["slack@claude-plugins-official"]))
+        .["slack@claude-plugins-official"])) |
+  if $mac then
+    .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}]
+  else . end
 '
