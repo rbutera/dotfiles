@@ -93,6 +93,66 @@
       "maxTurns": 20,
       "prompt": "Run /jira-sync"
     }
+  },
+  {
+    "id": "lamplight-incremental",
+    "name": "Lamplight: Incremental Update (hourly, business hours)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 8-19 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "lamplight"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "lamplight-nightly",
+    "name": "Lamplight: Nightly Full Digest (22:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 22 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "lamplight"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
   }
 ]
 {{- else if eq .chezmoi.hostname "nimbus" }}
