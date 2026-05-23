@@ -153,6 +153,36 @@
       "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
+  },
+  {
+    "id": "session-recap-tick",
+    "name": "Session Recap (every 10m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/10 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "kinto", "session-recap"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
   }
 ]
 {{- else if eq .chezmoi.hostname "nimbus" }}
@@ -843,6 +873,36 @@
     "inputs": {
       "cmd": "node",
       "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/dist/libs/claude-quota-scraper/cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "session-recap-tick",
+    "name": "Session Recap (every 10m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/10 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus", "session-recap"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   }
