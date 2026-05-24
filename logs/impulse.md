@@ -106,3 +106,19 @@ Kinto is a Mac Mini that runs Florence (work-Claude agent), separate from Nimbus
 
 - `chezmoi apply` not run. Templates are source-only edits.
 - The actual `~/.camofox/cookies/florence.txt` file needs to exist on kinto (renamed from flaude.txt or re-exported).
+
+## 2026-05-24 — Fix scheduler/Discord sections to use host_groups.work instead of hardcoded kinto
+
+### Problem
+
+The scheduler paths section (line 28) and the Discord section (line 42) of `dot_env.tmpl` used `{{- if eq .chezmoi.hostname "kinto" }}` — hardcoded to the kinto hostname. This meant the Florence scheduler config and Discord token would not render on any future work host (e.g. latios) even though it was already in `host_groups.work`.
+
+### Fix
+
+Changed both `{{- if eq .chezmoi.hostname "kinto" }}` occurrences in the scheduler and Discord sections to `{{- if has .chezmoi.hostname .host_groups.work }}`. This matches the pattern already used at line 64 (Claude OAuth conditional) and in other templates.
+
+The Hatchet section (lines 9-24) retains the explicit `kinto` hostname branch — it references kinto-specific 1Password credentials and should not be generalised until other work hosts have their own Hatchet items.
+
+### Not done
+
+- `chezmoi apply` not run. Template is source-only.
