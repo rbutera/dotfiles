@@ -103,7 +103,7 @@ $env:E8N_CLOUDFLARE_API_TOKEN       = '{{ onepasswordRead "op://Private/openclaw
 $env:CLI_PROXY_API_TOKEN            = '{{ onepasswordRead "op://Private/CLIProxyAPI/credential" }}'
 {{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
 {{- if $useSharedClaudeOAuth }}
-$env:CLAUDE_CODE_OAUTH_TOKEN        = '{{ onepasswordRead "op://focused/claude code oauth token/credential" }}'
+$env:CLAUDE_CODE_OAUTH_TOKEN_WORK   = '{{ onepasswordRead "op://focused/claude code oauth token/credential" }}'
 {{- else }}
 $env:CLAUDE_CODE_OAUTH_TOKEN        = '{{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token" }}'
 {{- end }}
@@ -124,6 +124,11 @@ $env:SONARQUBE_URL        = 'https://sonarcloud.io'
 $env:NOTION_TOKEN         = '{{ onepasswordRead "op://Private/_focused notion token/credential" }}'
 $env:TODOIST_API_TOKEN    = '{{ onepasswordRead "op://dev/todoist_api/credential" }}'
 $env:HONCHO_API_KEY       = '{{ onepasswordRead "op://Private/honcho.dev/credential" }}'
+
+# === RunPod (GPU Cloud) ===
+$env:RUNPOD_API_KEY       = '{{ onepasswordRead "op://Private/RunPod API Key/credential" }}'
+$env:RUNPOD_S3_ACCESS_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}'
+$env:RUNPOD_S3_SECRET_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}'
 
 # === PSReadLine: vi mode, prediction ===
 # UpArrow/DownArrow use scriptblocks that fall back to PreviousHistory/NextHistory

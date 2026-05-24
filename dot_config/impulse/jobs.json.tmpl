@@ -1,4 +1,191 @@
-{{- if eq .chezmoi.hostname "nimbus" }}
+{{- if eq .chezmoi.hostname "kinto" }}
+[
+  {
+    "id": "quota-scrape",
+    "name": "Claude Quota Scrape (active account, every 5m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/dist/libs/claude-quota-scraper/cli.js"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "quota"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/dist/libs/claude-quota-scraper/cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "morning-sweep",
+    "name": "Florence: Morning Sweep (08:30 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 8 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "florence",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run /morning-sweep"
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto"],
+    "inputs": {
+      "agent": "florence",
+      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "model": "sonnet",
+      "maxTurns": 30,
+      "prompt": "Run /morning-sweep"
+    }
+  },
+  {
+    "id": "jira-sync",
+    "name": "Florence: JIRA Sync (08:00 daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 8 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "florence",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run /jira-sync"
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto"],
+    "inputs": {
+      "agent": "florence",
+      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "model": "sonnet",
+      "maxTurns": 20,
+      "prompt": "Run /jira-sync"
+    }
+  },
+  {
+    "id": "lamplight-incremental",
+    "name": "Lamplight: Incremental Update (hourly, business hours)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 8-19 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "lamplight"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "lamplight-nightly",
+    "name": "Lamplight: Nightly Full Digest (22:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 22 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "lamplight"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "session-recap-tick",
+    "name": "Session Recap (every 10m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/10 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "kinto", "session-recap"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  }
+]
+{{- else if eq .chezmoi.hostname "nimbus" }}
 [
   {
     "id": "dossier-refresh",
@@ -686,6 +873,36 @@
     "inputs": {
       "cmd": "node",
       "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/dist/libs/claude-quota-scraper/cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "session-recap-tick",
+    "name": "Session Recap (every 10m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/10 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "pnpm"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus", "session-recap"],
+    "inputs": {
+      "cmd": "pnpm",
+      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   }

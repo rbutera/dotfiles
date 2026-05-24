@@ -1,0 +1,42 @@
+{
+  "name": "navi",
+  "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark/plugin",
+  "additionalPlugins": [
+    "{{ .chezmoi.homeDir }}/navi",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/cortex-cc"
+  ],
+  "model": "opus",
+  "sensors": {
+    "contextPressure": {
+      "budgets": {
+        "opus":   { "standard": 150000, "1m": 700000 },
+        "sonnet": { "standard": 150000, "1m": 500000 },
+        "haiku":  { "standard": 150000 }
+      },
+      "modelCapacity": {
+        "claude-opus-4-6": 1000000,
+        "claude-sonnet-4-6": 1000000,
+        "claude-haiku-4-5": 200000
+      }
+    }
+  },
+  "discord": {
+    "botToken": "${OPENCLAW_DISCORD_NAVI}",
+    "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-text-plugin" },
+    "access": {
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "124046285308166146"
+      ],
+      "groups": {},
+      "mentionPatterns": [],
+      "ackReaction": "",
+      "replyToMode": "first",
+      "textChunkLimit": 2000,
+      "chunkMode": "newline"
+    }
+  },
+  "textPlugin": {
+    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle"
+  }
+}

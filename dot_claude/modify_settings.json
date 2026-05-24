@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, skillListingBudgetFraction, enabledPlugins
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins
 # Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
 set -euo pipefail
 
@@ -13,6 +13,12 @@ read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
+  "teammateMode": "in-process",
+  "tui": "fullscreen",
+  "editorMode": "vim",
+  "attribution": {"commit": "", "pr": ""},
+  "showThinkingSummaries": false,
+  "viewMode": "verbose",
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "github@claude-plugins-official": true,
@@ -32,11 +38,30 @@ BASE
 
 # Merge: base wins for managed keys, existing wins for everything else.
 # enabledPlugins is additive — base plugins always present, extras preserved.
-echo "$current" | jq --argjson base "$base" '
+# Ghostty notifications on macOS/Linux only, not Windows
+notif_channel="auto"
+case "$(uname -s)" in Darwin|Linux) notif_channel="ghostty" ;; esac
+
+# rtk hook on macOS only
+is_mac=false
+[ "$(uname -s)" = "Darwin" ] && is_mac=true
+
+echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjson mac "$is_mac" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
+  .teammateMode = $base.teammateMode |
+  .tui = $base.tui |
+  .editorMode = $base.editorMode |
+  .preferredNotifChannel = $notif |
+  .attribution = $base.attribution |
+  .showThinkingSummaries = $base.showThinkingSummaries |
+  .viewMode = $base.viewMode |
+  del(.env) |
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
-        .["slack@claude-plugins-official"]))
+        .["slack@claude-plugins-official"])) |
+  if $mac then
+    .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}]
+  else . end
 '

@@ -84,6 +84,8 @@ chezmoi source dir: ~/.local/share/chezmoi/
 ├── dot_ssh/                → SSH config
 ├── dot_tmux/               → tmux + TPM
 ├── dot_claude/             → Claude Code settings
+├── navi/ark.json.tmpl      → ~/navi/ark.json (Ark workspace config)
+├── focused/ark.json.tmpl   → ~/focused/ark.json (Ark workspace config)
 ├── bin/                    → custom executables (deployed to ~/bin/)
 ├── run_once_*.sh.tmpl      → bootstrap scripts (see warning below)
 └── docs/                   → documentation
