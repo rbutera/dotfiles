@@ -1,4 +1,23 @@
-{{- if eq .chezmoi.hostname "nimbus" }}
+{{- if eq .chezmoi.hostname "kinto" }}
+{
+  "agents": [
+    {
+      "agentId": "florence",
+      "adapter": "ark",
+      "strategy": "base",
+      "temperatureEnabled": false,
+      "diceEnabled": false,
+      "warmFollowupEnabled": false,
+      "compactThresholdEnabled": false,
+      "openclawTickEnabled": false,
+      "openclawProbeEnabled": false,
+      "stewardshipEnabled": false,
+      "coldModeIntervalMs": 1200000,
+      "heartbeats": []
+    }
+  ]
+}
+{{- else if eq .chezmoi.hostname "nimbus" }}
 {
   "agents": [
     {
@@ -78,25 +97,6 @@
       "stewardshipEnabled": false,
       "coldModeIntervalMs": 1200000,
       "openclawJobId": "8bce1721-3fc5-4a36-b497-368e520083b9",
-      "heartbeats": []
-    }
-  ]
-}
-{{- else if has .chezmoi.hostname .host_groups.work }}
-{
-  "agents": [
-    {
-      "agentId": "flaude",
-      "adapter": "ark",
-      "strategy": "base",
-      "temperatureEnabled": false,
-      "diceEnabled": false,
-      "warmFollowupEnabled": false,
-      "compactThresholdEnabled": false,
-      "openclawTickEnabled": false,
-      "openclawProbeEnabled": false,
-      "stewardshipEnabled": false,
-      "coldModeIntervalMs": 1200000,
       "heartbeats": []
     }
   ]

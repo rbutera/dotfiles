@@ -38,6 +38,10 @@ read -r -d '' base_mcps << 'MCPS' || true
   "codex": {
     "command": "npx",
     "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "codex"]
+  },
+  "terminal": {
+    "command": "uvx",
+    "args": ["terminal-mcp"]
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"automation": {
@@ -89,6 +93,7 @@ echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mc
   | del(.passesEligibilityCache)
   | del(.clientDataCache)
   | if .oauthAccount then .oauthAccount |= del(.hasExtraUsageEnabled) else . end
+  | .remoteControlAtStartup = true
   | if .projects then .projects |= with_entries(
       .value.enabledMcpServers = ((.value.enabledMcpServers // []) + $builtins | unique)
     ) else . end

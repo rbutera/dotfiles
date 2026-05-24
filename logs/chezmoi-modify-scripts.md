@@ -1,5 +1,17 @@
 # chezmoi modify scripts changelog
 
+## 2026-05-15 — Exclude chisel, tempograph, oss-autopilot on Windows
+
+### Problem
+Three MCP servers fail on Windows:
+- **chisel** — Unix-only Rust binary (POSIX syscalls, Unix shell whitelist). Not installable on Windows.
+- **tempograph** — Python dependency `py-rust-stemmers` fails to compile on Windows (needs maturin + Rust build chain).
+- **oss-autopilot** — fails to connect on Windows.
+
+### Changes
+- **`run_onchange_apply-claude-json-windows.ps1`**: Removed chisel, tempograph, and oss-autopilot from `$baseMcpsJson`. They remain in the bash `modify_dot_claude.json.tmpl` for Linux/macOS.
+- **`dot_codex/modify_private_config.toml`**: Added `sys.platform == "win32"` guard that pops the three servers from `BASE["mcp_servers"]` on Windows.
+
 ## 2026-04-10 — Force open-websearch to stdio-only in Codex
 
 ### Problem

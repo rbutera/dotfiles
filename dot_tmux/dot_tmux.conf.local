@@ -18,7 +18,7 @@ set -g mode-keys vi
 set -g @override_copy_command '~/bin/osc52copy'
 
 # Propagate Wayland env into tmux sessions on attach.
-set -g update-environment "WAYLAND_DISPLAY XDG_RUNTIME_DIR DISPLAY"
+set -g update-environment "WAYLAND_DISPLAY XDG_RUNTIME_DIR DISPLAY SSH_CONNECTION SSH_TTY SSH_AUTH_SOCK"
 
 setw -g automatic-rename off
 set -g allow-rename off

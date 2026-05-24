@@ -14,6 +14,9 @@
 {{- if eq .chezmoi.hostname "nimbus" }}
     "namespace": "navi",
     "workerName": "impulse-nimbus"
+{{- else if eq .chezmoi.hostname "kinto" }}
+    "namespace": "florence",
+    "workerName": "impulse-kinto"
 {{- else }}
     "namespace": "{{ .chezmoi.hostname }}",
     "workerName": "impulse-{{ .chezmoi.hostname }}"
@@ -27,6 +30,15 @@
     "narrateQueueEnabled": true,
     "stewardshipEnabled": true,
     "openclawProbeEnabled": true
+  }
+{{- else if eq .chezmoi.hostname "kinto" }}
+  "capabilities": {
+    "cronEnabled": true,
+    "sensorsEnabled": true,
+    "heartbeatsEnabled": true,
+    "narrateQueueEnabled": false,
+    "stewardshipEnabled": false,
+    "openclawProbeEnabled": false
   }
 {{- else }}
   "capabilities": {

@@ -60,23 +60,49 @@ The 21:00-21:10 BST journal finalization window (title-pass + full-post) is freq
 - Added a resilience note to `dot_config/impulse/prompts/journal-full-post.md` (and live equivalent): before writing, check whether the titled file exists; if not, run title-pass first. Guards against the independent cron race condition where full-post fires before title-pass completes.
 - `chezmoi apply` not run — no 1Password session active. Deployed files were edited directly for immediate effect.
 
-## 2026-05-15 — Add latios host-branching for agents.json template
+## 2026-05-15 — Add host-branching for agents.json template (superseded by kinto/florence)
 
 ### Problem
 
-`agents.json.tmpl` shipped nimbus-specific OpenClaw agent definitions (navi + shikamaru/heimerdinger/hermione/rick) to ALL hosts. Latios (Flaude's work Mac) should not receive OpenClaw agents — Flaude uses Ark only.
+`agents.json.tmpl` shipped nimbus-specific OpenClaw agent definitions to ALL hosts. Work machines should not receive OpenClaw agents.
 
 ### Solution/Fix
 
-- Added three-way hostname branching to `dot_config/impulse/agents.json.tmpl`:
-  - `nimbus`: full agent registry (navi + 4 openclaw agents) — unchanged behavior
-  - `host_groups.work` (latios): minimal `flaude` agent entry with `adapter: "ark"`, `strategy: "base"`, all advanced features disabled (temperature, dice, warmFollowup, compactThreshold, stewardship, openclawTick, openclawProbe)
-  - All other hosts: empty agents array
-- Uses `has .chezmoi.hostname .host_groups.work` from `.chezmoidata.toml` (where `work = ["latios"]`), matching the branching pattern in `config.json.tmpl` and `dot_env.tmpl`.
+- Originally added `host_groups.work` → flaude branch, but this was superseded by the 2026-05-21 kinto/florence work (below).
+- Final template uses hostname-specific branching: `kinto` → florence, `nimbus` → navi + openclaw agents, `else` → empty array.
 
-### Note on config.json.tmpl
+## 2026-05-21 — Add kinto (Florence) support across all Impulse templates
 
-The research brief (workspace-r44y) flagged `config.json.tmpl` as needing a latios-specific `workspaceRoot` branch. This was already fixed in commit `a17694b` — the template uses `host_groups.work` to set `workspaceRoot` to `~/focused` for work hosts. No change needed.
+### Motivation
 
-- Template validation: `chezmoi execute-template` renders valid JSON for nimbus branch. Cannot test latios branch from nimbus, but template syntax is correct.
-- `chezmoi apply` not run — no 1Password session active. Ready for deployment on latios when Mac Mini arrives.
+Kinto is a Mac Mini that runs Florence (work-Claude agent), separate from Nimbus which runs Navi (personal agent). Kinto was already in the `work` host group in `.chezmoidata.toml` but had no Impulse-specific template branches.
+
+### Changes
+
+**`config.json.tmpl`:**
+- Added `kinto` branch in the hatchet section: namespace "florence", workerName "impulse-kinto".
+- Added `kinto` branch in capabilities: cronEnabled, sensorsEnabled, heartbeatsEnabled = true; narrateQueueEnabled, stewardshipEnabled, openclawProbeEnabled = false.
+- workspaceRoot already resolves to `~/focused` via the existing `host_groups.work` conditional.
+
+**`dot_env.tmpl`:**
+- Added `kinto` branch for Hatchet credentials from `op://focused/Hatchet Kinto/{token,tenant_id}` (port 18888/17077, matching nimbus docker mapping).
+- Added `kinto` branch for scheduler paths: `ARK_WORKSPACE`, `FLORENCE_SCHEDULER_STATE_ROOT`, `FLORENCE_SCHEDULER_LOG_LEVEL`, `FLORENCE_SCHEDULER_NAMESPACE`.
+- Added `kinto` branch for Discord: `FLORENCE_DISCORD_TOKEN` from `op://focused/Flaude Discord/credential`.
+- Wrapped nimbus-only sections (narrate pipeline, temperature sensor) in `nimbus` conditional so they don't render on kinto.
+- `CLAUDE_CODE_OAUTH_TOKEN` already handled by the `shared_claude_oauth` / `host_groups.work` conditional.
+
+**`agents.json.tmpl`:**
+- Added `kinto` branch with a single florence agent (adapter: ark, strategy: WORK, all optional features disabled).
+- Non-kinto hosts fall through to existing nimbus agents (navi, shikamaru, heimerdinger, hermione, rick).
+
+**`jobs.json.tmpl`:**
+- Added `kinto` branch with 3 jobs: quota-scrape (every 5m, script), morning-sweep (08:30 daily, ark-spawn florence), jira-sync (08:00 daily, ark-spawn florence).
+- Nimbus jobs unchanged, other hosts still get quota-scrape only.
+
+**`../ark/config.json.tmpl`:**
+- Renamed work account cookiesPath from `flaude.txt` to `florence.txt`.
+
+### Not done
+
+- `chezmoi apply` not run. Templates are source-only edits.
+- The actual `~/.camofox/cookies/florence.txt` file needs to exist on kinto (renamed from flaude.txt or re-exported).

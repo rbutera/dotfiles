@@ -6,7 +6,7 @@
   niri = ["mondo"]
   kde  = []
   dev_infra = ["mondo"]
-  work = ["latios"]
+  work = ["latios", "kinto"]
 
 [feature_flags]
   shared_claude_oauth = false

@@ -11,6 +11,11 @@ HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Private/Hatchet Nimbus/token" }}
 HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Private/Hatchet Nimbus/tenant_id" }}
 HATCHET_CLIENT_API_URL=http://127.0.0.1:18888
 HATCHET_CLIENT_HOST_PORT=127.0.0.1:17077
+{{- else if eq .chezmoi.hostname "kinto" }}
+HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://focused/Hatchet Kinto/credential" }}
+HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://focused/Hatchet Kinto/username" }}
+HATCHET_CLIENT_API_URL=http://127.0.0.1:18888
+HATCHET_CLIENT_HOST_PORT=127.0.0.1:17077
 {{- else }}
 HATCHET_CLIENT_TOKEN=
 HATCHET_CLIENT_TENANT_ID=
@@ -20,14 +25,27 @@ HATCHET_CLIENT_HOST_PORT=127.0.0.1:7077
 HATCHET_CLIENT_TLS_STRATEGY=none
 
 # ── Scheduler paths ─────────────────────────────────────────────────────────
+{{- if has .chezmoi.hostname .host_groups.work }}
+ARK_WORKSPACE={{ .chezmoi.homeDir }}/focused
+FLORENCE_SCHEDULER_STATE_ROOT={{ .chezmoi.homeDir }}/.local/state/impulse
+FLORENCE_SCHEDULER_LOG_LEVEL=INFO
+FLORENCE_SCHEDULER_NAMESPACE=florence
+{{- else }}
 NAVI_SCHEDULER_RUNTIME_CONFIG={{ .chezmoi.homeDir }}/navi/state/runtime-config.json
 NAVI_SCHEDULER_STATE_ROOT={{ .chezmoi.homeDir }}/navi/state
 NAVI_SCHEDULER_REPO_ROOT={{ .chezmoi.homeDir }}/dev/lumiere
 NAVI_SCHEDULER_LOG_LEVEL=INFO
 NAVI_SCHEDULER_NAMESPACE=navi
+{{- end }}
 
-# ── Discord (Navi's token, sourced from 1Password) ──────────────────────────
+# ── Discord ─────────────────────────────────────────────────────────────────
+{{- if has .chezmoi.hostname .host_groups.work }}
+FLORENCE_DISCORD_TOKEN={{ onepasswordRead "op://focused/Flaude Discord/credential" }}
+{{- else }}
 OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
+{{- end }}
+
+{{- if eq .chezmoi.hostname "nimbus" }}
 
 # ── Narrate pipeline ────────────────────────────────────────────────────────
 NAVI_SCHEDULER_NARRATE_DAILY_ROOT={{ .chezmoi.homeDir }}/dev/expedition/blog
@@ -40,6 +58,7 @@ NAVI_SCHEDULER_NARRATE_NOTIFY_CHANNEL_ID=1473760382387621950
 # ── Temperature sensor ──────────────────────────────────────────────────────
 NAVI_SCHEDULER_TEMPERATURE_CHANNEL_ID=
 NAVI_SCHEDULER_RAI_USER_ID=124046285308166146
+{{- end }}
 
 # ── Claude Code OAuth (for ark-spawn jobs) ──────────────────────────────────
 {{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
