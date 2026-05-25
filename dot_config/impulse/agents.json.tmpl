@@ -4,15 +4,20 @@
     {
       "agentId": "florence",
       "adapter": "ark",
-      "strategy": "base",
-      "temperatureEnabled": false,
-      "diceEnabled": false,
-      "warmFollowupEnabled": false,
-      "compactThresholdEnabled": false,
+      "strategy": "dice",
+      "temperatureEnabled": true,
+      "diceEnabled": true,
+      "warmFollowupEnabled": true,
+      "compactThresholdEnabled": true,
       "openclawTickEnabled": false,
       "openclawProbeEnabled": false,
       "stewardshipEnabled": false,
       "coldModeIntervalMs": 1200000,
+      "temperatureHalfLifeMinutes": 20,
+      "temperatureDiscord": {
+        "channelId": "1499031021746913341",
+        "humanUserId": "124046285308166146"
+      },
       "heartbeats": []
     }
   ]
