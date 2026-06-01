@@ -1,5 +1,16 @@
 # Claude Code config changes log
 
+## 2026-06-01 — Remove Opus 4.6 model pin
+
+### Problem
+
+`ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'` was set as a workaround for the `/model opus[1m]` client-side gate bug (anthropics/claude-code#45449). With Opus 4.8 released and the upstream bug long resolved, the pin was preventing adoption of newer Opus models.
+
+### Changes
+
+- **`dot_zshenv.tmpl`**: Removed `export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'` and its comment block.
+- **`Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl`**: Removed the mirrored `$env:ANTHROPIC_DEFAULT_OPUS_MODEL` line.
+
 ## 2026-05-08 — Replace Perplexity MCP with Exa (HTTP mode)
 
 ### Problem

@@ -95,11 +95,6 @@ export ARK_WORKSPACE="$HOME/navi"
 {{- end }}
 
 # ── Claude Code ──────────────────────────────────────────────────────────────
-# Force Opus 1M context. Works around anthropics/claude-code#45449 where the
-# client-side /model opus[1m] gate is blocked by a stale/poisoned
-# cachedExtraUsageDisabledReason in ~/.claude.json despite Max 20x entitlement.
-# See logs/claude.md.
-export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
 export CLAUDE_CODE_NO_FLICKER=1
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
