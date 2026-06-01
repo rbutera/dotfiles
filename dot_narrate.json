@@ -2,10 +2,10 @@
   "ttsProvider": "elevenlabs",
   "apiKeyEnv": "ELEVENLABS_API_KEY",
   "defaultVoiceId": "${ELEVENLABS_NAVI}",
-  "defaultModel": "eleven_v3",
+  "defaultModel": "eleven_flash_v2_5",
   "enableLlmReview": true,
   "enableLlmAttribution": true,
-  "enableLlmEmotionAnnotation": true,
+  "enableLlmEmotionAnnotation": false,
   "llmModel": "openai-codex/gpt-5.2",
   "speakerVoices": {
     "rai": {
