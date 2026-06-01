@@ -23,6 +23,10 @@
       "inputPath" $inputPath
       "outputDir" $outputDir
       "summaryContextFiles" $agentSummaryContextFiles
+      "voiceTranscriptDir" (joinPath $workspace "voice-transcripts")
+      "cliTranscriptDir" (joinPath $workspace "cli-transcripts")
+      "adventuresJournalDir" (joinPath $pluginRoot "state" "impulse-journal")
+      "subagentSummaryDir" (joinPath $workspace "subagent-summaries")
     )
   )
   "inputPath" $inputPath

@@ -122,3 +122,9 @@ The Hatchet section (lines 9-24) retains the explicit `kinto` hostname branch â€
 ### Not done
 
 - `chezmoi apply` not run. Template is source-only.
+
+## 2026-05-25 â€” chezmoi template sync: proactiveMiningEnabled
+
+**Problem:** proactiveMiningEnabled was added to deployed agents.json on nimbus (May 24, during proactive thread-mining cascade deployment) but the chezmoi source template was not updated. Next `chezmoi apply` would have reverted the flag.
+
+**Fix:** Added `"proactiveMiningEnabled": true` to Navi's agent entry in `dot_config/impulse/agents.json.tmpl` (nimbus block only). Florence on kinto doesn't use proactive mining. Verified: template output matches deployed config exactly after edit.
