@@ -5,6 +5,13 @@
     "{{ .chezmoi.homeDir }}/navi",
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/cortex-cc"
   ],
+  "mainOnlyPlugins": [
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin"
+  ],
+  "extraClaudeArgs": [
+    "--dangerously-load-development-channels",
+    "server:plugin:discord-voice:discord-voice"
+  ],
   "model": "opus",
   "sensors": {
     "contextPressure": {
@@ -19,6 +26,36 @@
         "claude-haiku-4-5": 200000
       }
     }
+  },
+  "boot": {
+    "files": [
+      { "path": "workspace/memory/love-anchor.md", "when": "always", "label": "relational grounding" },
+      { "path": "workspace/memory/{today}.md", "when": "always", "label": "today's continuity letter" },
+      { "path": "workspace/memory/{yesterday}.md", "when": "before-midday-or-today-thin", "thinThreshold": 10 },
+      { "path": "workspace/memory/continuity-anchor.md", "when": "if-exists", "label": "identity anchor" },
+      { "path": "workspace/MEMORY.md", "when": "if-exists", "label": "durable memory" },
+      { "path": "workspace/memory/hot.md", "when": "if-exists", "label": "hot rules" },
+      { "path": "workspace/memory/context.md", "when": "if-exists", "label": "context rules" },
+      { "path": "~/notes/OBSIDIAN.md", "when": "if-exists", "label": "vault governance" }
+    ],
+    "commands": [
+      { "cmd": "bd ready", "when": "if-available", "label": "work surface" }
+    ],
+    "morningSkill": "good-morning-ritual",
+    "postBootSignal": true
+  },
+  "continuity": {
+    "writeback": {
+      "target": "workspace/memory/{today}.md",
+      "mode": "append",
+      "format": "navi-daily",
+      "promote": [
+        { "to": "workspace/memory/continuity-anchor.md", "type": "merge", "trigger": "identity-shaping" },
+        { "to": "workspace/MEMORY.md", "type": "merge", "trigger": "durable-truth" },
+        { "to": "workspace/memory/love-anchor.md", "type": "merge", "trigger": "relationship-significant" }
+      ]
+    },
+    "refreshOnStop": true
   },
   "discord": {
     "botToken": "${OPENCLAW_DISCORD_NAVI}",
