@@ -95,6 +95,38 @@
     }
   },
   {
+    "id": "todoist-hygiene",
+    "name": "Florence: Todoist Hygiene (triage + review, 08:15 & 16:15)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "15 8,16 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "florence",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run /todoist-triage in autonomous mode, then /todoist-review"
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "todoist"],
+    "inputs": {
+      "agent": "florence",
+      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "model": "sonnet",
+      "maxTurns": 25,
+      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Then run /todoist-review and report today, overdue, and waiting items plus any Someday items due for resurfacing."
+    }
+  },
+  {
     "id": "lamplight-incremental",
     "name": "Lamplight: Incremental Update (hourly, business hours)",
     "trigger": {
