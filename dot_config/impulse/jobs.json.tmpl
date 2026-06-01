@@ -188,10 +188,10 @@
   },
   {
     "id": "session-recap-tick",
-    "name": "Session Recap (every 10m)",
+    "name": "Session Recap (hourly)",
     "trigger": {
       "kind": "cron",
-      "expr": "*/10 * * * *",
+      "expr": "0 * * * *",
       "tz": "Europe/London"
     },
     "target": {
