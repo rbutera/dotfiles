@@ -39,7 +39,6 @@ foreach ($p in @("$HOME\bin", "$HOME\.local\bin", "$env:GOPATH\bin", $env:PNPM_H
 $env:FZF_DEFAULT_OPTS = '--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
 
 # === Claude Code tweaks (mirrors dot_zshenv) ===
-$env:ANTHROPIC_DEFAULT_OPUS_MODEL = 'claude-opus-4-6[1m]'
 $env:CLAUDE_CODE_NO_FLICKER = '1'
 
 # === non-secret API endpoints / app config ===
