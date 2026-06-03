@@ -2,6 +2,13 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-06-03 -- Removed both io.focused LaunchAgents (migrated to Impulse cron)
+
+- Removed `io.focused.standup-brief.plist` and `io.focused.nightly-health.plist` from chezmoi source (`Library/LaunchAgents/` dir is now empty and removed), plus their `always_on` block in `.chezmoiignore`, plus the deployed copies in `~/Library/LaunchAgents/`.
+- Both are now Impulse/Hatchet cron jobs in `dot_config/impulse/jobs.json.tmpl` (kinto branch) per Rai's standing preference (recurring jobs = Impulse, not launchd). See `logs/impulse.md` 2026-06-03 entry for the full job shape + verification.
+- standup-brief = enabled (fires Mon-Fri 09:25 BST via the same wrapper). nightly-health = `enabled: false` (stays disarmed; arm by flipping enabled + `pnpm nx run impulse:dev -- sync-crons`).
+- The `always_on = ["kinto"]` host group in `.chezmoidata.toml` was left in place for future kinto-only LaunchAgents.
+
 ## 2026-06-03 -- nightly-health launchagent is kinto-only
 
 - Added `io.focused.nightly-health.plist` (the Mon-Fri 07:00 system-health + docker-reclaim job; built in ~/focused, OpenSpec change `nightly-system-health`).

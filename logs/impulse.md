@@ -1,5 +1,22 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-06-03 -- Migrated standup-brief + nightly-health from launchd to Impulse cron jobs
+
+**Motivation:** Rai's standing preference (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron entries, not launchd LaunchAgents. Two jobs were still launchd plists.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl` (kinto branch):**
+
+- Added job `standup-brief` (enabled): cron `25 9 * * 1-5` Europe/London, `target.kind: script`, runs `bash {{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh` (the SAME wrapper the launchd job used; it loads the whisper token + ark port, checks readyz, then `ark whisper command /standup-brief`). `inputs` carries cmd/args/cwd for the `impulse-script` workflow factory.
+- Added job `nightly-health` (enabled: false -- DISARMED): cron `0 7 * * 1-5`, runs `bash {{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh`. Stays INERT because sync-crons + the worker both filter on `enabled`; a disabled job gets NO Hatchet cron and is pruned if previously synced. Rai arms it later by flipping `enabled: true` and re-running sync-crons (no chezmoi/launchd dance).
+
+**Job entry shape (learned):** each entry needs `id`, `name`, `trigger` (cron expr + tz), `target` (`{kind: script, bin}` for shell jobs, or `ark-spawn` for prompts), `payload` (`{kind: shell, cmd, args}` descriptor), `policy` (maxConcurrent/quotaAware/dedupe, optional timeout secs), `enabled`, optional `tags`, and `inputs` -- the runtime block the generic workflow factory actually reads (`cmd`, `args`, `cwd`, optional `env`). Script jobs all share the `impulse-script` Hatchet task (runners.ts spawns cmd/args in cwd; non-zero exit = step failure).
+
+**Registration flow:** edit chezmoi source -> `chezmoi apply ~/.config/impulse/jobs.json` -> `pnpm nx run impulse:dev -- sync-crons` (registers `<namespace>/<job.id>` crons into Hatchet, converting Europe/London to UTC). The long-running worker `dev.lumiere.impulse-florence` executes them.
+
+**Verification:** `list-jobs` shows standup-brief enabled / nightly-health disabled. Hatchet postgres `WorkflowTriggerCronRef` has `florence/standup-brief | 25 8 * * 1-5` (UTC = 09:25 BST), nightly-health correctly absent. `trigger standup-brief` (STANDUP_DRY_RUN=1) ran the wrapper end to end: exitCode 0, session ready, would-whisper confirmed. standup-brief WILL fire 2026-06-04 09:25 BST.
+
+**Removed:** both launchd plists (`io.focused.standup-brief.plist`, `io.focused.nightly-health.plist`) from chezmoi source `Library/LaunchAgents/` (dir now empty, removed), plus their `.chezmoiignore` `always_on` conditional block, plus the deployed copies in `~/Library/LaunchAgents/` (standup-brief unloaded first; nightly-health was never loaded). The `always_on = ["kinto"]` host group in `.chezmoidata.toml` is left in place for future kinto-only use.
+
 ## 2026-05-02 — Initial chezmoi management of ~/.config/impulse/
 
 **Motivation:** Impulse's XDG config directory (`~/.config/impulse/`) was unmanaged. Adding it to chezmoi ensures config is reproducible across machines and version-controlled with proper secret management.

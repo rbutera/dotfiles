@@ -187,6 +187,67 @@
     }
   },
   {
+    "id": "standup-brief",
+    "name": "Florence: Standup Brief (Mon-Fri 09:25, whisper into running session)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "25 9 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "standup"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh"],
+      "cwd": "{{ .chezmoi.homeDir }}/focused"
+    }
+  },
+  {
+    "id": "nightly-health",
+    "name": "Florence: Nightly System Health (Mon-Fri 07:00) -- DISARMED until Rai arms it",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 7 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 1800
+    },
+    "enabled": false,
+    "tags": ["work", "kinto", "health"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh"],
+      "cwd": "{{ .chezmoi.homeDir }}/focused"
+    }
+  },
+  {
     "id": "session-recap-tick",
     "name": "Session Recap (hourly)",
     "trigger": {
