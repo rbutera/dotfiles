@@ -8,6 +8,11 @@ openspec/
 skills/
 .claude-plugin/
 
+{{ if not (has .chezmoi.hostname .host_groups.always_on) }}
+# kinto-only (the 24/7 Mac Mini): nightly-health launchagent. Ignored on every other host.
+Library/LaunchAgents/io.focused.nightly-health.plist
+{{ end }}
+
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh
 0_install-cli-tools.sh
