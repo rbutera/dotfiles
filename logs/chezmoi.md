@@ -1,5 +1,39 @@
 # chezmoi config changes log
 
+## 2026-06-03 — Add io.focused.nightly-health launchd plist
+
+### Motivation
+
+The nightly system-health job (OpenSpec change `nightly-system-health`, tasks 6.1/6.2) needed a launchd plist managed via chezmoi so the schedule is version-controlled and deployed deterministically, but inert until manually armed.
+
+### What changed
+
+Added `Library/LaunchAgents/io.focused.nightly-health.plist` to the chezmoi source. This is a plain XML file (no 1Password template functions), so `chezmoi apply ~/Library/LaunchAgents/io.focused.nightly-health.plist` is safe to run without a 1Password session.
+
+The plist configures:
+- Label: `io.focused.nightly-health`
+- ProgramArguments: `/bin/bash /Users/rai/focused/scripts/health/nightly-health.sh`
+- StartCalendarInterval: five entries for Weekday 1-5 (Mon-Fri), Hour 7, Minute 0
+- RunAtLoad: false (inert until armed)
+- EnvironmentVariables: HOME, PATH (including .asdf/shims for node/ark), ARK_WORKSPACE_ROOT
+- StandardOutPath/StandardErrorPath: `scripts/health/logs/nightly-health-launchd{,-error}.log`
+
+### Arm / disarm
+
+```bash
+# Arm (deploy + load):
+chezmoi apply ~/Library/LaunchAgents/io.focused.nightly-health.plist
+launchctl load ~/Library/LaunchAgents/io.focused.nightly-health.plist
+
+# Disarm (stop schedule, keep file):
+launchctl unload ~/Library/LaunchAgents/io.focused.nightly-health.plist
+
+# Verify:
+launchctl list | grep nightly-health
+```
+
+Companion wrapper: `~/focused/scripts/health/nightly-health.sh` (runs run.sh first, then optional ark narration step, with overall deadline watchdog). Narration disabled pending task-0.4 spike.
+
 ## 2026-05-01 — Fix `chezmoi apply` failing with multiple 1Password accounts on WSL
 
 ### Problem
