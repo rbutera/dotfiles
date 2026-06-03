@@ -1,5 +1,16 @@
 # Claude Code config changes log
 
+## 2026-06-03 — Re-add Opus model pin as 4.8, conditional on host group
+
+### Problem
+
+The Opus 4.6 model pin was removed on 2026-06-01 but the value persisted in all shells via tmux's global environment (the tmux server was started when the old export was still active). Re-adding the pin as Opus 4.8 with a host-group conditional: work machines (`latios`, `kinto`) get `claude-opus-4-8[1m]` (1M context), others get `claude-opus-4-8`.
+
+### Changes
+
+- **`dot_zshenv.tmpl`**: Added conditional `ANTHROPIC_DEFAULT_OPUS_MODEL` export under the Claude Code section — `claude-opus-4-8[1m]` for `host_groups.work`, `claude-opus-4-8` for others.
+- **tmux global env**: Updated stale `ANTHROPIC_DEFAULT_OPUS_MODEL` from `claude-opus-4-6[1m]` to `claude-opus-4-8[1m]` via `tmux set-environment -g`.
+
 ## 2026-06-01 — Remove Opus 4.6 model pin
 
 ### Problem

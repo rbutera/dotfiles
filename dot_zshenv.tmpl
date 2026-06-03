@@ -95,6 +95,11 @@ export ARK_WORKSPACE="$HOME/navi"
 {{- end }}
 
 # ── Claude Code ──────────────────────────────────────────────────────────────
+{{- if has .chezmoi.hostname .host_groups.work }}
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8[1m]'
+{{- else }}
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8'
+{{- end }}
 export CLAUDE_CODE_NO_FLICKER=1
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
