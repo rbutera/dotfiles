@@ -248,6 +248,40 @@
     }
   },
   {
+    "id": "daily-blog",
+    "name": "Florence: Daily Blog (21:30 nightly, weekday=work+topic / weekend=wild)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "florence",
+      "model": "opus"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it. Pick the mode by day of week (weekday-post Mon-Fri, weekend-post Sat-Sun). Write today's post and DM it to Rai."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 2700
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "blog"],
+    "promptFile": "prompts/florence-daily-blog.md",
+    "inputs": {
+      "agent": "florence",
+      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "model": "opus",
+      "maxTurns": 40,
+      "prompt": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/florence.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/focused/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/focused/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
+    }
+  },
+  {
     "id": "session-recap-tick",
     "name": "Session Recap (hourly)",
     "trigger": {

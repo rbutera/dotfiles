@@ -1,5 +1,21 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-06-03 -- Add Florence daily-blog Impulse job (bead focused-9fia)
+
+**Motivation:** Florence's daily blog automation, modeled on Navi's journal pipeline (same `ark run <agent>` -> skill-mode shape). Rai's standing rule (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron, NOT launchd. The blueprint (`~/focused/vault/References/Florence Daily Blog.md`) originally suggested launchd; explicitly overridden to Impulse to match Navi.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl` (kinto branch):**
+- Added job `daily-blog` (enabled): cron `30 21 * * *` Europe/London (21:30 BST, after lamplight nightly digest at 22:00 is fine since the post reads breadcrumb + transcripts which are current by then), `target.kind: ark-spawn`, agent `florence`, model `opus`, `maxTurns: 40`, `timeout: 2700`, `dedupe: skip-if-running`, tags work/kinto/blog.
+- Carries both `promptFile: prompts/florence-daily-blog.md` (Navi-parity) and an inline `inputs.prompt` (the live ark-spawn workflow factory reads `inputs.prompt`, so the inline copy is what actually runs). The prompt is a thin launcher: read `~/focused/.claude/skills/daily-blog/SKILL.md`, pick mode by day-of-week (`date +%u`; Mon-Fri weekday-post, Sat-Sun weekend-post), write to `~/focused/vault/Blog/`, DM Rai on Discord (chat_id 1499031021746913341).
+
+**New file:** `dot_config/impulse/prompts/florence-daily-blog.md` (thin launcher, mirrors Navi's `journal-full-post.md` shape).
+
+**The skill itself** lives in the focused repo at `~/focused/.claude/skills/daily-blog/` (SKILL.md router + persona.md/voice-and-spine.md/research-step.md/weekend-wild.md references), committed separately to focused.
+
+**Registration flow (done):** edited chezmoi source -> `chezmoi apply ~/.config/impulse/jobs.json ~/.config/impulse/prompts/florence-daily-blog.md` (no onepasswordRead in these targets, so no 1Password session needed) -> `pnpm nx run impulse:dev -- sync-crons`.
+
+**Verification:** `list-jobs` shows `daily-blog` enabled. `sync-crons` registered `florence/daily-blog -> 30 20 * * * UTC` (= 21:30 BST). Worker `dev.lumiere.impulse-florence` is running (launchd keepalive, state=running). The job is ARMED: it will fire nightly at 21:30 BST starting tonight. First auto-run is reviewable (it writes the post AND DMs Rai; if voice is off, iterate on the skill refs). A dry-run sample post #2 was hand-generated to `~/focused/vault/Blog/daily-blog-SAMPLE.md` (Wednesday = weekday-post) before arming.
+
 ## 2026-06-03 -- Migrated standup-brief + nightly-health from launchd to Impulse cron jobs
 
 **Motivation:** Rai's standing preference (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron entries, not launchd LaunchAgents. Two jobs were still launchd plists.
