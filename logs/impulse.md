@@ -161,3 +161,7 @@ The Hatchet section (lines 9-24) retains the explicit `kinto` hostname branch â€
 **Problem:** proactiveMiningEnabled was added to deployed agents.json on nimbus (May 24, during proactive thread-mining cascade deployment) but the chezmoi source template was not updated. Next `chezmoi apply` would have reverted the flag.
 
 **Fix:** Added `"proactiveMiningEnabled": true` to Navi's agent entry in `dot_config/impulse/agents.json.tmpl` (nimbus block only). Florence on kinto doesn't use proactive mining. Verified: template output matches deployed config exactly after edit.
+
+## 2026-06-03 -- lamplight nightly 22:00 -> 21:00
+
+Moved `lamplight-nightly` from `0 22` to `0 21` (Europe/London) so the full daily digest lands before the daily-blog job at 21:30 (blog reads lamplight Summary). 30-min buffer; blog tolerates a stale/missing Summary anyway. Applied + sync-crons re-registered (florence/lamplight-nightly -> 0 20 UTC).
