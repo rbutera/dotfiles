@@ -213,6 +213,10 @@
                                             {
                                                 "product_id": 8705,
                                                 "vendor_id": 4617
+                                            },
+                                            {
+                                                "product_id": 18,
+                                                "vendor_id": 13807
                                             }
                                         ],
                                         "type": "device_unless"

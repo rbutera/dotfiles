@@ -1,5 +1,27 @@
 # karabiner config changes log
 
+## 2026-06-04 — Dygma Defy: leave caps lock as plain caps lock
+
+### Problem
+
+The `CAPS_LOCK -> Hyper/Escape Key` complex modification (caps lock → Escape on
+tap, Hyper = cmd+ctrl+opt on hold) used a `device_unless` condition that excluded
+only the **Dygma Raise** (`product_id 8705`, `vendor_id 4617`). As a result the
+remap still fired on the **Dygma Defy** (`product_id 18`, `vendor_id 13807`),
+turning its caps lock key into Escape/Hyper. User wanted caps lock to behave as a
+plain caps lock on the Defy.
+
+### Changes
+
+Added the Dygma Defy identifier (`product_id 18`, `vendor_id 13807`) to the
+`device_unless` identifiers array of the `CAPS_LOCK -> Hyper/Escape Key`
+manipulator in `dot_config/private_karabiner/private_karabiner.json`. The caps
+lock remap now applies on every device **except** the Dygma Raise and the Dygma
+Defy. On the Defy, `caps_lock` passes through untouched.
+
+The Defy's Hyper/Escape behaviour is unaffected — it comes from the separate
+`(Dygma Defy) F14 / F19` rules, not from the caps lock key.
+
 ## 2026-04-15 — Dygma Defy F18: replace ctrl/ctrl+space with Hyper+Space
 
 ### Problem
