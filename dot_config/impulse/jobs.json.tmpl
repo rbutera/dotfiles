@@ -1032,6 +1032,36 @@
       "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
+  },
+  {
+    "id": "wellness-check",
+    "name": "Navi: Tier 1 Wellness Check (flag-gated, default OFF)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 */2 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/wellness-check.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": ["wellness", "care", "navi", "tier-1-only"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/wellness-check.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}
