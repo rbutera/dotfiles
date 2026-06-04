@@ -218,7 +218,7 @@
   },
   {
     "id": "nightly-health",
-    "name": "Florence: Nightly System Health (Mon-Fri 07:00) -- DISARMED until Rai arms it",
+    "name": "Florence: Nightly System Health (Mon-Fri 07:00) -- ARMED 2026-06-04",
     "trigger": {
       "kind": "cron",
       "expr": "0 7 * * 1-5",
@@ -239,7 +239,7 @@
       "dedupe": "skip-if-running",
       "timeout": 1800
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["work", "kinto", "health"],
     "inputs": {
       "cmd": "bash",
