@@ -1,5 +1,22 @@
 # zshenv changelog
 
+## 2026-06-04 -- Add OpenAI + Ideogram image-gen API keys
+
+### Problem
+The creative pipeline (fanart, campfire wallpaper pu5x, anime stills) silently
+depended on the flaky ChatGPT-via-browser adapter (bead workspace-xho3). The
+deterministic fix is the direct image-gen APIs (pod-factory + the new
+`~/navi/bin/gen-image.mjs`), but OPENAI_API_KEY and IDEOGRAM_API_KEY were never
+exported anywhere — absent from env and from chezmoi source.
+
+### Solution/Fix
+Added two `onepasswordRead` exports to `dot_zshenv.tmpl` under a new "Image
+generation" block (right after the Cartesia key): OPENAI_API_KEY from
+`op://Private/OpenAI API/credential` and IDEOGRAM_API_KEY from
+`op://Private/Ideogram API/credential` (canonical paths per pod-factory setup
+docs). After `chezmoi apply` with a 1Password session, both keys are live and
+`gen-image.mjs` / pod-factory work browser-free.
+
 ## 2026-06-01 -- Add GELATO_API_KEY for Dopamade Etsy fulfilment
 
 ### Problem
