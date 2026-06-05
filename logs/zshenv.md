@@ -32,3 +32,11 @@ Added to `dot_zshenv.tmpl` after the Civitai key:
 - Added `export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" }}` to the API-keys block, for the Discord voice plugin's Cartesia migration (ElevenLabs -> Cartesia).
 - op reference only (resolved at apply-time); no raw key in git.
 - Lands in the shell env on next `chezmoi apply`. (The voice daemon reads the key from its own plugin .env, not the shell -- this is for shell/general use.)
+
+## 2026-06-04 -- Remove IDEOGRAM_API_KEY, demote OPENAI_API_KEY to billing-only
+
+### Problem
+Image generation was migrated to a first-party Codex/ChatGPT-subscription path (lumiere `openai-json` `generateImage` + pod-factory + `~/navi/bin/gen-image.mjs`), killing the paid Ideogram + OpenAI-paid-API image paths (bead workspace-0vuc). The `IDEOGRAM_API_KEY` export was now unused anywhere.
+
+### Solution/Fix
+Removed the `IDEOGRAM_API_KEY` export from `dot_zshenv.tmpl` (added earlier the same day, now dead). Kept `OPENAI_API_KEY` (still read by `~/navi/bin/cost-report.mjs` for billing checks) and updated its comment to note image-gen has moved to the free codex path. Removal takes effect on next `chezmoi apply`; the lingering deployed export is harmless until then.
