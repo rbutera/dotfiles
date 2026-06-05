@@ -1,5 +1,24 @@
 # karabiner config changes log
 
+## 2026-06-05 — Built-in MacBook F/J home-row shift
+
+### Problem
+
+Rai wanted the built-in MacBook keyboard to use home-row shift keys without
+changing external keyboards such as the Dygma Defy and Dygma Raise.
+
+### Changes
+
+Added a built-in-keyboard-only complex modification in
+`dot_config/private_karabiner/private_karabiner.json`:
+
+- `f` sends `f` when tapped and `left_shift` when held
+- `j` sends `j` when tapped and `right_shift` when held
+- Both manipulators use `device_if` with `is_built_in_keyboard: true`, so the
+  rule does not apply to external keyboards
+- Initial timing: `120ms` hold threshold and `170ms` tap timeout, chosen as a
+  fast-typing starting point for roughly 110wpm
+
 ## 2026-06-04 — Dygma Defy: leave caps lock as plain caps lock
 
 ### Problem
