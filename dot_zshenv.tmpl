@@ -96,7 +96,7 @@ export ARK_WORKSPACE="$HOME/navi"
 
 # ── Claude Code ──────────────────────────────────────────────────────────────
 {{- if has .chezmoi.hostname .host_groups.work }}
-export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8[1m]'
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8'
 {{- else }}
 export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8'
 {{- end }}

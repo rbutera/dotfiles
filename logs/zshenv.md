@@ -1,5 +1,16 @@
 # zshenv changelog
 
+## 2026-06-05 -- Use normal Claude Opus 4.8 context window
+
+### Problem
+Work-host `.zshenv` exported `ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8[1m]'`,
+which made Claude Code default to the 1M context variant.
+
+### Solution/Fix
+Changed the work-host branch in `dot_zshenv.tmpl` to export
+`ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-8'`, matching the existing
+non-work branch and using the normal context window. Rai will run `chezmoi apply`.
+
 ## 2026-06-04 -- Add OpenAI + Ideogram image-gen API keys
 
 ### Problem
