@@ -21,3 +21,9 @@ Applied via `chezmoi apply ~/.narrate.json` (plain file, no onepasswordRead, no 
 
 ### Solution/Fix
 Edited `dot_narrate.json`: `speakerVoices.rai.cartesia` -> `f114a467-c40a-4db8-964d-aaba89cd08fa` (the valid Cartesia rai UUID, matches `CARTESIA_VOICE_ID_RAI` in `apps/narrate/.env`; verified HTTP 200 against the Cartesia TTS API before applying). Applied with `chezmoi apply --force ~/.narrate.json` (the deployed file had drifted out-of-band, so --force was needed). Re-ran narrate with `--force`: all 33 segments synthesized (0 failed), merged to `apps/narrate/output/2026-06-06 When You Surface.mp3` (5.1M, ~8min), podcast feed updated (84 episodes). "When You Surface" is now narrated.
+
+## 2026-06-07 -- Narrate Cartesia model -> sonic-3.5
+### Problem
+Narrate pipeline was pinned to sonic-3 (old) in dot_narrate.json (defaultModel + cartesiaModelId) and apps/narrate/.env (CARTESIA_MODEL_ID=sonic-3-2026-01-12). Rai: use sonic-3.5 (latest), "head and shoulders better than v3". The discord-voice plugin already runs sonic-3.5.
+### Fix
+Set defaultModel + cartesiaModelId to "sonic-3.5" in dot_narrate.json; set CARTESIA_MODEL_ID=sonic-3.5 in apps/narrate/.env. Applied + re-narrated latest daily on 3.5.
