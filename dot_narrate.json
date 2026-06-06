@@ -12,7 +12,7 @@
   "speakerVoices": {
     "rai": {
       "elevenlabs": "${ELEVENLABS_RAI}",
-      "cartesia": "J05Vdux0uMD8mkWfultW"
+      "cartesia": "f114a467-c40a-4db8-964d-aaba89cd08fa"
     },
     "navi": {
       "elevenlabs": "${ELEVENLABS_NAVI}",
