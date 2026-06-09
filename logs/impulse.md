@@ -165,3 +165,14 @@ The Hatchet section (lines 9-24) retains the explicit `kinto` hostname branch â€
 ## 2026-06-03 -- lamplight nightly 22:00 -> 21:00
 
 Moved `lamplight-nightly` from `0 22` to `0 21` (Europe/London) so the full daily digest lands before the daily-blog job at 21:30 (blog reads lamplight Summary). 30-min buffer; blog tolerates a stale/missing Summary anyway. Applied + sync-crons re-registered (florence/lamplight-nightly -> 0 20 UTC).
+
+## 2026-06-09 -- Monthly ChatGPT Pro invoice -> Focused expense job
+
+### Problem
+Rai needs his ChatGPT Pro invoice (GBP 200/mo) submitted to Focused Labs expenses monthly. OpenAI does NOT email receipts (unlike his other Stripe-billed tools), so the invoice only lives in the ChatGPT billing portal (authenticated). He asked for an Impulse job (ark-spawn) on the 1st of each month, chezmoi-defined.
+
+### Solution/Fix
+- Added job `chatgpt-invoice-monthly` to the nimbus branch of `dot_config/impulse/jobs.json.tmpl` (cron `0 9 1 * *` Europe/London, target ark-spawn navi/sonnet, enabled, promptFile).
+- New prompt `dot_config/impulse/prompts/chatgpt-invoice-monthly.md`: opens ChatGPT billing via opentabs (launches Chrome itself if closed -- not a blocker, Navi has sudo + automation-mcp), grabs the latest invoice URL, runs the helper script.
+- Helper (in navi repo): `~/navi/bin/chatgpt-invoice-email.mjs` resolves the official itemised PDF via Stripe's `invoicedata.stripe.com/invoice_pdf_file_url/<acct>/<token>` endpoint -> signed S3 PDF, then gog-emails it to rai.butera@focused.io with the Rippling link.
+- Verified template <-> deployed in sync (chezmoi cat == deployed, 24 jobs) before adding; applied -> 25 jobs deployed. No secrets in the template, applied without 1Password.

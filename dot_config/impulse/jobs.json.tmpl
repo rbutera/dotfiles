@@ -1062,6 +1062,38 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/wellness-check.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "chatgpt-invoice-monthly",
+    "name": "Navi: ChatGPT Pro Invoice -> Focused (1st monthly)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 9 1 * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Fetch last month's ChatGPT Pro invoice and email it to Rai's Focused address for expensing. Follow prompts/chatgpt-invoice-monthly.md exactly, then stop."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["expenses", "nimbus"],
+    "promptFile": "prompts/chatgpt-invoice-monthly.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "{{ .chezmoi.homeDir }}/navi",
+      "model": "sonnet",
+      "maxTurns": 30
+    }
   }
 ]
 {{- else }}
