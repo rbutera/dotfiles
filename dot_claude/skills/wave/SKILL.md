@@ -213,3 +213,5 @@ All 4 tasks implemented across 3 waves. 1 review fix applied.
 - Don't pause between waves to ask "should I continue?" Just go.
 - Convention docs in every agent prompt. Agents that skip conventions produce code that fails review.
 - Implementation agents on the same branch can share a worktree. Different branches need separate worktrees.
+- **Run the integration/e2e gate, not just unit tests.** Unit-green hides two failure modes that only surface when the real app runs: (a) a *removed-API* call in an existing test that wasn't updated, and (b) tests still asserting the *old* behaviour a refactor replaced. A wave that changes behaviour MUST run the project's e2e/integration suite as a gate and rewrite any test that encodes the replaced behaviour — otherwise the suite passes while the observable thing is broken. (See "Verify the Observable, Not the Proxy".)
+- **A refactor/removal wave isn't done when the new code compiles — it's done when the tests of the OLD behaviour are rewritten or deleted.** Grep the test tree for references to the removed API/model before declaring a wave green.
