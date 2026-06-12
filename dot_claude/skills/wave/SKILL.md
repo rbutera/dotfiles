@@ -112,7 +112,7 @@ If using OpenSpec with a schema that has an apply instruction (like fusion-workf
 - **Sonnet**: straightforward tasks (CRUD, test writing, component creation, config changes)
 - **Opus**: complex domain logic, refactoring existing code, architectural decisions, multi-file coordination
 
-All independent tasks in a wave dispatch in a **single message** (parallel).
+All independent tasks in a wave dispatch in a **single message** (parallel), and **ALWAYS with `run_in_background: true`** — never block the main session waiting on an agent. After dispatching, await each agent's completion notification, then proceed. Running in the background keeps the orchestrator responsive (e.g. to the user) while waves execute.
 
 ### 4b. Handle implementation results
 
@@ -206,6 +206,7 @@ All 4 tasks implemented across 3 waves. 1 review fix applied.
 ## Rules
 
 - Never skip a review gate. The whole point is catching issues before they compound.
+- **ALL agents — implementation AND review — always dispatch with `run_in_background: true`.** The orchestrator never blocks on an agent; it dispatches, awaits the completion notification, then proceeds. This keeps the main session responsive throughout the run.
 - Review agents always run in parallel (both in one message).
 - Each wave's review sees only that wave's diff, not the full branch.
 - If a review gate fails twice on the same issue, escalate to the user.
