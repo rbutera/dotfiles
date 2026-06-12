@@ -123,7 +123,11 @@ All independent tasks in a wave dispatch in a **single message** (parallel), and
 
 ### 4c. Review gate
 
-After all implementation agents in the wave complete, dispatch **two review agents in parallel**:
+**First, check whether the implementation agent already ran its own dual review.** Some implementation agents spawn their OWN Opus + Codex review sub-agents, report both verdicts, and fix any findings to passing before reporting back. **If the implementation agent reports it ran a dual Opus+Codex (or equivalent two-reviewer) review and both passed — or it fixed the findings to passing — TRUST that review and proceed to the next wave. Do NOT dispatch a redundant second review gate.** Running your own reviewers on top of the subagent's is the confusion to avoid: you end up with stale reviews of a superseded commit and duplicated work.
+
+Only run the review gate YOURSELF when the implementation agent did **not** run its own dual review — i.e. it ran no review, ran only a single reviewer, or its self-review was inconclusive/failed. (When in doubt about whether the subagent's self-review was genuine and complete, a quick independent gate-check — run the tests/build yourself — is enough; you don't need to re-spawn reviewers.)
+
+When you do need to run the gate, dispatch **two review agents in parallel**:
 
 **Agent 1 (Claude Opus):**
 - Read the diff: `git diff <base>..<head>`
