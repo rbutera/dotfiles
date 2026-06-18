@@ -51,3 +51,14 @@ Image generation was migrated to a first-party Codex/ChatGPT-subscription path (
 
 ### Solution/Fix
 Removed the `IDEOGRAM_API_KEY` export from `dot_zshenv.tmpl` (added earlier the same day, now dead). Kept `OPENAI_API_KEY` (still read by `~/navi/bin/cost-report.mjs` for billing checks) and updated its comment to note image-gen has moved to the free codex path. Removal takes effect on next `chezmoi apply`; the lingering deployed export is harmless until then.
+
+## 2026-06-07 — Dedupe CARTESIA_API_KEY
+
+### Problem
+`CARTESIA_API_KEY` appeared twice in `dot_zshenv.tmpl` (line ~141 in the API-key cluster + line ~184 under the "voice migration 2026-06-03" comment), with inconsistent spacing before `}}`. Rai noticed the key seemed missing from his deployed `~/.zshenv` and asked about it.
+
+### Root cause
+The deployed `~/.zshenv` lacks the key because `chezmoi apply` hasn't run since it was added to the template on 2026-06-03 (apply needs an active 1Password session for the `onepasswordRead`, which agents can't provide). The key works at runtime anyway because it's also present in the gitignored runtime `.env` files (navi, discord-voice-plugin, narrate).
+
+### Fix
+Removed the duplicate, kept the single documented line (`export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" }}`) under the voice-migration comment, normalized spacing. Source-only change; no apply run. Rai still needs to `chezmoi apply` (after `op signin`) to get the key into his live shell env.
