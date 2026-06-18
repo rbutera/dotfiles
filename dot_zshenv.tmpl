@@ -122,7 +122,7 @@ fi
 {{- if $useSharedClaudeOAuth }}
 export CLAUDE_CODE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
 {{- else }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token"}}
+export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/claude code token/credential"}}
 {{- end }}
 
 # GitHub
