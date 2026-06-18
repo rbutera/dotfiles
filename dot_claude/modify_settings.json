@@ -60,7 +60,8 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
-        .["slack@claude-plugins-official"])) |
+        .["slack@claude-plugins-official"],
+        .["discord@claude-plugins-official"])) |
   if $mac then
     .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}]
   else . end
