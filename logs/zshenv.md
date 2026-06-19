@@ -1,5 +1,17 @@
 # zshenv changelog
 
+## 2026-06-19 -- Remove OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS (omo flakiness)
+
+### Change
+Removed `export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=1` (a leftover from the
+oh-my-opencode-slim era). oh-my-openagent's background/parallel subagent delegation
+reports completion unreliably — `call_omo_agent` can time out after the subagent
+already shows completed, and fast-finishing tasks hang in "running" forever
+(oh-my-openagent issues #3774, #4570, #1517). Unsetting the flag forces
+foreground/synchronous delegation, which avoids the completion-handshake race.
+Requires `chezmoi apply ~/.zshenv` (1Password) + a fresh shell + restart of any
+running `openagent` session.
+
 ## 2026-06-19 -- Add CURSOR_API_KEY for the opencode `openagent` profile
 
 ### Change

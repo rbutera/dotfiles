@@ -148,7 +148,11 @@ export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory
 export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
 export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
-export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=1
+# OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS removed 2026-06-19: oh-my-openagent's
+# background/parallel subagent delegation reports completion unreliably — call_omo_agent
+# can time out after the subagent already shows completed, and fast-finishing tasks can
+# hang in "running" forever (oh-my-openagent #3774, #4570, #1517). Leaving this unset
+# forces foreground/synchronous delegation, sidestepping the completion-handshake race.
 # Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile
 export CURSOR_API_KEY={{ onepasswordRead "op://focused/cursor API key/credential" }}
 
