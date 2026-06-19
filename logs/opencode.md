@@ -1,5 +1,15 @@
 # opencode config changes log
 
+## 2026-06-19 — Consolidate Go models to GLM / Kimi / MiniMax (drop DeepSeek)
+
+Per request, removed all DeepSeek from the openagent routing. `deepseek-v4-pro`
+(strong-reasoning fallbacks) → `glm-5.2`; `deepseek-v4-flash` (cheap junior/explore/
+quick) → `minimax-m3` (fb `minimax-m2.7`). Go side now uses only `glm-5.2`,
+`kimi-k2.7-code`, `kimi-k2.6`, `minimax-m3`, `minimax-m2.7`. Verified 0 deepseek refs,
+openagent runs clean. (Also confirmed no fast-mode anywhere: sisyphus sends base
+`modelID=gpt-5.5`, not `gpt-5.5-fast`; `variant` is reasoning-effort, orthogonal to
+the fast tier.)
+
 ## 2026-06-19 — Set per-agent reasoning levels (variants) per official omo configs
 
 ### Change
