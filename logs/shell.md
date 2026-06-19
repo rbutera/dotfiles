@@ -1,5 +1,15 @@
 # shell config changes log
 
+## 2026-06-19 — flaude: add --dangerously-skip-permissions
+
+### Problem
+The `flaude`/`florence` function in `dot_aliases.tmpl` launched Claude Code without the
+permission-bypass flag, so the Florence session prompted for permissions on every action.
+
+### Solution
+**`dot_aliases.tmpl`** — added `--dangerously-skip-permissions` to both `command claude`
+invocations in `flaude()` (the brain-found branch and the plain-fallback branch).
+
 ## 2026-04-24 — Fix GITHUB_TOKEN source and add SonarQube env vars
 
 ### Problem

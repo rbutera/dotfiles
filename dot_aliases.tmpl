@@ -289,10 +289,10 @@ flaude() {
   local brain="$HOME/dev/lumiere/apps/ark/plugin/agents/florence.md"
   cd ~/focused && unset CLAUDE_CODE_OAUTH_TOKEN
   if [ -f "$brain" ]; then
-    command claude --append-system-prompt-file "$brain" "$@"
+    command claude --dangerously-skip-permissions --append-system-prompt-file "$brain" "$@"
   else
     echo "flaude: brain not found at $brain, launching plain claude" >&2
-    command claude "$@"
+    command claude --dangerously-skip-permissions "$@"
   fi
 }
 florence() { flaude "$@"; }
