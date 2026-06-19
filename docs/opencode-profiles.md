@@ -102,43 +102,38 @@ categories — each with a Go fallback. High-volume grind on **OpenCode Go**: at
 `minimax-m3`, designer/visual/writing → `glm-5.2`. `claude_code` discovery off,
 `runtime_fallback` on.
 
-### Cursor Pro wiring (orchestrator) — installed, pending keychain auth
+### Cursor Pro wiring (orchestrator) — ✅ WORKING
 
 The `opencode-cursor` plugin (`@rama_nigg/open-cursor`) is installed in the
 openagent profile and exposes Cursor Pro models as `cursor-acp/*`. **Top Claude is
-`cursor-acp/opus-4.6`** (NOT 4.8 — Cursor's API caps there as of 2026-06-19; also
-`opus-4.5`, `sonnet-4.6`, `gemini-3.1-pro`, `gpt-5.5`, `cursor-acp/auto`).
+`cursor-acp/claude-opus-4-8`** (Opus 4.8, 1M ctx — verified). Also available:
+`claude-opus-4-7`, `gpt-5.5`/`gpt-5.5-high`, `gemini-3.1-pro`, `composer-2.5`,
+`cursor-acp/auto`, and many `gpt-5.x-codex` variants. (An earlier sync run with the
+keychain *locked* produced stale aliases like `opus-4.6` — ignore those.)
 
 Setup (machine-local, like the omo install):
 ```bash
 cd ~/.config/opencode-openagent
 npm install @rama_nigg/open-cursor@latest                 # scoped .npmrc lifts gates
-./node_modules/.bin/open-cursor install \
-   --config ~/.config/opencode-openagent/opencode.json --variants --compact
-# remove its side-effect symlink so Cursor does NOT load in the vanilla profile:
-rm -f ~/.config/opencode/plugin/cursor-acp.js
+curl -fsS https://cursor.com/install | bash               # cursor-agent CLI -> ~/.local/bin
+security unlock-keychain                                   # cursor-agent needs login keychain unlocked
+cursor-agent login                                        # (or ensure CURSOR_API_KEY is a real key)
+./node_modules/.bin/open-cursor sync-models \
+   --config ~/.config/opencode-openagent/opencode.json --variants --compact   # REAL model IDs (keychain unlocked!)
+rm -f ~/.config/opencode/plugin/cursor-acp.js             # drop side-effect symlink (keep Cursor out of vanilla)
 ```
 chezmoi then keeps both plugins as `file://` entries and MERGES (preserves) the
-synced `cursor-acp` provider on apply.
-
-**Auth last-mile (interactive — user must do this):** the Cursor backend
-(`cursor-agent`, installed to `~/.local/bin`) requires the macOS login keychain
-unlocked; the headless SDK path (`CURSOR_API_KEY`) also failed on 2026-06-19. Run:
+synced `cursor-acp` provider on apply. Verify:
 ```bash
-security unlock-keychain      # unlock login keychain
-cursor-agent login            # or verify CURSOR_API_KEY is a real cursor.com/settings key
-cursor-agent -p "say hi"      # confirm it responds
-opencode run -m cursor-acp/opus-4.6 "say hi"   # confirm the route works in opencode
+OPENCODE_CONFIG_DIR=~/.config/opencode-openagent opencode run -m cursor-acp/claude-opus-4-8 "say hi"
 ```
-Once that works, flip the orchestrator: set `sisyphus.model` →
-`cursor-acp/opus-4.6` (fallback `openai/gpt-5.5`) in `modify_oh-my-openagent.json.tmpl`.
-Until then sisyphus runs on `gpt-5.5` (working).
 
-### Done this session
-- GPT-native seats promoted to `openai/gpt-5.5` (Codex). ✅
-- Executor `atlas` → `openai/gpt-5.5` (user chose Codex for the grindiest role). ✅
-- Cursor plugin + provider + models wired & chezmoi-durable; orchestrator switch
-  pending the keychain auth above.
+### Done this session ✅
+- Removed oh-my-opencode-slim; vanilla `opencode` + `openagent` two-profile system.
+- omo loaded via the `file://` workaround; routing live & verified.
+- GPT-native seats → `openai/gpt-5.5` (Codex); `atlas` executor → `gpt-5.5` (user's pick).
+- **Orchestrator `sisyphus` → `cursor-acp/claude-opus-4-8` (Cursor Pro) — verified.**
+- opencode self-update break fixed (standalone installer).
 
 ## Model / provider routing plan
 
@@ -198,32 +193,36 @@ Principle: **Codex (most generous) carries the GPT-native + high-leverage roles;
 Cursor Pro (capped) is reserved for low-volume premium planning/vision; OpenCode Go
 ($60/mo cap) carries the high-volume execution/utility/frontend.** All ~$0 marginal.
 
-| omo agent / category | Model | Sub | Why |
-|---|---|---|---|
-| sisyphus (orchestrator) | `openai/gpt-5.5` **or** `cursor-acp/<claude-opus>` ¹ | Codex / Cursor | best planner; GPT-native; **your pick (Q below)** |
-| prometheus (planner) | `openai/gpt-5.5` | Codex | interview/plan, GPT-native |
-| metis (plan review) | `openai/gpt-5.5` | Codex | |
-| hephaestus (deep worker) | `openai/gpt-5.5-codex` | Codex | GPT-native agent, on the generous quota |
-| momus (reviewer) | `openai/gpt-5.5` | Codex | cross-check vs worker |
-| oracle (consultant) | `cursor-acp/<claude-opus>` ¹ | Cursor | true second opinion; read-heavy, low volume |
-| atlas (executor) | `opencode-go/kimi-k2.7-code` | Go | token-efficient executor, high volume |
-| sisyphus-junior | `opencode-go/deepseek-v4-flash` | Go | cheap executor |
-| librarian (search) | `opencode-go/minimax-m3` | Go | BrowseComp 83.5, 1M ctx, cheap |
-| explore (grep) | `opencode-go/deepseek-v4-flash` | Go | fast |
-| designer / frontend | `opencode-go/glm-5.2` | Go | #1 Design Arena |
-| multimodal-looker (vision) | `cursor-acp/<gemini-3-pro>` ¹ **or** `opencode-go/minimax-m3` | Cursor / Go | Gemini best vision; M3 if conserving Cursor quota |
-| category: ultrabrain | `openai/gpt-5.5` (xhigh) | Codex | |
-| category: deep | `openai/gpt-5.5-codex` | Codex | |
-| category: quick | `opencode-go/deepseek-v4-flash` | Go | |
-| category: visual/artistry | `opencode-go/glm-5.2` | Go | |
-| category: writing | `opencode-go/glm-5.2` | Go | |
+Final LIVE routing (all verified `pong`):
 
-¹ exact `cursor-acp/*` model IDs pending `opencode models | grep cursor-acp` after the
-`opencode-cursor` plugin is installed (`cursor-agent login`).
+| omo agent / category | Model | Sub |
+|---|---|---|
+| **sisyphus (orchestrator)** | **`cursor-acp/claude-opus-4-8`** (fb gpt-5.5 → deepseek-v4-pro) | **Cursor Pro (Opus 4.8 1M)** |
+| prometheus / metis / momus | `openai/gpt-5.5` (fb deepseek-v4-pro) | Codex |
+| hephaestus (deep worker) | `openai/gpt-5.5` (fb glm-5.2, kimi-k2.7-code) | Codex |
+| oracle (consultant) | `openai/gpt-5.5` (fb deepseek-v4-pro) | Codex |
+| **atlas (executor)** | `openai/gpt-5.5` (fb kimi-k2.7-code, minimax-m3) | Codex (user's pick) |
+| sisyphus-junior | `opencode-go/deepseek-v4-flash` (fb minimax-m3) | Go |
+| librarian (search) | `opencode-go/minimax-m3` (fb minimax-m2.7) | Go |
+| explore (grep) | `opencode-go/deepseek-v4-flash` (fb minimax-m3) | Go |
+| designer / frontend | `opencode-go/glm-5.2` | Go |
+| multimodal-looker (vision) | `opencode-go/minimax-m3` (fb kimi-k2.6) | Go |
+| category: ultrabrain / deep / unspecified-high | `openai/gpt-5.5` (fb deepseek-v4-pro) | Codex |
+| category: quick / unspecified-low | `opencode-go/deepseek-v4-flash` / `minimax-m3` | Go |
+| category: visual / artistry / writing | `opencode-go/glm-5.2` | Go |
 
-`fallback_models` chains add resilience: e.g. sisyphus `gpt-5.5` → `cursor-acp/claude-opus`
-→ `opencode-go/glm-5.2`; oracle Cursor-Opus → `opencode-go/deepseek-v4-pro`. So if one
-quota is exhausted, omo's `runtime_fallback` auto-switches to the next sub.
+`runtime_fallback` is on, so an exhausted quota auto-spills down each chain
+(Cursor → Codex → Go). Optional further Cursor moves (left on Codex/Go to conserve
+Cursor's $20/mo usage cap): oracle → `cursor-acp/claude-opus-4-8`,
+multimodal-looker → `cursor-acp/gemini-3.1-pro`.
 
-_Open decision: orchestrator = GPT-5.5 (Codex, generous) vs Claude Opus 4.8 (Cursor,
-best planner but capped). Pending: cursor-acp exact IDs + ToS verdict._
+### Cursor `--yolo` / trust
+The `opencode-cursor` plugin passes `--force` to `cursor-agent` automatically
+(env `CURSOR_ACP_FORCE`, default on; pinned in `bin/executable_openagent`) which
+auto-trusts the working dir — no "Workspace Trust Required" prompt. `cursor-agent`'s
+`--yolo` is NOT used and does not apply: in ACP mode opencode owns tool execution,
+so tool-approval is governed by the **profile's opencode `permission` config**, not
+by cursor-agent. The one-time setup that was required: unlock the macOS login
+keychain + `open-cursor sync-models` (the first sync ran with the keychain locked
+and produced stale model IDs like `opus-4.6`; re-syncing unlocked surfaced the real
+`claude-opus-4-8`).

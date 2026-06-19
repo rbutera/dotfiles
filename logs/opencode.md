@@ -14,12 +14,17 @@ to expose Cursor Pro models as `cursor-acp/*` (top Claude is `opus-4.6`, not 4.8
   Cursor does NOT leak into the vanilla profile. `CURSOR_API_KEY` added to zshenv
   (op://focused/cursor API key/credential).
 
-### Blocked (interactive, user action)
-Cursor runtime auth: `cursor-agent` (installed to ~/.local/bin) errors
-`macOS login keychain is locked`; the headless SDK path (CURSOR_API_KEY) also
-failed. Needs `security unlock-keychain` + `cursor-agent login`. Until resolved,
-`sisyphus` stays on `openai/gpt-5.5`; flip to `cursor-acp/opus-4.6` after.
-See `docs/opencode-profiles.md` → "Cursor Pro wiring".
+### Resolved — orchestrator now on Cursor Opus 4.8
+Two gotchas fixed: (1) `cursor-agent` needs the macOS login keychain unlocked
+(`security unlock-keychain`) + dir trust — the plugin passes `--force` automatically
+(`CURSOR_ACP_FORCE`, default on; pinned in `bin/executable_openagent`), so no
+"Workspace Trust" prompt. `cursor-agent --yolo` is NOT used / doesn't apply in ACP
+mode (opencode owns tool execution + permissions). (2) the first `open-cursor
+install` ran with the keychain LOCKED → wrote stale static model IDs (`opus-4.6`);
+re-running `open-cursor sync-models` unlocked surfaced the REAL IDs incl
+`claude-opus-4-8` (Opus 4.8 1M). `sisyphus` → `cursor-acp/claude-opus-4-8`
+(fallbacks gpt-5.5 → deepseek-v4-pro), verified `pong`. `CURSOR_ACP_FORCE=1` pinned
+in the wrapper. See `docs/opencode-profiles.md` → "Cursor Pro wiring".
 
 ## 2026-06-19 — opencode broke after self-update; switch install method to standalone binary
 

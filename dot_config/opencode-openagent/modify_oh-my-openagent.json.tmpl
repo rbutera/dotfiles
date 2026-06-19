@@ -9,11 +9,11 @@
 #     (kimi-k2.7-code, deepseek-v4-flash, minimax-m3, glm-5.2) — verified working.
 #   - Every gpt-5.5 seat has a Go fallback so an exhausted Codex quota spills to Go.
 #
-# PENDING (needs CURSOR_API_KEY live — `chezmoi apply ~/.zshenv` + fresh shell):
-#   sisyphus (orchestrator) -> cursor-acp/claude-4.6-opus  (Cursor Pro; best planner)
-#   oracle / multimodal     -> cursor-acp/claude-4.6-opus / gemini-3.1-pro (Cursor)
-# Until then sisyphus runs on gpt-5.5 (strong interim orchestrator). See
-# docs/opencode-profiles.md.
+# Orchestrator: sisyphus -> cursor-acp/claude-opus-4-8 (Cursor Pro, Opus 4.8 1M —
+#   verified working) with gpt-5.5 (Codex) then deepseek-v4-pro (Go) as fallbacks.
+# Optional further moves (not done — conserve Cursor's $20/mo usage cap):
+#   oracle -> cursor-acp/claude-opus-4-8 ; multimodal-looker -> cursor-acp/gemini-3.1-pro
+# See docs/opencode-profiles.md.
 #
 # Managed keys (replaced): $schema, agents, categories, claude_code, runtime_fallback
 # Free keys (preserved):   anything else the omo installer/runtime writes
@@ -26,7 +26,7 @@ read -r -d '' base << 'BASE' || true
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
-    "sisyphus":   { "model": "openai/gpt-5.5", "fallback_models": [ { "model": "opencode-go/deepseek-v4-pro" }, { "model": "opencode-go/glm-5.2" } ] },
+    "sisyphus":   { "model": "cursor-acp/claude-opus-4-8", "fallback_models": [ { "model": "openai/gpt-5.5" }, { "model": "opencode-go/deepseek-v4-pro" } ] },
     "prometheus": { "model": "openai/gpt-5.5", "fallback_models": [ { "model": "opencode-go/deepseek-v4-pro" } ] },
     "metis":      { "model": "openai/gpt-5.5", "fallback_models": [ { "model": "opencode-go/deepseek-v4-pro" } ] },
     "momus":      { "model": "openai/gpt-5.5", "fallback_models": [ { "model": "opencode-go/deepseek-v4-pro" } ] },
