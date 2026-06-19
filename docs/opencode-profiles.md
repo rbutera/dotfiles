@@ -197,7 +197,7 @@ Final LIVE routing (all verified `pong`):
 
 | omo agent / category | Model | Sub |
 |---|---|---|
-| **sisyphus (orchestrator)** | **`cursor-acp/claude-opus-4-8`** (fb gpt-5.5 → deepseek-v4-pro) | **Cursor Pro (Opus 4.8 1M)** |
+| **sisyphus (orchestrator)** | **`openai/gpt-5.5`** (fb deepseek-v4-pro → glm-5.2) | Codex |
 | prometheus / metis / momus | `openai/gpt-5.5` (fb deepseek-v4-pro) | Codex |
 | hephaestus (deep worker) | `openai/gpt-5.5` (fb glm-5.2, kimi-k2.7-code) | Codex |
 | oracle (consultant) | `openai/gpt-5.5` (fb deepseek-v4-pro) | Codex |
@@ -216,7 +216,15 @@ Final LIVE routing (all verified `pong`):
 Cursor's $20/mo usage cap): oracle → `cursor-acp/claude-opus-4-8`,
 multimodal-looker → `cursor-acp/gemini-3.1-pro`.
 
-### Cursor backend — MUST be SDK (tool-surface fix)
+### ⚠️ Cursor-acp is NOT used as an omo agent backend (manual only)
+Routing omo agents through `cursor-acp/*` breaks two ways: (1) omo applies
+reasoning-effort variants → invalid IDs like `claude-opus-4-8-medium` that Cursor's
+SDK rejects (`exitCode 1`); (2) the bridge can't reach REMOTE MCP servers (exa,
+context7), so cursor-routed agents lose those tools. So the orchestrator stays on
+`openai/gpt-5.5` (native, no proxy, full MCP). Cursor remains wired for **manual**
+use: `openagent run -m cursor-acp/claude-opus-4-8 "..."` (base ID, no variant).
+
+### Cursor backend — MUST be SDK (tool-surface fix; applies to manual cursor use)
 The wrapper pins **`CURSOR_ACP_BACKEND=sdk`**. This is important: the plugin's
 default `auto` mode prefers the `cursor-agent` CLI when it's installed, and that
 backend spawns a FULL Cursor agent per request with its own system prompt + Shell

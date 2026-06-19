@@ -1,5 +1,30 @@
 # opencode config changes log
 
+## 2026-06-19 — Revert omo orchestrator off cursor-acp (variant + remote-MCP breakage)
+
+### Problem
+After switching sisyphus to `cursor-acp/claude-opus-4-8`, real omo runs threw
+`cursor-acp error: cursor-agent exited with code 1 and no output` (the message is
+hardcoded in the plugin even for the SDK backend). `~/.opencode-cursor/plugin.log`
+showed the true causes:
+- **Model-variant mismatch (fatal):** omo applies reasoning-effort variants, so it
+  requested `claude-opus-4-8-medium` — Cursor's SDK rejects it (`Request … complete
+  with exitCode 1`); Cursor only knows `-low` / `-thinking-high` / base, not `-medium`.
+- **Remote MCP unsupported:** `MCP server connection failed {server:"exa" … "Remote
+  MCP transport not yet implemented"}` (and context7). The opencode-cursor bridge
+  only speaks local/stdio MCP, so cursor-routed agents lose exa + context7.
+
+### Fix
+Reverted `sisyphus.model` -> `openai/gpt-5.5` (fb deepseek-v4-pro -> glm-5.2) — a
+native opencode provider: no proxy, no variant mangling, full remote-MCP support.
+Verified `openagent` default runs sisyphus on gpt-5.5, `pong`, no cursor error.
+
+Cursor stays fully wired (plugin + provider + 14 models + SDK backend) for **manual**
+use: `openagent run -m cursor-acp/claude-opus-4-8 "..."` works (base ID, no variant).
+Making cursor-acp a viable omo agent backend would need variant-ID mapping + a
+local-MCP story — deferred. NB: a running opencode session caches the config at
+startup; restart `openagent` after changing the routing.
+
 ## 2026-06-19 — Cursor: force SDK backend (fix tool-surface collision with omo)
 
 ### Problem
