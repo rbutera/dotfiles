@@ -94,10 +94,13 @@ The omo `dist/` install is the only non-chezmoi-tracked piece (node_modules) —
 step 2 on each new machine. Everything else (`opencode.json`, `oh-my-openagent.json`
 routing, `.npmrc`, wrapper) is chezmoi-managed.
 
-### Current routing (live): all-OpenCode-Go (every model smoke-tested ✅)
-sisyphus/prometheus/metis/momus/oracle → `deepseek-v4-pro`; hephaestus/designer →
-`glm-5.2`; atlas → `kimi-k2.7-code`; junior/explore/quick → `deepseek-v4-flash`;
-librarian/multimodal → `minimax-m3`. `claude_code` discovery off, `runtime_fallback` on.
+### Current routing (live, verified ✅)
+High-leverage seats on **Codex GPT-5.5** (re-authed): sisyphus (interim orchestrator),
+prometheus, metis, momus, hephaestus, oracle + `deep`/`ultrabrain`/`unspecified-high`
+categories — each with a Go fallback. High-volume grind on **OpenCode Go**: atlas →
+`kimi-k2.7-code`, junior/explore/quick → `deepseek-v4-flash`, librarian/multimodal →
+`minimax-m3`, designer/visual/writing → `glm-5.2`. `claude_code` discovery off,
+`runtime_fallback` on.
 
 ### Pending refinement (Codex re-authed 2026-06-19; Cursor needs key)
 - Promote GPT-native seats (hephaestus, momus, prometheus, metis, categories
