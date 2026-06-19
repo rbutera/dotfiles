@@ -1,5 +1,21 @@
 # opencode config changes log
 
+## 2026-06-19 — Set per-agent reasoning levels (variants) per official omo configs
+
+### Change
+The routing set models but left `variant` implicit, so agents ran at omo's default
+reasoning level (and, on cursor, produced the invalid `-medium` ID). Pinned each
+gpt-5.5 seat's `variant` to match omo's canonical agent provider chains
+(`docs/reference/configuration.md` in the omo repo):
+- sisyphus **high** (bumped from omo's medium gpt-5.5-fallback since gpt-5.5 is now
+  the *primary* orchestrator, not a fallback), prometheus/metis/oracle **high**,
+  momus **xhigh**, hephaestus/atlas **medium**.
+- categories: ultrabrain **xhigh**, deep **medium**, unspecified-high **high**.
+Go-model seats (junior/librarian/explore/multimodal + quick/visual/writing/
+unspecified-low) carry no variant (omo normalizes per capability). `variant` is the
+field omo uses even for OpenAI (it maps to reasoningEffort). Verified sisyphus runs
+`gpt-5.5 / high` clean.
+
 ## 2026-06-19 — Revert omo orchestrator off cursor-acp (variant + remote-MCP breakage)
 
 ### Problem
