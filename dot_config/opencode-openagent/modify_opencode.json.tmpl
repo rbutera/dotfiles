@@ -6,8 +6,11 @@
 # oh-my-openagent plugin on top. The omo plugin's own settings live alongside in
 # this dir as oh-my-openagent.jsonc (installed/managed separately).
 #
-# Managed keys (replaced from shared base + overlay): $schema, provider, mcp, skills, lsp, plugin
-# Free (preserved):                                   everything the omo installer/runtime writes
+# Managed keys (replaced from shared base + overlay): $schema, mcp, skills, lsp, plugin
+# Provider is MERGED (not replaced): the shared base's zai-anthropic is layered on
+#   top of whatever is live, so the runtime-synced `cursor-acp` provider that
+#   `open-cursor install` writes (Cursor Pro models) survives chezmoi apply.
+# Free (preserved): everything the omo installer/runtime writes.
 set -euo pipefail
 
 current=$(cat)
@@ -17,16 +20,19 @@ read -r -d '' shared << 'BASE' || true
 {{ includeTemplate "opencode-shared-base" . }}
 BASE
 
-# Overlay the oh-my-openagent plugin registration onto the shared base.
-# NOTE: opencode 1.17.8 cannot resolve the bare npm name "oh-my-openagent" in this
-# machine's hardened npm env (ignore-scripts / min-release-age / engine-strict).
-# We instead point at omo's built entry via file:// — loads directly like a local
-# plugin. This requires omo to be installed in the profile's node_modules (see the
-# scoped .npmrc + the install step in docs/opencode-profiles.md).
+# Overlay the plugin registrations onto the shared base.
+# NOTE: opencode 1.17.8 cannot resolve bare npm plugin names in this machine's
+# hardened npm env (ignore-scripts / min-release-age / engine-strict). We instead
+# point at each plugin's built entry via file:// — loads directly like a local
+# plugin. Requires both packages installed in the profile's node_modules (see the
+# scoped .npmrc + install steps in docs/opencode-profiles.md).
 omo_entry="file://{{ .chezmoi.homeDir }}/.config/opencode-openagent/node_modules/oh-my-openagent/dist/index.js"
-base=$(echo "$shared" | jq --arg omo "$omo_entry" '. * {"plugin": [$omo]}')
+cur_entry="file://{{ .chezmoi.homeDir }}/.config/opencode-openagent/node_modules/@rama_nigg/open-cursor/dist/plugin-entry.js"
+base=$(echo "$shared" | jq --arg omo "$omo_entry" --arg cur "$cur_entry" '. * {"plugin": [$omo, $cur]}')
 
+# Merge: managed keys (schema/mcp/skills/lsp/plugin) come from base; provider is
+# MERGED so the live cursor-acp provider survives; all other runtime keys preserved.
 echo "$current" | jq --argjson base "$base" '
   . as $current |
-  $base * ($current | del(."$schema", .provider, .mcp, .skills, .lsp, .plugin))
+  $base * ($current | del(."$schema", .mcp, .skills, .lsp, .plugin))
 '

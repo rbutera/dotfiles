@@ -102,13 +102,43 @@ categories — each with a Go fallback. High-volume grind on **OpenCode Go**: at
 `minimax-m3`, designer/visual/writing → `glm-5.2`. `claude_code` discovery off,
 `runtime_fallback` on.
 
-### Pending refinement (Codex re-authed 2026-06-19; Cursor needs key)
-- Promote GPT-native seats (hephaestus, momus, prometheus, metis, categories
-  deep/ultrabrain) → `openai/gpt-5.5` (Codex sub — now live, verified `pong`).
-- Orchestrator (sisyphus) → **Cursor Claude Opus** (user's call): install
-  `opencode-cursor` plugin + set `CURSOR_API_KEY`, then `cursor-acp/claude-4.6-opus`
-  (or 4.8 if `opencode models | grep cursor-acp` shows it).
-- Executor (atlas): user deciding between `kimi-k2.7-code` / `minimax-m3` / `gpt-5.5`.
+### Cursor Pro wiring (orchestrator) — installed, pending keychain auth
+
+The `opencode-cursor` plugin (`@rama_nigg/open-cursor`) is installed in the
+openagent profile and exposes Cursor Pro models as `cursor-acp/*`. **Top Claude is
+`cursor-acp/opus-4.6`** (NOT 4.8 — Cursor's API caps there as of 2026-06-19; also
+`opus-4.5`, `sonnet-4.6`, `gemini-3.1-pro`, `gpt-5.5`, `cursor-acp/auto`).
+
+Setup (machine-local, like the omo install):
+```bash
+cd ~/.config/opencode-openagent
+npm install @rama_nigg/open-cursor@latest                 # scoped .npmrc lifts gates
+./node_modules/.bin/open-cursor install \
+   --config ~/.config/opencode-openagent/opencode.json --variants --compact
+# remove its side-effect symlink so Cursor does NOT load in the vanilla profile:
+rm -f ~/.config/opencode/plugin/cursor-acp.js
+```
+chezmoi then keeps both plugins as `file://` entries and MERGES (preserves) the
+synced `cursor-acp` provider on apply.
+
+**Auth last-mile (interactive — user must do this):** the Cursor backend
+(`cursor-agent`, installed to `~/.local/bin`) requires the macOS login keychain
+unlocked; the headless SDK path (`CURSOR_API_KEY`) also failed on 2026-06-19. Run:
+```bash
+security unlock-keychain      # unlock login keychain
+cursor-agent login            # or verify CURSOR_API_KEY is a real cursor.com/settings key
+cursor-agent -p "say hi"      # confirm it responds
+opencode run -m cursor-acp/opus-4.6 "say hi"   # confirm the route works in opencode
+```
+Once that works, flip the orchestrator: set `sisyphus.model` →
+`cursor-acp/opus-4.6` (fallback `openai/gpt-5.5`) in `modify_oh-my-openagent.json.tmpl`.
+Until then sisyphus runs on `gpt-5.5` (working).
+
+### Done this session
+- GPT-native seats promoted to `openai/gpt-5.5` (Codex). ✅
+- Executor `atlas` → `openai/gpt-5.5` (user chose Codex for the grindiest role). ✅
+- Cursor plugin + provider + models wired & chezmoi-durable; orchestrator switch
+  pending the keychain auth above.
 
 ## Model / provider routing plan
 

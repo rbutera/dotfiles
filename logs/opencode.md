@@ -1,5 +1,26 @@
 # opencode config changes log
 
+## 2026-06-19 — Wire Cursor Pro into the openagent profile (orchestrator)
+
+### Change
+Installed `opencode-cursor` (`@rama_nigg/open-cursor`) into the openagent profile
+to expose Cursor Pro models as `cursor-acp/*` (top Claude is `opus-4.6`, not 4.8).
+- Plugin registered by `file://` path to `dist/plugin-entry.js` (same workaround as
+  omo — bare names don't resolve on opencode 1.17.8 here).
+- `open-cursor install` wrote the `cursor-acp` provider (14 models). The openagent
+  `modify_opencode.json.tmpl` now MERGES provider (instead of replacing) so the
+  synced cursor-acp survives `chezmoi apply`; both plugins are file:// entries.
+- Removed its side-effect symlink `~/.config/opencode/plugin/cursor-acp.js` so
+  Cursor does NOT leak into the vanilla profile. `CURSOR_API_KEY` added to zshenv
+  (op://focused/cursor API key/credential).
+
+### Blocked (interactive, user action)
+Cursor runtime auth: `cursor-agent` (installed to ~/.local/bin) errors
+`macOS login keychain is locked`; the headless SDK path (CURSOR_API_KEY) also
+failed. Needs `security unlock-keychain` + `cursor-agent login`. Until resolved,
+`sisyphus` stays on `openai/gpt-5.5`; flip to `cursor-acp/opus-4.6` after.
+See `docs/opencode-profiles.md` → "Cursor Pro wiring".
+
 ## 2026-06-19 — opencode broke after self-update; switch install method to standalone binary
 
 ### Problem
