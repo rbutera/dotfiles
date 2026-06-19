@@ -1,0 +1,32 @@
+#!/bin/bash
+# Modify script for ~/.config/opencode-openagent/opencode.json  (OPENAGENT profile — `openagent`)
+#
+# Isolated config dir selected via OPENCODE_CONFIG_DIR by the ~/bin/openagent
+# wrapper. Deploys the SAME shared base as the vanilla profile, then layers the
+# oh-my-openagent plugin on top. The omo plugin's own settings live alongside in
+# this dir as oh-my-openagent.jsonc (installed/managed separately).
+#
+# Managed keys (replaced from shared base + overlay): $schema, provider, mcp, skills, lsp, plugin
+# Free (preserved):                                   everything the omo installer/runtime writes
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+read -r -d '' shared << 'BASE' || true
+{{ includeTemplate "opencode-shared-base" . }}
+BASE
+
+# Overlay the oh-my-openagent plugin registration onto the shared base.
+# NOTE: opencode 1.17.8 cannot resolve the bare npm name "oh-my-openagent" in this
+# machine's hardened npm env (ignore-scripts / min-release-age / engine-strict).
+# We instead point at omo's built entry via file:// — loads directly like a local
+# plugin. This requires omo to be installed in the profile's node_modules (see the
+# scoped .npmrc + the install step in docs/opencode-profiles.md).
+omo_entry="file://{{ .chezmoi.homeDir }}/.config/opencode-openagent/node_modules/oh-my-openagent/dist/index.js"
+base=$(echo "$shared" | jq --arg omo "$omo_entry" '. * {"plugin": [$omo]}')
+
+echo "$current" | jq --argjson base "$base" '
+  . as $current |
+  $base * ($current | del(."$schema", .provider, .mcp, .skills, .lsp, .plugin))
+'

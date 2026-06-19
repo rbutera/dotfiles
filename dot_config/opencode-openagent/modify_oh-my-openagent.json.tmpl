@@ -1,0 +1,64 @@
+#!/bin/bash
+# Modify script for ~/.config/opencode-openagent/oh-my-openagent.json
+# (oh-my-openagent model routing for the `openagent` profile)
+#
+# Strategy: PURE OpenCode-Go routing using the June-2026 models that were
+# smoke-tested working on this machine (glm-5.2, kimi-k2.7-code, deepseek-v4-pro,
+# deepseek-v4-flash, minimax-m3). $0 marginal cost on the Go flat sub.
+#
+# UPGRADE PATH (documented in docs/opencode-profiles.md): once the Codex OAuth is
+# re-authed (`opencode auth login` → OpenAI) and Cursor Pro is wired
+# (`opencode-cursor` plugin + CURSOR_API_KEY), promote the high-leverage seats:
+#   sisyphus/prometheus/metis/momus -> openai/gpt-5.5   (Codex sub, generous)
+#   oracle / multimodal-looker      -> cursor-acp/claude-4.6-opus / gemini-3.1-pro (Cursor)
+# Keep atlas/junior/librarian/explore/designer on Go (high-volume).
+#
+# Managed keys (replaced): $schema, agents, categories, claude_code, runtime_fallback
+# Free keys (preserved):   anything else the omo installer/runtime writes
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+read -r -d '' base << 'BASE' || true
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus":   { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" }, { "model": "opencode-go/kimi-k2.7-code" } ] },
+    "prometheus": { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "metis":      { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "momus":      { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "hephaestus": { "model": "opencode-go/glm-5.2", "fallback_models": [ { "model": "opencode-go/kimi-k2.7-code" }, { "model": "opencode-go/minimax-m3" } ] },
+    "oracle":     { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "atlas":      { "model": "opencode-go/kimi-k2.7-code", "fallback_models": [ { "model": "opencode-go/minimax-m3" }, { "model": "opencode-go/deepseek-v4-flash" } ] },
+    "sisyphus-junior": { "model": "opencode-go/deepseek-v4-flash", "fallback_models": [ { "model": "opencode-go/minimax-m3" } ] },
+    "librarian":  { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "explore":    { "model": "opencode-go/deepseek-v4-flash", "fallback_models": [ { "model": "opencode-go/minimax-m3" } ] },
+    "multimodal-looker": { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/kimi-k2.6" } ] }
+  },
+  "categories": {
+    "ultrabrain":         { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "deep":               { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "quick":              { "model": "opencode-go/deepseek-v4-flash", "fallback_models": [ { "model": "opencode-go/minimax-m3" } ] },
+    "visual-engineering": { "model": "opencode-go/glm-5.2" },
+    "artistry":           { "model": "opencode-go/glm-5.2" },
+    "writing":            { "model": "opencode-go/glm-5.2", "fallback_models": [ { "model": "opencode-go/kimi-k2.7-code" } ] },
+    "unspecified-low":    { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/deepseek-v4-flash" } ] },
+    "unspecified-high":   { "model": "opencode-go/deepseek-v4-pro", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] }
+  },
+  "claude_code": {
+    "mcp": false,
+    "commands": false,
+    "skills": false,
+    "agents": false,
+    "hooks": false,
+    "plugins": false
+  },
+  "runtime_fallback": true
+}
+BASE
+
+echo "$current" | jq --argjson base "$base" '
+  . as $current |
+  $base * ($current | del(."$schema", .agents, .categories, .claude_code, .runtime_fallback))
+'

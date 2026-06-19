@@ -1,0 +1,29 @@
+#!/bin/bash
+# Modify script for ~/.config/opencode/opencode.json  (VANILLA profile — `opencode`)
+#
+# This is the default, framework-free profile. It deploys the SHARED base
+# (providers + MCP servers + skills path + lsp) and nothing else: no plugin,
+# default agents left ENABLED. The `openagent` profile lives in a separate
+# config dir and layers oh-my-openagent on top of this same shared base.
+#
+# Managed keys (replaced from the shared base): $schema, provider, mcp, skills, lsp
+# Actively stripped:                            plugin, agent   (remove any framework leftovers)
+# Free (preserved):                             everything else (runtime/auth state)
+#
+# Shared base is defined once in .chezmoitemplates/opencode-shared-base and
+# included by both profiles so common config stays DRY.
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+read -r -d '' base << 'BASE' || true
+{{ includeTemplate "opencode-shared-base" . }}
+BASE
+
+# Replace managed keys from base; strip framework leftovers (plugin, agent);
+# preserve any unknown runtime keys the app/plugins may have written.
+echo "$current" | jq --argjson base "$base" '
+  . as $current |
+  $base * ($current | del(."$schema", .provider, .mcp, .skills, .lsp, .plugin, .agent))
+'

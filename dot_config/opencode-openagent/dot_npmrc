@@ -1,0 +1,12 @@
+# Scoped npm config for the openagent profile ONLY.
+#
+# The global ~/.npmrc hardening (ignore-scripts, min-release-age=7, engine-strict)
+# blocks installing opencode's plugin SDK and the bun-built oh-my-openagent package
+# into this dir. This profile deliberately runs a third-party agent framework, so we
+# lift those gates here — contained to ~/.config/opencode-openagent/.
+minimum-release-age=0
+min-release-age=0
+engine-strict=false
+ignore-scripts=false
+audit=false
+fund=false

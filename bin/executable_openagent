@@ -1,0 +1,18 @@
+#!/bin/bash
+# openagent — launch opencode with the oh-my-openagent framework profile.
+#
+# `opencode`  -> default ~/.config/opencode      (vanilla: providers + MCP, no framework)
+# `openagent` -> ~/.config/opencode-openagent    (vanilla base + oh-my-openagent on top)
+#
+# Both profiles share the same base config (providers, MCP servers) via chezmoi's
+# .chezmoitemplates/opencode-shared-base. This wrapper just points opencode at the
+# openagent config dir; everything else (slash commands, args) passes straight through.
+set -euo pipefail
+
+export OPENCODE_CONFIG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode-openagent}"
+
+# Opt out of oh-my-openagent anonymous telemetry by default.
+export OMO_DISABLE_POSTHOG="${OMO_DISABLE_POSTHOG:-1}"
+export OMO_SEND_ANONYMOUS_TELEMETRY="${OMO_SEND_ANONYMOUS_TELEMETRY:-0}"
+
+exec opencode "$@"
