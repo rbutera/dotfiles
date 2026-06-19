@@ -1,5 +1,14 @@
 # zshenv changelog
 
+## 2026-06-19 -- Add CURSOR_API_KEY for the opencode `openagent` profile
+
+### Change
+Added `export CURSOR_API_KEY={{ "{{" }} onepasswordRead "op://focused/cursor API key/credential" {{ "}}" }}`
+under the OpenCode section. Used by the `opencode-cursor` plugin in the `openagent`
+profile to route the Sisyphus orchestrator (and oracle/vision) through the user's
+Cursor Pro subscription (`cursor-acp/*` models). Requires `chezmoi apply` with an
+active 1Password session. See `logs/opencode.md` and `docs/opencode-profiles.md`.
+
 ## 2026-06-05 -- Use normal Claude Opus 4.8 context window
 
 ### Problem
