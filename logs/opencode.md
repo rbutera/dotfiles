@@ -1,5 +1,23 @@
 # opencode config changes log
 
+## 2026-06-19 — Cursor: force SDK backend (fix tool-surface collision with omo)
+
+### Problem
+With `cursor-agent` installed, the opencode-cursor plugin's default `auto` backend
+prefers the `cursor-agent` CLI — which spawns a FULL Cursor agent per request (its
+own system prompt + Shell tool). That tool surface collides with oh-my-openagent's
+own tool/agent loop, breaking omo's tool surfaces.
+
+### Fix
+Pinned in `bin/executable_openagent`:
+- `CURSOR_ACP_BACKEND=sdk` — use `@cursor/sdk` (CURSOR_API_KEY) instead of the
+  cursor-agent CLI. Keeps tool-loop mode = opencode, so OpenCode/omo own the active
+  tool list and cursor-acp only translates tool-call protocol boundaries.
+- `CURSOR_ACP_TOOL_LOOP_MODE=opencode` (default, pinned).
+Verified: `openagent` runs a `bash` tool call cleanly through `cursor-acp/claude-opus-4-8`
+with no cursor-agent spawn and no tool errors. SDK backend needs a real
+cursor.com/settings CURSOR_API_KEY (from zshenv / 1Password).
+
 ## 2026-06-19 — Wire Cursor Pro into the openagent profile (orchestrator)
 
 ### Change

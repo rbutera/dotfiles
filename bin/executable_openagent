@@ -15,11 +15,19 @@ export OPENCODE_CONFIG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode-openag
 export OMO_DISABLE_POSTHOG="${OMO_DISABLE_POSTHOG:-1}"
 export OMO_SEND_ANONYMOUS_TELEMETRY="${OMO_SEND_ANONYMOUS_TELEMETRY:-0}"
 
-# Cursor (opencode-cursor plugin): pass --force to cursor-agent so it auto-trusts
-# the working directory (no "Workspace Trust Required" prompt). This is the relevant
-# knob — cursor-agent's --yolo does NOT apply in ACP mode (opencode owns tool
-# execution + permissions, governed by the profile's `permission` config, not by
-# cursor-agent). CURSOR_ACP_FORCE defaults on; pinned here for certainty.
+# Cursor (opencode-cursor plugin) backend selection.
+#
+# Force the SDK backend (@cursor/sdk via CURSOR_API_KEY). The default `auto` mode
+# prefers the `cursor-agent` CLI when it's installed — but that backend spawns a
+# FULL Cursor agent per request with its own system prompt + Shell-tool surface,
+# which collides with oh-my-openagent's tool/agent loop ("tool surface" breakage).
+# The SDK backend keeps tool-loop mode = opencode: OpenCode/omo own the tool list
+# and cursor-acp only translates tool-call protocol boundaries. Requires a real
+# CURSOR_API_KEY (cursor.com/settings) — which we export from 1Password in zshenv.
+export CURSOR_ACP_BACKEND="${CURSOR_ACP_BACKEND:-sdk}"
+# Keep omo/opencode as the tool executor (default, pinned for certainty).
+export CURSOR_ACP_TOOL_LOOP_MODE="${CURSOR_ACP_TOOL_LOOP_MODE:-opencode}"
+# --force still auto-trusts the dir if the SDK ever falls back to cursor-agent.
 export CURSOR_ACP_FORCE="${CURSOR_ACP_FORCE:-1}"
 
 exec opencode "$@"

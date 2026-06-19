@@ -216,13 +216,23 @@ Final LIVE routing (all verified `pong`):
 Cursor's $20/mo usage cap): oracle → `cursor-acp/claude-opus-4-8`,
 multimodal-looker → `cursor-acp/gemini-3.1-pro`.
 
+### Cursor backend — MUST be SDK (tool-surface fix)
+The wrapper pins **`CURSOR_ACP_BACKEND=sdk`**. This is important: the plugin's
+default `auto` mode prefers the `cursor-agent` CLI when it's installed, and that
+backend spawns a FULL Cursor agent per request with its own system prompt + Shell
+tool — which **collides with oh-my-openagent's tool/agent loop** (omo's
+`task`/`skill`/delegate tools get clobbered; "tool surface" breakage). The SDK
+backend (`@cursor/sdk` via `CURSOR_API_KEY`) keeps `CURSOR_ACP_TOOL_LOOP_MODE=opencode`
+so **OpenCode/omo own the active tool list** and cursor-acp only translates
+tool-call protocol boundaries. Verified: `openagent` runs a `bash` tool call
+cleanly through Opus 4.8 with no cursor-agent spawn. (SDK needs a real
+cursor.com/settings `CURSOR_API_KEY` — exported from 1Password in zshenv.)
+
 ### Cursor `--yolo` / trust
-The `opencode-cursor` plugin passes `--force` to `cursor-agent` automatically
-(env `CURSOR_ACP_FORCE`, default on; pinned in `bin/executable_openagent`) which
-auto-trusts the working dir — no "Workspace Trust Required" prompt. `cursor-agent`'s
-`--yolo` is NOT used and does not apply: in ACP mode opencode owns tool execution,
-so tool-approval is governed by the **profile's opencode `permission` config**, not
-by cursor-agent. The one-time setup that was required: unlock the macOS login
-keychain + `open-cursor sync-models` (the first sync ran with the keychain locked
-and produced stale model IDs like `opus-4.6`; re-syncing unlocked surfaced the real
-`claude-opus-4-8`).
+`--force` is passed to cursor-agent automatically (`CURSOR_ACP_FORCE`, default on;
+pinned) so there's no "Workspace Trust" prompt if the SDK ever falls back.
+`cursor-agent --yolo` is NOT used / doesn't apply: opencode owns tool execution, so
+tool-approval is governed by the **profile's opencode `permission` config**. One-time
+setup gotchas: unlock the macOS login keychain, then `open-cursor sync-models` (the
+first sync ran keychain-locked → stale `opus-4.6`; re-syncing unlocked surfaced the
+real `claude-opus-4-8`).
