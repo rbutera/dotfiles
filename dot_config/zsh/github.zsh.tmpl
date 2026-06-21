@@ -1,0 +1,12 @@
+# ── Secrets group: GitHub ─────────────────────────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/github.zsh
+
+# github gh PAT — three env vars, same item/field → one fetch, reused
+{{- $ghpat := onepasswordDetailsFields "github gh PAT" "Private" }}
+export GITHUB_TOKEN={{ $ghpat.credential.value | quote }}
+export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}
+export GITHUB_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}
+
+# Separate item (LLM PAT)
+export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" | quote }}

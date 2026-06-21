@@ -114,149 +114,28 @@ fi
 [[ -s "$HOME/.vite-plus/env" ]] && . "$HOME/.vite-plus/env"
 
 # ═════════════════════════════════════════════════════════════════════════════
-# Secrets (1Password)
+# Secrets (1Password) — sourced group files under ~/.config/zsh/
 # ═════════════════════════════════════════════════════════════════════════════
-
-# Claude Code
-{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
-{{- if $useSharedClaudeOAuth }}
-export CLAUDE_CODE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
-{{- else }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/claude code token/credential"}}
-{{- end }}
-
-# GitHub
-export GITHUB_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential" }}
-export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" }}
-export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
-export GITHUB_PERSONAL_ACCESS_TOKEN={{ onepasswordRead "op://Private/github gh PAT/credential"}}
-
-# AI & LLM services
-export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" }}
-export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" }}
-export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential"}}
-export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}
-export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential"}}
-export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential"}}
-
-# Supermemory
-export SUPERMEMORY_CC_API_KEY={{ onepasswordRead "op://Private/supermemory api key/claude" }}
-export SUPERMEMORY_API_KEY={{ onepasswordRead "op://Private/supermemory api key/opencode"}}
-export SUPERMEMORY_OPENCLAW_API_KEY={{ onepasswordRead "op://Private/supermemory api key/credential"}}
-
-# OpenCode
-export OPENCODE_ZEN_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
-export OPENCODE_API_KEY={{ onepasswordRead "op://Private/OpenCode Zen/credential"}}
-export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
-# OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS removed 2026-06-19: oh-my-openagent's
-# background/parallel subagent delegation reports completion unreliably — call_omo_agent
-# can time out after the subagent already shows completed, and fast-finishing tasks can
-# hang in "running" forever (oh-my-openagent #3774, #4570, #1517). Leaving this unset
-# forces foreground/synchronous delegation, sidestepping the completion-handshake race.
-# Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile
-export CURSOR_API_KEY={{ onepasswordRead "op://focused/cursor API key/credential" }}
-
-# Honcho
-export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" }}
-export HONCHO_PEER_NAME="Rai"
-
-# Camofox
-export CAMOFOX_URL="http://localhost:9377"
-export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" }}
-
-# OpenClaw Discord bots
-export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
-export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}
-export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}
-export OPENCLAW_DISCORD_HEIMERDINGER={{ onepasswordRead "op://Private/Navi Discord tokens/heimerdinger" }}
-export OPENCLAW_DISCORD_ROCKY={{ onepasswordRead "op://Private/Navi Discord tokens/rocky" }}
-export OPENCLAW_DISCORD_RICK={{ onepasswordRead "op://Private/Navi Discord tokens/rick" }}
-export OPENCLAW_DISCORD_SHIKAMARU={{ onepasswordRead "op://Private/Navi Discord tokens/shikamaru" }}
-export OPENCLAW_DISCORD_HEDWIG={{ onepasswordRead "op://Private/Navi Discord tokens/hedwig" }}
-export OPENCLAW_DISCORD_DOBBY={{ onepasswordRead "op://Private/Navi Discord tokens/dobby"}}
-export OPENCLAW_DISCORD_DUMBLEDORE={{ onepasswordRead "op://Private/Navi Discord tokens/dumbledore"}}
-export OPENCLAW_DISCORD_ORCA={{ onepasswordRead "op://Private/Navi Discord tokens/orca" }}
-export OPENCLAW_DISCORD_PLANA={{ onepasswordRead "op://Private/Navi Discord tokens/plana"}}
-export OPENCLAW_DISCORD_CODA={{ onepasswordRead "op://Private/Navi Discord tokens/coda"}}
-export OPENCLAW_DISCORD_READA={{ onepasswordRead "op://Private/Navi Discord tokens/reada"}}
-
-# Elevenlabs
-export ELEVENLABS_API_KEY={{ onepasswordRead "op://Private/Elevenlabs API/credential"}}
-export ELEVENLABS_RAI={{ onepasswordRead "op://Private/Elevenlabs API/rai"}}
-export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi"}}
-
-# Cartesia (TTS Sonic + STT ink-whisper) — voice migration 2026-06-03
-export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" }}
-
-# Expedition
-export EXPEDITION_EMAIL=raibutera91@gmail.com
-export EXPEDITION_EMAIL_APP_PASSWORD={{ onepasswordRead "op://Private/google raibutera91/app_password" }}
-export EXPEDITION_EMAIL_AUTHENTICATOR="{{ onepasswordRead "op://Private/google raibutera91/one-time password"}}"
-
-# Notion & Todoist
-export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential"}}
-export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" }}
-
-# Obsidian
-export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}
-
-# Cloudflare
-export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}
-
-# Tailscale
-export TAILSCALE_NOCODB_CLIENT_ID={{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}
-export TAILSCALE_NOCODB_CLIENT_SECRET={{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}
-
-# Other services
-export REED_API_KEY={{ onepasswordRead "op://Private/Reed API Key/credential" }}
-export ADZUNA_APPLICATION_ID={{ onepasswordRead "op://Private/Adzuna API Key/username" }}
-export ADZUNA_API_KEY={{ onepasswordRead "op://Private/Adzuna API Key/credential" }}
-export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" }}
-export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" }}
-export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential"}}
-export NTFY_TOKEN={{ onepasswordRead "op://Private/ntfy.sh/credential" }}
-export DOCKER_TOKEN={{ onepasswordRead "op://Private/docker raigasm/credential" }}
-
-# ── Work (easyJet) ──────────────────────────────────────────────────────────
-{{- if has .chezmoi.hostname .host_groups.work }}
-export ATLASSIAN_API_KEY={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
-export ATLASSIAN_EMAIL={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
-export ATLASSIAN_BASE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
-
-export JIRA_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
-export JIRA_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
-export JIRA_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}
-
-export CONFLUENCE_API_TOKEN={{ onepasswordRead "op://focused/EasyJet JIRA API/credential"}}
-export CONFLUENCE_USERNAME={{ onepasswordRead "op://focused/EasyJet JIRA API/username"}}
-export CONFLUENCE_URL={{ onepasswordRead "op://focused/EasyJet JIRA API/hostname"}}/wiki
-
-export SONARQUBE_TOKEN={{ onepasswordRead "op://focused/SonarQube/credential"}}
-export SONARQUBE_ORG=easyjet-dev
-export SONARQUBE_URL=https://sonarcloud.io
-
-export AWS_PROFILE=ej-dev
-{{- end }}
-
-# ── Host-specific infrastructure ─────────────────────────────────────────────
-{{- if has .chezmoi.hostname .host_groups.dev_infra }}
-export DB_URL="postgresql://rai:{{ onepasswordRead "op://Private/local-postgres/password" }}@localhost:5432/dev"
-{{- end }}
-{{- if eq .chezmoi.hostname "nimbus" }}
-# Used by Cortex MCP for claim storage and execution logs.
-# Hardcoded so subagent processes (Tatls) inherit it via the shell env.
-export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
-{{- end }}
-
-# RunPod (GPU Cloud)
-export RUNPOD_API_KEY={{ onepasswordRead "op://Private/RunPod API Key/credential" }}
-export RUNPOD_S3_ACCESS_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}
-export RUNPOD_S3_SECRET_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}
-
-export CIVITAI_API_KEY={{ onepasswordRead "op://Private/Civitai/credential" }}
-
-# Gelato print-on-demand API (Dopamade Etsy fulfilment)
-export GELATO_API_KEY={{ onepasswordRead "op://Private/Gelato/credential" }}
-export GELATO_STORE_ID=340c612d-ddd9-4777-a860-d58b8867d62a
-export GELATO_TEMPLATE_ID=866345f9-8419-4f1b-a08c-9a73239ac818
-export GELATO_PLACEHOLDER_NAME=placeholder.png
+#
+# Secrets used to live inline here (~70 onepasswordRead calls = ~70 `op read`
+# round-trips on every `chezmoi apply`). They now live in per-domain group files
+# (chezmoi source: dot_config/zsh/*.zsh.tmpl → deployed: ~/.config/zsh/*.zsh),
+# each rendered with whole-item caching (onepasswordDetailsFields) so a multi-
+# field item is fetched ONCE, not once per field.
+#
+# Why this is faster to APPLY (not faster at shell startup — startup was already
+# ~0ms): `chezmoi apply ~/.config/zsh/<group>.zsh` renders only that one group,
+# so editing one key re-reads only that group's items, not all ~70. Bulk apply
+# also collapses dup/multi-field items (discord 14→1, easyjet-jira 9→1, etc.).
+#
+# This structural .zshenv contains NO onepasswordRead calls, so
+# `chezmoi apply ~/.zshenv` never invokes 1Password.
+#
+# Sourcing every group keeps .zshenv behaviour identical to the old inline block
+# (these are exported for every zsh, including non-interactive shells/scripts).
+if [ -d "$HOME/.config/zsh" ]; then
+  for __zsh_group in "$HOME"/.config/zsh/*.zsh(N); do
+    [ -r "$__zsh_group" ] && source "$__zsh_group"
+  done
+  unset __zsh_group
+fi

@@ -1,0 +1,14 @@
+# ── Secrets group: host-specific infrastructure ───────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/host-infra.zsh
+#
+# Host-gated: renders to nothing (and runs zero op reads) on hosts not in the
+# relevant group.
+{{- if has .chezmoi.hostname .host_groups.dev_infra }}
+export DB_URL={{ printf "postgresql://rai:%s@localhost:5432/dev" (onepasswordRead "op://Private/local-postgres/password") | quote }}
+{{- end }}
+{{- if eq .chezmoi.hostname "nimbus" }}
+# Used by Cortex MCP for claim storage and execution logs.
+# Hardcoded so subagent processes (Tatls) inherit it via the shell env.
+export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
+{{- end }}

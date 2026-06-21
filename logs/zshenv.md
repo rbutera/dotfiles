@@ -1,5 +1,49 @@
 # zshenv changelog
 
+## 2026-06-21 — Split secrets into sourced group files (Dotfiles Phase 1, focused-nswr)
+
+### Motivation
+`dot_zshenv.tmpl` carried ~70 inline `onepasswordRead` calls in one block, so every
+`chezmoi apply` did ~70 sequential `op read` round-trips — the real source of the
+"applying the env takes forever" pain (profiling showed shell startup itself is
+already ~0ms; see `vault/research/dotfiles/phase1-zshenv-profiling.md`). Two wins:
+(1) per-file apply — `chezmoi apply ~/.config/zsh/<group>.zsh` renders only that
+group, so editing one key re-reads only that group's items, not all 70; (2)
+whole-item caching — multi-field / duplicate items now fetched ONCE via
+`onepasswordDetailsFields` instead of once per field.
+
+### What changed
+- **`dot_zshenv.tmpl`**: removed the whole inline `# Secrets (1Password)` block
+  and replaced it with a loader that sources every `~/.config/zsh/*.zsh` (zsh
+  `(N)` null-glob so an empty dir is a no-op). The structural `.zshenv` now has
+  ZERO `onepasswordRead` calls → `chezmoi apply ~/.zshenv` never invokes 1Password.
+- **`dot_config/zsh/*.zsh.tmpl`** (8 new group files): secrets carved out by
+  domain — `claude-ai`, `github`, `ai-apis`, `easyjet` (whole file work-host
+  gated), `discord`, `voice-media`, `tools`, `jobsearch`, plus `host-infra`
+  (DB_URL dev_infra / DATABASE_URL nimbus). Every env var name + `op://` ref
+  preserved exactly (verified: zero vars added/dropped vs the old block).
+  Caching collapses: Navi Discord 14→1, EasyJet JIRA 9→1, github PAT 3→1,
+  Supermemory 3→1, Elevenlabs 3→1, RunPod 3→1, Tailscale 2→1, Adzuna 2→1,
+  OpenCode Zen 2→1, Expedition email 2→1. `| quote` added to all secret values.
+
+### Behaviour preserved
+Host conditionals kept; `CONFLUENCE_URL` still gets `/wiki` (now via
+`printf "%s/wiki"` inside the quote). On non-work hosts the easyjet group renders
+to its header comment only (zero op reads).
+
+### Verify on apply (needs an unlocked 1Password session)
+1. `op signin` / biometric unlock FIRST (the group files call `op read`).
+2. `chezmoi apply ~/.zshenv` (instant, no op), then `chezmoi apply ~/.config/zsh`.
+3. New shell: spot-check collapsed items, e.g. `${GITHUB_TOKEN:+SET}`,
+   `${ATLASSIAN_API_KEY:+SET}`, `${OPENCLAW_DISCORD_ORCA:+SET}`, must print `SET`.
+4. Run on BOTH kinto (work) and nimbus (personal) — host-gated blocks differ.
+
+### Caveat
+`onepasswordDetailsFields` keys by 1Password FIELD ID. Field ids here were taken
+verbatim from the old `op://item/<field>` refs Rai already used. If any field's id
+differs from its label in 1Password, that one var renders empty — the `:+SET`
+spot-check catches it. No live verification was possible (no op session at refactor).
+
 ## 2026-06-19 -- Remove OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS (omo flakiness)
 
 ### Change

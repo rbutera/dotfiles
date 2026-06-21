@@ -1,0 +1,34 @@
+# ── Secrets group: misc tools / services ──────────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/tools.zsh
+
+# Notion & Todoist
+export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential" | quote }}
+export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" | quote }}
+
+# Obsidian
+export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" | quote }}
+
+# Cloudflare
+export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" | quote }}
+
+# Tailscale (nocodb oauth) — two distinct fields of ONE item → one fetch
+{{- $tailscale := onepasswordDetailsFields "tailscale nocodb oauth" "Private" }}
+export TAILSCALE_NOCODB_CLIENT_ID={{ $tailscale.username.value | quote }}
+export TAILSCALE_NOCODB_CLIENT_SECRET={{ $tailscale.credential.value | quote }}
+
+# Camofox
+export CAMOFOX_URL="http://localhost:9377"
+export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" | quote }}
+
+# Expedition email — two distinct fields of ONE item → one fetch
+{{- $expmail := onepasswordDetailsFields "google raibutera91" "Private" }}
+export EXPEDITION_EMAIL=raibutera91@gmail.com
+export EXPEDITION_EMAIL_APP_PASSWORD={{ $expmail.app_password.value | quote }}
+export EXPEDITION_EMAIL_AUTHENTICATOR={{ (index $expmail "one-time password").value | quote }}
+
+# Other single-field services
+export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" | quote }}
+export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential" | quote }}
+export NTFY_TOKEN={{ onepasswordRead "op://Private/ntfy.sh/credential" | quote }}
+export DOCKER_TOKEN={{ onepasswordRead "op://Private/docker raigasm/credential" | quote }}

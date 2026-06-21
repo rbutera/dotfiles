@@ -1,0 +1,26 @@
+# ── Secrets group: voice / media / generative ─────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/voice-media.zsh
+
+# Elevenlabs — three env vars, three distinct fields of ONE item → one fetch
+{{- $eleven := onepasswordDetailsFields "Elevenlabs API" "Private" }}
+export ELEVENLABS_API_KEY={{ $eleven.credential.value | quote }}
+export ELEVENLABS_RAI={{ $eleven.rai.value | quote }}
+export ELEVENLABS_NAVI={{ $eleven.navi.value | quote }}
+
+# Cartesia (TTS Sonic + STT ink-whisper) — voice migration 2026-06-03
+export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" | quote }}
+
+export CIVITAI_API_KEY={{ onepasswordRead "op://Private/Civitai/credential" | quote }}
+
+# RunPod (GPU Cloud) — three distinct fields of ONE item → one fetch
+{{- $runpod := onepasswordDetailsFields "RunPod API Key" "Private" }}
+export RUNPOD_API_KEY={{ $runpod.credential.value | quote }}
+export RUNPOD_S3_ACCESS_KEY={{ $runpod.s3_access.value | quote }}
+export RUNPOD_S3_SECRET_KEY={{ $runpod.s3_secret.value | quote }}
+
+# Gelato print-on-demand API (Dopamade Etsy fulfilment)
+export GELATO_API_KEY={{ onepasswordRead "op://Private/Gelato/credential" | quote }}
+export GELATO_STORE_ID=340c612d-ddd9-4777-a860-d58b8867d62a
+export GELATO_TEMPLATE_ID=866345f9-8419-4f1b-a08c-9a73239ac818
+export GELATO_PLACEHOLDER_NAME=placeholder.png

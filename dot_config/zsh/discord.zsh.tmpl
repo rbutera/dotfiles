@@ -1,0 +1,21 @@
+# ── Secrets group: OpenClaw Discord bot tokens ────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/discord.zsh
+#
+# All 14 tokens are distinct fields of ONE item ("Navi Discord tokens") →
+# one whole-item fetch, indexed by field id (was 14 separate op reads).
+{{- $d := onepasswordDetailsFields "Navi Discord tokens" "Private" }}
+export OPENCLAW_DISCORD_NAVI={{ $d.credential.value | quote }}
+export OPENCLAW_DISCORD_HERMIONE={{ $d.hermione.value | quote }}
+export OPENCLAW_DISCORD_ZELDA={{ $d.zelda.value | quote }}
+export OPENCLAW_DISCORD_HEIMERDINGER={{ $d.heimerdinger.value | quote }}
+export OPENCLAW_DISCORD_ROCKY={{ $d.rocky.value | quote }}
+export OPENCLAW_DISCORD_RICK={{ $d.rick.value | quote }}
+export OPENCLAW_DISCORD_SHIKAMARU={{ $d.shikamaru.value | quote }}
+export OPENCLAW_DISCORD_HEDWIG={{ $d.hedwig.value | quote }}
+export OPENCLAW_DISCORD_DOBBY={{ $d.dobby.value | quote }}
+export OPENCLAW_DISCORD_DUMBLEDORE={{ $d.dumbledore.value | quote }}
+export OPENCLAW_DISCORD_ORCA={{ $d.orca.value | quote }}
+export OPENCLAW_DISCORD_PLANA={{ $d.plana.value | quote }}
+export OPENCLAW_DISCORD_CODA={{ $d.coda.value | quote }}
+export OPENCLAW_DISCORD_READA={{ $d.reada.value | quote }}

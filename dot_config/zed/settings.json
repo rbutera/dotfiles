@@ -159,14 +159,13 @@
   "show_edit_predictions": true,
 
   // -- External agents (Claude Code, Codex) --
-  "agent_servers": {
-    "claude-acp": {
-      "type": "registry"
-    },
-    "codex-acp": {
-      "type": "registry"
-    }
-  },
+  // Claude Agent + Codex are installed from Zed's ACP Registry and configured
+  // via the Agent panel; registry agents need NO agent_servers entry. The old
+  // { "type": "registry" } entries were not a valid agent_servers schema value
+  // (valid type is "custom" with a command) and were a no-op, so they were
+  // removed. Add an "agent_servers": { "<id>": { ... } } block here only to
+  // OVERRIDE a registry agent's settings, or with "type": "custom" + "command"
+  // to run a non-registry agent. Docs: https://zed.dev/docs/ai/external-agents
 
   // -- Project panel (sidebar right, matching VSCode) --
   "project_panel": {

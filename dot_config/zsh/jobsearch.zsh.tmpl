@@ -1,0 +1,10 @@
+# ── Secrets group: job search APIs ────────────────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/jobsearch.zsh
+
+export REED_API_KEY={{ onepasswordRead "op://Private/Reed API Key/credential" | quote }}
+
+# Adzuna API Key — two distinct fields of ONE item → one fetch
+{{- $adzuna := onepasswordDetailsFields "Adzuna API Key" "Private" }}
+export ADZUNA_APPLICATION_ID={{ $adzuna.username.value | quote }}
+export ADZUNA_API_KEY={{ $adzuna.credential.value | quote }}
