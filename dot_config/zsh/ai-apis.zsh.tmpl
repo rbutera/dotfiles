@@ -10,12 +10,6 @@ export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential" 
 export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential" | quote }}
 export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" | quote }}
 
-# Supermemory — three env vars, three distinct fields of ONE item → one fetch
-{{- $supermem := onepasswordDetailsFields "supermemory api key" "Private" }}
-export SUPERMEMORY_CC_API_KEY={{ $supermem.claude.value | quote }}
-export SUPERMEMORY_API_KEY={{ $supermem.opencode.value | quote }}
-export SUPERMEMORY_OPENCLAW_API_KEY={{ $supermem.credential.value | quote }}
-
 # Honcho
 export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" | quote }}
 export HONCHO_PEER_NAME="Rai"

@@ -1,5 +1,24 @@
 # zshenv changelog
 
+## 2026-06-22 — Drop Supermemory block from ai-apis group (apply failure)
+
+### Motivation
+After the 2026-06-21 split, `chezmoi apply` failed rendering
+`dot_config/zsh/ai-apis.zsh.tmpl:15` with
+`map has no entry for key "claude"`. The refactor had collapsed the three
+pre-existing `SUPERMEMORY_*` exports (originally three separate
+`onepasswordRead "op://Private/supermemory api key/<field>"` calls) into one
+cached `onepasswordDetailsFields "supermemory api key" "Private"` read, then
+indexed it as `$supermem.claude` / `.opencode` / `.credential`. The
+`onepasswordDetailsFields` map keys don't match those field references, so the
+`.claude` lookup returned no entry and aborted the whole apply. Rai confirmed he
+doesn't use supermemory, so the block is removed entirely rather than re-mapped.
+
+### What changed
+- **`dot_config/zsh/ai-apis.zsh.tmpl`**: Removed the Supermemory block
+  (`$supermem` assignment + `SUPERMEMORY_CC_API_KEY`, `SUPERMEMORY_API_KEY`,
+  `SUPERMEMORY_OPENCLAW_API_KEY` exports).
+
 ## 2026-06-21 — Split secrets into sourced group files (Dotfiles Phase 1, focused-nswr)
 
 ### Motivation
