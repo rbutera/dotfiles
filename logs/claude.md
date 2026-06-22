@@ -1,5 +1,34 @@
 # Claude Code config changes log
 
+## 2026-06-22 — Verified entitlement-cache scrub is STILL needed (keep it)
+
+### Context
+While reconciling chezmoi drift, `.claude.json` kept showing as drifted right
+after `chezmoi apply`. Questioned whether the `modify_dot_claude.json.tmpl`
+entitlement-cache scrub (`del(.cachedExtraUsageDisabledReason)` + 4 siblings,
+added 2026-04-12 for the `/model opus[1m]` gate bug #45449) was now obsolete on
+Opus 4.8.
+
+### Finding — NOT obsolete, do not remove
+- **Issue [#45449] is closed as NOT_PLANNED** — auto-closed by the
+  github-actions bot for inactivity ("Closing for now — inactive for too long"),
+  **not** because it was fixed. No fix shipped; last human comment just restates
+  the env-var workaround.
+- **Live machine is still being re-poisoned.** Applied `.claude.json` (scrub
+  deletes the keys), then `jq` on `~/.claude.json` showed
+  `cachedExtraUsageDisabledReason: true` back, plus `hasAvailableSubscription`,
+  `s1mAccessCache`, `passesEligibilityCache`, `clientDataCache` all repopulated.
+  So Claude Code re-writes the poisoned keys at runtime between applies.
+
+### Conclusion
+The scrub is actively doing its job; removing it would re-break
+`/model opus[1m]`. **Keep both** the scrub and `ANTHROPIC_DEFAULT_OPUS_MODEL`.
+This re-poisoning is also the root cause of `.claude.json`'s perpetual drift —
+expected and benign (a `modify_` script over a runtime-churned file will always
+diff). Track [#45449] for an eventual real fix before removing either workaround.
+
+[#45449]: https://github.com/anthropics/claude-code/issues/45449
+
 ## 2026-06-03 — Re-add Opus model pin as 4.8, conditional on host group
 
 ### Problem
