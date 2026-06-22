@@ -1,5 +1,45 @@
 # zshenv changelog
 
+## 2026-06-22 — Fix onepasswordDetailsFields section-field bug across group files
+
+### Motivation
+After dropping the Supermemory block (below), `chezmoi apply` still failed —
+`chezmoi status` aborted rendering `dot_config/zsh/discord.zsh.tmpl` with
+`map has no entry for key "hermione"`. Same root cause as Supermemory: the
+2026-06-21 split rewrote several groups to fetch a whole item once via
+`onepasswordDetailsFields` and index fields as `$item.<key>.value`. But
+**`onepasswordDetailsFields` only returns an item's top-level fields**
+(`credential`, `username`, `hostname`, `password`, …) — fields nested inside a
+1Password **section** are absent from its map. Verified live by dumping the key
+set for "Navi Discord tokens": only `credential`/`username`/`hostname`/… present,
+none of the per-bot section labels. The old `op://Item/<label>` reads worked
+because `op read` resolves section labels; the map lookup does not.
+
+Three group files referenced section fields and so failed to render:
+- `discord.zsh.tmpl` — 13 of 14 bot tokens are section fields
+- `tools.zsh.tmpl` — `$expmail.app_password`, `one-time password` (google item)
+- `voice-media.zsh.tmpl` — `$eleven.rai`/`.navi`, `$runpod.s3_access`/`.s3_secret`
+
+Files that only referenced top-level fields render fine and were left as-is
+(`claude-ai`, `easyjet`, `github`, `jobsearch`, and `tailscale`/`opencode` etc.
+in `tools`) — `onepasswordDetailsFields` is correct there and still saves reads.
+
+### What changed
+- **`discord.zsh.tmpl`**: dropped the `$d := onepasswordDetailsFields` line;
+  all 14 exports back to per-field `onepasswordRead "op://Private/Navi Discord
+  tokens/<label>" | quote`.
+- **`tools.zsh.tmpl`**: Expedition-email block back to two `onepasswordRead`
+  calls (`app_password`, `one-time password`); removed `$expmail`.
+- **`voice-media.zsh.tmpl`**: Elevenlabs (`rai`/`navi`) and RunPod
+  (`s3_access`/`s3_secret`) blocks back to `onepasswordRead`; removed `$eleven`
+  and `$runpod`. Kept `| quote`.
+- Verified all three render and resolve to non-empty values; applied the 8
+  previously-unapplied group files + `.zshenv`; `zsh -n` clean on all groups.
+
+### Lesson
+`onepasswordDetailsFields` is only safe for **top-level** item fields. For any
+value stored in a 1Password section, use `onepasswordRead` with the field label.
+
 ## 2026-06-22 — Drop Supermemory block from ai-apis group (apply failure)
 
 ### Motivation
