@@ -43,6 +43,16 @@ TWO root causes, which is why it was so flaky:
   Terminal). OSC52 is also correct for WSL over Windows Terminal (clip.exe would
   write the wrong machine's clipboard when SSH'd).
 
+**`dot_tmux/dot_tmux.conf`** — mouse highlight-to-copy needed one more flip:
+`@yank_with_mouse 'off'` → `'on'`. Evidence: the osc52copy debug log showed the
+mouse copy never invoked osc52copy at all (only keyboard `y` did), so the drag
+wasn't triggering a copy. `@yank_with_mouse` is tmux-yank's master switch for
+copy-on-drag; with it off the drag only selected, never piped. With it on, mouse
+drag routes through `@override_copy_command` = osc52copy (the same wrapped path
+keyboard uses). Confirmed working 2026-06-23 (kinto, mouse + keyboard both land).
+Needs a config reload / tmux-yank re-init to take effect (prefix-r, or
+kill-server).
+
 ### Still open (separate surface)
 - **Neovim yank**: nvim is on `vim.opt.clipboard = "unnamedplus"` + the built-in
   provider (the custom osc52copy override was removed earlier, see nvim log). That
