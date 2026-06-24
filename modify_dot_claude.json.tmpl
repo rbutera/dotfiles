@@ -74,12 +74,6 @@ base_mcps=$(echo "$base_mcps" | jq --arg key "${EXA_API_KEY:-}" \
 # Replace: base is authoritative for MCP servers. Removals from base
 # are reflected in the deployed config. All other fields untouched.
 #
-# Also scrub the poisoned 1M-context entitlement cache keys on every apply.
-# See anthropics/claude-code#45449 and logs/claude.md. The server emits a
-# stale `org_level_disabled` reason header on Max personal plans, which the
-# client caches and uses to block /model opus[1m] even though the 1M
-# entitlement is actually valid. Deleting these keys (plus the env var in
-# dot_zshenv.tmpl) keeps the slash command from tripping on stale state.
 # ── Built-in MCP servers to enable across all projects ──────────────────────
 # computer-use is a default-disabled built-in; opt-in stored per-project in
 # .projects[path].enabledMcpServers inside ~/.claude.json.
@@ -87,12 +81,6 @@ builtin_mcps='["computer-use"]'
 
 echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mcps" '
   .mcpServers = $base
-  | del(.cachedExtraUsageDisabledReason)
-  | del(.hasAvailableSubscription)
-  | del(.s1mAccessCache)
-  | del(.passesEligibilityCache)
-  | del(.clientDataCache)
-  | if .oauthAccount then .oauthAccount |= del(.hasExtraUsageEnabled) else . end
   | .remoteControlAtStartup = true
   | if .projects then .projects |= with_entries(
       .value.enabledMcpServers = ((.value.enabledMcpServers // []) + $builtins | unique)

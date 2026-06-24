@@ -6,8 +6,15 @@
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/cortex-cc"
   ],
   "mainOnlyPlugins": [
-    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin"
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin"
   ],
+  "email": {
+    "address": "navi@e8n.dev",
+    "displayName": "Navi Butera",
+    "account": "navi",
+    "whitelist": ["rai@rbutera.com", "navi@e8n.dev", "florence@e8n.dev"]
+  },
   "extraClaudeArgs": [
     "--dangerously-load-development-channels",
     "server:plugin:discord-voice:discord-voice"
@@ -65,7 +72,9 @@
       "allowFrom": [
         "124046285308166146"
       ],
-      "groups": {},
+      "groups": {
+        "1508801011760762940": { "requireMention": false, "allowFrom": [] }
+      },
       "mentionPatterns": [],
       "ackReaction": "",
       "replyToMode": "first",
@@ -74,6 +83,7 @@
     }
   },
   "textPlugin": {
-    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle"
+    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle",
+    "recapChannelId": "1508801011760762940"
   }
 }

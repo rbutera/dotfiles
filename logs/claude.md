@@ -1,5 +1,32 @@
 # Claude Code config changes log
 
+## 2026-06-24 — Remove all `.claude.json` cache scrubs (supersedes 2026-06-22)
+
+### Context
+During a `/chezmoi-sync` reconciliation, `.claude.json` again showed `MM` drift.
+Per Rai's call, the 1M-context entitlement cache poisoning (#45449) "is no
+longer a thing" — so the `modify_dot_claude.json.tmpl` scrub block is now
+obsolete. This **overrides the 2026-06-22 finding** below, which had concluded
+the scrub was still needed because the machine kept getting re-poisoned. Rai is
+deliberately overriding that verification.
+
+### Changes
+- **`modify_dot_claude.json.tmpl`**: Removed the entire cache-scrub `del()`
+  chain from the jq transform — `cachedExtraUsageDisabledReason`,
+  `hasAvailableSubscription`, `s1mAccessCache`, `passesEligibilityCache`,
+  `clientDataCache`, and `oauthAccount.hasExtraUsageEnabled`. Also removed the
+  now-stale explanatory comment block referencing #45449. The script now only
+  manages `mcpServers`, built-in `enabledMcpServers`, and `remoteControlAtStartup`.
+- Applied `chezmoi apply --force ~/.claude.json`. Deployed file keeps all its
+  runtime fields untouched; the only residual diff is a trailing-newline (jq
+  emits one, Claude Code writes none) — cosmetic and harmless.
+
+### Side effect — less drift
+Removing the scrub also reduces `.claude.json`'s perpetual churn: the script no
+longer deletes the runtime keys Claude Code re-writes, so the modify output and
+the live file now agree on those keys. The 1M model is still pinned separately
+via `ANTHROPIC_DEFAULT_OPUS_MODEL` in `dot_zshenv.tmpl` (left in place).
+
 ## 2026-06-22 — Verified entitlement-cache scrub is STILL needed (keep it)
 
 ### Context
