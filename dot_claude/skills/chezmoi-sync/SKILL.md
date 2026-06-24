@@ -1,6 +1,6 @@
 ---
 name: chezmoi-sync
-description: Reconcile chezmoi source vs deployed dotfiles when they have drifted. Use when Rai says "sync dotfiles", "chezmoi drift", "dotfiles out of sync", "what's drifted", "chezmoi-sync", "reconcile dotfiles", or when an agent edited a deployed dotfile and the chezmoi source needs catching up. Pulls latest, checks git + 1Password session, finds drift, then walks each drifted file ONE AT A TIME through an update-source-vs-override-deployed decision. Calm, guided, never dumps the full diff at once.
+description: Reconcile chezmoi source vs deployed dotfiles when they have drifted. Use when Rai says "sync dotfiles", "chezmoi drift", "dotfiles out of sync", "what's drifted", "chezmoi-sync", "reconcile dotfiles", or when an agent edited a deployed dotfile and the chezmoi source needs catching up. Pulls latest, checks git + 1Password session, finds drift, then walks each drifted file ONE AT A TIME through an update-source-vs-override-deployed decision, then commits and pushes only the files it changed. Calm, guided, never dumps the full diff at once.
 allowed-tools: Bash, Read
 ---
 
@@ -166,7 +166,7 @@ Summarize what differs; avoid echoing secret values into the transcript.
 
 Confirm the result in one line, then move to the next file.
 
-## Step 4 — Summary + commit reminder
+## Step 4 — Summary, then commit + push
 
 After the worklist is done:
 
@@ -175,10 +175,43 @@ After the worklist is done:
    template edits).
 2. Summarize: resolved (kept-deployed / kept-source counts), skipped, and any
    templates flagged for manual edit.
-3. **If any `chezmoi add` ran, the SOURCE repo now has uncommitted changes.**
-   Remind Rai (this skill does NOT commit/push):
-   > Source files changed in `~/.local/share/chezmoi`. Commit + push when ready:
-   > `git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit && git -C ~/.local/share/chezmoi push`
+3. **Commit + push the source changes this sync made.** This skill DOES commit
+   and push — but **only the files it touched**, never a blanket `git add -A`.
+
+   The repo often carries *unrelated* uncommitted source edits (e.g. someone was
+   mid-change on `dot_config/impulse/jobs.json.tmpl`). Sweeping those into the
+   sync commit is wrong. So stage **explicitly** the paths this run changed:
+   - every source path written by a `chezmoi add <file>` (keep-deployed, plain),
+   - every template you hand-edited (keep-deployed, templated),
+   - any `logs/*.md` you updated for the change.
+
+   Keep a running list of these source paths as you go through Step 3. Then:
+
+   ```bash
+   cd ~/.local/share/chezmoi
+   # stage ONLY the paths this sync changed (one -- pathspec list, no `-A`)
+   git add -- <path1> <path2> logs/<topic>.md ...
+   # sanity-check you're committing only sync paths
+   git status -sb
+   git diff --cached --stat
+   ```
+
+   Write a commit message that summarizes the reconciliation per file
+   (what was kept-deployed vs kept-source, and why), following the repo's commit
+   conventions. Then commit and push:
+
+   ```bash
+   git commit -m "chezmoi-sync: <one-line summary>" -m "<per-file detail>"
+   git push
+   ```
+
+   - If **nothing** was changed by the sync (everything was keep-source or
+     skipped), there's nothing to stage — say so and skip the commit.
+   - If staging would pick up unrelated changes, it won't: you named exact paths.
+     Mention any leftover unrelated uncommitted files in the summary so Rai knows
+     they're still pending (you did NOT commit them).
+   - If `git push` fails (no upstream, auth, non-fast-forward), surface the error
+     and the staged-but-unpushed commit; don't force-push.
 
 ## Rules
 
@@ -187,9 +220,11 @@ After the worklist is done:
 - `chezmoi apply` is always `chezmoi apply --force <file>`.
 - NEVER `chezmoi add` a `*.tmpl` source. Warn and route to manual template edit.
 - NEVER run a bare `op` command — always `timeout`-guard it (it hangs on auth).
-- This skill never commits, never pushes, never signs into 1Password. It surfaces
-  the next step and hands the wheel to Rai for those.
-- Don't auto-resolve git conflicts in Step 0 — surface and stop.
+- This skill DOES commit + push at the end — but only the exact source paths it
+  changed (staged by explicit pathspec, NEVER `git add -A`). It never signs into
+  1Password; if a secret file needs an op session it can't get, defer it.
+- Don't auto-resolve git conflicts in Step 0 — surface and stop. Don't force-push
+  if the Step 4 push is rejected — surface the error and the unpushed commit.
 
 ---
 
