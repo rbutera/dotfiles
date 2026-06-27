@@ -11,4 +11,9 @@ export DB_URL={{ printf "postgresql://rai:%s@localhost:5432/dev" (onepasswordRea
 # Used by Cortex MCP for claim storage and execution logs.
 # Hardcoded so subagent processes (Tatls) inherit it via the shell env.
 export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline"
+
+# Home Assistant (dockerised on nimbus, see ~/expedition/Home Assistant Deployment - Nimbus.md).
+# Long-lived API token (~10yr); 1Password item: API Credential "Home Assistant nimbus".
+export HASS_SERVER="http://localhost:8123"
+export HASS_TOKEN={{ onepasswordRead "op://Private/Home Assistant nimbus/credential" | quote }}
 {{- end }}

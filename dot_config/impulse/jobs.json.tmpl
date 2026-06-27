@@ -281,36 +281,6 @@
       "prompt": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/florence.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/focused/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/focused/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
     }
   },
-  {
-    "id": "session-recap-tick",
-    "name": "Session Recap (hourly)",
-    "trigger": {
-      "kind": "cron",
-      "expr": "0 * * * *",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "script",
-      "bin": "pnpm"
-    },
-    "payload": {
-      "kind": "shell",
-      "cmd": "pnpm",
-      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": false,
-      "dedupe": "skip-if-running"
-    },
-    "enabled": true,
-    "tags": ["infrastructure", "kinto", "session-recap"],
-    "inputs": {
-      "cmd": "pnpm",
-      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
-      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
-    }
-  }
 ]
 {{- else if eq .chezmoi.hostname "nimbus" }}
 [
@@ -757,7 +727,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": ["autonomy", "nimbus"],
     "inputs": {
       "agent": "navi",
@@ -789,7 +759,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": ["autonomy", "nimbus"],
     "inputs": {
       "agent": "navi",
@@ -1000,36 +970,6 @@
     "inputs": {
       "cmd": "node",
       "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"],
-      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
-    }
-  },
-  {
-    "id": "session-recap-tick",
-    "name": "Session Recap (every 10m)",
-    "trigger": {
-      "kind": "cron",
-      "expr": "*/10 * * * *",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "script",
-      "bin": "pnpm"
-    },
-    "payload": {
-      "kind": "shell",
-      "cmd": "pnpm",
-      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"]
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": false,
-      "dedupe": "skip-if-running"
-    },
-    "enabled": true,
-    "tags": ["infrastructure", "nimbus", "session-recap"],
-    "inputs": {
-      "cmd": "pnpm",
-      "args": ["nx", "run", "discord-text-plugin:dev", "--", "recap"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   },

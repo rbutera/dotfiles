@@ -1,5 +1,15 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-06-20 -- Remove session-recap-tick job (recap retired)
+
+**Motivation:** The `/recap` HTTP endpoint and `recap-cli.ts` producer were removed from discord-text-plugin (chore/retire-recap). The prose-mirror accumulator is now the sole transcript-to-Discord path. The `session-recap-tick` Impulse cron job was the producer for the now-deleted endpoint.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl`:**
+- Removed `session-recap-tick` job object from the kinto branch (was hourly cron, `enabled: true`).
+- Removed `session-recap-tick` job object from the nimbus branch (was every 10m cron, `enabled: true`).
+
+**Deployed:** job already disabled (enabled:false) in the deployed `/Users/rai/.config/impulse/jobs.json` on nimbus; entire object now removed from the template. sync-crons --prune run to confirm no stale Hatchet crons remain.
+
 ## 2026-06-03 -- Add Florence daily-blog Impulse job (bead focused-9fia)
 
 **Motivation:** Florence's daily blog automation, modeled on Navi's journal pipeline (same `ark run <agent>` -> skill-mode shape). Rai's standing rule (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron, NOT launchd. The blueprint (`~/focused/vault/References/Florence Daily Blog.md`) originally suggested launchd; explicitly overridden to Impulse to match Navi.
@@ -176,3 +186,19 @@ Rai needs his ChatGPT Pro invoice (GBP 200/mo) submitted to Focused Labs expense
 - New prompt `dot_config/impulse/prompts/chatgpt-invoice-monthly.md`: opens ChatGPT billing via opentabs (launches Chrome itself if closed -- not a blocker, Navi has sudo + automation-mcp), grabs the latest invoice URL, runs the helper script.
 - Helper (in navi repo): `~/navi/bin/chatgpt-invoice-email.mjs` resolves the official itemised PDF via Stripe's `invoicedata.stripe.com/invoice_pdf_file_url/<acct>/<token>` endpoint -> signed S3 PDF, then gog-emails it to rai.butera@focused.io with the Rippling link.
 - Verified template <-> deployed in sync (chezmoi cat == deployed, 24 jobs) before adding; applied -> 25 jobs deployed. No secrets in the template, applied without 1Password.
+
+## 2026-06-20 -- Temporarily disable Cortex Tick + Cortex Review Tick
+
+### Problem
+Rai is not actively using Cortex right now. The two scheduled Cortex jobs (`cortex-tick` every 20m, `cortex-review-tick` hourly) spawn ephemeral headless Navi sessions (`target.kind: ark-spawn`) that run do-tick/do-review against the bead+Cortex work surface. This (a) confused Rai ("are there two Navis running?"), (b) caused a near-collision with the main session's Continue roll on bead workspace-ezfr (both claimed it ~1 min apart), and (c) added ephemeral-session prose to his Discord notification flood.
+
+### Solution/Fix
+Set `enabled: false` for `cortex-tick` and `cortex-review-tick` in BOTH:
+- deployed `~/.config/impulse/jobs.json` (live — read by sync-crons)
+- source `dot_config/impulse/jobs.json.tmpl` (so a future `chezmoi apply` keeps them disabled; template is onepasswordRead-free so safe to apply once the wider deployed-vs-template drift is reconciled)
+Then ran `tsx src/main.ts sync-crons --prune` from `apps/impulse` → pruned both crons from Hatchet (confirmed: "pruning stale cron: navi/cortex-tick", "navi/cortex-review-tick").
+
+To RE-ENABLE later: flip both back to `enabled: true` in deployed jobs.json, re-run `sync-crons` (no --prune needed to add).
+
+### Known drift (flagged for the dotfiles conversation)
+Deployed jobs.json and the chezmoi template have diverged BOTH ways: deployed has narrate-*/journal-* set + the quota-scrape path fix; template has an older set (jira-sync, lamplight-*, morning-sweep, standup-brief, daily-blog, nightly-health, todoist-hygiene) that is NOT deployed. "Which is canonical" is unresolved — do NOT `chezmoi apply` the template wholesale or it will regress the deployed set. Cortex disable was applied to both so it survives either resolution.
