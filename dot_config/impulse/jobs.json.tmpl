@@ -944,6 +944,36 @@
     }
   },
   {
+    "id": "florence-cookie-push",
+    "name": "Navi: Florence Cookie Push (SSH drop-file to kinto, every 2min)",
+    "trigger": {
+      "kind": "interval",
+      "baseMs": 120000
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": [
+        "{{ .chezmoi.homeDir }}/navi/bin/florence-cookie-push.mjs"
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": [
+      "infrastructure",
+      "cookie-sync",
+      "nimbus"
+    ]
+  },
+  {
     "id": "check-sister-email",
     "name": "Navi: Check Sister Email (Florence → Navi, every 15min, cold only)",
     "trigger": {
