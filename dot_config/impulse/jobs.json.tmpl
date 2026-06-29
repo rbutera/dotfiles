@@ -944,6 +944,36 @@
     }
   },
   {
+    "id": "check-sister-email",
+    "name": "Navi: Check Sister Email (Florence → Navi, every 15min, cold only)",
+    "trigger": {
+      "kind": "interval",
+      "baseMs": 900000
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": [
+        "{{ .chezmoi.homeDir }}/navi/bin/check-sister-email.mjs"
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "requiresTemperature": "cold",
+      "dedupe": "skip-if-running"
+    },
+    "enabled": false,
+    "tags": [
+      "sister-comms",
+      "nimbus"
+    ]
+  },
+  {
     "id": "quota-scrape",
     "name": "Claude Quota Scrape (active account, every 5m)",
     "trigger": {
