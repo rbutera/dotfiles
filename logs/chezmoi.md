@@ -1,5 +1,18 @@
 # chezmoi config changes log
 
+## 2026-07-01 — Bake the "never leave the source repo dirty" golden rule into CLAUDE.md + AGENTS.md
+
+### Motivation
+
+Rai's standing golden rule (2026-07-01): whenever an agent finds this chezmoi source repo dirty, it must commit and push it, never stash-and-forget. Previously this lived only in Florence's bd memory (`chezmoi-golden-rule`), so it depended on Florence remembering. Baking it into the repo's agent-guidance file makes any agent touching chezmoi (Claude Code, Codex, etc.) obey it without external memory (Brita filter).
+
+### What changed
+
+- Added a **"Golden Rule: never leave the source repo dirty"** section to `CLAUDE.md`, right after Agent requirements: inspect all drift (including un-authored), commit sane diffs with a clear message + push, surface suspicious diffs to Rai, never leave dirty.
+- Created `AGENTS.md` as a **symlink to `CLAUDE.md`** so cross-tool agents (Codex and anything reading AGENTS.md) get the same guidance from a single source of truth (no duplication → no drift, fitting given the topic).
+
+Both are plain files (no 1Password), safe to commit without a session.
+
 ## 2026-06-03 — Add io.focused.nightly-health launchd plist
 
 ### Motivation
