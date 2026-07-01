@@ -33,10 +33,9 @@ channel = "stable"
 version_check = true
 
 [keys]
-# Prefix = ctrl+a to match years of oh-my-tmux muscle memory.
-# (herdr's native default is ctrl+b — flip this one line if you'd rather
-# learn the native default and keep ctrl+a for readline start-of-line.)
-prefix = "ctrl+a"
+# Prefix = ctrl+space — Rai's accustomed prefix.
+# (herdr's native default is ctrl+b; oh-my-tmux was ctrl+a. Rai prefers ctrl+space.)
+prefix = "ctrl+space"
 
 # --- Familiar tmux reflexes that map ~1:1 (kept as herdr defaults) ---
 # detach          = prefix+q    (tmux was prefix+d — different letter, learn it)
