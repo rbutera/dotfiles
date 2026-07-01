@@ -109,7 +109,7 @@
     },
     "payload": {
       "kind": "prompt",
-      "text": "Run /todoist-triage in autonomous mode, then /todoist-review"
+      "text": "Run /todoist-triage in autonomous mode, then /todoist-review. Send at most ONE Discord DM, at the very end, only if something needs Rai, prefixed EXACTLY with '🗂️ [todoist-hygiene] '. Never send a preamble, 'summary incoming', 'test', or mid-run announcement."
     },
     "policy": {
       "maxConcurrent": 1,
@@ -123,7 +123,7 @@
       "workingDir": "{{ .chezmoi.homeDir }}/focused",
       "model": "sonnet",
       "maxTurns": 25,
-      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Then run /todoist-review and report today, overdue, and waiting items plus any Someday items due for resurfacing. Finally, if there is anything needing Rai's attention (items in today's needs-review file, or overdue/waiting items), DM him a short Discord summary of what you filed and what needs him; if nothing needs him, send no DM."
+      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Then run /todoist-review and report today, overdue, and waiting items plus any Someday items due for resurfacing. Finally, send AT MOST ONE Discord DM, at the very END of the run, and ONLY if something genuinely needs Rai's attention (items in today's needs-review file, or overdue/waiting items). Prefix that single DM EXACTLY with '🗂️ [todoist-hygiene] ' so it is instantly attributable to this scheduled job. Do NOT send any preamble, placeholder, 'summary incoming', 'test', 'heads up', or mid-run announcement message under any circumstances; the ONLY message allowed is the one final tagged summary. If nothing needs Rai, send NO DM at all."
     }
   },
   {
