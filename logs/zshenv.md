@@ -194,3 +194,11 @@ Lloyd asked to publish the spec-driven-development blog series into Notion. The 
 
 ### Solution/Fix
 New per-domain group `dot_config/zsh/notion.zsh.tmpl` -> `~/.config/zsh/notion.zsh`, gated to `host_groups.work` (kinto/latios) exactly like `easyjet.zsh`. Exports `NOTION_API_KEY` (+ a `NOTION_TOKEN` alias) from `onepasswordRead "op://focused/Notion API Key/credential"`. On non-work hosts it renders to the header only (zero op reads). Requires the `Notion API Key` item in the `focused` vault (same vault easyjet.zsh already uses), then `chezmoi apply ~/.config/zsh/notion.zsh` with an active 1Password session. Source-only change; Rai applies.
+
+## 2026-07-03 — Add Cloudflare R2 image-CDN credentials
+
+### Problem
+The new R2-backed image-hosting library (expedition-dashboard gallery + Florence/Navi skill uploads) needs Cloudflare R2 credentials in the shell env on all hosts. Rai generated a CF API token with R2+Images access plus S3-compatible R2 credentials, stored in `op://dev/Cloudflare R2 Images CDN`.
+
+### Solution/Fix
+Added five vars to `tools.zsh` (ungated — both Florence/kinto and Navi/nimbus need it): `CLOUDFLARE_R2_ACCOUNT_ID` (username), `CLOUDFLARE_R2_API_TOKEN` (credential; CF Bearer for R2/Images management), and `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_S3_ENDPOINT` (S3-compatible object ops for aws-sdk / rclone). Deliberately `R2_`-prefixed, NOT `AWS_*`, so they never collide with `AWS_PROFILE=ej-dev`. Source-only change; requires `chezmoi apply ~/.config/zsh/tools.zsh` with an active 1Password session.
