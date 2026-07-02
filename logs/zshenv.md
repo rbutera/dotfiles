@@ -186,3 +186,11 @@ The deployed `~/.zshenv` lacks the key because `chezmoi apply` hasn't run since 
 
 ### Fix
 Removed the duplicate, kept the single documented line (`export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" }}`) under the voice-migration comment, normalized spacing. Source-only change; no apply run. Rai still needs to `chezmoi apply` (after `op signin`) to get the key into his live shell env.
+
+## 2026-07-02 — Add Notion API key (work-gated group)
+
+### Problem
+Lloyd asked to publish the spec-driven-development blog series into Notion. The hosted Notion MCP (OAuth) cannot upload local files (charts/PDFs) to pages, so we need the Notion REST API, which needs an integration token in the shell env. It is a work tool and should not land on personal hosts.
+
+### Solution/Fix
+New per-domain group `dot_config/zsh/notion.zsh.tmpl` -> `~/.config/zsh/notion.zsh`, gated to `host_groups.work` (kinto/latios) exactly like `easyjet.zsh`. Exports `NOTION_API_KEY` (+ a `NOTION_TOKEN` alias) from `onepasswordRead "op://focused/Notion API Key/credential"`. On non-work hosts it renders to the header only (zero op reads). Requires the `Notion API Key` item in the `focused` vault (same vault easyjet.zsh already uses), then `chezmoi apply ~/.config/zsh/notion.zsh` with an active 1Password session. Source-only change; Rai applies.
