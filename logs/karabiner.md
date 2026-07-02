@@ -1,5 +1,25 @@
 # karabiner config changes log
 
+## 2026-06-25 — Dygma Defy F20 fn key and raw F16/F17/F21
+
+### Problem
+
+Rai wanted the Dygma Defy `F16`, `F17`, `F20`, and `F21` keys freed from
+existing Karabiner behavior so they can be assigned directly by apps. `F20`
+should act like the built-in Mac keyboard's Fn/Globe key for Wispr Flow
+hold-to-dictate, while `F21` should remain available as a raw Discord
+push-to-talk key.
+
+### Changes
+
+Updated `dot_config/private_karabiner/private_karabiner.json`:
+
+- Removed the Defy `F16 -> ctrl + Amethyst` manipulator
+- Removed the Defy `F17 -> raycast` manipulator
+- Added a Defy-only `F20 -> apple_vendor_top_case_key_code keyboard_fn`
+  manipulator
+- Left `F21` unbound in Karabiner so Discord can capture raw `F21`
+
 ## 2026-06-05 — Built-in MacBook F/J home-row shift
 
 ### Problem

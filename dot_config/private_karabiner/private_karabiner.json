@@ -57,9 +57,9 @@
                                         "type": "device_if"
                                     }
                                 ],
-                                "description": "(Dygma Defy) F17 -> raycast",
+                                "description": "(Dygma Defy) F20 -> fn",
                                 "from": {
-                                    "key_code": "f17",
+                                    "key_code": "f20",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -68,51 +68,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "left_command"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "spacebar",
-                                        "modifiers": [
-                                            "left_command"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "identifiers": [
-                                            {
-                                                "product_id": 18,
-                                                "vendor_id": 13807
-                                            }
-                                        ],
-                                        "type": "device_if"
-                                    }
-                                ],
-                                "description": "(Dygma Defy) F16 -> ctrl + Amethyst",
-                                "from": {
-                                    "key_code": "f16",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": [
-                                            "left_option",
-                                            "left_control"
-                                        ]
+                                        "apple_vendor_top_case_key_code": "keyboard_fn"
                                     }
                                 ],
                                 "type": "basic"

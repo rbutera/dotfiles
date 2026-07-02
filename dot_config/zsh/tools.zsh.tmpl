@@ -12,6 +12,16 @@ export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault P
 # Cloudflare
 export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" | quote }}
 
+# Cloudflare R2 image CDN (shared by Florence + Navi, all hosts). Two auth sets:
+# the CF API token (+ account id) for R2/Images management, and the S3-compatible
+# creds for object ops (aws-sdk / rclone). R2_-prefixed, NOT AWS_*, so they never
+# collide with the ej-dev AWS profile.
+export CLOUDFLARE_R2_ACCOUNT_ID={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /username" | quote }}
+export CLOUDFLARE_R2_API_TOKEN={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /credential" | quote }}
+export R2_ACCESS_KEY_ID={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /access_key_id" | quote }}
+export R2_SECRET_ACCESS_KEY={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /secret_access_key" | quote }}
+export R2_S3_ENDPOINT={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /s3_api_endpoint" | quote }}
+
 # Tailscale (nocodb oauth) — two distinct fields of ONE item → one fetch
 {{- $tailscale := onepasswordDetailsFields "tailscale nocodb oauth" "Private" }}
 export TAILSCALE_NOCODB_CLIENT_ID={{ $tailscale.username.value | quote }}

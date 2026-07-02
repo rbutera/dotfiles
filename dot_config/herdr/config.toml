@@ -1,0 +1,93 @@
+# herdr configuration — managed by chezmoi
+# Deployed to ~/.config/herdr/config.toml
+#
+# Tuned for Rai's workflow migrating from tmux (gpakosz/oh-my-tmux).
+# Only the lines that DEVIATE from herdr's defaults are set here; everything
+# else inherits `herdr --default-config`. Each deviation has a why.
+# Regenerate the full default reference any time with: herdr --default-config
+#
+# Ground truth: herdr 0.7.1. Model = Session > Workspace > Tab > Pane, with
+# Agents as first-class, state-tracked entities (the thing tmux/zellij lack).
+# tmux SESSION ~= herdr WORKSPACE (your all-day switch unit, prefix+w).
+
+[theme]
+# Carries over your tmux catppuccin theme natively.
+name = "catppuccin"
+# Follow the host terminal's light/dark. Uncomment if you want auto-switching.
+# auto_switch = true
+# dark_name = "catppuccin"
+# light_name = "catppuccin-latte"
+
+[terminal]
+# Empty = $SHELL then /bin/sh. Leave default unless you want a fixed shell.
+# default_shell = ""
+shell_mode = "auto"
+# New panes/tabs/workspaces inherit the source pane's cwd (tmux-like).
+new_cwd = "follow"
+
+[update]
+# Pre-1.0 software ships ~66 releases/quarter. Keep the stable channel and the
+# background check ON so you know when to update, but update DELIBERATELY with
+# `herdr update` (brew-pinned to 0.7.1 today) rather than floating silently.
+channel = "stable"
+version_check = true
+
+[keys]
+# Prefix = ctrl+space — Rai's accustomed prefix.
+# (herdr's native default is ctrl+b; oh-my-tmux was ctrl+a. Rai prefers ctrl+space.)
+prefix = "ctrl+space"
+
+# --- Familiar tmux reflexes that map ~1:1 (kept as herdr defaults) ---
+# detach          = prefix+q    (tmux was prefix+d — different letter, learn it)
+# new_tab         = prefix+c
+# next_tab        = prefix+n    prev_tab = prefix+p    switch_tab = prefix+1..9
+# split_vertical  = prefix+v    split_horizontal = prefix+minus
+# focus_pane_*    = prefix+h/j/k/l
+# zoom            = prefix+z    close_pane = prefix+x   resize_mode = prefix+r
+# copy mode       = prefix+[  (vi motions; y/Enter copy — your reflex survives)
+
+# --- The native flow to LEARN FRESH (do not rebuild tmux session-switching) ---
+# workspace_picker = prefix+w   goto = prefix+g   new_workspace = prefix+shift+n
+# toggle_sidebar   = prefix+b   (the fleet view — herdr's whole point)
+
+# --- ADHD attention-routing: jump straight to the agent that needs you ---
+# These are UNSET by default; binding them is the highest-leverage add.
+next_agent = "prefix+shift+j"
+previous_agent = "prefix+shift+k"
+focus_agent = "prefix+alt+1..9"   # jump to agent row N
+
+# Optional direct (prefix-free) tab switching like tmux's ctrl+1..9.
+# [keys.indexed]
+# tabs = "ctrl"   # makes ctrl+1..9 switch tabs directly
+
+# Heavy git user: pop lazygit in a temporary pane.
+[[keys.command]]
+key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
+
+[ui]
+# Attention queue: order the agent panel by who needs you, not by workspace.
+# This is the ADHD win — blocked agents float to the top of the sidebar.
+agent_panel_sort = "priority"
+# Show detected agent labels on pane borders so you can tell panes apart fast.
+show_agent_labels_on_pane_borders = true
+confirm_close = true   # guard against nuking a workspace by reflex
+
+[ui.toast]
+# Desktop notification when a BACKGROUND agent changes state (e.g. goes blocked
+# and needs you). This is the "don't let a stalled agent rot unnoticed" signal.
+# Options: off | herdr (in-app) | terminal | system (macOS notifications).
+# Dial to "herdr" or "off" if it gets noisy.
+delivery = "system"
+
+[ui.sound]
+# Audible cue on agent state change in background workspaces. On by default;
+# set enabled=false if the sounds annoy you.
+enabled = true
+
+[session]
+# Native replacement for tmux-resurrect + tmux-continuum: resume AI-agent panes
+# into their real conversation sessions after a herdr server restart.
+# (Requires official integrations that report session refs.)
+resume_agents_on_restore = true
