@@ -64,3 +64,21 @@ shift-punctuation chords is a separate concern noted above.
 **Reference — what `prefix+w` does in tmux:** opens `choose-tree`, the interactive tree of
 sessions+windows to pick from — the direct analogue of herdr's space/workspace picker,
 which is why `prefix+w` is kept bound to `workspace_picker` alongside the new `prefix+s`.
+
+## 2026-07-03 (pass 3) — scroll speed knob (perf triage)
+
+**Symptom.** Rai: scrolling feels slow; interface laggy after a long multi-day session.
+
+**Triage (local, verified).** herdr-server up 2d1h at ~24-31MB RSS (no leak), all 7 panes
+idle zsh at 0% CPU, yet the server burns ~8% CPU idle — i.e. herdr's own render/event
+loop, not a chatty pane. On 0.7.1 = latest stable (no update lever). All perf knobs were
+at defaults.
+
+**Change.** `[ui] mouse_scroll_lines = 5` (was default 3) — faster viewport scroll.
+
+**Not changed (offered).** `redraw_on_focus_gained=false` (less redraw churn on focus,
+trade-off: rare surface corruption until next redraw); lower `scrollback_limit_bytes`
+(default 10MB/pane) to shrink the render walk on long sessions. Real lever for cumulative
+lag: restart the server (`herdr server stop` then `herdr`, or `herdr update --handoff`) —
+safe because panes restore + `resume_agents_on_restore=true`. Pre-1.0 render-loop overhead
+is a known rough edge at this stage.

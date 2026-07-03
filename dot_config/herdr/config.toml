@@ -111,6 +111,9 @@ confirm_close = true   # guard against nuking a workspace by reflex
 # tmux-instant tabs: your tmux runs `automatic-rename off`, so don't stop to ask
 # for a name on every new tab — create it immediately, rename later if needed.
 prompt_new_tab_name = false
+# Scroll speed: herdr's default is 3 lines per wheel notch, which feels sluggish.
+# Bump to 5 so the viewport moves more per notch. Raise further (8) if still slow.
+mouse_scroll_lines = 5
 
 [ui.toast]
 # Desktop notification when a BACKGROUND agent changes state (e.g. goes blocked
