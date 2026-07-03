@@ -13,10 +13,10 @@
 [theme]
 # Carries over your tmux catppuccin theme natively.
 name = "catppuccin"
-# Follow the host terminal's light/dark. Uncomment if you want auto-switching.
-# auto_switch = true
-# dark_name = "catppuccin"
-# light_name = "catppuccin-latte"
+# Follow the host terminal's light/dark automatically (Ghostty reports it).
+auto_switch = true
+dark_name = "catppuccin"
+light_name = "catppuccin-latte"
 
 [terminal]
 # Empty = $SHELL then /bin/sh. Leave default unless you want a fixed shell.
@@ -49,17 +49,36 @@ settings = "prefix+;"
 # entry key is bindable. herdr's native prefix+[ is kept as a fallback.
 copy_mode = ["prefix+space", "prefix+["]
 
-# --- Familiar tmux reflexes that map ~1:1 (kept as herdr defaults) ---
-# detach          = prefix+q    (tmux was prefix+d — different letter, learn it)
-# new_tab         = prefix+c
-# next_tab        = prefix+n    prev_tab = prefix+p    switch_tab = prefix+1..9
-# split_vertical  = prefix+v    split_horizontal = prefix+minus
-# focus_pane_*    = prefix+h/j/k/l
-# zoom            = prefix+z    close_pane = prefix+x   resize_mode = prefix+r
+# --- tmux split/pane keys layered onto herdr's native ones (arrays = both fire) ---
+# tmux: `prefix+-` splits down (stacked), `prefix+_` splits right (side-by-side).
+# herdr's native split_horizontal(down) already = prefix+minus == tmux `-`; we add
+# tmux `_` onto split_vertical(right) so either muscle memory works.
+split_horizontal = ["prefix+minus"]           # down / stacked  (tmux `-`)
+split_vertical   = ["prefix+v", "prefix+_"]   # right / side    (tmux `_` + herdr v)
+# tmux: rename window = prefix+,  (herdr tab ≈ tmux window).
+rename_tab = ["prefix+comma", "prefix+shift+t"]
+# tmux: swap pane down/up = prefix+>/prefix+< — added alongside herdr shift+j/k.
+swap_pane_down = ["prefix+shift+j", "prefix+>"]
+swap_pane_up   = ["prefix+shift+k", "prefix+<"]
+# Prefix-FREE pane focus on the docs' recommended "safe" ctrl+alt family; the
+# native prefix+h/j/k/l are kept too.
+focus_pane_left  = ["prefix+h", "ctrl+alt+h"]
+focus_pane_down  = ["prefix+j", "ctrl+alt+j"]
+focus_pane_up    = ["prefix+k", "ctrl+alt+k"]
+focus_pane_right = ["prefix+l", "ctrl+alt+l"]
 
-# --- The native flow to LEARN FRESH (do not rebuild tmux session-switching) ---
-# workspace_picker = prefix+w   goto = prefix+g   new_workspace = prefix+shift+n
-# toggle_sidebar   = prefix+b   (the fleet view — herdr's whole point)
+# --- Familiar tmux reflexes that already map ~1:1 (herdr defaults, no config) ---
+# detach = prefix+q   new_tab = prefix+c   next/prev_tab = prefix+n/p
+# switch_tab = prefix+1..9   zoom = prefix+z   close_pane = prefix+x
+# resize_mode = prefix+r
+
+# --- Space (workspace) navigation — herdr's answer to tmux session-switching ---
+# picker = prefix+s / prefix+w (set above)   goto = prefix+g
+# new_workspace = prefix+shift+n   toggle_sidebar = prefix+b (the fleet view)
+# Direct jump to space N, plus prev/next cycling (your tmux session-hop reflex).
+switch_workspace = "prefix+shift+1..9"
+previous_workspace = "prefix+shift+left"
+next_workspace = "prefix+shift+right"
 
 # --- ADHD attention-routing: jump straight to the agent that needs you ---
 # These are UNSET by default; binding them is the highest-leverage add.
@@ -70,9 +89,11 @@ next_agent = "prefix+shift+down"
 previous_agent = "prefix+shift+up"
 focus_agent = "prefix+alt+1..9"   # jump to agent row N
 
-# Optional direct (prefix-free) tab switching like tmux's ctrl+1..9.
-# [keys.indexed]
-# tabs = "ctrl"   # makes ctrl+1..9 switch tabs directly
+# Direct (prefix-free) tab switching like tmux — ctrl+1..9. NOTE: many terminals
+# (Ghostty included) don't emit distinct codes for ctrl+<digit>; if it no-ops,
+# that's the terminal swallowing it, not herdr. prefix+1..9 always works.
+[keys.indexed]
+tabs = "ctrl"
 
 # Heavy git user: pop lazygit in a temporary pane.
 [[keys.command]]
