@@ -37,6 +37,18 @@ version_check = true
 # (herdr's native default is ctrl+b; oh-my-tmux was ctrl+a. Rai prefers ctrl+space.)
 prefix = "ctrl+space"
 
+# --- tmux-reflex OVERRIDES (these DEVIATE from herdr defaults) ---
+# tmux's `prefix+s` opens the session tree. herdr's everyday switch unit is the
+# SPACE (workspace), so put the space/workspace picker on prefix+s. herdr's
+# native prefix+w is kept as a secondary binding (bindings accept arrays).
+workspace_picker = ["prefix+s", "prefix+w"]
+# prefix+s was herdr's `settings`; move settings off it, onto prefix+;.
+settings = "prefix+;"
+# Copy/yank mode on prefix+space (your reflex). The vi motions inside copy mode
+# (h/j/k/l  w/b/e  {/})  and y/Enter-to-copy are HARDWIRED by herdr — only the
+# entry key is bindable. herdr's native prefix+[ is kept as a fallback.
+copy_mode = ["prefix+space", "prefix+["]
+
 # --- Familiar tmux reflexes that map ~1:1 (kept as herdr defaults) ---
 # detach          = prefix+q    (tmux was prefix+d — different letter, learn it)
 # new_tab         = prefix+c
@@ -44,7 +56,6 @@ prefix = "ctrl+space"
 # split_vertical  = prefix+v    split_horizontal = prefix+minus
 # focus_pane_*    = prefix+h/j/k/l
 # zoom            = prefix+z    close_pane = prefix+x   resize_mode = prefix+r
-# copy mode       = prefix+[  (vi motions; y/Enter copy — your reflex survives)
 
 # --- The native flow to LEARN FRESH (do not rebuild tmux session-switching) ---
 # workspace_picker = prefix+w   goto = prefix+g   new_workspace = prefix+shift+n
@@ -52,8 +63,11 @@ prefix = "ctrl+space"
 
 # --- ADHD attention-routing: jump straight to the agent that needs you ---
 # These are UNSET by default; binding them is the highest-leverage add.
-next_agent = "prefix+shift+j"
-previous_agent = "prefix+shift+k"
+# NOTE: prefix+shift+j/k are herdr's swap_pane_down/up defaults — binding agent
+# nav there collides. Parked on prefix+shift+down/up (unbound by default) so
+# both survive: down = next in the attention queue, up = previous.
+next_agent = "prefix+shift+down"
+previous_agent = "prefix+shift+up"
 focus_agent = "prefix+alt+1..9"   # jump to agent row N
 
 # Optional direct (prefix-free) tab switching like tmux's ctrl+1..9.
@@ -73,6 +87,9 @@ agent_panel_sort = "priority"
 # Show detected agent labels on pane borders so you can tell panes apart fast.
 show_agent_labels_on_pane_borders = true
 confirm_close = true   # guard against nuking a workspace by reflex
+# tmux-instant tabs: your tmux runs `automatic-rename off`, so don't stop to ask
+# for a name on every new tab — create it immediately, rename later if needed.
+prompt_new_tab_name = false
 
 [ui.toast]
 # Desktop notification when a BACKGROUND agent changes state (e.g. goes blocked
@@ -80,6 +97,16 @@ confirm_close = true   # guard against nuking a workspace by reflex
 # Options: off | herdr (in-app) | terminal | system (macOS notifications).
 # Dial to "herdr" or "off" if it gets noisy.
 delivery = "system"
+# How long a background-agent state change must persist before it toasts, to
+# swallow rapid working→blocked→working flaps. Default 1s. Bump if it's chatty.
+delay_seconds = 1
+
+[ui.toast.clipboard]
+# The "copied to clipboard" confirmation toast. Worth keeping ON for you: your
+# copies travel out over OSC 52 (incl. SSH) and are otherwise invisible, so the
+# toast is your proof the yank actually landed. In-app, doesn't hit macOS notifs.
+enabled = true
+position = "bottom-center"
 
 [ui.sound]
 # Audible cue on agent state change in background workspaces. On by default;
