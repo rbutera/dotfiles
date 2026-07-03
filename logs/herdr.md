@@ -34,7 +34,33 @@ before touching config.
 `{"diagnostics":[],"status":"applied"}`. Empty diagnostics = every binding parsed clean,
 including `prefix+;` and `prefix+space`.
 
-**Not yet applied (offered as opt-in).** Direct prefix-free `ctrl+alt+h/j/k/l` pane-focus
-chords (docs' recommended "safe" modifier family); `theme.auto_switch` light/dark
-catppuccin; `switch_workspace = "prefix+shift+1..9"`; `previous/next_workspace` cycling;
-`[keys.indexed] tabs = "ctrl"` for direct `ctrl+1..9` tab jumps.
+## 2026-07-03 (pass 2) — more tmux split/pane parity + the opt-in menu applied
+
+**Motivation.** Rai wanted the tmux split/rename/swap reflexes to *also* work in herdr
+(both keymaps live side by side), plus "apply the rest" of the opt-in menu.
+
+**tmux keys layered on (arrays, so herdr-native + tmux both fire):**
+- `rename_tab` += `prefix+comma` (tmux rename-window is `prefix+,`; herdr tab ≈ window).
+- `split_vertical` += `prefix+_` (tmux `_` = split right/side-by-side; herdr keeps `v`).
+- `split_horizontal` stays `prefix+minus` — already == tmux `-` (split down/stacked).
+- `swap_pane_down/up` += `prefix+>` / `prefix+<` (tmux `>`/`<`).
+- `focus_pane_*` += `ctrl+alt+h/j/k/l` — prefix-FREE pane focus (docs' "safe" chord
+  family); `prefix+h/j/k/l` retained.
+
+**Opt-in menu applied:**
+- `switch_workspace = "prefix+shift+1..9"` — direct jump to space N.
+- `previous/next_workspace = prefix+shift+left/right` — cycle spaces (tmux session-hop).
+- `[keys.indexed] tabs = "ctrl"` — direct `ctrl+1..9` tab jumps. CAVEAT: many terminals
+  (Ghostty) don't emit distinct `ctrl+<digit>` codes; may no-op at the terminal layer.
+  `prefix+1..9` is unaffected.
+- `[theme] auto_switch = true` (dark=catppuccin, light=catppuccin-latte) — follow
+  Ghostty's light/dark.
+
+**Verification.** Re-applied + `herdr server reload-config` → `{"diagnostics":[],...}` and
+no keybind/parse WARN in herdr-server.log — every key string (incl. the shift-punctuation
+`_`/`>`/`<` and the indexed table) accepted. Terminal-layer delivery of `ctrl+<digit>` and
+shift-punctuation chords is a separate concern noted above.
+
+**Reference — what `prefix+w` does in tmux:** opens `choose-tree`, the interactive tree of
+sessions+windows to pick from — the direct analogue of herdr's space/workspace picker,
+which is why `prefix+w` is kept bound to `workspace_picker` alongside the new `prefix+s`.
