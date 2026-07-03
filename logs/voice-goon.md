@@ -13,3 +13,11 @@
   - `section` — silence-only chunk (`pause_ms`, optional `label`); no `text`
 - Converted the original 64 inline segments to 77 JSON items (13 section markers from the old `# === ... ===` comments, 54 narration, 10 dialogue exclamations).
 - Removed `~/generate.py` (superseded by `~/voice-goon/generate.py`).
+
+## 2026-07-03 — Add AGENTS.md for voice-goon
+
+### Problem
+No local documentation for agents on JSON script format or how to run `generate.py`.
+
+### Solution
+Added `~/voice-goon/AGENTS.md` covering directory layout, prerequisites, CLI usage, JSON schema for all three segment types (`narration`, `dialogue`, `section`), and agent workflow conventions.
