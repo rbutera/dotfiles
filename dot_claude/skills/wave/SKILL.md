@@ -105,6 +105,7 @@ One agent per independent task in the wave. Each agent prompt MUST include:
 4. **Context files**: if OpenSpec, include proposal/design/specs. If a plan file, include it. If the task references specific files, list them.
 5. **Commit rules**: commit after each logical unit, descriptive messages
 6. **Output format**: report status as DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED, list files changed, summarize what was built
+7. **No self-orchestrated review (MANDATORY)**: every implementation-agent prompt MUST explicitly forbid the agent from spawning, dispatching, or SendMessage-ing its OWN review/verification subagents (no "dual review", no Opus/Codex reviewer, no self-review loop). The agent ONLY implements, runs the gate commands (build/test/lint/typecheck) itself, commits, and reports facts. **The orchestrator (you) owns the review gate — step 4c — always.** Rationale: a spawned implementation agent and the reviewers it spawns are separate sessions; the reviewers cannot SendMessage back to it, so the implementer hangs forever waiting on verdicts it can never receive. Put this prohibition in the prompt in plain terms, e.g. "⛔ Do NOT spawn any review subagents; implement + gate + commit + report only — the orchestrator reviews."
 
 If using OpenSpec with a schema that has an apply instruction (like fusion-workflow), tell the agent to use `/opsx:apply`. Otherwise, the agent implements directly from the task description.
 
@@ -123,11 +124,9 @@ All independent tasks in a wave dispatch in a **single message** (parallel), and
 
 ### 4c. Review gate
 
-**First, check whether the implementation agent already ran its own dual review.** Some implementation agents spawn their OWN Opus + Codex review sub-agents, report both verdicts, and fix any findings to passing before reporting back. **If the implementation agent reports it ran a dual Opus+Codex (or equivalent two-reviewer) review and both passed — or it fixed the findings to passing — TRUST that review and proceed to the next wave. Do NOT dispatch a redundant second review gate.** Running your own reviewers on top of the subagent's is the confusion to avoid: you end up with stale reviews of a superseded commit and duplicated work.
+**The orchestrator ALWAYS runs the review gate — never the implementation agent.** Implementation agents are forbidden from spawning their own reviewers (step 4a.7), because a spawned agent and the reviewers it spawns are separate sessions: the reviewers cannot report back to it, so it hangs waiting on verdicts it can never receive. So do NOT rely on any self-review an implementation agent claims — if an agent reports it "ran a dual review", treat that as a process violation, ignore its verdicts, and run the gate yourself on the committed diff. You dispatch the reviewers, you receive the verdicts, you decide.
 
-Only run the review gate YOURSELF when the implementation agent did **not** run its own dual review — i.e. it ran no review, ran only a single reviewer, or its self-review was inconclusive/failed. (When in doubt about whether the subagent's self-review was genuine and complete, a quick independent gate-check — run the tests/build yourself — is enough; you don't need to re-spawn reviewers.)
-
-When you do need to run the gate, dispatch **two review agents in parallel**:
+Once the implementation agent reports DONE (with its gate output), dispatch **two review agents in parallel** yourself:
 
 **Agent 1 (Claude Opus):**
 - Read the diff: `git diff <base>..<head>`
