@@ -4,6 +4,38 @@ Dated changelog for `dot_config/herdr/config.toml` (deployed to `~/.config/herdr
 herdr is a terminal workspace manager for AI coding agents — tmux-like, but with agents
 as first-class, state-tracked entities. Ground truth: herdr 0.7.1. Docs: https://herdr.dev/docs.
 
+## 2026-07-05 — Fix: tab switching completely broken (remove `[keys.indexed]`)
+
+**Symptom.** Rai reported he couldn't switch to his second tab *at all* in a live
+herdr session. `prefix`-then-`2` did nothing; `ctrl+2` popped the prefix menu.
+
+**Root causes (two, compounding).**
+1. The running herdr server had been up since Jul 1 but the config was edited Jul 3
+   (+ more on Jul 4). herdr does **not** hot-reload `config.toml` — it holds keybinds
+   in memory — so every recent keymap change had never been loaded. Fixed live with
+   `herdr server reload-config`. (Lesson: after any herdr config edit, reload-config.)
+2. The real bug: the `[keys.indexed]` block (`tabs = "ctrl"`, added 2026-07-04) was
+   **destroying** tab switching, not adding to it. Confirmed against herdr source
+   (`src/config/keybinds.rs`): a legacy `[keys.indexed]` entry is treated as user
+   config that **displaces** the modern default — see the `apply_indexed!` macro
+   (the `BindingSource::Default && !legacy_config.is_empty()` branch is a no-op that
+   skips installing the default) and the test
+   `legacy_indexed_user_bindings_displace_modern_defaults`. So `tabs = "ctrl"`:
+   - removed the default `switch_tab = "prefix+1..9"` (→ `prefix+N` unbound), and
+   - rebound tabs to `ctrl+1..9` **direct**, which is un-typeable here because
+     `ctrl+<digit>` == `ctrl+@` == NUL == the `ctrl+space` prefix (hence `ctrl+2`
+     opening the prefix menu). Net: zero working tab-switch keys.
+
+**Change.** Deleted the entire `[keys.indexed]` table from
+`dot_config/herdr/config.toml`, replacing it with a NOTE comment warning future-me
+not to re-add it and explaining the displacement trap. Leaving `switch_tab` unset
+restores herdr's default `prefix+1..9`.
+
+**Verification.** Edited the deployed `~/.config/herdr/config.toml` directly and ran
+`herdr server reload-config` → `{"diagnostics":[],"status":"applied"}`. `prefix+2`
+switches tabs again. Docs/source cross-checked: herdr.dev/docs/keyboard confirms
+`prefix+1..9` = "Jump to tab 1–9"; source confirms the displacement semantics.
+
 ## 2026-07-03 — tmux-reflex keybind alignment + toast/QoL pass
 
 **Motivation.** Bring the herdr keymap closer to Rai's tmux (gpakosz/oh-my-tmux) muscle

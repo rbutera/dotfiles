@@ -89,11 +89,14 @@ next_agent = "prefix+shift+down"
 previous_agent = "prefix+shift+up"
 focus_agent = "prefix+alt+1..9"   # jump to agent row N
 
-# Direct (prefix-free) tab switching like tmux — ctrl+1..9. NOTE: many terminals
-# (Ghostty included) don't emit distinct codes for ctrl+<digit>; if it no-ops,
-# that's the terminal swallowing it, not herdr. prefix+1..9 always works.
-[keys.indexed]
-tabs = "ctrl"
+# NOTE: do NOT re-add a [keys.indexed] table for tabs. Setting `[keys.indexed]
+# tabs = "ctrl"` does NOT *add* a ctrl+1..9 shortcut — herdr treats a legacy
+# [keys.indexed] entry as user config that DISPLACES the modern default, so it
+# silently removes `switch_tab = prefix+1..9` and rebinds tabs to ctrl+1..9 only.
+# And ctrl+<digit> is un-typeable here: ctrl+2 emits NUL == the ctrl+space prefix.
+# Result: zero working tab-switch keys. (Confirmed in herdr src: the
+# `legacy_indexed_user_bindings_displace_modern_defaults` test.) Leaving switch_tab
+# unset keeps herdr's default prefix+1..9, which is what we want.
 
 # Heavy git user: pop lazygit in a temporary pane.
 [[keys.command]]
