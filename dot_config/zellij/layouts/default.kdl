@@ -1,14 +1,13 @@
-// Default layout — Rai Butera
-// Clean single-pane layout with compact status bar.
-// Mirrors the tmux experience: one pane, split as needed.
-
+// Default layout — reset to zellij's built-in OOTB default on 2026-07-04.
+// tab-bar on top, your pane in the middle, and the full status-bar at the bottom
+// (the one that shows the current mode + its keybind hints) — that hint bar is the
+// main way to learn the default keybindings, so it stays.
 layout {
-    // Main editing area
+    pane size=1 borderless=true {
+        plugin location="tab-bar"
+    }
     pane
-
-    // Status bar — shows current mode and contextual keybind hints
-    // Switch back to compact-bar (size=1) once comfortable with keybinds
-    pane size=2 borderless=true {
+    pane size=1 borderless=true {
         plugin location="status-bar"
     }
 }
