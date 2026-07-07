@@ -119,6 +119,19 @@ key = "prefix+alt+g"
 type = "pane"
 command = "lazygit"
 
+# Pane-close confirmation (herdr core has none — confirm_close guards workspaces
+# only). Two-tier close: prefix+x asks first via the confirm-close-pane plugin
+# (opens an overlay prompt on the focused pane; y closes, anything else keeps),
+# while prefix+shift+x (close_pane, set above) stays the immediate "I'm sure"
+# path. REQUIRES the plugin installed on this machine, or reload-config errors:
+#   herdr plugin install rbutera/herdr-confirm-close-pane --yes
+# Repo: https://github.com/rbutera/herdr-confirm-close-pane
+[[keys.command]]
+key = "prefix+x"
+type = "plugin_action"
+command = "rbutera.confirm-close-pane.confirm"
+description = "confirm before closing pane"
+
 [ui]
 # Attention queue: order the agent panel by who needs you, not by workspace.
 # This is the ADHD win — blocked agents float to the top of the sidebar.
