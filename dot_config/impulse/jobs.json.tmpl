@@ -96,7 +96,7 @@
   },
   {
     "id": "todoist-hygiene",
-    "name": "Florence: Todoist Hygiene (triage + review, hourly 08:15-20:15)",
+    "name": "Florence: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
     "trigger": {
       "kind": "cron",
       "expr": "15 8-20 * * *",
@@ -109,7 +109,7 @@
     },
     "payload": {
       "kind": "prompt",
-      "text": "Run /todoist-triage in autonomous mode, then /todoist-review. Send at most ONE Discord DM, at the very end, only if something needs Rai, prefixed EXACTLY with '🗂️ [todoist-hygiene] '. Never send a preamble, 'summary incoming', 'test', or mid-run announcement."
+      "text": "Run /todoist-triage in autonomous mode. Then, ONLY on the 08:xx morning run (check `date +%H` == 08), send the interactive digest: `python3 ~/focused/scripts/todoist/digest.py send`. On later hourly runs do triage only and send NO Discord message. Never send a preamble, 'summary incoming', 'test', or mid-run announcement."
     },
     "policy": {
       "maxConcurrent": 1,
@@ -123,7 +123,7 @@
       "workingDir": "{{ .chezmoi.homeDir }}/focused",
       "model": "sonnet",
       "maxTurns": 25,
-      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Then run /todoist-review and report today, overdue, and waiting items plus any Someday items due for resurfacing. Finally, send AT MOST ONE Discord DM, at the very END of the run, and ONLY if something genuinely needs Rai's attention (items in today's needs-review file, or overdue/waiting items). Prefix that single DM EXACTLY with '🗂️ [todoist-hygiene] ' so it is instantly attributable to this scheduled job. Do NOT send any preamble, placeholder, 'summary incoming', 'test', 'heads up', or mid-run announcement message under any circumstances; the ONLY message allowed is the one final tagged summary. If nothing needs Rai, send NO DM at all."
+      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Triage ALSO refreshes today's Todoist snapshot at vault/research/todoist/<date>-snapshot.json, which the digest reads. THEN decide whether to surface: run `date +%H` — if and ONLY if the hour is 08 (the morning run), send the interactive Todoist digest by running the shell command `python3 ~/focused/scripts/todoist/digest.py send`. That command builds the Components-V2 digest from the fresh snapshot + the loop ledger and POSTs it to the ark-discord daemon at 127.0.0.1:3850/todoist-digest, which DMs Rai the tappable digest (this REPLACES the old plain-text /todoist-review summary DM — do not run /todoist-review or send any plain-text summary yourself). Report the digest.py exit status. On any hourly run where the hour is NOT 08, do the triage filing only and send NO Discord message at all. If digest.py reports the daemon is unreachable or returns non-200 (e.g. the /todoist-digest route is not yet deployed), do NOT fall back to a plain-text DM — instead log the failure to vault/research/todoist/<date>-needs-review.md and send NO message. Never send any preamble, placeholder, 'summary incoming', 'test', 'heads up', or mid-run announcement message under any circumstances."
     }
   },
   {
@@ -280,7 +280,7 @@
       "maxTurns": 40,
       "prompt": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/florence.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/focused/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/focused/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
     }
-  },
+  }
 ]
 {{- else if eq .chezmoi.hostname "nimbus" }}
 [
