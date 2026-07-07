@@ -1,5 +1,20 @@
 # Codex config changes log
 
+## 2026-07-07 — Convert codex-teammate into a faithful Sonnet-low relay
+
+### Problem
+The `codex-teammate` agent and the `/wave` Codex reviewer were defined so that a host Opus agent would gather context, read files, call Codex, then rewrite Codex's answer ("synthesize, don't parrot"). This defeated both reasons to use Codex: it contaminated Codex's **independent** second-model read (Opus framed the input and editorialized the output), and it burned Anthropic tokens doing work Codex should do itself. The "Opus does the work then relays" behavior lived entirely in these markdown files, not in the `claude-codex-bridge` MCP server (which already passes prompts to `codex exec` verbatim).
+
+### Changes
+- `dot_claude/agents/codex-teammate.md` — rewrote into a deliberately cheap, faithful **relay**:
+  - Frontmatter pinned to `model: sonnet` + `effort: low`, and a `tools:` allowlist restricted to only the six `mcp__codex__codex_*` tools so it *structurally* cannot read files.
+  - Body inverted: no file reading, no context gathering, no opinion forming, no synthesis. It routes to the right Codex tool, always passes `workingDirectory` (Codex reads the repo itself), forwards the caller's task verbatim (self-contained, since Codex can't see chat history), and returns Codex's output under a fixed `— Codex —` header with nothing added.
+- `dot_claude/skills/codex/SKILL.md` — left as the **synthesized, human-readable** `/codex` path (intended); added one line distinguishing it from the relay agent.
+- `dot_claude/skills/wave/SKILL.md` — wired the "Agent 2 (Codex)" review-gate reviewer to dispatch via the `codex-teammate` agent with **no spawn-time `model` override** (a spawn-time model beats frontmatter and would force Opus, re-breaking independence). Scoped its inputs to the review target + caller-known paths, not Agent 1's "read the diff" instructions; narrowed the inline fallback to genuine agent-unavailability.
+
+### Process
+Implemented by a Sonnet subagent, then dual-reviewed by Codex + Opus in parallel. Codex initially FAILed (missing `tools:` allowlist; `context` param invited background-gathering; `/wave` "same inputs as Agent 1" re-imported read instructions). Applied all findings, re-reviewed, Codex PASSed. Deployed via `chezmoi apply` (plain `.md` files — no 1Password session needed). Takes effect in new Claude Code sessions.
+
 ## 2026-03-28 — Fix macOS editor path and template Codex home paths
 
 ### Problem

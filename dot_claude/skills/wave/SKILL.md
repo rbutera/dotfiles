@@ -136,10 +136,12 @@ Once the implementation agent reports DONE (with its gate output), dispatch **tw
 - Verdict: PASS or FAIL with specific file:line references
 
 **Agent 2 (Codex):**
-- Same inputs as Agent 1
-- Independent second opinion
-- Catches different things (naming, patterns, subtle bugs)
-- Verdict: PASS or FAIL with specific file:line references
+- Dispatch this as the `codex-teammate` agent (`subagent_type: codex-teammate`). It runs Sonnet-low and relays the review task straight to a Codex MCP tool verbatim — it does not read files or form its own opinion first.
+- Give it the same review **target** as Agent 1 — the diff range/commits (`<base>..<head>`) — plus any caller-known context **paths** (convention doc paths, spec/plan file paths), as a self-contained task description, since Codex can't see this conversation's history. Do **not** hand it Agent 1's operational instructions ("Read the diff", "Read convention docs", "Read spec/plan context") — the relay must not read anything itself; it passes the review task to Codex, which reads the actual content itself via `workingDirectory`.
+- **Do not pass a spawn-time `model` override when dispatching this agent.** A spawn-time `model` beats the agent's own frontmatter (`model: sonnet`), which would force it onto Opus and silently re-break Codex's independence. Let the agent's own frontmatter apply.
+- The inline fallback is permitted **only if the `codex-teammate` agent is genuinely unavailable**. Even then, it MUST hand the review instructions to a Codex MCP tool (e.g. `mcp__codex__codex_review_code`) verbatim, with `workingDirectory` set, and return Codex's raw verdict as-is — no reading files first, no Opus opinion layered on top.
+- Independent second opinion — catches different things (naming, patterns, subtle bugs) precisely because it's Codex's read, not Opus's read of Codex.
+- Verdict: PASS or FAIL with specific file:line references, reported as Codex gave them.
 
 Both agents dispatch in a **single message** (parallel). Use `run_in_background: true`.
 

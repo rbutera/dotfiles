@@ -7,6 +7,8 @@ allowed-tools: "Read, Glob, Grep, Bash, mcp__codex__codex_query, mcp__codex__cod
 
 You are invoking Codex to get a second opinion. Route the user's request to the most appropriate Codex MCP tool.
 
+This is the interactive, human-readable path — a person is asking directly and will read your reply, so you synthesize Codex's answer for them (see step 5). This differs from the `codex-teammate` agent, which orchestrators and `/wave` use instead: that agent is a faithful pass-through that returns Codex's raw output unmodified, with no synthesis.
+
 ## Tool Selection
 
 Pick the best tool based on the user's request:
