@@ -82,3 +82,44 @@ trade-off: rare surface corruption until next redraw); lower `scrollback_limit_b
 lag: restart the server (`herdr server stop` then `herdr`, or `herdr update --handoff`) —
 safe because panes restore + `resume_agents_on_restore=true`. Pre-1.0 render-loop overhead
 is a known rough edge at this stage.
+
+## 2026-07-07 — agent-switch on prefix+tab, pane-close guard, + [keys.indexed] drift reconciled
+
+**Motivation.** Rai wanted (1) a good key to switch between agents, and (2) a confirmation
+before closing a pane because he kept nuking panes by accident.
+
+**Agent switching → prefix+tab / prefix+shift+tab.** `prefix+tab` and `prefix+shift+tab`
+were herdr's `cycle_pane_next`/`cycle_pane_previous` defaults. Repointed them at agent nav:
+- `next_agent = "prefix+tab"`, `previous_agent = "prefix+shift+tab"`. With
+  `agent_panel_sort = "priority"`, tab walks the attention queue top-down (next = who needs
+  you most) — the ADHD-routing win, on a key that's actually memorable.
+- Pane cycling relocated off tab to `cycle_pane_next = "prefix+o"` /
+  `cycle_pane_previous = "prefix+shift+o"` (tmux's "other pane" reflex) to avoid the
+  same key-collision class as the old shift+j/k bug. Directional `prefix+hjkl` stays the
+  primary pane nav; cycling is the secondary motion.
+- This REPLACED the previous parking of agent nav on `prefix+shift+down/up`.
+
+**Pane-close guard → prefix+shift+x.** herdr has NO per-pane close confirmation:
+`confirm_close` guards WORKSPACES only (verified against 0.7.1 docs, herdr.dev/docs/
+configuration). Since there's no confirm flag, mitigated by moving `close_pane` off the
+fat-finger-prone bare `prefix+x` to `prefix+shift+x` ("shift = more destructive", matches
+swap_pane on shift+j/k). A reflexive single `prefix+x` tap now no-ops instead of killing a
+pane. FOLLOW-UP: worth a feature request to herdr for a real `confirm_close_pane` — Rai
+clearly wants tmux's `kill-pane? (y/n)` behavior.
+
+**Drift reconciled — [keys.indexed] removal (reverses pass-2 decision).** Found the
+deployed `~/.config/herdr/config.toml` had drifted from source: the `[keys.indexed] tabs =
+"ctrl"` table added in pass 2 had been removed on the machine and replaced with a warning
+comment, never synced back. Pulled that fix into source. WHY it was removed: setting
+`[keys.indexed] tabs = "ctrl"` does NOT *add* a ctrl+1..9 shortcut — herdr treats a legacy
+`[keys.indexed]` entry as user config that DISPLACES the modern `switch_tab = prefix+1..9`
+default, silently removing it and rebinding tabs to ctrl+1..9 only. And ctrl+<digit> is
+un-typeable here (ctrl+2 emits NUL == the ctrl+space prefix), so the net result was ZERO
+working tab-switch keys. Leaving `switch_tab` unset keeps herdr's default `prefix+1..9`.
+This supersedes the pass-2 log entry that recommended the indexed table.
+
+**Verification.** `chezmoi apply --force ~/.config/herdr/config.toml` (no 1Password — file
+has no onepasswordRead; `--force` needed because the deployed file was hand-edited so
+chezmoi's state hash mismatched), then `herdr server reload-config` returned
+`{"diagnostics":[],"status":"applied"}`. Empty diagnostics = every binding parsed clean,
+including `prefix+tab`, `prefix+o`, and `prefix+shift+x`.

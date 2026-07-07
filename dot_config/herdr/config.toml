@@ -67,9 +67,23 @@ focus_pane_down  = ["prefix+j", "ctrl+alt+j"]
 focus_pane_up    = ["prefix+k", "ctrl+alt+k"]
 focus_pane_right = ["prefix+l", "ctrl+alt+l"]
 
+# Pane CYCLING relocated off prefix+tab / prefix+shift+tab (herdr defaults) so
+# tab/shift+tab can drive agent nav instead (see next_agent below). prefix+o is
+# tmux's "other pane" reflex, so nothing is lost. Directional prefix+hjkl above
+# is still the primary pane nav; cycling is the secondary "just rotate" motion.
+cycle_pane_next     = "prefix+o"
+cycle_pane_previous = "prefix+shift+o"
+
+# close_pane: herdr has NO per-pane close confirmation (confirm_close only guards
+# WORKSPACES, verified against 0.7.1 docs). Bare prefix+x was too fat-finger-prone
+# — Rai kept nuking panes by reflex (tmux's prefix+x prompts y/n; herdr doesn't).
+# Moved to prefix+shift+x so a reflexive single tap can't kill a pane. "shift =
+# more destructive" matches swap_pane on prefix+shift+j/k.
+close_pane = "prefix+shift+x"
+
 # --- Familiar tmux reflexes that already map ~1:1 (herdr defaults, no config) ---
 # detach = prefix+q   new_tab = prefix+c   next/prev_tab = prefix+n/p
-# switch_tab = prefix+1..9   zoom = prefix+z   close_pane = prefix+x
+# switch_tab = prefix+1..9   zoom = prefix+z   (close_pane moved to prefix+shift+x)
 # resize_mode = prefix+r
 
 # --- Space (workspace) navigation — herdr's answer to tmux session-switching ---
@@ -82,18 +96,22 @@ next_workspace = "prefix+shift+right"
 
 # --- ADHD attention-routing: jump straight to the agent that needs you ---
 # These are UNSET by default; binding them is the highest-leverage add.
-# NOTE: prefix+shift+j/k are herdr's swap_pane_down/up defaults — binding agent
-# nav there collides. Parked on prefix+shift+down/up (unbound by default) so
-# both survive: down = next in the attention queue, up = previous.
-next_agent = "prefix+shift+down"
-previous_agent = "prefix+shift+up"
-focus_agent = "prefix+alt+1..9"   # jump to agent row N
+# prefix+tab / prefix+shift+tab are herdr's cycle_pane_next/previous defaults,
+# relocated to prefix+o below so tab belongs to agents. Since agent_panel_sort =
+# "priority", prefix+tab walks the attention queue top-down (next = who needs you
+# most), shift+tab walks back. This REPLACED the old prefix+shift+down/up parking.
+next_agent = "prefix+tab"
+previous_agent = "prefix+shift+tab"
+focus_agent = "prefix+alt+1..9"   # jump to agent row N (direct jump, unchanged)
 
-# Direct (prefix-free) tab switching like tmux — ctrl+1..9. NOTE: many terminals
-# (Ghostty included) don't emit distinct codes for ctrl+<digit>; if it no-ops,
-# that's the terminal swallowing it, not herdr. prefix+1..9 always works.
-[keys.indexed]
-tabs = "ctrl"
+# NOTE: do NOT re-add a [keys.indexed] table for tabs. Setting `[keys.indexed]
+# tabs = "ctrl"` does NOT *add* a ctrl+1..9 shortcut — herdr treats a legacy
+# [keys.indexed] entry as user config that DISPLACES the modern default, so it
+# silently removes `switch_tab = prefix+1..9` and rebinds tabs to ctrl+1..9 only.
+# And ctrl+<digit> is un-typeable here: ctrl+2 emits NUL == the ctrl+space prefix.
+# Result: zero working tab-switch keys. (Confirmed in herdr src: the
+# `legacy_indexed_user_bindings_displace_modern_defaults` test.) Leaving switch_tab
+# unset keeps herdr's default prefix+1..9, which is what we want.
 
 # Heavy git user: pop lazygit in a temporary pane.
 [[keys.command]]
