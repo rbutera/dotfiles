@@ -1,5 +1,26 @@
 # voice-goon changelog
 
+## 2026-07-03 — Per-segment speed/volume mix + couch_confession script
+
+### Problem
+All segments used one global TTS speed; narration and dialogue had no volume differentiation.
+
+### Solution
+- `generate.py`: narration fixed at speed `1.0` + `80%` volume; dialogue `100%` volume with optional per-segment `speed` (`0.8`–`1.3`, default `1.0`). Volume applied post-TTS via ffmpeg.
+- Updated `spicy-story` skill and `AGENTS.md` with speed guidance for dialogue.
+- Added `scripts/md_to_json.py`; generated `couch_confession.json` (407 segments) from approved markdown.
+
+## 2026-07-03 — Output dir CLI, emotion validation, spicy-story skill
+
+### Problem
+`generate.py` always wrote output and chunks to `~/voice-goon/`; emotions were undocumented and unvalidated; no structured agent workflow for drafting stories before JSON.
+
+### Solution
+- `generate.py`: `-o` / `--output-file` and `-d` / `--output-dir` CLI flags; JSON `output_dir` field; script path resolves cwd → voice-goon → absolute; chunks live under `<output_dir>/chunks/`.
+- `VALID_EMOTIONS` enum validated in `load_script`; migrated example JSON off deprecated `playful`/`seductive` tags.
+- Added `.grok/skills/spicy-story/` (brainstorm → `stories/<slug>.md` → `<slug>.json`).
+- Updated `AGENTS.md`, `story-writing.md` (Rai physical notes), created `stories/` directory.
+
 ## 2026-07-03 — JSON-driven TTS script format + voice-goon folder
 
 ### Problem
