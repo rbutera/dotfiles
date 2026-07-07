@@ -123,3 +123,39 @@ has no onepasswordRead; `--force` needed because the deployed file was hand-edit
 chezmoi's state hash mismatched), then `herdr server reload-config` returned
 `{"diagnostics":[],"status":"applied"}`. Empty diagnostics = every binding parsed clean,
 including `prefix+tab`, `prefix+o`, and `prefix+shift+x`.
+
+## 2026-07-07 (pass 4) — pane-close confirmation via a plugin (prefix+x)
+
+**Motivation.** Core herdr has no per-pane close confirmation (the core PR for it,
+ogulcancelik/herdr#1129, was auto-closed by the first-time-contributor gate). herdr
+discussion #884 suggested a plugin instead. Built one.
+
+**Plugin.** `rbutera.confirm-close-pane` — new public repo
+https://github.com/rbutera/herdr-confirm-close-pane (zero-dep POSIX sh). Flow: prefix+x →
+`plugin_action` `confirm` (headless, captures the focused pane from HERDR_PANE_ID) → opens
+an overlay pane running a `[y] close / anything-else keep` prompt → on `y` runs
+`herdr pane close <that pane>`. Plugin v1 has no native modal, so the confirm is an overlay
+prompt. Target is handed to the overlay per-invocation via `plugin pane open --env
+HCCP_TARGET_PANE=<id>` (no shared state file → no wrong-pane race). Only an explicit y/Y
+closes; Enter/Esc/EOF/any other key keep (default-to-keep on ambiguity). Built with an
+OpenSpec proposal + dual Opus/Codex review (two rounds: first round FAILed on a wrong-pane
+race + an EOF-defaults-to-close bug; both fixed and re-reviewed PASS). shellcheck clean,
+13/13 unit + 2/2 live (verified against real herdr 0.7.1 on kinto).
+
+**Keybind (`dot_config/herdr/config.toml`).** Added a second `[[keys.command]]`:
+`prefix+x` → `type=plugin_action` → `rbutera.confirm-close-pane.confirm`. Composes with the
+pass-1 change: `prefix+x` now = guarded close (asks first), `prefix+shift+x` (`close_pane`)
+= immediate close. REQUIRES the plugin installed on the machine or reload-config errors on
+the unknown action — install with `herdr plugin install rbutera/herdr-confirm-close-pane
+--yes`.
+
+**Applied on kinto.** Plugin installed from GitHub, `chezmoi apply --force
+~/.config/herdr/config.toml`, `herdr server reload-config` → `{"diagnostics":[]}` (the
+plugin_action binding parsed clean). NOTE: this machine (kinto) is macOS/Apple Silicon, not
+Linux as the old fleet notes said; nimbus is also macOS.
+
+**nimbus: NOT done.** herdr is not installed on nimbus (only the chezmoi-deployed config is
+present), so the plugin has nothing to attach to there. Left for Rai to decide whether to
+`brew install herdr` on nimbus first. The keybind is in the shared chezmoi config, so once
+herdr + the plugin exist on nimbus, `chezmoi apply ~/.config/herdr/config.toml` + install
+the plugin + reload-config finishes it.
