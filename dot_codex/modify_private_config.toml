@@ -65,9 +65,7 @@ BASE = {
                 "serena",
                 "start-mcp-server",
                 "--context",
-                "ide-assistant",
-                "--enable-web-dashboard",
-                "false",
+                "codex",
             ],
         },
         "tempograph": {
