@@ -30,7 +30,7 @@ read -r -d '' base << 'BASE' || true
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "serena@claude-plugins-official": true,
+    "serena@claude-plugins-official": false,
     "chrome-devtools-mcp@claude-plugins-official": true
   }
 }

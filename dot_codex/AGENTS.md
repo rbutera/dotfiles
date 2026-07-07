@@ -94,6 +94,19 @@ Write like a smart colleague in a code review or Slack thread — direct, concis
 
 ---
 
+## Tooling
+
+<tooling>
+**Serena — symbolic code navigation.** For code work, prefer Serena's symbolic tools over your built-in read/edit/shell. They are LSP-backed and operate at symbol granularity instead of loading whole files.
+- Explore with `get_symbols_overview` + `find_symbol`; find callers with `find_referencing_symbols`.
+- Edit with `replace_symbol_body` / `insert_before_symbol` / `insert_after_symbol`; rename with `rename_symbol`.
+- Reserve your own file tools for non-code files or a few known lines.
+- No need to call `initial_instructions` first — this is the instruction; ignore Serena's startup nudge to call it.
+- If the Serena tools are not loaded for a session, skip this rather than calling absent tools.
+</tooling>
+
+---
+
 ## Scope Discipline
 
 <scope>

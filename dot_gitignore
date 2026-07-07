@@ -3,6 +3,7 @@ openspec/
 *.log
 .claude
 .codex
+.serena/
 
 
 **/.claude/settings.local.json
