@@ -8,6 +8,39 @@ built-in defaults → `~/.config/hunk/config.toml` (user) → `<repo>/.hunk/conf
 (per-repo) → CLI flags. Per-command tables (`[diff]`, `[show]`, `[patch]`,
 `[difftool]`, `[pager]`) override the top-level keys for that command only.
 
+## 2026-07-09 — Install hunk on nimbus (brew) + lancelot/WSL (npm), track in brewfile
+
+**Problem/motivation:** Wanted hunk available on `nimbus` (macOS) and `lancelot`
+(the Linux/WSL host), reachable over Tailscale.
+
+**Fleet note (resolved a stale record):** Tailscale + `uname` confirm `nimbus` is
+**macOS/arm64** and `lancelot` is **Linux/x86_64** (the WSL Ubuntu instance; the
+Windows side is the separate `lancelot-win` node). The Honcho profile calling
+nimbus "Linux" is wrong — the [[fleet-machines-are-macos]] memory is correct.
+
+**What was done (over Tailscale SSH):**
+- **nimbus** — `brew install hunk` → 0.17.0 (poured the `arm64_tahoe` bottle).
+- **lancelot** — `npm install -g hunkdiff` (asdf node v24; reshimmed) → **0.16.0**.
+  homebrew-core has no Linux bottle for hunk (only `arm64_tahoe`), so npm is the
+  right channel on Linux.
+
+**Version skew is expected and benign:** lancelot landed on 0.16.0, not 0.17.0,
+because lancelot's npm enforces a publish-date **cooldown** (`before=`) — 0.17.0
+was published inside the window, so `hunkdiff@0.17.0` errors `ETARGET`. Did **not**
+bypass the cooldown (it's a deliberate supply-chain control). Verified 0.16.0
+parses the committed `.hunk` config and renders Catppuccin Mocha (base `#1e1e2e`)
+with no error, so nothing breaks when chezmoi applies the config there. lancelot
+will pick up 0.17.0 on the next `npm i -g hunkdiff` once the cooldown window clears.
+
+**Reproducibility:**
+- **`raisbrewfile.tmpl`** — added `brew "hunk"` to the **darwin-only** section, so
+  macOS machines (nimbus/kinto/latios) get it via `brew bundle`. Kept out of the
+  common section on purpose: no Linux bottle → would trigger a source build under
+  Linuxbrew.
+- Linux/WSL installs (`npm i -g hunkdiff`) are not currently captured by any
+  chezmoi package mechanism — noted inline in the brewfile comment. Left as a
+  manual step rather than adding new (per CLAUDE.md, unreliable) run_once automation.
+
 ## 2026-07-09 — Initial config: Catppuccin Mocha + agent-focused defaults, opt-in git difftool
 
 **Problem/motivation:** Freshly installed `hunk`. Wanted it configured with
