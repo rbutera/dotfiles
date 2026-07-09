@@ -1,0 +1,34 @@
+# ~/.config/hunk/config.toml — Hunk (agent-focused terminal diff reviewer)
+# Managed by chezmoi (source: dot_config/hunk/config.toml). Upstream: https://github.com/modem-dev/hunk
+#
+# Precedence (low → high): built-in defaults → this user file → per-repo
+# .hunk/config.toml → CLI flags. Per-command tables ([diff], [show], [patch],
+# [difftool], [pager]) override the top-level keys for that command only.
+
+# Catppuccin Mocha, to match the rest of the terminal (kitty / ghostty).
+# Other bundled variants: catppuccin-macchiato, catppuccin-frappe,
+# catppuccin-latte (light). Full set also includes github-*, gruvbox-*,
+# dracula, nord, tokyo-night, solarized-*, monokai, one-dark, etc.
+theme = "catppuccin-mocha"
+
+# Show agent-authored rationale/notes by default — the whole point of Hunk.
+agent_notes = true
+
+# Highlight moved (not just added/removed) code — mirrors `diff.colorMoved = default`
+# already set in ~/.gitconfig.
+color_moved = true
+
+# --- Left at Hunk's built-in defaults (listed here for discoverability) ---
+# mode = "auto"                   # auto | split | stack (auto: split when wide, stack when narrow)
+# line_numbers = true
+# wrap_lines = false              # truncate long lines; set true to soft-wrap
+# hunk_headers = true
+# menu_bar = true
+# transparent_background = false  # true lets the terminal background show through Hunk surfaces
+# copy_decorations = false        # include +/- gutter marks when copying selected text
+# watch = false                   # auto-reload when the diff input changes
+# exclude_untracked = false       # working-tree reviews include untracked files by default
+
+# Example per-command override — pager chrome wraps long lines by default:
+# [pager]
+# wrap_lines = true
