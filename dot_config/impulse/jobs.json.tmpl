@@ -1,6 +1,36 @@
 {{- if eq .chezmoi.hostname "kinto" }}
 [
   {
+    "id": "codex-56-watch",
+    "name": "Codex gpt-5.6 availability watch (flip when ChatGPT-account access lands)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 5,8-23 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/codex-56-watch.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "codex"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/codex-56-watch.sh"],
+      "cwd": "{{ .chezmoi.homeDir }}/focused"
+    }
+  },
+  {
     "id": "quota-scrape",
     "name": "Claude Quota Scrape (active account, every 5m)",
     "trigger": {
