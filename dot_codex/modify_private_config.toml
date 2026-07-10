@@ -142,10 +142,12 @@ import socket as _socket
 _host = _socket.gethostname().split(".")[0].lower()
 if _host.startswith("kinto"):
     BASE["mcp_servers"].update({
-        # ark-scoped quick-markdown server (ark plugin .mcp.json). Match the
-        # ark IPv6 loopback the server is known to bind.
+        # quick-markdown search. qmd's native MCP is STDIO (`qmd mcp`), so codex
+        # spawns it directly — more robust than the ark plugin's http://[::1]:8181
+        # wrapper, which needs a separate server that isn't always running.
         "qmd": {
-            "url": "http://[::1]:8181/mcp",
+            "command": "qmd",
+            "args": ["mcp"],
         },
         # focused vault CRUD (focused .mcp.json).
         "obsidian": {
