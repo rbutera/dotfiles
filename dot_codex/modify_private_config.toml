@@ -29,7 +29,7 @@ HOME = os.environ.get("HOME") or os.environ.get("USERPROFILE", "")
 
 BASE = {
     "personality": "pragmatic",
-    "model": "gpt-5.6",
+    "model": "gpt-5.5",
     "model_reasoning_effort": "medium",
     "model_reasoning_summary": "auto",
     "approval_policy": "never",
