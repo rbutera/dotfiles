@@ -1,5 +1,10 @@
 # Codex config changes log
 
+## 2026-07-11 — Use high reasoning effort for GPT-5.6 SOL
+
+Changed the managed Codex default `model_reasoning_effort` from `medium` to
+`high`. The default model remains `gpt-5.6-sol`.
+
 ## 2026-07-07 — Convert codex-teammate into a faithful Sonnet-low relay
 
 ### Problem
