@@ -1,12 +1,5 @@
 # tmux config changes log
 
-## 2026-07-11 — Make both pane-split binding pairs explicit
-
-Kept the mnemonic `<prefix>-` / `<prefix>_` bindings and explicitly added
-tmux's default `<prefix>"` / `<prefix>%` bindings. On a UK keyboard the defaults
-are physically Shift+2 and Shift+5. This makes both pairs intentional rather
-than relying on tmux's built-in key table remaining intact.
-
 ## 2026-06-23 — Fix copy-paste over SSH for real (passthrough wrap + reattach bug)
 
 ### Problem
