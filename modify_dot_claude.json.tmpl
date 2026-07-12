@@ -44,10 +44,6 @@ read -r -d '' base_mcps << 'MCPS' || true
     "args": ["terminal-mcp"]
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
-  ,"automation": {
-    "command": "bun",
-    "args": ["run", "/Users/rai/dev/github/ashwwwin/automation-mcp/index.ts", "--stdio"]
-  }
   ,"cortex": {
     "command": "node",
     "args": ["/Users/rai/dev/lumiere/apps/cortex-cc/vendor/cortex-mcp/index.cjs"],
@@ -56,6 +52,17 @@ read -r -d '' base_mcps << 'MCPS' || true
       "DATABASE_URL": "postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline",
       "CORTEX_DRIZZLE_PATH": "/Users/rai/dev/lumiere/apps/cortex-cc/vendor/cortex-mcp/drizzle"
     }
+  }
+  ,"mobile-mcp": {
+    "command": "npx",
+    "args": ["-y", "@mobilenext/mobile-mcp@latest"],
+    "env": {
+      "MOBILEMCP_DISABLE_TELEMETRY": "1"
+    }
+  }
+  ,"cua-driver": {
+    "command": "cua-driver",
+    "args": ["mcp"]
   }
 {{- end }}
 {{- if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
