@@ -1,5 +1,52 @@
 # chezmoi config changes log
 
+## 2026-07-13 — chezmoi-sync: finish `main` merge + reconcile deployed drift
+
+### Context
+Session started mid-merge (`git merge` of `origin/main`, 13 commits behind) with
+a single conflict in `logs/codex.md`, followed by a full `/chezmoi-sync` run.
+
+### Merge
+- Resolved `logs/codex.md` by keeping **both** log entries newest-first
+  (2026-07-13 sandbox-friction on top, then 2026-07-11 GPT-5.6 reasoning), then
+  committed the merge (`8bb7a66`) and pushed. A stray `pull --rebase --autostash`
+  re-triggered the same conflict; aborted the rebase back to the clean merge
+  (I was already `ahead 3, behind 0`, so the pull was a no-op anyway).
+
+### 1Password gate
+- `op whoami` reports "no active session" (stale `OP_SESSION_personal` env var),
+  but the **1Password desktop-app CLI integration** authorizes `op read`/`op vault
+  list` directly — so templates render fine despite `whoami` failing. The sync
+  detector only needs `chezmoi status` to succeed, which it does.
+- The deployed `detect-drift.sh` was the **old** pre-merge version
+  (`${CHEZMOI:-chezmoi}` + 20s timeout), so it errored `chezmoi-not-found`;
+  ran `chezmoi status` directly instead. Applying Group A updated the deployed
+  detector to the fixed `$CHEZMOI_SYNC_BIN`/180s version.
+
+### Group A — un-applied merge (source authoritative; `apply --force`)
+Deployed this machine's copies of the just-merged source (nothing deployed-side
+to lose — all ` M`/new/benign-churn): `codex-teammate.md`, `settings.json`,
+`detect-drift.sh`, `herdr/config.toml`, `.pi/agent/auth.json` (had to `mkdir -p
+~/.pi/agent` first), `.ssh/config`, and the re-merge modify-scripts
+(`.claude.json`, `.codex/config.toml`, `.config/impulse/jobs.json`).
+
+### Group B — genuine deployed drift, kept deployed by updating source
+- **`dot_tool-versions`**: `chezmoi add` — source said `bun 1.3.9`, deployed (and
+  kinto) run `bun 1.3.14`. Kept deployed.
+- **`dot_zshrc.tmpl`**: appended the `# >>> grok installer >>>` PATH/compinit
+  block the grok installer had added to the live `~/.zshrc`.
+- See `logs/ssh.md` (authorized_keys) and `logs/ark.md` (navi) for the other two.
+
+### Residual
+`.claude.json` still shows `MM` — a trailing-newline-only diff (jq emits `\n`,
+Claude Code doesn't). Documented benign churn (see 2026-06-24 in `logs/claude.md`);
+left as-is.
+
+### Verification
+Each Group B template re-rendered with `chezmoi execute-template` and `diff`-ed
+byte-for-byte against its deployed file — all identical. Committed only the four
+touched source paths (+ these logs); pushed.
+
 ## 2026-07-13 — Fix chezmoi-sync detector: `$CHEZMOI` env var collision
 
 ### Problem

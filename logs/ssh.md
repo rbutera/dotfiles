@@ -1,5 +1,28 @@
 # SSH Config Changelog
 
+## 2026-07-13 -- Preserve nimbus-only `expedition-vps-backup` authorized key (chezmoi-sync)
+
+### Problem
+The deployed `~/.ssh/authorized_keys` on nimbus had a second public key,
+`expedition-vps-backup` (the Expedition VPS's key for pulling backups off nimbus),
+that `dot_ssh/authorized_keys.tmpl` didn't render — so `chezmoi apply` would have
+**revoked** it. The template previously rendered only the primary
+`op://Private/ed25519_rbutera/public key`.
+
+### Key detail — machine-specific
+kinto's `authorized_keys` does **not** carry this key (verified over tailscale);
+it's specific to nimbus (the Expedition infra host). Adding it unconditionally to
+the shared template would wrongly authorize it on every machine.
+
+### Changes
+- `dot_ssh/authorized_keys.tmpl`: appended the `expedition-vps-backup` public key
+  behind a `{{ if eq .chezmoi.hostname "nimbus" }}` guard, matching the repo's
+  hostname-gating pattern. Public key stored literally (public keys aren't secret).
+
+### Verification
+`chezmoi execute-template` on nimbus renders byte-identical to the deployed
+`~/.ssh/authorized_keys` (both keys); other hosts render only the primary key.
+
 ## 2026-04-17 -- Added expedition VPS
 
 ### Problem

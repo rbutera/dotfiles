@@ -1,1 +1,4 @@
 {{ onepasswordRead "op://Private/ed25519_rbutera/public key" }}
+{{- if eq .chezmoi.hostname "nimbus" }}
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPJnoZBGPTln76Y3AKrO3NkNOo7EJVSKmGIrLqkgbbX5 expedition-vps-backup
+{{- end }}
