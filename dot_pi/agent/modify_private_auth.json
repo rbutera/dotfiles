@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Modify script for ~/.pi/agent/auth.json (Pi / oh-my-pi coding agent).
+
+chezmoi pipes the CURRENT auth.json in on stdin; we emit the merged result on
+stdout. We only own the MANAGED API-key providers below; everything else in the
+file (notably the OAuth entries Pi writes after `/login` for Claude Pro/Max and
+ChatGPT Codex, which are machine-local secrets) is passed through untouched.
+
+The managed keys use Pi's `$ENV` interpolation, so NO literal secret is ever
+committed to the chezmoi repo. Kill rule stays out of this file: choosing which
+model runs through which provider is the caller's job.
+"""
+import json
+import sys
+
+# ── Managed API-key providers (env-interpolated — never a literal secret) ────
+# GLM (z.ai), MiniMax and Kimi all ride the OpenCode Go + Zen gateways, so the
+# single OpenCode key covers them; the direct zai/minimax/kimi-coding providers
+# are intentionally left unmanaged. Anthropic + OpenAI stay on native OAuth
+# (`/login`) and must NEVER be served through zen.
+MANAGED = {
+    "opencode": {"type": "api_key", "key": "$OPENCODE_ZEN_API_KEY"},
+    "opencode-go": {"type": "api_key", "key": "$OPENCODE_ZEN_API_KEY"},
+}
+
+raw = sys.stdin.buffer.read()
+try:
+    current = json.loads(raw.decode()) if raw.strip() else {}
+    if not isinstance(current, dict):
+        current = {}
+except Exception:
+    current = {}
+
+# Preserve everything already there (OAuth tokens etc); managed keys are
+# authoritative for their own entries only.
+merged = dict(current)
+for k, v in MANAGED.items():
+    merged[k] = v
+
+sys.stdout.write(json.dumps(merged, indent=2) + "\n")
