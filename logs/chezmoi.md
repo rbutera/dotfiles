@@ -1,5 +1,26 @@
 # chezmoi config changes log
 
+## 2026-07-13 — Fix chezmoi-sync detector: `$CHEZMOI` env var collision
+
+### Problem
+
+`/chezmoi-sync` failed immediately with `ERROR | chezmoi-not-found`, even though
+`chezmoi` was on PATH (`~/.asdf/shims/chezmoi`). The detector took its binary
+path from an env override, `CHEZMOI="${CHEZMOI:-chezmoi}"` — but `CHEZMOI=1` was
+already exported in the environment (chezmoi sets `CHEZMOI=1` in scripts it
+runs, and the session inherited it). So the script resolved the binary to the
+literal string `1`, and `command -v 1` failed the presence check.
+
+### What changed
+
+- **`dot_claude/skills/chezmoi-sync/detect-drift.sh`**: The override variable is
+  now `CHEZMOI_SYNC_BIN` instead of `CHEZMOI`, with a comment explaining why the
+  bare name is unusable. Applied to the deployed skill.
+
+With the fix, the detector reaches `chezmoi status` and fails cleanly on the
+1Password gate (exit 1, "multiple accounts found") rather than hanging — the
+op-session gate in the skill is still required before a drift walk can run.
+
 ## 2026-07-01 — Bake the "never leave the source repo dirty" golden rule into CLAUDE.md + AGENTS.md
 
 ### Motivation

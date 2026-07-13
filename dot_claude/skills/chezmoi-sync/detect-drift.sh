@@ -40,7 +40,9 @@
 
 set -u
 
-CHEZMOI="${CHEZMOI:-chezmoi}"
+# NOT $CHEZMOI — chezmoi exports CHEZMOI=1 into scripts it runs, so a shell that
+# inherits that env would resolve the binary to "1".
+CHEZMOI="${CHEZMOI_SYNC_BIN:-chezmoi}"
 STATUS_TIMEOUT="${CHEZMOI_SYNC_STATUS_TIMEOUT:-20}"
 
 # --- locate a timeout binary (gtimeout on macOS via coreutils, else timeout) ---
