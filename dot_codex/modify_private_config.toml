@@ -30,7 +30,7 @@ BASE = {
     "model": "gpt-5.6-sol",
     "model_reasoning_effort": "high",
     "model_reasoning_summary": "auto",
-    "approval_policy": "on-request",
+    "approval_policy": "never",
     "default_permissions": ":danger-full-access",
     "features": {
         "multi_agent": True,

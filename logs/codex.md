@@ -1,5 +1,34 @@
 # Codex config changes log
 
+## 2026-07-13 — Set approval_policy back to `never` (full auto-approval)
+
+### Problem
+Rai asked Codex to stop prompting for approval and just auto-grant it. Codex CLI
+0.144.1 uses the permission-profile scheme; per the official docs
+(https://learn.chatgpt.com/docs/config-file/config-reference), fully autonomous
+no-prompt operation is exactly `approval_policy = "never"` +
+`default_permissions = ":danger-full-access"`. The base already had
+`:danger-full-access`, so the only key still forcing prompts was
+`approval_policy = "on-request"`.
+
+### Changes
+- **`dot_codex/modify_private_config.toml`**: `BASE["approval_policy"]` changed
+  from `"on-request"` back to `"never"`.
+
+### Note — this reverses the entry directly below (same day)
+Earlier today `never` was switched to `on-request` because, paired with the
+*legacy `[sandbox]`* config, `never` left Codex unable to escalate past a
+sandbox block. That reasoning no longer applies: the same earlier change also
+removed the legacy sandbox and set `default_permissions = ":danger-full-access"`
+(unrestricted local access), so there is nothing left to block/escalate. With
+full access already granted, `never` is the intended "no safety net, fully
+autonomous" mode — which is what Rai explicitly requested.
+
+### Verification
+`chezmoi apply ~/.codex/config.toml` (scoped; this source is a `modify_` python
+script, not a template — no 1Password needed). Deployed `~/.codex/config.toml`
+now shows `approval_policy = "never"` and `default_permissions = ":danger-full-access"`.
+
 ## 2026-07-13 — Remove sandbox friction and allow escalation
 
 ### Problem
