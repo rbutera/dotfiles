@@ -38,6 +38,17 @@ read -r -d '' base_mcps << 'MCPS' || true
   "terminal": {
     "command": "uvx",
     "args": ["terminal-mcp"]
+  },
+  "mobile-mcp": {
+    "command": "npx",
+    "args": ["-y", "@mobilenext/mobile-mcp@latest"],
+    "env": {
+      "MOBILEMCP_DISABLE_TELEMETRY": "1"
+    }
+  },
+  "cua-driver": {
+    "command": "uvx",
+    "args": ["cua-driver", "mcp"]
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"cortex": {
@@ -48,17 +59,6 @@ read -r -d '' base_mcps << 'MCPS' || true
       "DATABASE_URL": "postgresql://expedition:expedition-pipeline-2026@127.0.0.1:5433/pipeline",
       "CORTEX_DRIZZLE_PATH": "/Users/rai/dev/lumiere/apps/cortex-cc/vendor/cortex-mcp/drizzle"
     }
-  }
-  ,"mobile-mcp": {
-    "command": "npx",
-    "args": ["-y", "@mobilenext/mobile-mcp@latest"],
-    "env": {
-      "MOBILEMCP_DISABLE_TELEMETRY": "1"
-    }
-  }
-  ,"cua-driver": {
-    "command": "cua-driver",
-    "args": ["mcp"]
   }
   ,"serena": {
     "command": "uvx",

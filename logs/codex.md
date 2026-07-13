@@ -1,5 +1,25 @@
 # Codex config changes log
 
+## 2026-07-13 — Add mobile-mcp (android) + cua-driver (computer-use) to Codex
+
+### Change
+Added two MCP servers to `BASE["mcp_servers"]` in
+`dot_codex/modify_private_config.toml` (shared base — both machines), part of the
+cross-harness android/computer-use rollout (see logs/claude.md same date for the
+survey rationale and the full picture):
+- `mobile-mcp` → `npx -y @mobilenext/mobile-mcp@latest` (android device control;
+  needs adb + a device to operate).
+- `cua-driver` → `uvx cua-driver mcp` (trycua/cua computer-use; macOS needs
+  `cua-driver permissions grant` once).
+
+Note: nimbus Codex still carries ChatGPT-desktop's own `node_repl` + `computer-use`
+(app-managed, preserved by the merge logic) alongside `cua-driver` — both by design.
+
+### Verification
+`chezmoi apply ~/.codex/config.toml` on nimbus (python modify script, no 1Password);
+both `[mcp_servers.mobile-mcp]` and `[mcp_servers.cua-driver]` present, exa key intact.
+Kinto synced via `chezmoi update`.
+
 ## 2026-07-13 — Set approval_policy back to `never` (full auto-approval)
 
 ### Problem

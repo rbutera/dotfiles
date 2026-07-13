@@ -1,5 +1,38 @@
 # Claude Code config changes log
 
+## 2026-07-13 — Roll out mobile-mcp (android) + cua-driver (computer-use) everywhere
+
+### Context
+Next step after round-1 cleanup: pick the best Android + Computer-use MCP from
+the vault surveys (`~/expedition/References/Android and Mobile MCP Servers…`,
+`…Open-source Computer-use MCPs…`) and wire them into every harness.
+- **Android winner: `mobile-next/mobile-mcp`** (`@mobilenext/mobile-mcp`) — 5.4k★,
+  a11y-tree-first hybrid, full app lifecycle; npx (portable).
+- **Computer-use winner: Cua `cua-driver`** (trycua/cua, ~19.5k★) — background,
+  accessibility-grounded. It's a **PyPI package** (`cua-driver 0.7.1`), so invoked
+  via `uvx cua-driver mcp` (no global binary — consistent with our other uvx MCPs,
+  works identically on both machines, and fixes the previously-dead
+  `command:"cua-driver"` entry that had no binary anywhere).
+
+### Changes (`modify_dot_claude.json.tmpl`)
+- Moved `mobile-mcp` + `cua-driver` **out of the nimbus-only block into the shared
+  base** so kinto/Florence get them too.
+- `cua-driver` command changed from bare `cua-driver` → `uvx cua-driver mcp`.
+- `cortex` and `serena` stay nimbus-gated (Florence has her own serena).
+
+### Runtime prerequisites (not config)
+- `cua-driver` on macOS needs Accessibility + Screen-Recording grants once:
+  `cua-driver permissions grant`.
+- `mobile-mcp` needs `adb` (Android platform-tools) + a connected/emulated device
+  to actually operate; the server itself starts fine without them.
+- nimbus Codex also keeps ChatGPT-desktop's own `computer-use`/`node_repl` (app-
+  managed) alongside `cua-driver` — both present by design.
+
+### Verification
+`chezmoi apply` on nimbus; live `~/.claude.json` cua-driver = `uvx cua-driver mcp`,
+mobile-mcp present. Codex + OpenCode got both too (see logs/codex.md, logs/opencode.md).
+Kinto synced via `chezmoi update`. Takes effect in new sessions.
+
 ## 2026-07-13 — MCP cleanup round 1 (Claude-side dedup + prune)
 
 ### Context

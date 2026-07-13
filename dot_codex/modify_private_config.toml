@@ -83,6 +83,19 @@ BASE = {
             "command": "npx",
             "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "claude"],
         },
+        # Android device control (mobile-next/mobile-mcp) — a11y-tree-first hybrid,
+        # full app lifecycle. Needs adb (Android platform-tools) + a device/emulator.
+        "mobile-mcp": {
+            "command": "npx",
+            "args": ["-y", "@mobilenext/mobile-mcp@latest"],
+            "env": {"MOBILEMCP_DISABLE_TELEMETRY": "1"},
+        },
+        # Computer-use (trycua/cua) — background, accessibility-grounded. macOS needs
+        # `cua-driver permissions grant` (Accessibility + Screen Recording) once.
+        "cua-driver": {
+            "command": "uvx",
+            "args": ["cua-driver", "mcp"],
+        },
     },
     "model_providers": {
         "zen": {

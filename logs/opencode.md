@@ -1,5 +1,24 @@
 # opencode config changes log
 
+## 2026-07-13 — Add mobile-mcp (android) + cua-driver (computer-use)
+
+### Change
+Added two MCP servers to `.chezmoitemplates/opencode-shared-base` `mcp` block
+(inherited by both the vanilla and openagent profiles, both machines), part of the
+cross-harness android/computer-use rollout (survey rationale in logs/claude.md same date):
+- `mobile-mcp` → local `["npx","-y","@mobilenext/mobile-mcp@latest"]` (android;
+  needs adb + a device to operate).
+- `cua-driver` → local `["uvx","cua-driver","mcp"]` (trycua/cua computer-use; macOS
+  needs `cua-driver permissions grant` once).
+
+Both `"enabled": true`. OpenCode now declares 5 MCP servers: camofox, exa, context7,
+mobile-mcp, cua-driver.
+
+### Verification
+`chezmoi apply` on nimbus for both `~/.config/opencode/opencode.json` and
+`~/.config/opencode-openagent/opencode.json`; both profiles show mobile-mcp +
+cua-driver. Kinto synced via `chezmoi update`.
+
 ## 2026-06-19 — Consolidate Go models to GLM / Kimi / MiniMax (drop DeepSeek)
 
 Per request, removed all DeepSeek from the openagent routing. `deepseek-v4-pro`
