@@ -1,5 +1,40 @@
 # chezmoi config changes log
 
+## 2026-07-13 — Fix chezmoi-sync detector: `$CHEZMOI` env var collision
+
+### Problem
+
+`/chezmoi-sync` failed immediately with `ERROR | chezmoi-not-found`, even though
+`chezmoi` was on PATH (`~/.asdf/shims/chezmoi`). The detector took its binary
+path from an env override, `CHEZMOI="${CHEZMOI:-chezmoi}"` — but `CHEZMOI=1` was
+already exported in the environment (chezmoi sets `CHEZMOI=1` in scripts it
+runs, and the session inherited it). So the script resolved the binary to the
+literal string `1`, and `command -v 1` failed the presence check.
+
+### What changed
+
+- **`dot_claude/skills/chezmoi-sync/detect-drift.sh`**: The override variable is
+  now `CHEZMOI_SYNC_BIN` instead of `CHEZMOI`, with a comment explaining why the
+  bare name is unusable. Applied to the deployed skill.
+
+With the fix, the detector reaches `chezmoi status` and fails cleanly on the
+1Password gate (exit 1, "multiple accounts found") rather than hanging. That gate
+was then fixed separately — see logs/zshenv.md, 2026-07-13 (OP_ACCOUNT).
+
+### Second bug: timeout far too short
+
+Once 1Password was selecting an account correctly, the detector still reported
+`STATUS_BLOCKED | need-op-session` — a false alarm. A full `chezmoi status` walk
+renders every template and so pays one `op` round-trip per secret: measured at
+**87s** on this repo with a perfectly healthy session. The detector's default
+`STATUS_TIMEOUT` was 20s, so it tripped the timeout and blamed the op session.
+
+- **`dot_claude/skills/chezmoi-sync/detect-drift.sh`**: default
+  `CHEZMOI_SYNC_STATUS_TIMEOUT` raised 20s → 180s.
+
+Both fixes verified together: the detector now runs from a clean shell with no
+sign-in and no env overrides, listing drift in ~90s.
+
 ## 2026-07-01 — Bake the "never leave the source repo dirty" golden rule into CLAUDE.md + AGENTS.md
 
 ### Motivation

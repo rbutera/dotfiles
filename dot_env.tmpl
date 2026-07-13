@@ -19,7 +19,10 @@ OPENROUTER_API_KEY={{ onepasswordRead "op://Private/openrouter_api/credential" }
 #OPENAI_API_KEY=
 
 ## Anthropic
-ANTHROPIC_API_KEY={{ onepasswordRead "op://Private/anthropic claude 3.5 api key/credential" }}
+# Intentionally NO ANTHROPIC_API_KEY here. It outranks (precedence rank 3) the Max
+# subscription /login creds (rank 6), so its presence forces every Claude Code wrapper
+# (claude-codex-bridge, interactive `claude`, `ark run`) onto API billing instead of the
+# subscription. Leave unset; Claude Code uses the keychain Max login. (Removed 2026-07-13.)
 
 
 ##...

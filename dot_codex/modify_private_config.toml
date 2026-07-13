@@ -28,7 +28,7 @@ except ModuleNotFoundError:
 BASE = {
     "personality": "pragmatic",
     "model": "gpt-5.6-sol",
-    "model_reasoning_effort": "medium",
+    "model_reasoning_effort": "high",
     "model_reasoning_summary": "auto",
     "approval_policy": "on-request",
     "default_permissions": ":danger-full-access",
@@ -125,6 +125,54 @@ if _is_arch:
         "command": "uvx",
         "args": ["arch-ops-server"],
     }
+
+# ── Florence (kinto)-only MCP servers ────────────────────────────────────────
+# The codex "doppelganger" runs in ~/focused on kinto. These servers are only
+# wired into Florence's Claude/Ark harness (ark plugin .mcp.json + focused
+# .mcp.json), so codex couldn't see them. Port them here, host-gated to kinto so
+# Navi (nimbus) doesn't inherit Florence's work vault / kinto-local services.
+# Deliberately NOT ported: discord / discord-voice / elevenlabs (voice+chat
+# transport, harness-bound) and playwright-headed (codex already has Playwright).
+import socket as _socket
+
+_host = _socket.gethostname().split(".")[0].lower()
+if _host.startswith("kinto"):
+    BASE["mcp_servers"].update({
+        # quick-markdown search. qmd's native MCP is STDIO (`qmd mcp`), so codex
+        # spawns it directly — more robust than the ark plugin's http://[::1]:8181
+        # wrapper, which needs a separate server that isn't always running.
+        "qmd": {
+            "command": "qmd",
+            "args": ["mcp"],
+        },
+        # focused vault CRUD (focused .mcp.json).
+        "obsidian": {
+            "command": "mcpvault",
+            "args": [os.path.join(HOME, "focused", "vault")],
+        },
+        # JIRA + Confluence (focused .mcp.json).
+        "atlassian": {
+            "command": "uvx",
+            "args": ["mcp-atlassian"],
+        },
+        # Notion conventions hub (focused .mcp.json). Hosted; first use prompts
+        # a one-time OAuth in the browser.
+        "notion": {
+            "url": "https://mcp.notion.com/mcp",
+        },
+        # SonarCloud PR quality (focused .mcp.json). Needs docker + the
+        # SONARQUBE_* env (SONARQUBE_TOKEN/ORG/URL) in the codex environment.
+        "sonarqube": {
+            "command": "docker",
+            "args": [
+                "run", "-i", "--rm",
+                "-e", "SONARQUBE_TOKEN",
+                "-e", "SONARQUBE_ORG",
+                "-e", "SONARQUBE_URL",
+                "mcp/sonarqube",
+            ],
+        },
+    })
 
 # chisel (Unix-only binary), tempograph (Rust build fails), oss-autopilot
 # don't work on Windows — remove them.

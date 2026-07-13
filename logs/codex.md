@@ -11,6 +11,11 @@ Codex desktop sessions were restricted to workspace writes and blocked outbound 
 - Removed the legacy `sandbox` settings from the managed base and explicitly delete stale `sandbox`, `sandbox_mode`, and `sandbox_workspace_write` keys while merging an existing deployed config, preventing old sandbox policy from overriding the permission profile.
 - Preserved desktop-app-owned `node_repl`, computer-use, bundled, and primary-runtime integration entries during authoritative merges; added Slack to the managed curated plugin set. This prevents a targeted Codex config apply from deleting working integrations discovered in the live config.
 
+## 2026-07-11 — Use high reasoning effort for GPT-5.6 SOL
+
+Changed the managed Codex default `model_reasoning_effort` from `medium` to
+`high`. The default model remains `gpt-5.6-sol`.
+
 ## 2026-07-07 — Convert codex-teammate into a faithful Sonnet-low relay
 
 ### Problem
@@ -141,3 +146,14 @@ Codex (Tael) calls were taking 5-10 minutes each, and one timed out entirely. Co
 
 ### Solution/Fix
 Changed `model_reasoning_effort` from `"high"` to `"low"` in `dot_codex/modify_private_config.toml` BASE dict. Applied via `chezmoi apply`. Should significantly reduce Tael dispatch latency.
+
+## 2026-07-10 — Revert codex-teammate to vanilla (Sonnet-low relay was a no-op)
+
+### Problem
+The 2026-07-07 "faithful Sonnet-low relay" (`model: sonnet`, `effort: low`, tools pinned to the six `mcp__codex__codex_*` only) did not route in practice: dispatched as the Codex reviewer for PR #571 it returned with `tool_uses: 0`, produced no findings, and just echoed its system preamble (~66k tokens spent, zero Codex calls). A review gate that silently yields nothing is worse than a slightly less "independent" but functioning one.
+
+### Change
+- `dot_claude/agents/codex-teammate.md` — reverted to the vanilla `c51f71d` definition (the one shipped with the bridge): no `model`/`effort`/`tools` frontmatter (inherits the caller's model + full tools), body reads context, calls the right Codex tool, and synthesizes. Applied via `chezmoi apply`.
+
+### Trade-off accepted
+Loses the strict "uncontaminated independent read" the relay aimed for; regains an actually-working Codex second opinion. Rai's call. Agent-definition changes take effect in new Claude Code sessions.

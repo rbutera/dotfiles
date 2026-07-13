@@ -4,6 +4,16 @@ Dated changelog for `dot_config/herdr/config.toml` (deployed to `~/.config/herdr
 herdr is a terminal workspace manager for AI coding agents — tmux-like, but with agents
 as first-class, state-tracked entities. Ground truth: herdr 0.7.1. Docs: https://herdr.dev/docs.
 
+## 2026-07-11 — Add tmux-default split keys alongside mnemonic splits
+
+Kept Herdr's existing `prefix+-` / `prefix+_` split bindings and added tmux's
+default `prefix+"` / `prefix+%` pair. On a UK keyboard those defaults are
+physically Shift+2 and Shift+5. Horizontal/down now accepts `-` or `"`;
+vertical/right accepts Herdr's native `v`, `_`, or `%`.
+
+Also reconciled the deployed `onboarding = false` setting into managed source
+before applying, rather than overwriting that legitimate local drift.
+
 ## 2026-07-03 — tmux-reflex keybind alignment + toast/QoL pass
 
 **Motivation.** Bring the herdr keymap closer to Rai's tmux (gpakosz/oh-my-tmux) muscle

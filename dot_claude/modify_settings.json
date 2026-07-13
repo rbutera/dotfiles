@@ -16,7 +16,7 @@ read -r -d '' base << 'BASE' || true
   "teammateMode": "in-process",
   "tui": "fullscreen",
   "editorMode": "vim",
-  "attribution": {"commit": "", "pr": ""},
+  "attribution": {"commit": "", "pr": "", "sessionUrl": false},
   "showThinkingSummaries": false,
   "viewMode": "verbose",
   "enabledPlugins": {

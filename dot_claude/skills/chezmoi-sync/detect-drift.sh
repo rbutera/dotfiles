@@ -40,8 +40,13 @@
 
 set -u
 
-CHEZMOI="${CHEZMOI:-chezmoi}"
-STATUS_TIMEOUT="${CHEZMOI_SYNC_STATUS_TIMEOUT:-20}"
+# NOT $CHEZMOI — chezmoi exports CHEZMOI=1 into scripts it runs, so a shell that
+# inherits that env would resolve the binary to "1".
+CHEZMOI="${CHEZMOI_SYNC_BIN:-chezmoi}"
+# A full status walk renders every template, so it pays one `op` round-trip per
+# secret — ~90s on this repo even with a healthy session. 20s spuriously tripped
+# the need-op-session sentinel.
+STATUS_TIMEOUT="${CHEZMOI_SYNC_STATUS_TIMEOUT:-180}"
 
 # --- locate a timeout binary (gtimeout on macOS via coreutils, else timeout) ---
 TIMEOUT_BIN=""

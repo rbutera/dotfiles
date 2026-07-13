@@ -25,6 +25,7 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 # ── PATH ─────────────────────────────────────────────────────────────────────
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"
+export PATH="$HOME/.bun/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.asdf/shims:$PATH"
@@ -73,10 +74,18 @@ export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share"
 export BROWSER='wslview'
 {{- end }}
 
+# ── 1Password account selection ───────────────────────────────────────────────
+# Two accounts are signed in (personal + Focused Labs), so `op` refuses to guess
+# and errors "multiple accounts found" — which breaks every onepasswordRead in a
+# chezmoi template. Select by USER ID, not the `personal` shorthand: shorthands
+# only exist on machines where the account was added via `op account add`, and
+# that command is disabled while the CLI is connected to the 1Password app.
+# The user ID is the same account identifier on every machine.
+export OP_ACCOUNT=RTBK7UHJFNF7FB7ELCPJRRLDGM # rai@rbutera.com / my.1password.com
+
 # ── SSH session overrides ─────────────────────────────────────────────────────
 if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
   export OP_BIOMETRIC_UNLOCK_ENABLED=false
-  export OP_ACCOUNT=personal
 fi
 
 # ── Tool config ──────────────────────────────────────────────────────────────

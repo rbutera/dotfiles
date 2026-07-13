@@ -4,6 +4,17 @@ Include ~/.orbstack/ssh/config
 {{- end }}
 {{- end }}
 
+{{/* colima writes these Includes into ~/.ssh/config itself when a VM starts, so
+     without them here every apply would strip them back out and colima would
+     re-add them — perpetual drift. stat-guarded so each only lands on a machine
+     that actually has that file (the ExternalNVMe path is host-specific). */}}
+{{- if stat "/Volumes/ExternalNVMe/home/.colima/ssh_config" }}
+Include /Volumes/ExternalNVMe/home/.colima/ssh_config
+{{- end }}
+{{- if stat (joinPath .chezmoi.homeDir ".colima/ssh_config") }}
+Include {{ .chezmoi.homeDir }}/.colima/ssh_config
+{{- end }}
+
 Host pidgey
  User rai
  HostName pidgey.piranha-wyvern.ts.net
