@@ -1,5 +1,16 @@
 # Codex config changes log
 
+## 2026-07-13 — Remove sandbox friction and allow escalation
+
+### Problem
+Codex desktop sessions were restricted to workspace writes and blocked outbound SSH to Tailscale hosts. `approval_policy = "never"` prevented Codex from requesting an escalation, while the legacy `[sandbox]` configuration did not provide the intended unrestricted local access.
+
+### Changes
+- Changed the managed approval policy from `never` to `on-request` so Codex can request confirmation when a separate safety rule requires it.
+- Set `default_permissions = ":danger-full-access"` for unrestricted local filesystem and network execution on Rai's personal machines.
+- Removed the legacy `sandbox` settings from the managed base and explicitly delete stale `sandbox`, `sandbox_mode`, and `sandbox_workspace_write` keys while merging an existing deployed config, preventing old sandbox policy from overriding the permission profile.
+- Preserved desktop-app-owned `node_repl`, computer-use, bundled, and primary-runtime integration entries during authoritative merges; added Slack to the managed curated plugin set. This prevents a targeted Codex config apply from deleting working integrations discovered in the live config.
+
 ## 2026-07-07 — Convert codex-teammate into a faithful Sonnet-low relay
 
 ### Problem

@@ -2,7 +2,7 @@
 """Modify script for ~/.codex/config.toml
 
 Merges managed base config into existing Codex settings.
-Managed: top-level settings, sandbox, mcp_servers, model_providers, plugins, marketplaces
+Managed: top-level settings, permissions, mcp_servers, model_providers, plugins, marketplaces
 Free: projects, notice (machine-specific, added by Codex at runtime)
 """
 
@@ -25,20 +25,15 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 # ── Base config: fields we want on all machines ──────────────────────────────
-HOME = os.environ.get("HOME") or os.environ.get("USERPROFILE", "")
-
 BASE = {
     "personality": "pragmatic",
     "model": "gpt-5.6-sol",
     "model_reasoning_effort": "medium",
     "model_reasoning_summary": "auto",
-    "approval_policy": "never",
+    "approval_policy": "on-request",
+    "default_permissions": ":danger-full-access",
     "features": {
         "multi_agent": True,
-    },
-    "sandbox": {
-        "writable_roots": [HOME, "/tmp"],
-        "network_access": True,
     },
     "mcp_servers": {
         "github": {
@@ -102,6 +97,7 @@ BASE = {
         "gmail@openai-curated": {"enabled": True},
         "github@openai-curated": {"enabled": True},
         "google-drive@openai-curated": {"enabled": True},
+        "slack@openai-curated": {"enabled": True},
         "caveman@caveman-repo": {"enabled": True},
     },
     "marketplaces": {
@@ -158,10 +154,25 @@ else:
 # Merge: base wins for managed keys, current adds free keys (projects, notice, etc.)
 merged = deep_merge(BASE, current)
 
+# Permission profiles replace the legacy sandbox settings and must not coexist
+# with them, including stale values preserved from the deployed config.
+for key in ("sandbox", "sandbox_mode", "sandbox_workspace_write"):
+    merged.pop(key, None)
+
 # Authoritative keys: base is the sole source of truth for these.
 # Removals from base are reflected in deployed config.
 for key in ("mcp_servers", "model_providers", "plugins"):
     if key in BASE:
         merged[key] = BASE[key]
+
+# The desktop app owns these generated integrations. Preserve the machine-local
+# paths, versioned plugin state, and runtime hashes it writes into the config.
+for name in ("node_repl", "computer-use"):
+    if name in current.get("mcp_servers", {}):
+        merged["mcp_servers"][name] = current["mcp_servers"][name]
+
+for name, config in current.get("plugins", {}).items():
+    if name.endswith(("@openai-bundled", "@openai-primary-runtime")):
+        merged["plugins"][name] = config
 
 sys.stdout.buffer.write(tomli_w.dumps(merged).encode())
