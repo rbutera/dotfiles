@@ -1,5 +1,42 @@
 # zshenv changelog
 
+## 2026-07-13 — Export OP_ACCOUNT unconditionally, by user ID (not the `personal` shorthand)
+
+### Problem
+
+Every `onepasswordRead` in every template failed on this machine:
+
+```
+[ERROR] multiple accounts found. Use the --account flag or set the OP_ACCOUNT
+        environment variable to select an account.
+```
+
+Two accounts are signed in — `my.1password.com` (rai@rbutera.com) and
+`focusedlabs.1password.com` — so `op` refuses to guess. `OP_ACCOUNT=personal`
+*was* set, but only inside the SSH-session block, so a local shell had nothing.
+
+Worse, the `personal` value was wrong here anyway. That shorthand only exists on
+machines where the account was added with `op account add --shorthand personal`.
+On this machine the CLI is connected to the 1Password **app**, and in that mode
+`op account add` is refused outright ("Add an account through the 1Password
+app") — app-provided accounts carry no shorthand. `op account list` confirms:
+URL/email/user ID only. So `--account personal` matched nothing.
+
+Selector support, verified live: user ID ✅, account URL ✅, email ❌ (fails).
+
+### What changed
+
+- **`dot_zshenv.tmpl`**: Moved `OP_ACCOUNT` out of the SSH block and made it an
+  unconditional export, set to the **user ID** `RTBK7UHJFNF7FB7ELCPJRRLDGM`
+  (rai@rbutera.com). The user ID is the same identifier on every machine —
+  it works whether the account came from the app integration (this machine) or
+  from a CLI `op account add` (the machines with a `personal` shorthand), so one
+  value is portable across the fleet where `personal` was not.
+  The SSH block keeps `OP_BIOMETRIC_UNLOCK_ENABLED=false`.
+
+No `op signin` is needed on this machine: the app integration serves reads
+directly once the desktop app is unlocked.
+
 ## 2026-06-22 — Fix onepasswordDetailsFields section-field bug across group files
 
 ### Motivation
