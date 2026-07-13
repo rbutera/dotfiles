@@ -1,5 +1,35 @@
 # Claude Code config changes log
 
+## 2026-07-13 — Disable the `Claude-Session:` commit trailer (`attribution.sessionUrl: false`)
+
+### Context
+Claude Code appends a `Claude-Session: https://claude.ai/code/session_...` git
+trailer to commit messages by default when running from a web or Remote Control
+session. This is AI attribution, and it leaked into a commit in an easyJet-owned
+client repo (`~/focused/launchpad/`), where Rai must be the sole attributed
+author. It had to be caught and stripped by hand — a Brita-filter violation:
+anything that depends on a human remembering will eventually fail.
+
+`attribution.commit: ""` (already set) only suppresses the `Co-Authored-By:`
+trailer. The session link is a separate flag. Per the docs
+(https://code.claude.com/docs/en/settings#attribution-settings): "`sessionUrl` —
+Whether to append the claude.ai session link as a `Claude-Session` trailer on
+commits and a link in pull request descriptions when running from a web or
+Remote Control session. Defaults to `true`. Set to `false` to omit the link." The
+same section notes `attribution` supersedes the deprecated `includeCoAuthoredBy`
+key, and that hiding all attribution needs `commit` + `pr` empty **and**
+`sessionUrl: false`.
+
+### Changes
+- **`dot_claude/modify_settings.json`**: base config `attribution` block now
+  `{"commit": "", "pr": "", "sessionUrl": false}`. `attribution` is a
+  fully-managed key in the jq merge, so this deploys to every machine.
+
+### Verification
+`chezmoi apply ~/.claude/settings.json` (scoped, no 1Password needed — this
+source file is not a template). Deployed `~/.claude/settings.json` now has
+`.attribution == {"commit": "", "pr": "", "sessionUrl": false}` and is valid JSON.
+
 ## 2026-06-24 — Remove all `.claude.json` cache scrubs (supersedes 2026-06-22)
 
 ### Context
