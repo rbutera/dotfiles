@@ -1,5 +1,48 @@
 # Claude Code config changes log
 
+## 2026-07-13 — MCP cleanup round 1 (Claude-side dedup + prune)
+
+### Context
+First round of a cross-harness MCP cleanup initiative (anchor:
+`~/expedition/Installed Agent Harnesses/`). This round does only the
+unambiguous Claude-side removals/dedup; android/computer-use rollout is a
+separate later step.
+
+### Changes
+- **Removed `open-websearch`** from `modify_dot_claude.json.tmpl` base mcpServers
+  (all machines) — redundant with `exa`.
+- **Deduped `context7`**: Claude was loading it *twice per session* — the managed
+  global stdio (`npx @upstash/context7-mcp`) **and** the
+  `context7@claude-plugins-official` plugin (also npx, identical mechanism). Kept
+  the managed global stdio; added `context7` to the `del()` list in
+  `dot_claude/modify_settings.json` so the plugin is stripped on apply.
+- **Removed `chrome-devtools-mcp@claude-plugins-official`** plugin (dropped from
+  base + added to the `del()` list) — browser control is covered by `playwright`.
+- **Enabled serena for nimbus Navi**: added a **nimbus-gated** `serena` entry to
+  `modify_dot_claude.json.tmpl` mcpServers — `uvx --from
+  git+https://github.com/oraios/serena serena start-mcp-server --context
+  claude-code`, mirroring Florence's kinto `~/focused/.mcp.json` entry. Done via
+  mcpServers (not the plugin, kept deliberately off) so kinto/Florence — which
+  already has serena in its own `.mcp.json` — doesn't double-load. Verified the 7
+  serena tools referenced in `~/.claude/rules/serena.md`
+  (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`,
+  `replace_symbol_body`, `insert_before_symbol`, `insert_after_symbol`,
+  `rename_symbol`) are all current, real serena tools.
+
+### Deferred to the next step (not this round)
+`mobile-mcp` (android) + `cua-driver` (computer-use) "available everywhere incl.
+Codex". `cua-driver` has **no binary on either nimbus or kinto** — so it's
+currently a dead entry even on nimbus. Rolling it out belongs to the vault-driven
+"select best android + computer-use MCP, then install" step, which will install
+the binary first.
+
+### Verification
+`chezmoi apply --force ~/.claude.json ~/.claude/settings.json` on nimbus (EXA_API_KEY
+confirmed in env first — the modify script injects it, empty would blank the exa
+key). Live `~/.claude.json` mcpServers now include `serena`, no `open-websearch`;
+`enabledPlugins` has no `context7`/`chrome-devtools-mcp`; exa key intact. Kinto
+brought in sync via `chezmoi update`. serena takes effect in new Claude sessions.
+
 ## 2026-07-13 — Disable the `Claude-Session:` commit trailer (`attribution.sessionUrl: false`)
 
 ### Context

@@ -11,10 +11,6 @@ current=$(cat)
 # ── Base MCP servers: shared across all machines ─────────────────────────────
 read -r -d '' base_mcps << 'MCPS' || true
 {
-  "open-websearch": {
-    "command": "npx",
-    "args": ["-y", "open-websearch"]
-  },
   "context7": {
     "command": "npx",
     "args": ["-y", "@upstash/context7-mcp@latest"]
@@ -63,6 +59,10 @@ read -r -d '' base_mcps << 'MCPS' || true
   ,"cua-driver": {
     "command": "cua-driver",
     "args": ["mcp"]
+  }
+  ,"serena": {
+    "command": "uvx",
+    "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "claude-code"]
   }
 {{- end }}
 {{- if and (eq .chezmoi.os "linux") (or (eq .chezmoi.osRelease.id "arch") (and (hasKey .chezmoi.osRelease "idLike") (eq .chezmoi.osRelease.idLike "arch"))) }}
