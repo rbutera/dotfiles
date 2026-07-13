@@ -1,5 +1,14 @@
 # Codex config changes log
 
+## 2026-07-13 — Fix `HOME` NameError in the kinto Florence codex section
+
+Bug (pre-existing, kinto-only): the Florence `obsidian` entry used a bare,
+undefined `HOME` — `os.path.join(HOME, "focused", "vault")` — so the whole modify
+script raised `NameError` and **every kinto `chezmoi apply ~/.codex/config.toml`
+was failing** (surfaced while rolling out mobile-mcp/cua-driver). Fixed to
+`os.path.expanduser("~")` → `/Users/rai/focused/vault` (verified against Florence's
+live `~/focused/.mcp.json`). nimbus never hit it (kinto-gated branch).
+
 ## 2026-07-13 — Add mobile-mcp (android) + cua-driver (computer-use) to Codex
 
 ### Change

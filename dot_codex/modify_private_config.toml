@@ -161,7 +161,7 @@ if _host.startswith("kinto"):
         # focused vault CRUD (focused .mcp.json).
         "obsidian": {
             "command": "mcpvault",
-            "args": [os.path.join(HOME, "focused", "vault")],
+            "args": [os.path.join(os.path.expanduser("~"), "focused", "vault")],
         },
         # JIRA + Confluence (focused .mcp.json).
         "atlassian": {
