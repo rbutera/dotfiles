@@ -1,5 +1,48 @@
 # chezmoi config changes log
 
+## 2026-07-14 — chezmoi-sync: kill recurring claude.json / npmrc drift + merge ark.json
+
+### Context
+`/chezmoi-sync` run. Detector flagged 4 drifted files, all templates:
+`.claude.json`, `focused/ark.json`, `.env`, `.npmrc`. Two were *recurring*
+drift (self-inflicted by tooling), so the fix was structural, not a one-off
+reconcile — Rai's directive was "make the trailing newline a non-factor" and
+"convert npmrc into a modify script and leave the auth token out of it".
+
+### `.claude.json` — permanent trailing-newline fix (modify script)
+- Symptom: perpetual 1-byte drift. `modify_dot_claude.json.tmpl` ended with
+  `jq`, which always emits a trailing newline; Claude Code rewrites
+  `~/.claude.json` with **no** trailing newline → drifts every session.
+- Fix: capture the `jq` output in `result=$(…)` (strips trailing newlines) and
+  emit with `printf '%s' "$result"` (no newline). Output now byte-identical to
+  Claude's own writes. Drift can't recur. (See chezmoi-modify-scripts.md.)
+
+### `focused/ark.json` — merge (kept deployed + re-added hang-fix)
+- Deployed (07-03) had diverged from source (07-01) *both ways*: deployed used
+  `ark-discord` channelSource + had `snooze`/`recap`/`email` blocks but had
+  **lost** the `--disallowedTools AskUserQuestion` hang-fix; source used
+  `discord-text-plugin`, dropped those blocks, kept the hang-fix.
+- Resolution (Rai's call): treat live 07-03 config as canonical, rewrite
+  `focused/ark.json.tmpl` to match it (ark-discord, snooze, recap, email) **and**
+  re-add `--disallowedTools AskUserQuestion`, then `apply --force` so the live
+  file actually regains the hang-fix. Florence picks it up on next reload.
+
+### `.env` — keep source (apply --force)
+- Only diff was an additive comment block documenting why `ANTHROPIC_API_KEY` is
+  intentionally absent (rank-3 API key would outrank the Max /login creds). No
+  secret-value change. Applied; no source edit.
+
+### `.npmrc` — converted to modify script, auth token now untracked
+- Deployed npm token (07-11, `…0OghvD`) was **newer** than the 1Password item
+  `op://Private/npm auth/credential` (06-22, `…0fxfxI`) — a local `npm login`
+  rotated it, 1Password never caught up. Blind `apply --force` would have
+  reverted npm auth to the stale token.
+- Fix (Rai's call): retired `private_dot_npmrc.tmpl` (1Password-templated) for
+  `modify_private_dot_npmrc`. It emits the managed supply-chain directive block
+  and preserves any `^//` registry line (tokens/creds) verbatim from the
+  existing file. Token is no longer tracked in chezmoi *or* 1Password → drift
+  can't recur. `private_` prefix keeps 0600. (See npm.md.)
+
 ## 2026-07-13 — chezmoi-sync: finish `main` merge + reconcile deployed drift
 
 ### Context

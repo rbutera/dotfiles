@@ -36,3 +36,29 @@ ccline --version && claudex --version                 # verify they resolve
 
 ### Runbook: after ANY `asdf` node default bump
 Reinstall the global CLIs so their shims re-point at the new node. The full set (from the 2026-05-23 entry): `@bitbonsai/mcpvault`, `@cometix/ccline`, `@kunwarshah/claudex`, `@fission-ai/openspec`, `@openai/codex`, `@opentabs-dev/cli` (+ slack/teams plugins), `@tobilu/qmd`, `humanizer`, `mcporter`, `obsidian-headless`, `obsidian-mcp`. Then `asdf reshim nodejs`. This prevents the silent-orphan class from recurring on the next upgrade.
+
+## 2026-07-14 — Convert `~/.npmrc` to a modify script; stop tracking the auth token
+
+### Problem
+`private_dot_npmrc.tmpl` rendered the registry auth token from 1Password
+(`op://Private/npm auth/credential`). A local `npm login` rotated the token
+(deployed `…0OghvD`, mtime 07-11) but 1Password was never updated (item still
+`…0fxfxI`, updated 06-22). Result: perpetual drift, and any `chezmoi apply`
+would have clobbered the working token with the stale 1Password one.
+
+### Fix
+- Retired `private_dot_npmrc.tmpl`; added **`modify_private_dot_npmrc`** (plain
+  bash, no templating — no 1Password dependency).
+- The modify script emits the authoritative supply-chain directive block
+  (`min-release-age=7`, `save-exact`, `engine-strict`, `strict-ssl`, `audit`,
+  etc. + the `# Supply-chain protection` comment) and then preserves **every
+  `^//` registry line** (auth tokens, `:always-auth`, …) verbatim from the
+  existing file via `printf '%s\n' "$current" | grep -E '^//' || true`.
+- Net effect: chezmoi owns the config knobs; the auth token is owned by
+  `npm login`/`npm token` and never touched. No token in chezmoi *or* 1Password.
+  `private_` prefix keeps `~/.npmrc` at 0600. On a fresh machine (no existing
+  file) the grep is a harmless no-op — run `npm login` to populate the token.
+
+### Note
+This supersedes the token-management half of the 2026-05-23 `dot_npmrc` design.
+The supply-chain directives are unchanged; only the auth line is now untracked.

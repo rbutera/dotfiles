@@ -71,10 +71,6 @@ BASE = {
             "command": "npx",
             "args": ["-y", "@oss-autopilot/mcp@latest"],
         },
-        "chisel": {
-            "command": "chisel",
-            "args": ["--stdio", "--root", "/"],
-        },
         "exa": {
             "url": "https://mcp.exa.ai/mcp?enableAdvancedSearch=true",
             "headers": {"x-api-key": os.environ.get("EXA_API_KEY", "")},
@@ -187,10 +183,9 @@ if _host.startswith("kinto"):
         },
     })
 
-# chisel (Unix-only binary), tempograph (Rust build fails), oss-autopilot
-# don't work on Windows — remove them.
+# tempograph (Rust build fails), oss-autopilot don't work on Windows — remove them.
 if sys.platform == "win32":
-    for _srv in ("chisel", "tempograph", "oss-autopilot"):
+    for _srv in ("tempograph", "oss-autopilot"):
         BASE["mcp_servers"].pop(_srv, None)
 
 

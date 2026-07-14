@@ -1,5 +1,15 @@
 # Codex config changes log
 
+## 2026-07-14 — Remove chisel MCP server
+
+Rai retired `chisel`. Removed `chisel` from `BASE["mcp_servers"]` in
+`dot_codex/modify_private_config.toml` and dropped it from the Windows `pop()`
+list (now `("tempograph", "oss-autopilot")`). Applied `chezmoi apply --force
+~/.codex/config.toml` (python modify script, no 1Password) — live config now
+chisel-free, diff empty. Also removed from the claude modify script the same day;
+see logs/chezmoi-modify-scripts.md (pi inherits MCP via discovery, no pi-native
+config to edit).
+
 ## 2026-07-13 — Fix `HOME` NameError in the kinto Florence codex section
 
 Bug (pre-existing, kinto-only): the Florence `obsidian` entry used a bare,
