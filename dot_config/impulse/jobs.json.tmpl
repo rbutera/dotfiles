@@ -280,6 +280,36 @@
       "maxTurns": 40,
       "prompt": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/florence.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/focused/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/focused/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
     }
+  },
+  {
+    "id": "demo-env-refresh",
+    "name": "Fusion demo env: refresh to latest main (hourly 08-20 Mon-Fri)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 8-20 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "bash"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/.claude/skills/demo-env/demo-env.sh", "up", "--branch", "main", "--databricks", "prod", "--flags", "all", "--rebuild", "true", "--worktree", "{{ .chezmoi.homeDir }}/focused/launchpad"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["work", "kinto", "demo-env"],
+    "inputs": {
+      "cmd": "bash",
+      "args": ["{{ .chezmoi.homeDir }}/focused/.claude/skills/demo-env/demo-env.sh", "up", "--branch", "main", "--databricks", "prod", "--flags", "all", "--rebuild", "true", "--worktree", "{{ .chezmoi.homeDir }}/focused/launchpad"],
+      "cwd": "{{ .chezmoi.homeDir }}/focused/launchpad"
+    }
   }
 ]
 {{- else if eq .chezmoi.hostname "nimbus" }}
