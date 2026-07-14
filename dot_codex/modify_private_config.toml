@@ -89,8 +89,8 @@ BASE = {
         # Computer-use (trycua/cua) — background, accessibility-grounded. macOS needs
         # `cua-driver permissions grant` (Accessibility + Screen Recording) once.
         "cua-driver": {
-            "command": "uvx",
-            "args": ["cua-driver", "mcp"],
+            "command": "/Users/rai/.local/bin/cua-driver",
+            "args": ["mcp"],
         },
     },
     "model_providers": {

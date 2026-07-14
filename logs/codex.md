@@ -1,5 +1,13 @@
 # Codex config changes log
 
+## 2026-07-15 — Use the signed native CUA Driver in Codex
+
+Installed the official native CUA Driver app and replaced the cache-backed
+`uvx cua-driver mcp` registration with the canonical absolute command emitted by
+`cua-driver mcp-config --client codex`: `/Users/rai/.local/bin/cua-driver mcp`.
+This gives app-launched Codex sessions a stable path and makes macOS Accessibility
+and Screen Recording grants attach to the signed `com.trycua.driver` bundle.
+
 ## 2026-07-14 — Remove chisel MCP server
 
 Rai retired `chisel`. Removed `chisel` from `BASE["mcp_servers"]` in
