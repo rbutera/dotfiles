@@ -1,5 +1,38 @@
 # SSH Config Changelog
 
+## 2026-07-14 — Re-removed the colima Include (self-inflicted regression) + guard comment
+
+### What happened
+
+During a `/chezmoi-sync` walk, `~/.ssh/config` showed two colima `Include` lines
+present in the deployed file but absent from the template. I misread this as
+"template is missing config" and added them back, `stat`-guarded, reasoning that
+colima re-injects them anyway so the template should own them.
+
+**That was wrong** — it re-introduced the exact bug fixed by `f87711c`
+(2026-06-27, "remove colima Include to prevent config abort on inaccessible
+external volume"). OpenSSH is **fatal** on an *unreadable* include (silent only
+on a *missing* one), so when `/Volumes/ExternalNVMe` is unmounted the include
+aborts parsing of the entire ssh config. The `stat` guard does not help: `stat`
+is evaluated at **apply** time, while the failure occurs later, whenever the
+volume goes away.
+
+The bad edit was picked up and committed by an unrelated autonomous
+drift-committer (`cebe62a`) before it could be caught.
+
+### What changed
+
+- **`dot_ssh/config.tmpl`**: colima Include block removed again. In its place, a
+  comment recording *why* it must not come back, so the next sync (human or
+  agent) doesn't re-derive the same wrong conclusion from the same drift.
+- Re-applied `~/.ssh/config`; verified `ssh -G pidgey` parses cleanly.
+
+### The rule
+
+The deployed-vs-source drift on `~/.ssh/config` (colima's injected Includes) is
+**expected and benign**. Colima re-adds them on VM start. Keep SOURCE; never
+back-port them into the template.
+
 ## 2026-07-13 -- Preserve nimbus-only `expedition-vps-backup` authorized key (chezmoi-sync)
 
 ### Problem

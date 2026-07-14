@@ -103,3 +103,7 @@ export PATH="$HOME/.grok/bin:$PATH"
 fpath=(~/.grok/completions/zsh $fpath)
 autoload -Uz compinit && compinit -C
 # <<< grok installer <<<
+
+# bun completions ($HOME, not the installer's hardcoded /Users/rai — this file
+# also deploys to Linux). The -s guard makes it inert where bun isn't installed.
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
