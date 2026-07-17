@@ -1124,6 +1124,37 @@
       "model": "sonnet",
       "maxTurns": 30
     }
+  },
+  {
+    "id": "majora-research-engine",
+    "name": "Majora Research Engine (gatekeeper, every 5m, quota-adaptive)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "sh",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/majora-gatekeeper.sh"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 600
+    },
+    "enabled": true,
+    "tags": ["research-engine", "majora", "nimbus"],
+    "inputs": {
+      "cmd": "sh",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/majora-gatekeeper.sh"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/majora-research-engine"
+    }
   }
 ]
 {{- else }}
