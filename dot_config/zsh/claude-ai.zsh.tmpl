@@ -3,11 +3,14 @@
 # Apply just this group:  chezmoi apply ~/.config/zsh/claude-ai.zsh
 
 # Claude Code OAuth
+# Personal-host CLAUDE_CODE_OAUTH_TOKEN export removed 2026-07-17: an ambient
+# env token overrides keychain/`claude auth login` credentials and flips the CLI
+# to API-key billing. Verified `claude -p` authenticates fine from the keychain
+# with no token env var. Work hosts still get the _WORK variant (not read by the
+# CLI directly; consumed by tooling that injects it explicitly).
 {{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
 {{- if $useSharedClaudeOAuth }}
 export CLAUDE_CODE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" | quote }}
-{{- else }}
-export CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/claude code token/credential" | quote }}
 {{- end }}
 
 # Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile

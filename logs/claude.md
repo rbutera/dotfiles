@@ -362,3 +362,25 @@ Added `DATABASE_URL` as a shell-level env var in `dot_zshenv.tmpl` with a nimbus
 - Removed `pty-mcp` from `modify_dot_claude.json.tmpl` (broken `oneOf` schema, already removed from Codex on 2026-04-21)
 - Removed `obsidian` (`@bitbonsai/mcpvault`) from `modify_dot_claude.json.tmpl` (also removed from Codex config)
 - Added `perplexity` (`@perplexity-ai/mcp-server`) MCP server — API key inherited from shell env
+
+## 2026-07-17 — Remove personal-host CLAUDE_CODE_OAUTH_TOKEN export from claude-ai.zsh
+
+### Problem
+
+Every `chezmoi apply` re-injected `CLAUDE_CODE_OAUTH_TOKEN` into the shell environment via the else-branch in `dot_config/zsh/claude-ai.zsh.tmpl` (personal hosts, `op://Private/claude code token/credential`). An ambient env token takes precedence over keychain/`claude auth login` credentials, flipping the CLI to API-key billing — the same conflict documented in the 2026-era removal that was later reverted. Rai has moved off this token entirely.
+
+### Verification
+
+- Empirical: `env -u CLAUDE_CODE_OAUTH_TOKEN -u ANTHROPIC_API_KEY claude -p 'reply ok' --model haiku` succeeds via keychain on nimbus — headless mode needs no token env var.
+- Docs (code.claude.com/docs/en/authentication): `CLAUDE_CODE_OAUTH_TOKEN` is step 5 in the credential precedence chain; subscription OAuth from `/login` (macOS Keychain) is the default step 6 and works in `--print` mode. The token is only *required* for `--bare` mode or environments with no keychain/login (CI).
+
+### Changes
+
+- **`dot_config/zsh/claude-ai.zsh.tmpl`**: Removed the personal-host `export CLAUDE_CODE_OAUTH_TOKEN=…` else-branch; work hosts keep `CLAUDE_CODE_OAUTH_TOKEN_WORK`. Added a comment explaining why.
+- **Deployed `~/.config/zsh/claude-ai.zsh`**: Edited directly to match the new render (1Password signin failed in-session, so `chezmoi apply` couldn't render the template). No functional diff vs source.
+- Kept the `unset CLAUDE_CODE_OAUTH_TOKEN` alias in `dot_aliases.tmpl` (per Rai) — harmless, and still useful in shells with a stale env.
+
+### Not touched (separate consumers with their own token copies)
+
+- `dot_config/impulse/dot_env.tmpl` (ark-spawn jobs) and the PowerShell profile still template the token.
+- `~/Library/LaunchAgents/com.lumiere.discord-text-plugin.plist` hardcodes a literal token (not chezmoi-managed); lumiere `apps/ark/.env` and `infra/cortex-lab/**/.env` hold three more distinct literal tokens. These should be revoked/migrated to keychain auth as a follow-up.
