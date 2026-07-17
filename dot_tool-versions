@@ -5,3 +5,4 @@ chezmoi 2.69.4
 bun 1.3.14
 rust 1.94.0
 pnpm 10.32.1
+dotnet 10.0.100

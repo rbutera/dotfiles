@@ -1,5 +1,29 @@
 # tmux config changes log
 
+## 2026-07-14 — Add extrakto (fuzzy grab URLs/paths/text, incl. wrapped URLs)
+
+### Motivation
+Windows Terminal / any outer terminal can't detect URLs that wrap across lines
+once tmux is in the mix (it only sees tmux's wrapped grid, not the logical text).
+extrakto scans the pane *buffer* and reconstructs whole tokens, so wrapped URLs
+come out intact. Also grabs paths, git hashes, words, lines.
+
+### Changes
+**`dot_tmux/dot_tmux.conf.local`** — appended:
+- `set -g @plugin 'laktak/extrakto'` (declared here; the file is sourced at
+  ~line 132 of dot_tmux.conf, before `run tpm` at ~line 151, so TPM picks it up).
+- `set -g @extrakto_clip_mode 'tmux_osc52'` — copy via OSC52, so it lands in the
+  right clipboard locally and over SSH, matching tmux-yank's path (no dependency
+  on ~/bin/osc52copy). `@extrakto_clip_tool_run` is legacy, replaced by this.
+- `set -g @extrakto_key 'u'` — default key is Tab, which collides with
+  `bind Tab last-window` in dot_tmux.conf. Moved to `prefix + u` (the old
+  urlview binding) to preserve last-window.
+
+### Usage
+`prefix + u` opens the fzf popup. In it: `Tab` inserts to the pane, `Enter`
+copies, `Ctrl-o` opens, `Ctrl-f` cycles filters (word/all/line/path/url/...).
+Deps present: fzf 0.71, Python 3.14. Installed via TPM (`install_plugins`).
+
 ## 2026-06-23 — Fix copy-paste over SSH for real (passthrough wrap + reattach bug)
 
 ### Problem

@@ -27,10 +27,6 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "npx",
     "args": ["-y", "@oss-autopilot/mcp@latest"]
   },
-  "chisel": {
-    "command": "chisel",
-    "args": ["--stdio", "--root", "/"]
-  },
   "codex": {
     "command": "npx",
     "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "codex"]
@@ -86,10 +82,15 @@ base_mcps=$(echo "$base_mcps" | jq --arg key "${EXA_API_KEY:-}" \
 # .projects[path].enabledMcpServers inside ~/.claude.json.
 builtin_mcps='["computer-use"]'
 
-echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mcps" '
+# Output without a trailing newline: Claude Code rewrites ~/.claude.json with no
+# trailing newline, so emitting one causes perpetual 1-byte drift on every
+# session. $(...) strips trailing newlines and printf '%s' emits none, keeping
+# this script's output byte-identical to Claude's own writes.
+result=$(echo "$current" | jq --argjson base "$base_mcps" --argjson builtins "$builtin_mcps" '
   .mcpServers = $base
   | .remoteControlAtStartup = true
   | if .projects then .projects |= with_entries(
       .value.enabledMcpServers = ((.value.enabledMcpServers // []) + $builtins | unique)
     ) else . end
-'
+')
+printf '%s' "$result"

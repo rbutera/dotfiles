@@ -27,3 +27,16 @@ set -g allow-rename off
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "~/bin/osc52copy"
 bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "~/bin/osc52copy"
 bind -T copy-mode MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "~/bin/osc52copy"
+
+# extrakto — fuzzy-grab URLs / paths / words from the pane, incl. wrapped URLs.
+# prefix + u opens the fzf popup (Tab stays bound to last-window). In the popup:
+# Tab inserts to the pane, Enter copies, Ctrl-o opens, Ctrl-f cycles filters.
+# Declared here because ~/.tmux.conf sources this file (line ~132) before it
+# runs TPM (line ~151), so the @plugin is registered in time.
+set -g @plugin 'laktak/extrakto'
+# Copy via OSC52 so it reaches the right clipboard locally and over SSH,
+# matching tmux-yank's clipboard path (no dependency on ~/bin/osc52copy).
+set -g @extrakto_clip_mode 'tmux_osc52'
+# Default key is Tab, which collides with `bind Tab last-window` in ~/.tmux.conf.
+# Use u instead (the old urlview binding) to preserve last-window.
+set -g @extrakto_key 'u'

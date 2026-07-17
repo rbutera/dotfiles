@@ -1,5 +1,59 @@
 # chezmoi modify scripts changelog
 
+## 2026-07-14 — Remove chisel MCP from claude + codex (pi inherits via discovery)
+
+### Change
+Rai retired the `chisel` MCP server. Removed its definition from both harness
+modify scripts:
+- `modify_dot_claude.json.tmpl` — dropped the `chisel` block from `base_mcps`.
+- `dot_codex/modify_private_config.toml` — dropped `chisel` from
+  `BASE["mcp_servers"]` and from the Windows `pop()` list (now
+  `("tempograph", "oss-autopilot")`), since a server that no longer exists in
+  BASE needn't be popped.
+
+### Pi (Oh My Pi) has no dedicated MCP config
+There is **no** pi-native MCP file (no `~/.omp/agent/mcp.json`, no
+`~/.pi/agent/mcp.json`, nothing under `dot_pi/` beyond auth). Per omp mcp-config
+docs, pi *discovers* MCP servers from other tools' configs — chiefly the Claude
+global config (`~/.claude.json` `mcpServers`) plus opencode/etc. So removing
+chisel from the claude modify script IS the removal for pi; no separate pi edit
+exists. (chisel was defined only in claude + codex; opencode configs never had
+it.) Applied to live claude.json (already chisel-free) and `~/.codex/config.toml`.
+
+## 2026-07-14 — jq trailing-newline drift (claude.json) + new npmrc modify script
+
+### Problem 1: `modify_dot_claude.json.tmpl` drifted every session
+The script ended with a bare `jq` pipeline. `jq` always appends a trailing
+newline, but Claude Code rewrites `~/.claude.json` with **no** trailing newline.
+So `chezmoi status` reported the file `MM` after every session over a 1-byte
+diff that could never be resolved by a normal sync.
+
+### Fix 1
+Capture and re-emit without the newline:
+```bash
+result=$(echo "$current" | jq --argjson base "$base_mcps" … '…')
+printf '%s' "$result"
+```
+`$(…)` strips trailing newlines; `printf '%s'` adds none → output byte-identical
+to Claude's own writes. **Lesson: any modify script whose downstream consumer
+writes without a trailing newline must strip jq's.**
+
+### Problem 2: `.npmrc` auth token drift
+`private_dot_npmrc.tmpl` templated the registry token from 1Password. A local
+`npm login` rotated it; 1Password lagged → permanent drift, and `apply` would
+revert to the stale token.
+
+### Fix 2: `modify_private_dot_npmrc` (new)
+Plain-bash modify script (no `.tmpl` — no 1Password). Emits the managed
+supply-chain directive block, then preserves registry-scoped lines verbatim:
+```bash
+printf '%s\n' "$current" | grep -E '^//' || true
+```
+Config knobs are chezmoi-owned; the auth token is owned by `npm login` and never
+touched. **Lesson: for files where a secret sub-line is written by an external
+tool (npm login, gh auth), a modify script that manages the rest and passes the
+secret line through beats templating the secret from 1Password.** (See npm.md.)
+
 ## 2026-05-15 — Exclude chisel, tempograph, oss-autopilot on Windows
 
 ### Problem
