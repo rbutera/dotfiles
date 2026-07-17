@@ -61,3 +61,20 @@ A `/chezmoi-sync` pass found two ark configs drifted between deployed and source
 - **`~/dev/lumiere/CLAUDE.md`** (= `AGENTS.md`): Added chezmoi-managed files table covering `ark.json` (navi/focused) and impulse `jobs.json`.
 - **`~/dev/lumiere/apps/ark/AGENTS.md`**: Added chezmoi guidance to Key Concepts.
 - **`~/dev/lumiere/apps/impulse/AGENTS.md`**: Added chezmoi-managed config section for `jobs.json`.
+
+## 2026-07-17 — ark.json: discord voice bridge path renamed (ark-discord unification)
+
+### Problem
+
+Lumiere finished unifying the Discord plugin under `apps/ark-discord`, and the old
+`apps/discord-voice-plugin` package (the thin voice MCP bridge) was renamed to
+`apps/ark-discord-voice-bridge`. Both ark.json templates still pointed
+`mainOnlyPlugins` at the old path.
+
+### Changes
+
+- **`navi/ark.json.tmpl`** and **`focused/ark.json.tmpl`**: `mainOnlyPlugins` entry
+  `apps/discord-voice-plugin` → `apps/ark-discord-voice-bridge`.
+- Left `extraClaudeArgs` `server:plugin:discord-voice:discord-voice` unchanged on
+  purpose: `discord-voice` is the Claude plugin id (wire identifier in transcripts),
+  not the directory name — the rename deliberately kept it.
