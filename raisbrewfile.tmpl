@@ -13,6 +13,15 @@ brew "reattach-to-user-namespace"
 cask "font-fira-code-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 
+# Apps
+cask "discord"
+
+# Hunk — agent-focused terminal diff reviewer (macOS only: homebrew-core ships an
+# arm64 bottle but no Linux one, so a common-section `brew "hunk"` would force a
+# source build under Linuxbrew). On Linux/WSL (e.g. lancelot) install via
+# `npm i -g hunkdiff` instead. Config lives in dot_config/hunk/config.toml.
+brew "hunk"
+
 {{ if has .chezmoi.hostname .host_groups.work }}
 # Docker (Colima-backed — work machines only). `DOCKER_HOST` in
 # dot_zshenv.tmpl already points at ~/.colima/default/docker.sock.
@@ -46,6 +55,7 @@ brew "tree"
 brew "wget"
 brew "zsh"
 brew "zsh-completions"
+brew "tailscale"
 
 # Modern replacements
 brew "zoxide"

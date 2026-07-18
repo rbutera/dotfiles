@@ -1,0 +1,26 @@
+# ── Secrets group: voice / media / generative ─────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/voice-media.zsh
+
+# Elevenlabs — three fields of ONE item; rai/navi live in a 1Password section,
+# so they're absent from onepasswordDetailsFields' top-level map. Read by label.
+export ELEVENLABS_API_KEY={{ onepasswordRead "op://Private/Elevenlabs API/credential" | quote }}
+export ELEVENLABS_RAI={{ onepasswordRead "op://Private/Elevenlabs API/rai" | quote }}
+export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi" | quote }}
+
+# Cartesia (TTS Sonic + STT ink-whisper) — voice migration 2026-06-03
+export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" | quote }}
+
+export CIVITAI_API_KEY={{ onepasswordRead "op://Private/Civitai/credential" | quote }}
+
+# RunPod (GPU Cloud) — three fields of ONE item; s3_access/s3_secret live in a
+# 1Password section, absent from onepasswordDetailsFields' map. Read by label.
+export RUNPOD_API_KEY={{ onepasswordRead "op://Private/RunPod API Key/credential" | quote }}
+export RUNPOD_S3_ACCESS_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_access" | quote }}
+export RUNPOD_S3_SECRET_KEY={{ onepasswordRead "op://Private/RunPod API Key/s3_secret" | quote }}
+
+# Gelato print-on-demand API (Dopamade Etsy fulfilment)
+export GELATO_API_KEY={{ onepasswordRead "op://Private/Gelato/credential" | quote }}
+export GELATO_STORE_ID=340c612d-ddd9-4777-a860-d58b8867d62a
+export GELATO_TEMPLATE_ID=866345f9-8419-4f1b-a08c-9a73239ac818
+export GELATO_PLACEHOLDER_NAME=placeholder.png

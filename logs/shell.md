@@ -1,5 +1,34 @@
 # shell config changes log
 
+## 2026-07-14 — zshrc: adopt the bun completions block into the template
+
+### Problem
+
+`/chezmoi-sync` showed `~/.zshrc` drifted: the deployed file had a bun
+completions block the template didn't, while the template had a grok installer
+block the deployed file didn't. Both were appended by their respective
+installers on different machines/runs — so neither side was "wrong", and a plain
+apply in either direction would have destroyed one of them.
+
+### What changed
+
+- **`dot_zshrc.tmpl`**: added the bun completions block alongside the existing
+  grok block, rewritten to use `$HOME` instead of the installer's hardcoded
+  `/Users/rai/.bun/_bun` (this file also deploys to Linux). The `[ -s ... ]`
+  guard keeps it inert where bun isn't installed.
+
+Applied; `zsh -n ~/.zshrc` parses clean, both blocks present, zero residual drift.
+
+## 2026-06-19 — flaude: add --dangerously-skip-permissions
+
+### Problem
+The `flaude`/`florence` function in `dot_aliases.tmpl` launched Claude Code without the
+permission-bypass flag, so the Florence session prompted for permissions on every action.
+
+### Solution
+**`dot_aliases.tmpl`** — added `--dangerously-skip-permissions` to both `command claude`
+invocations in `flaude()` (the brain-found branch and the plain-fallback branch).
+
 ## 2026-04-24 — Fix GITHUB_TOKEN source and add SonarQube env vars
 
 ### Problem

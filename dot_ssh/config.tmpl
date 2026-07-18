@@ -1,11 +1,16 @@
 {{- if eq .chezmoi.os "darwin" }}
-{{- if stat "/Users/rai/.colima/ssh_config" }}
-Include /Users/rai/.colima/ssh_config
-{{- end }}
 {{- if stat "/Users/rai/.orbstack/ssh/config" }}
 Include ~/.orbstack/ssh/config
 {{- end }}
 {{- end }}
+
+{{/* Do NOT add a colima Include here. It was removed deliberately (f87711c,
+     2026-06-27): OpenSSH is FATAL on an unreadable include, so when the
+     ExternalNVMe volume is unmounted the include aborts parsing of the WHOLE
+     ssh config. A stat guard does not help — stat runs at apply time, the
+     failure happens later. Colima re-injects its own Include into
+     ~/.ssh/config on VM start, so the resulting ~/.ssh/config-vs-source drift
+     is expected and benign. See logs/ssh.md. */}}
 
 Host pidgey
  User rai

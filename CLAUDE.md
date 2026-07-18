@@ -6,6 +6,18 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io). Owner: Rai Butera 
 
 - **Always update the relevant log file** in `logs/` after making changes. Each file is a dated changelog for a topic (e.g. `logs/tmux.md`). If no log exists for the topic yet, create one. Entries must include today's date, a summary of the problem/motivation, and what was changed. Use the existing entries in `logs/tmux.md` as a style reference.
 
+## Golden Rule: never leave the source repo dirty
+
+**If you find this chezmoi source repo (`~/.local/share/chezmoi`) dirty, commit and push it. Every time.** Never leave it dirty, never `git stash`-and-forget.
+
+Process:
+1. `git -C ~/.local/share/chezmoi status` — see what changed.
+2. **Inspect every diff, including ones you didn't author.** Drift accumulates from real config Rai evolved on a machine (brewfiles, karabiner/kanata, plists, host config).
+3. If the diffs look sane / match the deployed files (i.e. they're genuine config, not junk or a half-broken edit), stage the specific paths, commit with a clear message describing what drifted, and `git push`.
+4. If a diff looks wrong or suspicious, surface it to Rai rather than committing it — but still don't leave it sitting dirty.
+
+Rationale (Rai, 2026-07-01): dirty source = single-source-of-truth drift between what's deployed and what's tracked. Leaving it dirty is how the deployed machine and the repo silently diverge. Pushing autonomously is expected — same posture as always-push-chezmoi-autonomously. Ties to the impulse-reload rule and the wider "kill drift in my own stack" doctrine.
+
 ## Critical Constraint: chezmoi apply requires 1Password
 
 **Agents cannot run `chezmoi apply` without prior user action.**

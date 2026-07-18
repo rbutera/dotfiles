@@ -1,8 +1,10 @@
 {
-  "ttsProvider": "elevenlabs",
-  "apiKeyEnv": "ELEVENLABS_API_KEY",
-  "defaultVoiceId": "${ELEVENLABS_NAVI}",
-  "defaultModel": "eleven_flash_v2_5",
+  "ttsProvider": "cartesia",
+  "apiKeyEnv": "CARTESIA_API_KEY",
+  "defaultVoiceId": "7759fe57-60c2-46c0-82bd-dab9c228a652",
+  "defaultModel": "sonic-3.5",
+  "cartesiaVoiceId": "7759fe57-60c2-46c0-82bd-dab9c228a652",
+  "cartesiaModelId": "sonic-3.5",
   "enableLlmReview": true,
   "enableLlmAttribution": true,
   "enableLlmEmotionAnnotation": false,
@@ -10,15 +12,15 @@
   "speakerVoices": {
     "rai": {
       "elevenlabs": "${ELEVENLABS_RAI}",
-      "cartesia": "J05Vdux0uMD8mkWfultW"
+      "cartesia": "f114a467-c40a-4db8-964d-aaba89cd08fa"
     },
     "navi": {
       "elevenlabs": "${ELEVENLABS_NAVI}",
-      "cartesia": "J05Vdux0uMD8mkWfultW"
+      "cartesia": "7759fe57-60c2-46c0-82bd-dab9c228a652"
     },
     "narrator": {
       "elevenlabs": "${ELEVENLABS_NAVI}",
-      "cartesia": "J05Vdux0uMD8mkWfultW"
+      "cartesia": "7759fe57-60c2-46c0-82bd-dab9c228a652"
     }
   },
   "concurrency": 3

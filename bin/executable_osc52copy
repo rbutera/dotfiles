@@ -7,19 +7,39 @@ log() { echo "[osc52copy] $*" >> /tmp/osc52debug.log; }
 
 osc52_to_tty() {
   tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null)
-  log "osc52 tty='$tty' writable=$([ -w "$tty" ] && echo yes || echo no)"
-  if [ -n "$tty" ] && [ -w "$tty" ]; then
-    printf "\033]52;c;%s\a" "$encoded" > "$tty"
-    log "wrote OSC52 to tty"
+  [ -n "$tty" ] && [ -w "$tty" ] || tty=/dev/tty
+  if [ -n "$TMUX" ]; then
+    # Inside tmux: wrap the OSC52 in tmux's passthrough sequence (DCS tmux; ... ST),
+    # inner ESCs doubled, so tmux FORWARDS it to the client terminal instead of
+    # swallowing it. Raw OSC52 written to client_tty does not escape the tmux layer
+    # over SSH (confirmed 2026-06-23 on mac+Ghostty: raw token never arrived, the
+    # passthrough-wrapped token did). Requires `set -g allow-passthrough on`
+    # (already set in dot_tmux.conf).
+    printf '\033Ptmux;\033\033]52;c;%s\a\033\\' "$encoded" > "$tty"
+    log "wrote passthrough-wrapped OSC52 to '$tty'"
   else
-    printf "\033]52;c;%s\a" "$encoded" > /dev/tty
-    log "wrote OSC52 to /dev/tty (fallback)"
+    printf '\033]52;c;%s\a' "$encoded" > "$tty"
+    log "wrote raw OSC52 to '$tty'"
   fi
 }
 
-log "SSH_CONNECTION='$SSH_CONNECTION' SSH_TTY='$SSH_TTY' WAYLAND_DISPLAY='$WAYLAND_DISPLAY'"
+log "SSH_CONNECTION='$SSH_CONNECTION' SSH_TTY='$SSH_TTY' WAYLAND_DISPLAY='$WAYLAND_DISPLAY' TMUX='${TMUX:+set}'"
 
-# SSH: send OSC52 so the remote terminal (e.g. Kitty on mondo) sets the clipboard.
+# Inside tmux: ALWAYS target the active client's terminal via passthrough-wrapped
+# OSC52 (osc52_to_tty wraps when $TMUX is set). This is correct regardless of
+# where the server was started or where you are resuming from — local-start +
+# remote-resume, remote-start + local-resume, mouse drag, and the yank tool all
+# funnel through here. Works on any OSC52-capable terminal (Ghostty, Kitty,
+# Windows Terminal). Do NOT branch on $SSH_CONNECTION here: inside tmux that env
+# reflects where the SERVER was started, not where the active client is, which is
+# exactly the reattach bug. The platform branches below are only for invocation
+# OUTSIDE tmux.
+if [ -n "$TMUX" ]; then
+  osc52_to_tty
+  exit 0
+fi
+
+# (Not in tmux) SSH: OSC52 straight to the client terminal.
 if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_TTY" ]; then
   osc52_to_tty
   exit 0

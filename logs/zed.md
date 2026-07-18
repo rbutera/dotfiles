@@ -1,5 +1,28 @@
 # Zed config changes log
 
+## 2026-06-21 — Remove invalid `agent_servers` registry entries (Dotfiles Phase 1)
+
+### Problem
+`dot_config/zed/settings.json` had:
+```json
+"agent_servers": {
+  "claude-acp": { "type": "registry" },
+  "codex-acp":  { "type": "registry" }
+}
+```
+`"type": "registry"` is not a valid `agent_servers` schema value. Per current Zed
+docs (https://zed.dev/docs/ai/external-agents, confirmed via context7 2026-06-21),
+`agent_servers.<id>` entries are either `"type": "custom"` with a `command` (for
+non-registry agents) or an override block for a registry agent. Claude Agent and
+Codex are installed from Zed's ACP Registry via the Agent panel and need NO
+`agent_servers` entry at all — the block was a no-op / noise.
+
+### Fix
+Removed the `agent_servers` block, left a comment documenting how to add a real
+override or custom agent if ever needed. Registry-installed Claude/Codex continue
+to work unchanged. Source-only; takes effect on `chezmoi apply ~/.config/zed/settings.json`
+(plain JSONC, no 1Password needed).
+
 ## 2026-04-09 — Initial Zed setup, ported from VSCode
 
 ### Motivation

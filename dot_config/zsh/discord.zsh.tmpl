@@ -1,0 +1,22 @@
+# ── Secrets group: OpenClaw Discord bot tokens ────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/discord.zsh
+#
+# All 14 tokens are distinct fields of ONE item ("Navi Discord tokens"), but 13
+# live in a 1Password *section*. onepasswordDetailsFields only returns top-level
+# fields (credential/username/...), so section labels like "hermione" are absent
+# from its map. Use onepasswordRead per field — op resolves section labels.
+export OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" | quote }}
+export OPENCLAW_DISCORD_HERMIONE={{ onepasswordRead "op://Private/Navi Discord tokens/hermione" | quote }}
+export OPENCLAW_DISCORD_ZELDA={{ onepasswordRead "op://Private/Navi Discord tokens/zelda" | quote }}
+export OPENCLAW_DISCORD_HEIMERDINGER={{ onepasswordRead "op://Private/Navi Discord tokens/heimerdinger" | quote }}
+export OPENCLAW_DISCORD_ROCKY={{ onepasswordRead "op://Private/Navi Discord tokens/rocky" | quote }}
+export OPENCLAW_DISCORD_RICK={{ onepasswordRead "op://Private/Navi Discord tokens/rick" | quote }}
+export OPENCLAW_DISCORD_SHIKAMARU={{ onepasswordRead "op://Private/Navi Discord tokens/shikamaru" | quote }}
+export OPENCLAW_DISCORD_HEDWIG={{ onepasswordRead "op://Private/Navi Discord tokens/hedwig" | quote }}
+export OPENCLAW_DISCORD_DOBBY={{ onepasswordRead "op://Private/Navi Discord tokens/dobby" | quote }}
+export OPENCLAW_DISCORD_DUMBLEDORE={{ onepasswordRead "op://Private/Navi Discord tokens/dumbledore" | quote }}
+export OPENCLAW_DISCORD_ORCA={{ onepasswordRead "op://Private/Navi Discord tokens/orca" | quote }}
+export OPENCLAW_DISCORD_PLANA={{ onepasswordRead "op://Private/Navi Discord tokens/plana" | quote }}
+export OPENCLAW_DISCORD_CODA={{ onepasswordRead "op://Private/Navi Discord tokens/coda" | quote }}
+export OPENCLAW_DISCORD_READA={{ onepasswordRead "op://Private/Navi Discord tokens/reada" | quote }}

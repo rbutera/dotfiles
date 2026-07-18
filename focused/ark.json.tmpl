@@ -3,11 +3,14 @@
   "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark/plugin",
   "additionalPlugins": ["{{ .chezmoi.homeDir }}/focused"],
   "mainOnlyPlugins": [
-    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin"
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord-voice-bridge",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin"
   ],
   "extraClaudeArgs": [
     "--dangerously-load-development-channels",
-    "server:plugin:discord-voice:discord-voice"
+    "server:plugin:discord-voice:discord-voice",
+    "--disallowedTools",
+    "AskUserQuestion"
   ],
   "model": "opus",
 
@@ -53,17 +56,25 @@
     "botToken": "${FLORENCE_DISCORD_TOKEN}",
     "guildId": "1473757777078911016",
     "channelId": "1507371381623488562",
-    "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-text-plugin" },
+    "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord" },
     "access": {
       "dmPolicy": "allowlist",
       "allowFrom": ["124046285308166146"],
       "replyToMode": "first",
       "textChunkLimit": 2000,
       "chunkMode": "newline"
-    }
+    },
+    "snooze": {
+      "quietHours": { "start": "22:00", "end": "08:00", "tz": "Europe/London" }
+    },
+    "recap": { "mode": "on-return", "channel": "florence" }
   },
 
   "textPlugin": {
     "lifecycleUrl": "http://127.0.0.1:3850/lifecycle"
+  },
+
+  "email": {
+    "account": "florence"
   }
 }

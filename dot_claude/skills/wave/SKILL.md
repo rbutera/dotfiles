@@ -105,6 +105,7 @@ One agent per independent task in the wave. Each agent prompt MUST include:
 4. **Context files**: if OpenSpec, include proposal/design/specs. If a plan file, include it. If the task references specific files, list them.
 5. **Commit rules**: commit after each logical unit, descriptive messages
 6. **Output format**: report status as DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED, list files changed, summarize what was built
+7. **No self-orchestrated review (MANDATORY)**: every implementation-agent prompt MUST explicitly forbid the agent from spawning, dispatching, or SendMessage-ing its OWN review/verification subagents (no "dual review", no Opus/Codex reviewer, no self-review loop). The agent ONLY implements, runs the gate commands (build/test/lint/typecheck) itself, commits, and reports facts. **The orchestrator (you) owns the review gate — step 4c — always.** Rationale: a spawned implementation agent and the reviewers it spawns are separate sessions; the reviewers cannot SendMessage back to it, so the implementer hangs forever waiting on verdicts it can never receive. Put this prohibition in the prompt in plain terms, e.g. "⛔ Do NOT spawn any review subagents; implement + gate + commit + report only — the orchestrator reviews."
 
 If using OpenSpec with a schema that has an apply instruction (like fusion-workflow), tell the agent to use `/opsx:apply`. Otherwise, the agent implements directly from the task description.
 
@@ -112,7 +113,7 @@ If using OpenSpec with a schema that has an apply instruction (like fusion-workf
 - **Sonnet**: straightforward tasks (CRUD, test writing, component creation, config changes)
 - **Opus**: complex domain logic, refactoring existing code, architectural decisions, multi-file coordination
 
-All independent tasks in a wave dispatch in a **single message** (parallel).
+All independent tasks in a wave dispatch in a **single message** (parallel), and **ALWAYS with `run_in_background: true`** — never block the main session waiting on an agent. After dispatching, await each agent's completion notification, then proceed. Running in the background keeps the orchestrator responsive (e.g. to the user) while waves execute.
 
 ### 4b. Handle implementation results
 
@@ -123,7 +124,9 @@ All independent tasks in a wave dispatch in a **single message** (parallel).
 
 ### 4c. Review gate
 
-After all implementation agents in the wave complete, dispatch **two review agents in parallel**:
+**The orchestrator ALWAYS runs the review gate — never the implementation agent.** Implementation agents are forbidden from spawning their own reviewers (step 4a.7), because a spawned agent and the reviewers it spawns are separate sessions: the reviewers cannot report back to it, so it hangs waiting on verdicts it can never receive. So do NOT rely on any self-review an implementation agent claims — if an agent reports it "ran a dual review", treat that as a process violation, ignore its verdicts, and run the gate yourself on the committed diff. You dispatch the reviewers, you receive the verdicts, you decide.
+
+Once the implementation agent reports DONE (with its gate output), dispatch **two review agents in parallel** yourself:
 
 **Agent 1 (Claude Opus):**
 - Read the diff: `git diff <base>..<head>`
@@ -133,10 +136,12 @@ After all implementation agents in the wave complete, dispatch **two review agen
 - Verdict: PASS or FAIL with specific file:line references
 
 **Agent 2 (Codex):**
-- Same inputs as Agent 1
-- Independent second opinion
-- Catches different things (naming, patterns, subtle bugs)
-- Verdict: PASS or FAIL with specific file:line references
+- Dispatch this as the `codex-teammate` agent (`subagent_type: codex-teammate`). It runs Sonnet-low and relays the review task straight to a Codex MCP tool verbatim — it does not read files or form its own opinion first.
+- Give it the same review **target** as Agent 1 — the diff range/commits (`<base>..<head>`) — plus any caller-known context **paths** (convention doc paths, spec/plan file paths), as a self-contained task description, since Codex can't see this conversation's history. Do **not** hand it Agent 1's operational instructions ("Read the diff", "Read convention docs", "Read spec/plan context") — the relay must not read anything itself; it passes the review task to Codex, which reads the actual content itself via `workingDirectory`.
+- **Do not pass a spawn-time `model` override when dispatching this agent.** A spawn-time `model` beats the agent's own frontmatter (`model: sonnet`), which would force it onto Opus and silently re-break Codex's independence. Let the agent's own frontmatter apply.
+- The inline fallback is permitted **only if the `codex-teammate` agent is genuinely unavailable**. Even then, it MUST hand the review instructions to a Codex MCP tool (e.g. `mcp__codex__codex_review_code`) verbatim, with `workingDirectory` set, and return Codex's raw verdict as-is — no reading files first, no Opus opinion layered on top.
+- Independent second opinion — catches different things (naming, patterns, subtle bugs) precisely because it's Codex's read, not Opus's read of Codex.
+- Verdict: PASS or FAIL with specific file:line references, reported as Codex gave them.
 
 Both agents dispatch in a **single message** (parallel). Use `run_in_background: true`.
 
@@ -206,9 +211,12 @@ All 4 tasks implemented across 3 waves. 1 review fix applied.
 ## Rules
 
 - Never skip a review gate. The whole point is catching issues before they compound.
+- **ALL agents — implementation AND review — always dispatch with `run_in_background: true`.** The orchestrator never blocks on an agent; it dispatches, awaits the completion notification, then proceeds. This keeps the main session responsive throughout the run.
 - Review agents always run in parallel (both in one message).
 - Each wave's review sees only that wave's diff, not the full branch.
 - If a review gate fails twice on the same issue, escalate to the user.
 - Don't pause between waves to ask "should I continue?" Just go.
 - Convention docs in every agent prompt. Agents that skip conventions produce code that fails review.
 - Implementation agents on the same branch can share a worktree. Different branches need separate worktrees.
+- **Run the integration/e2e gate, not just unit tests.** Unit-green hides two failure modes that only surface when the real app runs: (a) a *removed-API* call in an existing test that wasn't updated, and (b) tests still asserting the *old* behaviour a refactor replaced. A wave that changes behaviour MUST run the project's e2e/integration suite as a gate and rewrite any test that encodes the replaced behaviour — otherwise the suite passes while the observable thing is broken. (See "Verify the Observable, Not the Proxy".)
+- **A refactor/removal wave isn't done when the new code compiles — it's done when the tests of the OLD behaviour are rewritten or deleted.** Grep the test tree for references to the removed API/model before declaring a wave green.

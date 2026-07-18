@@ -1,0 +1,176 @@
+# herdr configuration — managed by chezmoi
+# Deployed to ~/.config/herdr/config.toml
+#
+# Tuned for Rai's workflow migrating from tmux (gpakosz/oh-my-tmux).
+# Only the lines that DEVIATE from herdr's defaults are set here; everything
+# else inherits `herdr --default-config`. Each deviation has a why.
+# Regenerate the full default reference any time with: herdr --default-config
+#
+# Ground truth: herdr 0.7.1. Model = Session > Workspace > Tab > Pane, with
+# Agents as first-class, state-tracked entities (the thing tmux/zellij lack).
+# tmux SESSION ~= herdr WORKSPACE (your all-day switch unit, prefix+w).
+
+onboarding = false
+
+[theme]
+# Carries over your tmux catppuccin theme natively.
+name = "catppuccin"
+# Follow the host terminal's light/dark automatically (Ghostty reports it).
+auto_switch = true
+dark_name = "catppuccin"
+light_name = "catppuccin-latte"
+
+[terminal]
+# Empty = $SHELL then /bin/sh. Leave default unless you want a fixed shell.
+# default_shell = ""
+shell_mode = "auto"
+# New panes/tabs/workspaces inherit the source pane's cwd (tmux-like).
+new_cwd = "follow"
+
+[update]
+# Pre-1.0 software ships ~66 releases/quarter. Keep the stable channel and the
+# background check ON so you know when to update, but update DELIBERATELY with
+# `herdr update` (brew-pinned to 0.7.1 today) rather than floating silently.
+channel = "stable"
+version_check = true
+
+[keys]
+# Prefix = ctrl+space — Rai's accustomed prefix.
+# (herdr's native default is ctrl+b; oh-my-tmux was ctrl+a. Rai prefers ctrl+space.)
+prefix = "ctrl+space"
+
+# --- tmux-reflex OVERRIDES (these DEVIATE from herdr defaults) ---
+# tmux's `prefix+s` opens the session tree. herdr's everyday switch unit is the
+# SPACE (workspace), so put the space/workspace picker on prefix+s. herdr's
+# native prefix+w is kept as a secondary binding (bindings accept arrays).
+workspace_picker = ["prefix+s", "prefix+w"]
+# prefix+s was herdr's `settings`; move settings off it, onto prefix+;.
+settings = "prefix+;"
+# Copy/yank mode on prefix+space (your reflex). The vi motions inside copy mode
+# (h/j/k/l  w/b/e  {/})  and y/Enter-to-copy are HARDWIRED by herdr — only the
+# entry key is bindable. herdr's native prefix+[ is kept as a fallback.
+copy_mode = ["prefix+space", "prefix+["]
+
+# --- tmux split/pane keys layered onto herdr's native ones (arrays = both fire) ---
+# tmux: `prefix+-`/`prefix+"` split down (stacked); `prefix+_`/`prefix+%`
+# split right (side-by-side). Shift+2 produces `"` and Shift+5 produces `%` on UK.
+split_horizontal = ["prefix+minus", "prefix+\""] # down / stacked  (tmux `-` / `"`)
+split_vertical   = ["prefix+v", "prefix+_", "prefix+%"] # right / side (herdr v, tmux `_` / `%`)
+# tmux: rename window = prefix+,  (herdr tab ≈ tmux window).
+rename_tab = ["prefix+comma", "prefix+shift+t"]
+# tmux: swap pane down/up = prefix+>/prefix+< — added alongside herdr shift+j/k.
+swap_pane_down = ["prefix+shift+j", "prefix+>"]
+swap_pane_up   = ["prefix+shift+k", "prefix+<"]
+# Prefix-FREE pane focus on the docs' recommended "safe" ctrl+alt family; the
+# native prefix+h/j/k/l are kept too.
+focus_pane_left  = ["prefix+h", "ctrl+alt+h"]
+focus_pane_down  = ["prefix+j", "ctrl+alt+j"]
+focus_pane_up    = ["prefix+k", "ctrl+alt+k"]
+focus_pane_right = ["prefix+l", "ctrl+alt+l"]
+
+# Pane CYCLING relocated off prefix+tab / prefix+shift+tab (herdr defaults) so
+# tab/shift+tab can drive agent nav instead (see next_agent below). prefix+o is
+# tmux's "other pane" reflex, so nothing is lost. Directional prefix+hjkl above
+# is still the primary pane nav; cycling is the secondary "just rotate" motion.
+cycle_pane_next     = "prefix+o"
+cycle_pane_previous = "prefix+shift+o"
+
+# close_pane: herdr has NO per-pane close confirmation (confirm_close only guards
+# WORKSPACES, verified against 0.7.1 docs). Bare prefix+x was too fat-finger-prone
+# — Rai kept nuking panes by reflex (tmux's prefix+x prompts y/n; herdr doesn't).
+# Moved to prefix+shift+x so a reflexive single tap can't kill a pane. "shift =
+# more destructive" matches swap_pane on prefix+shift+j/k.
+close_pane = "prefix+shift+x"
+
+# --- Familiar tmux reflexes that already map ~1:1 (herdr defaults, no config) ---
+# detach = prefix+q   new_tab = prefix+c   next/prev_tab = prefix+n/p
+# switch_tab = prefix+1..9   zoom = prefix+z   (close_pane moved to prefix+shift+x)
+# resize_mode = prefix+r
+
+# --- Space (workspace) navigation — herdr's answer to tmux session-switching ---
+# picker = prefix+s / prefix+w (set above)   goto = prefix+g
+# new_workspace = prefix+shift+n   toggle_sidebar = prefix+b (the fleet view)
+# Direct jump to space N, plus prev/next cycling (your tmux session-hop reflex).
+switch_workspace = "prefix+shift+1..9"
+previous_workspace = "prefix+shift+left"
+next_workspace = "prefix+shift+right"
+
+# --- ADHD attention-routing: jump straight to the agent that needs you ---
+# These are UNSET by default; binding them is the highest-leverage add.
+# prefix+tab / prefix+shift+tab are herdr's cycle_pane_next/previous defaults,
+# relocated to prefix+o below so tab belongs to agents. Since agent_panel_sort =
+# "priority", prefix+tab walks the attention queue top-down (next = who needs you
+# most), shift+tab walks back. This REPLACED the old prefix+shift+down/up parking.
+next_agent = "prefix+tab"
+previous_agent = "prefix+shift+tab"
+focus_agent = "prefix+alt+1..9"   # jump to agent row N (direct jump, unchanged)
+
+# NOTE: do NOT re-add a [keys.indexed] table for tabs. Setting `[keys.indexed]
+# tabs = "ctrl"` does NOT *add* a ctrl+1..9 shortcut — herdr treats a legacy
+# [keys.indexed] entry as user config that DISPLACES the modern default, so it
+# silently removes `switch_tab = prefix+1..9` and rebinds tabs to ctrl+1..9 only.
+# And ctrl+<digit> is un-typeable here: ctrl+2 emits NUL == the ctrl+space prefix.
+# Result: zero working tab-switch keys. (Confirmed in herdr src: the
+# `legacy_indexed_user_bindings_displace_modern_defaults` test.) Leaving switch_tab
+# unset keeps herdr's default prefix+1..9, which is what we want.
+
+# Heavy git user: pop lazygit in a temporary pane.
+[[keys.command]]
+key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
+
+# Pane-close confirmation (herdr core has none — confirm_close guards workspaces
+# only). Two-tier close: prefix+x asks first via the confirm-close-pane plugin
+# (opens an overlay prompt on the focused pane; y closes, anything else keeps),
+# while prefix+shift+x (close_pane, set above) stays the immediate "I'm sure"
+# path. REQUIRES the plugin installed on this machine, or reload-config errors:
+#   herdr plugin install rbutera/herdr-confirm-close-pane --yes
+# Repo: https://github.com/rbutera/herdr-confirm-close-pane
+[[keys.command]]
+key = "prefix+x"
+type = "plugin_action"
+command = "rbutera.confirm-close-pane.confirm"
+description = "confirm before closing pane"
+
+[ui]
+# Attention queue: order the agent panel by who needs you, not by workspace.
+# This is the ADHD win — blocked agents float to the top of the sidebar.
+agent_panel_sort = "priority"
+# Show detected agent labels on pane borders so you can tell panes apart fast.
+show_agent_labels_on_pane_borders = true
+confirm_close = true   # guard against nuking a workspace by reflex
+# tmux-instant tabs: your tmux runs `automatic-rename off`, so don't stop to ask
+# for a name on every new tab — create it immediately, rename later if needed.
+prompt_new_tab_name = false
+# Scroll speed: herdr's default is 3 lines per wheel notch, which feels sluggish.
+# Bump to 5 so the viewport moves more per notch. Raise further (8) if still slow.
+mouse_scroll_lines = 5
+
+[ui.toast]
+# Desktop notification when a BACKGROUND agent changes state (e.g. goes blocked
+# and needs you). This is the "don't let a stalled agent rot unnoticed" signal.
+# Options: off | herdr (in-app) | terminal | system (macOS notifications).
+# Dial to "herdr" or "off" if it gets noisy.
+delivery = "system"
+# How long a background-agent state change must persist before it toasts, to
+# swallow rapid working→blocked→working flaps. Default 1s. Bump if it's chatty.
+delay_seconds = 1
+
+[ui.toast.clipboard]
+# The "copied to clipboard" confirmation toast. Worth keeping ON for you: your
+# copies travel out over OSC 52 (incl. SSH) and are otherwise invisible, so the
+# toast is your proof the yank actually landed. In-app, doesn't hit macOS notifs.
+enabled = true
+position = "bottom-center"
+
+[ui.sound]
+# Audible cue on agent state change in background workspaces. On by default;
+# set enabled=false if the sounds annoy you.
+enabled = true
+
+[session]
+# Native replacement for tmux-resurrect + tmux-continuum: resume AI-agent panes
+# into their real conversation sessions after a herdr server restart.
+# (Requires official integrations that report session refs.)
+resume_agents_on_restore = true

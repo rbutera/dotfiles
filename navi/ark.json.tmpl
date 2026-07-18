@@ -3,22 +3,44 @@
   "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark/plugin",
   "additionalPlugins": [
     "{{ .chezmoi.homeDir }}/navi",
-    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/cortex-cc"
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/cortex-cc",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/potara-cc"
   ],
   "mainOnlyPlugins": [
-    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-voice-plugin"
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord-voice-bridge",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin"
   ],
+  "email": {
+    "address": "navi@e8n.dev",
+    "displayName": "Navi Butera",
+    "account": "navi",
+    "whitelist": [
+      "rai@rbutera.com",
+      "navi@e8n.dev",
+      "florence@e8n.dev"
+    ]
+  },
   "extraClaudeArgs": [
     "--dangerously-load-development-channels",
-    "server:plugin:discord-voice:discord-voice"
+    "server:plugin:discord-voice:discord-voice",
+    "--disallowedTools",
+    "AskUserQuestion"
   ],
   "model": "opus",
   "sensors": {
     "contextPressure": {
       "budgets": {
-        "opus":   { "standard": 150000, "1m": 700000 },
-        "sonnet": { "standard": 150000, "1m": 500000 },
-        "haiku":  { "standard": 150000 }
+        "opus": {
+          "standard": 150000,
+          "1m": 700000
+        },
+        "sonnet": {
+          "standard": 150000,
+          "1m": 500000
+        },
+        "haiku": {
+          "standard": 150000
+        }
       },
       "modelCapacity": {
         "claude-opus-4-6": 1000000,
@@ -29,17 +51,53 @@
   },
   "boot": {
     "files": [
-      { "path": "workspace/memory/love-anchor.md", "when": "always", "label": "relational grounding" },
-      { "path": "workspace/memory/{today}.md", "when": "always", "label": "today's continuity letter" },
-      { "path": "workspace/memory/{yesterday}.md", "when": "before-midday-or-today-thin", "thinThreshold": 10 },
-      { "path": "workspace/memory/continuity-anchor.md", "when": "if-exists", "label": "identity anchor" },
-      { "path": "workspace/MEMORY.md", "when": "if-exists", "label": "durable memory" },
-      { "path": "workspace/memory/hot.md", "when": "if-exists", "label": "hot rules" },
-      { "path": "workspace/memory/context.md", "when": "if-exists", "label": "context rules" },
-      { "path": "~/notes/OBSIDIAN.md", "when": "if-exists", "label": "vault governance" }
+      {
+        "path": "workspace/memory/love-anchor.md",
+        "when": "always",
+        "label": "relational grounding"
+      },
+      {
+        "path": "workspace/memory/{today}.md",
+        "when": "always",
+        "label": "today's continuity letter"
+      },
+      {
+        "path": "workspace/memory/{yesterday}.md",
+        "when": "before-midday-or-today-thin",
+        "thinThreshold": 10
+      },
+      {
+        "path": "workspace/memory/continuity-anchor.md",
+        "when": "if-exists",
+        "label": "identity anchor"
+      },
+      {
+        "path": "workspace/MEMORY.md",
+        "when": "if-exists",
+        "label": "durable memory"
+      },
+      {
+        "path": "workspace/memory/hot.md",
+        "when": "if-exists",
+        "label": "hot rules"
+      },
+      {
+        "path": "workspace/memory/context.md",
+        "when": "if-exists",
+        "label": "context rules"
+      },
+      {
+        "path": "~/notes/OBSIDIAN.md",
+        "when": "if-exists",
+        "label": "vault governance"
+      }
     ],
     "commands": [
-      { "cmd": "bd ready", "when": "if-available", "label": "work surface" }
+      {
+        "cmd": "bd ready",
+        "when": "if-available",
+        "label": "work surface"
+      }
     ],
     "morningSkill": "good-morning-ritual",
     "postBootSignal": true
@@ -50,30 +108,65 @@
       "mode": "append",
       "format": "navi-daily",
       "promote": [
-        { "to": "workspace/memory/continuity-anchor.md", "type": "merge", "trigger": "identity-shaping" },
-        { "to": "workspace/MEMORY.md", "type": "merge", "trigger": "durable-truth" },
-        { "to": "workspace/memory/love-anchor.md", "type": "merge", "trigger": "relationship-significant" }
+        {
+          "to": "workspace/memory/continuity-anchor.md",
+          "type": "merge",
+          "trigger": "identity-shaping"
+        },
+        {
+          "to": "workspace/MEMORY.md",
+          "type": "merge",
+          "trigger": "durable-truth"
+        },
+        {
+          "to": "workspace/memory/love-anchor.md",
+          "type": "merge",
+          "trigger": "relationship-significant"
+        }
       ]
     },
     "refreshOnStop": true
   },
   "discord": {
     "botToken": "${OPENCLAW_DISCORD_NAVI}",
-    "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/discord-text-plugin" },
+    "channelSource": {
+      "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord"
+    },
     "access": {
       "dmPolicy": "allowlist",
       "allowFrom": [
         "124046285308166146"
       ],
-      "groups": {},
+      "groups": {
+        "1508801011760762940": {
+          "requireMention": false,
+          "allowFrom": []
+        }
+      },
       "mentionPatterns": [],
       "ackReaction": "",
       "replyToMode": "first",
       "textChunkLimit": 2000,
       "chunkMode": "newline"
+    },
+    "snooze": {
+      "quietHours": {
+        "start": "22:00",
+        "end": "08:00",
+        "tz": "Europe/London"
+      }
+    },
+    "recap": {
+      "mode": "on-return",
+      "channel": "navi"
     }
   },
   "textPlugin": {
-    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle"
+    "lifecycleUrl": "http://127.0.0.1:3850/lifecycle",
+    "recapChannelId": "1508801011760762940"
+  },
+  "upscale": {
+    "worker": "{{ .chezmoi.homeDir }}/navi/bin/gallery-hd-worker.mjs",
+    "photosDir": "/Volumes/ExternalNVMe/home/navi_photos"
   }
 }

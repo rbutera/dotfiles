@@ -1,0 +1,15 @@
+# ── Secrets group: AI / LLM service APIs ──────────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/ai-apis.zsh
+
+export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" | quote }}
+export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" | quote }}
+export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential" | quote }}
+export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" | quote }}
+export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential" | quote }}
+export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential" | quote }}
+export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" | quote }}
+
+# Honcho
+export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" | quote }}
+export HONCHO_PEER_NAME="Rai"

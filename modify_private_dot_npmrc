@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Modify script for ~/.npmrc
+# Manages supply-chain / npm client config directives (authoritative for the keys
+# in the block below). Registry-scoped auth lines (e.g.
+# //registry.npmjs.org/:_authToken=...) are written by `npm login` / `npm token`
+# and are deliberately NOT tracked here or in 1Password — they are preserved
+# verbatim from the existing file so chezmoi never clobbers a freshly-rotated
+# token. Converted from a 1Password-templated static file 2026-07-14 after the
+# tracked token drifted behind a locally-rotated one.
+set -euo pipefail
+
+current=$(cat)
+
+# ── Managed config block (authoritative for these keys) ──────────────────────
+cat <<'NPMRC'
+# Supply-chain protection
+min-release-age=7
+save-exact=true
+engine-strict=true
+package-lock=true
+strict-ssl=true
+audit=true
+audit-level=high
+fund=false
+prefer-dedupe=true
+update-notifier=false
+loglevel=warn
+NPMRC
+
+# ── Preserve registry-scoped lines (auth tokens / credentials) verbatim ──────
+# Any `//...` line from the existing file (tokens, :always-auth, etc.) is kept
+# untouched. On a fresh machine with no existing file this is a no-op.
+printf '%s\n' "$current" | grep -E '^//' || true

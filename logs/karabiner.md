@@ -1,5 +1,66 @@
 # karabiner config changes log
 
+## 2026-06-25 — Dygma Defy F20 fn key and raw F16/F17/F21
+
+### Problem
+
+Rai wanted the Dygma Defy `F16`, `F17`, `F20`, and `F21` keys freed from
+existing Karabiner behavior so they can be assigned directly by apps. `F20`
+should act like the built-in Mac keyboard's Fn/Globe key for Wispr Flow
+hold-to-dictate, while `F21` should remain available as a raw Discord
+push-to-talk key.
+
+### Changes
+
+Updated `dot_config/private_karabiner/private_karabiner.json`:
+
+- Removed the Defy `F16 -> ctrl + Amethyst` manipulator
+- Removed the Defy `F17 -> raycast` manipulator
+- Added a Defy-only `F20 -> apple_vendor_top_case_key_code keyboard_fn`
+  manipulator
+- Left `F21` unbound in Karabiner so Discord can capture raw `F21`
+
+## 2026-06-05 — Built-in MacBook F/J home-row shift
+
+### Problem
+
+Rai wanted the built-in MacBook keyboard to use home-row shift keys without
+changing external keyboards such as the Dygma Defy and Dygma Raise.
+
+### Changes
+
+Added a built-in-keyboard-only complex modification in
+`dot_config/private_karabiner/private_karabiner.json`:
+
+- `f` sends `f` when tapped and `left_shift` when held
+- `j` sends `j` when tapped and `right_shift` when held
+- Both manipulators use `device_if` with `is_built_in_keyboard: true`, so the
+  rule does not apply to external keyboards
+- Initial timing: `120ms` hold threshold and `170ms` tap timeout, chosen as a
+  fast-typing starting point for roughly 110wpm
+
+## 2026-06-04 — Dygma Defy: leave caps lock as plain caps lock
+
+### Problem
+
+The `CAPS_LOCK -> Hyper/Escape Key` complex modification (caps lock → Escape on
+tap, Hyper = cmd+ctrl+opt on hold) used a `device_unless` condition that excluded
+only the **Dygma Raise** (`product_id 8705`, `vendor_id 4617`). As a result the
+remap still fired on the **Dygma Defy** (`product_id 18`, `vendor_id 13807`),
+turning its caps lock key into Escape/Hyper. User wanted caps lock to behave as a
+plain caps lock on the Defy.
+
+### Changes
+
+Added the Dygma Defy identifier (`product_id 18`, `vendor_id 13807`) to the
+`device_unless` identifiers array of the `CAPS_LOCK -> Hyper/Escape Key`
+manipulator in `dot_config/private_karabiner/private_karabiner.json`. The caps
+lock remap now applies on every device **except** the Dygma Raise and the Dygma
+Defy. On the Defy, `caps_lock` passes through untouched.
+
+The Defy's Hyper/Escape behaviour is unaffected — it comes from the separate
+`(Dygma Defy) F14 / F19` rules, not from the caps lock key.
+
 ## 2026-04-15 — Dygma Defy F18: replace ctrl/ctrl+space with Hyper+Space
 
 ### Problem

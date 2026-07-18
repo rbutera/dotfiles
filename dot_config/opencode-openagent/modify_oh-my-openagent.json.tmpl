@@ -1,0 +1,71 @@
+#!/bin/bash
+# Modify script for ~/.config/opencode-openagent/oh-my-openagent.json
+# (oh-my-openagent model routing for the `openagent` profile)
+#
+# Strategy: spread across the user's flat subscriptions by leverage/volume.
+#   - High-leverage seats (orchestrator/planner/reviewer/deep-worker/oracle + the
+#     deep/ultrabrain categories) -> openai/gpt-5.5  (Codex sub, generous, verified).
+#   - High-volume grind (executor/junior/utility/frontend) -> OpenCode Go models
+#     (kimi-k2.7-code, deepseek-v4-flash, minimax-m3, glm-5.2) — verified working.
+#   - Every gpt-5.5 seat has a Go fallback so an exhausted Codex quota spills to Go.
+#
+# Orchestrator: sisyphus -> openai/gpt-5.5 (Codex), fb deepseek-v4-pro -> glm-5.2.
+#
+# NB: cursor-acp/* is intentionally NOT used for omo agents. The opencode-cursor
+# bridge breaks under omo two ways (see logs/opencode.md 2026-06-19):
+#   1. omo applies reasoning-effort variants -> e.g. `claude-opus-4-8-medium`, which
+#      Cursor's SDK rejects (exitCode 1) — it only knows -low / -thinking-high / etc.
+#   2. the bridge can't talk to REMOTE MCP servers (exa, context7), so cursor-routed
+#      agents lose those tools.
+# Cursor stays wired for manual use: `openagent run -m cursor-acp/claude-opus-4-8 ...`.
+# See docs/opencode-profiles.md.
+#
+# Managed keys (replaced): $schema, agents, categories, claude_code, runtime_fallback
+# Free keys (preserved):   anything else the omo installer/runtime writes
+set -euo pipefail
+
+current=$(cat)
+[ -z "$current" ] && current='{}'
+
+read -r -d '' base << 'BASE' || true
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus":   { "model": "openai/gpt-5.5", "variant": "high",   "fallback_models": [ { "model": "opencode-go/glm-5.2" }, { "model": "opencode-go/kimi-k2.7-code" } ] },
+    "prometheus": { "model": "openai/gpt-5.5", "variant": "high",   "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "metis":      { "model": "openai/gpt-5.5", "variant": "high",   "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "momus":      { "model": "openai/gpt-5.5", "variant": "xhigh",  "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "hephaestus": { "model": "openai/gpt-5.5", "variant": "medium", "fallback_models": [ { "model": "opencode-go/glm-5.2" }, { "model": "opencode-go/kimi-k2.7-code" } ] },
+    "oracle":     { "model": "openai/gpt-5.5", "variant": "high",   "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "atlas":      { "model": "openai/gpt-5.5", "variant": "medium", "fallback_models": [ { "model": "opencode-go/kimi-k2.7-code" }, { "model": "opencode-go/minimax-m3" } ] },
+    "sisyphus-junior": { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "librarian":  { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "explore":    { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "multimodal-looker": { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/kimi-k2.6" } ] }
+  },
+  "categories": {
+    "ultrabrain":         { "model": "openai/gpt-5.5", "variant": "xhigh",  "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "deep":               { "model": "openai/gpt-5.5", "variant": "medium", "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] },
+    "quick":              { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "visual-engineering": { "model": "opencode-go/glm-5.2" },
+    "artistry":           { "model": "opencode-go/glm-5.2" },
+    "writing":            { "model": "opencode-go/glm-5.2", "fallback_models": [ { "model": "opencode-go/kimi-k2.7-code" } ] },
+    "unspecified-low":    { "model": "opencode-go/minimax-m3", "fallback_models": [ { "model": "opencode-go/minimax-m2.7" } ] },
+    "unspecified-high":   { "model": "openai/gpt-5.5", "variant": "high",   "fallback_models": [ { "model": "opencode-go/glm-5.2" } ] }
+  },
+  "claude_code": {
+    "mcp": false,
+    "commands": false,
+    "skills": false,
+    "agents": false,
+    "hooks": false,
+    "plugins": false
+  },
+  "runtime_fallback": true
+}
+BASE
+
+echo "$current" | jq --argjson base "$base" '
+  . as $current |
+  $base * ($current | del(."$schema", .agents, .categories, .claude_code, .runtime_fallback))
+'

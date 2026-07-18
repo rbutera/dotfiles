@@ -1,5 +1,48 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-06-20 -- Remove session-recap-tick job (recap retired)
+
+**Motivation:** The `/recap` HTTP endpoint and `recap-cli.ts` producer were removed from discord-text-plugin (chore/retire-recap). The prose-mirror accumulator is now the sole transcript-to-Discord path. The `session-recap-tick` Impulse cron job was the producer for the now-deleted endpoint.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl`:**
+- Removed `session-recap-tick` job object from the kinto branch (was hourly cron, `enabled: true`).
+- Removed `session-recap-tick` job object from the nimbus branch (was every 10m cron, `enabled: true`).
+
+**Deployed:** job already disabled (enabled:false) in the deployed `/Users/rai/.config/impulse/jobs.json` on nimbus; entire object now removed from the template. sync-crons --prune run to confirm no stale Hatchet crons remain.
+
+## 2026-06-03 -- Add Florence daily-blog Impulse job (bead focused-9fia)
+
+**Motivation:** Florence's daily blog automation, modeled on Navi's journal pipeline (same `ark run <agent>` -> skill-mode shape). Rai's standing rule (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron, NOT launchd. The blueprint (`~/focused/vault/References/Florence Daily Blog.md`) originally suggested launchd; explicitly overridden to Impulse to match Navi.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl` (kinto branch):**
+- Added job `daily-blog` (enabled): cron `30 21 * * *` Europe/London (21:30 BST, after lamplight nightly digest at 22:00 is fine since the post reads breadcrumb + transcripts which are current by then), `target.kind: ark-spawn`, agent `florence`, model `opus`, `maxTurns: 40`, `timeout: 2700`, `dedupe: skip-if-running`, tags work/kinto/blog.
+- Carries both `promptFile: prompts/florence-daily-blog.md` (Navi-parity) and an inline `inputs.prompt` (the live ark-spawn workflow factory reads `inputs.prompt`, so the inline copy is what actually runs). The prompt is a thin launcher: read `~/focused/.claude/skills/daily-blog/SKILL.md`, pick mode by day-of-week (`date +%u`; Mon-Fri weekday-post, Sat-Sun weekend-post), write to `~/focused/vault/Blog/`, DM Rai on Discord (chat_id 1499031021746913341).
+
+**New file:** `dot_config/impulse/prompts/florence-daily-blog.md` (thin launcher, mirrors Navi's `journal-full-post.md` shape).
+
+**The skill itself** lives in the focused repo at `~/focused/.claude/skills/daily-blog/` (SKILL.md router + persona.md/voice-and-spine.md/research-step.md/weekend-wild.md references), committed separately to focused.
+
+**Registration flow (done):** edited chezmoi source -> `chezmoi apply ~/.config/impulse/jobs.json ~/.config/impulse/prompts/florence-daily-blog.md` (no onepasswordRead in these targets, so no 1Password session needed) -> `pnpm nx run impulse:dev -- sync-crons`.
+
+**Verification:** `list-jobs` shows `daily-blog` enabled. `sync-crons` registered `florence/daily-blog -> 30 20 * * * UTC` (= 21:30 BST). Worker `dev.lumiere.impulse-florence` is running (launchd keepalive, state=running). The job is ARMED: it will fire nightly at 21:30 BST starting tonight. First auto-run is reviewable (it writes the post AND DMs Rai; if voice is off, iterate on the skill refs). A dry-run sample post #2 was hand-generated to `~/focused/vault/Blog/daily-blog-SAMPLE.md` (Wednesday = weekday-post) before arming.
+
+## 2026-06-03 -- Migrated standup-brief + nightly-health from launchd to Impulse cron jobs
+
+**Motivation:** Rai's standing preference (bd memory `scheduled-recurring-jobs-on-kinto-impulse-jobs-hatchet`): recurring jobs on kinto = Impulse/Hatchet cron entries, not launchd LaunchAgents. Two jobs were still launchd plists.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl` (kinto branch):**
+
+- Added job `standup-brief` (enabled): cron `25 9 * * 1-5` Europe/London, `target.kind: script`, runs `bash {{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh` (the SAME wrapper the launchd job used; it loads the whisper token + ark port, checks readyz, then `ark whisper command /standup-brief`). `inputs` carries cmd/args/cwd for the `impulse-script` workflow factory.
+- Added job `nightly-health` (enabled: false -- DISARMED): cron `0 7 * * 1-5`, runs `bash {{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh`. Stays INERT because sync-crons + the worker both filter on `enabled`; a disabled job gets NO Hatchet cron and is pruned if previously synced. Rai arms it later by flipping `enabled: true` and re-running sync-crons (no chezmoi/launchd dance).
+
+**Job entry shape (learned):** each entry needs `id`, `name`, `trigger` (cron expr + tz), `target` (`{kind: script, bin}` for shell jobs, or `ark-spawn` for prompts), `payload` (`{kind: shell, cmd, args}` descriptor), `policy` (maxConcurrent/quotaAware/dedupe, optional timeout secs), `enabled`, optional `tags`, and `inputs` -- the runtime block the generic workflow factory actually reads (`cmd`, `args`, `cwd`, optional `env`). Script jobs all share the `impulse-script` Hatchet task (runners.ts spawns cmd/args in cwd; non-zero exit = step failure).
+
+**Registration flow:** edit chezmoi source -> `chezmoi apply ~/.config/impulse/jobs.json` -> `pnpm nx run impulse:dev -- sync-crons` (registers `<namespace>/<job.id>` crons into Hatchet, converting Europe/London to UTC). The long-running worker `dev.lumiere.impulse-florence` executes them.
+
+**Verification:** `list-jobs` shows standup-brief enabled / nightly-health disabled. Hatchet postgres `WorkflowTriggerCronRef` has `florence/standup-brief | 25 8 * * 1-5` (UTC = 09:25 BST), nightly-health correctly absent. `trigger standup-brief` (STANDUP_DRY_RUN=1) ran the wrapper end to end: exitCode 0, session ready, would-whisper confirmed. standup-brief WILL fire 2026-06-04 09:25 BST.
+
+**Removed:** both launchd plists (`io.focused.standup-brief.plist`, `io.focused.nightly-health.plist`) from chezmoi source `Library/LaunchAgents/` (dir now empty, removed), plus their `.chezmoiignore` `always_on` conditional block, plus the deployed copies in `~/Library/LaunchAgents/` (standup-brief unloaded first; nightly-health was never loaded). The `always_on = ["kinto"]` host group in `.chezmoidata.toml` is left in place for future kinto-only use.
+
 ## 2026-05-02 — Initial chezmoi management of ~/.config/impulse/
 
 **Motivation:** Impulse's XDG config directory (`~/.config/impulse/`) was unmanaged. Adding it to chezmoi ensures config is reproducible across machines and version-controlled with proper secret management.
@@ -128,3 +171,34 @@ The Hatchet section (lines 9-24) retains the explicit `kinto` hostname branch �
 **Problem:** proactiveMiningEnabled was added to deployed agents.json on nimbus (May 24, during proactive thread-mining cascade deployment) but the chezmoi source template was not updated. Next `chezmoi apply` would have reverted the flag.
 
 **Fix:** Added `"proactiveMiningEnabled": true` to Navi's agent entry in `dot_config/impulse/agents.json.tmpl` (nimbus block only). Florence on kinto doesn't use proactive mining. Verified: template output matches deployed config exactly after edit.
+
+## 2026-06-03 -- lamplight nightly 22:00 -> 21:00
+
+Moved `lamplight-nightly` from `0 22` to `0 21` (Europe/London) so the full daily digest lands before the daily-blog job at 21:30 (blog reads lamplight Summary). 30-min buffer; blog tolerates a stale/missing Summary anyway. Applied + sync-crons re-registered (florence/lamplight-nightly -> 0 20 UTC).
+
+## 2026-06-09 -- Monthly ChatGPT Pro invoice -> Focused expense job
+
+### Problem
+Rai needs his ChatGPT Pro invoice (GBP 200/mo) submitted to Focused Labs expenses monthly. OpenAI does NOT email receipts (unlike his other Stripe-billed tools), so the invoice only lives in the ChatGPT billing portal (authenticated). He asked for an Impulse job (ark-spawn) on the 1st of each month, chezmoi-defined.
+
+### Solution/Fix
+- Added job `chatgpt-invoice-monthly` to the nimbus branch of `dot_config/impulse/jobs.json.tmpl` (cron `0 9 1 * *` Europe/London, target ark-spawn navi/sonnet, enabled, promptFile).
+- New prompt `dot_config/impulse/prompts/chatgpt-invoice-monthly.md`: opens ChatGPT billing via opentabs (launches Chrome itself if closed -- not a blocker, Navi has sudo + automation-mcp), grabs the latest invoice URL, runs the helper script.
+- Helper (in navi repo): `~/navi/bin/chatgpt-invoice-email.mjs` resolves the official itemised PDF via Stripe's `invoicedata.stripe.com/invoice_pdf_file_url/<acct>/<token>` endpoint -> signed S3 PDF, then gog-emails it to rai.butera@focused.io with the Rippling link.
+- Verified template <-> deployed in sync (chezmoi cat == deployed, 24 jobs) before adding; applied -> 25 jobs deployed. No secrets in the template, applied without 1Password.
+
+## 2026-06-20 -- Temporarily disable Cortex Tick + Cortex Review Tick
+
+### Problem
+Rai is not actively using Cortex right now. The two scheduled Cortex jobs (`cortex-tick` every 20m, `cortex-review-tick` hourly) spawn ephemeral headless Navi sessions (`target.kind: ark-spawn`) that run do-tick/do-review against the bead+Cortex work surface. This (a) confused Rai ("are there two Navis running?"), (b) caused a near-collision with the main session's Continue roll on bead workspace-ezfr (both claimed it ~1 min apart), and (c) added ephemeral-session prose to his Discord notification flood.
+
+### Solution/Fix
+Set `enabled: false` for `cortex-tick` and `cortex-review-tick` in BOTH:
+- deployed `~/.config/impulse/jobs.json` (live — read by sync-crons)
+- source `dot_config/impulse/jobs.json.tmpl` (so a future `chezmoi apply` keeps them disabled; template is onepasswordRead-free so safe to apply once the wider deployed-vs-template drift is reconciled)
+Then ran `tsx src/main.ts sync-crons --prune` from `apps/impulse` → pruned both crons from Hatchet (confirmed: "pruning stale cron: navi/cortex-tick", "navi/cortex-review-tick").
+
+To RE-ENABLE later: flip both back to `enabled: true` in deployed jobs.json, re-run `sync-crons` (no --prune needed to add).
+
+### Known drift (flagged for the dotfiles conversation)
+Deployed jobs.json and the chezmoi template have diverged BOTH ways: deployed has narrate-*/journal-* set + the quota-scrape path fix; template has an older set (jira-sync, lamplight-*, morning-sweep, standup-brief, daily-blog, nightly-health, todoist-hygiene) that is NOT deployed. "Which is canonical" is unresolved — do NOT `chezmoi apply` the template wholesale or it will regress the deployed set. Cortex disable was applied to both so it survives either resolution.

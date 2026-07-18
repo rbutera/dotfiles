@@ -127,6 +127,13 @@
 	keepBackup = true
 	prompt = false
 
+{{ if lookPath "hunk" -}}
+# Hunk — agent-focused terminal diff reviewer. Opt-in only; delta stays the
+# default pager. Review any file pair with: git difftool -t hunk [<rev>]
+[difftool "hunk"]
+	cmd = hunk difftool "$LOCAL" "$REMOTE" "$MERGED"
+{{ end -}}
+
 {{ if eq .chezmoi.os "darwin" -}}
 [credential]
 	helper = osxkeychain

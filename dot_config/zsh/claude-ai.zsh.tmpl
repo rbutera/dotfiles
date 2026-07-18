@@ -1,0 +1,28 @@
+# ── Secrets group: Claude / Cursor / OpenCode ─────────────────────────────────
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# Apply just this group:  chezmoi apply ~/.config/zsh/claude-ai.zsh
+
+# Claude Code OAuth
+# Personal-host CLAUDE_CODE_OAUTH_TOKEN export removed 2026-07-17: an ambient
+# env token overrides keychain/`claude auth login` credentials and flips the CLI
+# to API-key billing. Verified `claude -p` authenticates fine from the keychain
+# with no token env var. Work hosts still get the _WORK variant (not read by the
+# CLI directly; consumed by tooling that injects it explicitly).
+{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
+{{- if $useSharedClaudeOAuth }}
+export CLAUDE_CODE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" | quote }}
+{{- end }}
+
+# Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile
+export CURSOR_API_KEY={{ onepasswordRead "op://focused/cursor API key/credential" | quote }}
+
+# OpenCode Zen — two env vars, same item/field → one fetch, reused
+{{- $opencode := onepasswordDetailsFields "OpenCode Zen" "Private" }}
+export OPENCODE_ZEN_API_KEY={{ $opencode.credential.value | quote }}
+export OPENCODE_API_KEY={{ $opencode.credential.value | quote }}
+export OPENCODE_DISABLE_EXTERNAL_SKILLS=true
+# OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS removed 2026-06-19: oh-my-openagent's
+# background/parallel subagent delegation reports completion unreliably — call_omo_agent
+# can time out after the subagent already shows completed, and fast-finishing tasks can
+# hang in "running" forever (oh-my-openagent #3774, #4570, #1517). Leaving this unset
+# forces foreground/synchronous delegation, sidestepping the completion-handshake race.

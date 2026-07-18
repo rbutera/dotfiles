@@ -16,7 +16,7 @@ read -r -d '' base << 'BASE' || true
   "teammateMode": "in-process",
   "tui": "fullscreen",
   "editorMode": "vim",
-  "attribution": {"commit": "", "pr": ""},
+  "attribution": {"commit": "", "pr": "", "sessionUrl": false},
   "showThinkingSummaries": false,
   "viewMode": "verbose",
   "enabledPlugins": {
@@ -30,8 +30,7 @@ read -r -d '' base << 'BASE' || true
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "serena@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true
+    "serena@claude-plugins-official": false
   }
 }
 BASE
@@ -60,7 +59,10 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
-        .["slack@claude-plugins-official"])) |
+        .["slack@claude-plugins-official"],
+        .["discord@claude-plugins-official"],
+        .["context7@claude-plugins-official"],
+        .["chrome-devtools-mcp@claude-plugins-official"])) |
   if $mac then
     .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}]
   else . end

@@ -202,23 +202,66 @@ function get_bg3_item() {
 }
 
 {{ if eq .chezmoi.os "darwin" -}}
-# code: when SSH'd in from a remote machine, open VS Code on that machine via Remote SSH
-# rather than opening VS Code locally on this Mac.
-# Requires SSH access from this machine back to the connecting host.
+# code / cursor: when SSH'd in from a remote machine, open the editor on THAT
+# machine (the connecting client) via Remote-SSH back into this host, rather
+# than opening locally on this Mac. When run locally (or inside an already-open
+# Remote-SSH integrated terminal, where $VSCODE_IPC_HOOK_CLI is set), it just
+# runs the real editor. Requires SSH access from this machine back to the client.
+#
+# Client binary resolution order:
+#   1. `command -v <editor>`                       (native Linux / macOS clients)
+#   2. /mnt/c/Users/*/.../resources/app/bin/<editor> (WSL clients, e.g. Lancelot)
+# Client launch dispatch:
+#   - WSL (/proc/version says microsoft) -> run the Windows shim, backgrounded
+#   - Wayland Linux -> systemd-run --user to inherit the compositor env
+#   - otherwise (macOS, X11) -> run directly, backgrounded
+#
+# The Remote-SSH target uses this host's Tailscale IP (the exact address the
+# client used to reach us, from SSH_CONNECTION) as user@ip, NOT the hostname --
+# so it does not depend on MagicDNS being enabled on the client. Override with
+# $REMOTE_EDITOR_HOST (e.g. a name in the client's ~/.ssh/config) if preferred.
+function _remote_editor() {
+    local editor="$1"
+    local target client server_ip host
+    target="$(realpath "${2:-.}")"
+    client="$(echo "$SSH_CONNECTION" | awk '{print $1}')"   # client (reverse-ssh dest)
+    server_ip="$(echo "$SSH_CONNECTION" | awk '{print $3}')" # this host, as the client sees us
+    host="${REMOTE_EDITOR_HOST:-$(id -un)@${server_ip}}"     # Remote-SSH authority
+
+    local remote_script='
+case "$EDITOR_NAME" in
+  code)   winprog="Microsoft VS Code" ;;
+  cursor) winprog="cursor" ;;
+  *)      winprog="$EDITOR_NAME" ;;
+esac
+bin="$(command -v "$EDITOR_NAME" 2>/dev/null)"
+[ -z "$bin" ] && bin="$(ls /mnt/c/Users/*/AppData/Local/Programs/"$winprog"/resources/app/bin/"$EDITOR_NAME" 2>/dev/null | head -1)"
+if [ -z "$bin" ]; then echo "remote-editor: $EDITOR_NAME not found on $(hostname)" >&2; exit 127; fi
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  nohup "$bin" --remote "ssh-remote+$REMOTE_HOST" "$TARGET" >/dev/null 2>&1 &
+elif command -v systemd-run >/dev/null 2>&1; then
+  systemd-run --user --no-block -- "$bin" --ozone-platform-hint=auto --remote "ssh-remote+$REMOTE_HOST" "$TARGET"
+else
+  nohup "$bin" --remote "ssh-remote+$REMOTE_HOST" "$TARGET" >/dev/null 2>&1 &
+fi
+'
+    ssh -o StrictHostKeyChecking=no "$client" \
+        "EDITOR_NAME=${(q)editor} REMOTE_HOST=${(q)host} TARGET=${(q)target} sh -c '$remote_script'"
+}
+
 function code() {
     if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$VSCODE_IPC_HOOK_CLI" ]]; then
-        local client_ip=$(echo $SSH_CONNECTION | awk '{print $1}')
-        local target_path="$(realpath "${1:-.}")"
-        local hostname=$(hostname -s)
-        # Linux needs systemd-run to inherit WAYLAND_DISPLAY; macOS can call code directly
-        ssh -o StrictHostKeyChecking=no "$client_ip" \
-            "if command -v systemd-run >/dev/null 2>&1; then
-                systemd-run --user --no-block -- code --ozone-platform-hint=auto --remote ssh-remote+${hostname} ${target_path}
-             else
-                code --remote ssh-remote+${hostname} ${target_path}
-             fi"
+        _remote_editor code "$@"
     else
         command code "$@"
+    fi
+}
+
+function cursor() {
+    if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$VSCODE_IPC_HOOK_CLI" ]]; then
+        _remote_editor cursor "$@"
+    else
+        command cursor "$@"
     fi
 }
 {{- end }}
@@ -281,5 +324,18 @@ alias updatenavi="cd ~/oclaw && git checkout main && git pull && pnpm install &&
 alias comfyui="cd /home/rai/ComfyUI && source .venv/bin/activate && python main.py"
 
 
-alias flaude='cd ~/focused && unset CLAUDE_CODE_OAUTH_TOKEN && claude'
-alias florence='flaude'
+# flaude: start a Claude Code session in ~/focused that reuses Florence's config
+# WITHOUT the Ark runtime or the Discord/voice/email channel plugins.
+# cwd=~/focused already auto-loads CLAUDE.md + project skills + project MCP + bd hooks;
+# this just adds the Florence persona/brain. unset token = use interactive login creds.
+flaude() {
+  local brain="$HOME/dev/lumiere/apps/ark/plugin/agents/florence.md"
+  cd ~/focused && unset CLAUDE_CODE_OAUTH_TOKEN
+  if [ -f "$brain" ]; then
+    command claude --dangerously-skip-permissions --append-system-prompt-file "$brain" "$@"
+  else
+    echo "flaude: brain not found at $brain, launching plain claude" >&2
+    command claude --dangerously-skip-permissions "$@"
+  fi
+}
+florence() { flaude "$@"; }

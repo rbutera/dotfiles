@@ -57,9 +57,9 @@
                                         "type": "device_if"
                                     }
                                 ],
-                                "description": "(Dygma Defy) F17 -> raycast",
+                                "description": "(Dygma Defy) F20 -> fn",
                                 "from": {
-                                    "key_code": "f17",
+                                    "key_code": "f20",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -68,51 +68,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "left_command"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "spacebar",
-                                        "modifiers": [
-                                            "left_command"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "identifiers": [
-                                            {
-                                                "product_id": 18,
-                                                "vendor_id": 13807
-                                            }
-                                        ],
-                                        "type": "device_if"
-                                    }
-                                ],
-                                "description": "(Dygma Defy) F16 -> ctrl + Amethyst",
-                                "from": {
-                                    "key_code": "f16",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_shift",
-                                        "modifiers": [
-                                            "left_option",
-                                            "left_control"
-                                        ]
+                                        "apple_vendor_top_case_key_code": "keyboard_fn"
                                     }
                                 ],
                                 "type": "basic"
@@ -213,6 +169,10 @@
                                             {
                                                 "product_id": 8705,
                                                 "vendor_id": 4617
+                                            },
+                                            {
+                                                "product_id": 18,
+                                                "vendor_id": 13807
                                             }
                                         ],
                                         "type": "device_unless"
@@ -362,6 +322,73 @@
                                 "to_if_alone": [
                                     {
                                         "key_code": "escape"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Built-in keyboard F/J -> Shift on hold, F/J on tap",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "description": "Built-in keyboard F -> left_shift on hold, f on tap",
+                                "from": {
+                                    "key_code": "f"
+                                },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 170,
+                                    "basic.to_if_held_down_threshold_milliseconds": 120
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "f"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "left_shift"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "description": "Built-in keyboard J -> right_shift on hold, j on tap",
+                                "from": {
+                                    "key_code": "j"
+                                },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 170,
+                                    "basic.to_if_held_down_threshold_milliseconds": 120
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "j"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "right_shift"
                                     }
                                 ],
                                 "type": "basic"

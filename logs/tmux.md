@@ -1,5 +1,91 @@
 # tmux config changes log
 
+## 2026-07-14 — Add extrakto (fuzzy grab URLs/paths/text, incl. wrapped URLs)
+
+### Motivation
+Windows Terminal / any outer terminal can't detect URLs that wrap across lines
+once tmux is in the mix (it only sees tmux's wrapped grid, not the logical text).
+extrakto scans the pane *buffer* and reconstructs whole tokens, so wrapped URLs
+come out intact. Also grabs paths, git hashes, words, lines.
+
+### Changes
+**`dot_tmux/dot_tmux.conf.local`** — appended:
+- `set -g @plugin 'laktak/extrakto'` (declared here; the file is sourced at
+  ~line 132 of dot_tmux.conf, before `run tpm` at ~line 151, so TPM picks it up).
+- `set -g @extrakto_clip_mode 'tmux_osc52'` — copy via OSC52, so it lands in the
+  right clipboard locally and over SSH, matching tmux-yank's path (no dependency
+  on ~/bin/osc52copy). `@extrakto_clip_tool_run` is legacy, replaced by this.
+- `set -g @extrakto_key 'u'` — default key is Tab, which collides with
+  `bind Tab last-window` in dot_tmux.conf. Moved to `prefix + u` (the old
+  urlview binding) to preserve last-window.
+
+### Usage
+`prefix + u` opens the fzf popup. In it: `Tab` inserts to the pane, `Enter`
+copies, `Ctrl-o` opens, `Ctrl-f` cycles filters (word/all/line/path/url/...).
+Deps present: fzf 0.71, Python 3.14. Installed via TPM (`install_plugins`).
+
+## 2026-06-23 — Fix copy-paste over SSH for real (passthrough wrap + reattach bug)
+
+### Problem
+Copy-paste over SSH failed ~99% of the time on mac/Ghostty — both copy-mode `y`
+and mouse highlight-to-yank (both route through `~/bin/osc52copy`). Behaviour
+also "changed on reattach" (start tmux locally in the office, SSH in + reattach
+from home → broken).
+
+### Diagnosis (evidence, not guess)
+Ran three OSC52 emission methods over a live SSH+tmux session and checked which
+token reached the mac clipboard: (1) RAW OSC52 to client_tty = FAILED; (2)
+tmux-PASSTHROUGH-WRAPPED OSC52 = WORKED; (3) tmux native `load-buffer -w` =
+FAILED. So raw OSC52 written to client_tty is swallowed by the tmux layer, and
+tmux's native set-clipboard emission also doesn't survive (consistent with a
+nested-tmux / client-forward issue). Only the explicit passthrough wrap escapes.
+
+TWO root causes, which is why it was so flaky:
+1. **Swallowed OSC52**: `osc52_to_tty()` wrote RAW OSC52 to `#{client_tty}`;
+   inside tmux that never reaches the terminal.
+2. **Reattach / server-env**: `osc52copy` branched on `$SSH_CONNECTION`/`$SSH_TTY`
+   to pick SSH-vs-local. Inside tmux that env is the SERVER's (captured at
+   session start). Start tmux locally → no SSH_CONNECTION → it took the `pbcopy`
+   branch → copied to the LOCAL (server) clipboard, not the remote client's.
+   Reattaching from remote never updates the server env, so it stayed wrong.
+   (The debug log showed both "used pbcopy" and "wrote OSC52 to tty" lines —
+   the two paths, two scenarios.)
+
+### Solution
+**`bin/executable_osc52copy`**:
+- `osc52_to_tty()` now wraps OSC52 in tmux's passthrough DCS
+  (`\ePtmux;\e\e]52;c;<data>\a\e\\`, inner ESCs doubled) when `$TMUX` is set, so
+  tmux forwards it to the active client terminal. Requires `allow-passthrough on`
+  (already set in dot_tmux.conf).
+- Restructured the main logic: **when `$TMUX` is set, ALWAYS use
+  osc52_to_tty** (the active client's terminal is the correct target regardless
+  of where the server started or where you resume from). Do NOT branch on
+  `$SSH_CONNECTION` inside tmux — that's the reattach bug. pbcopy/wl-copy/xclip
+  remain only as the non-tmux fallback.
+- Covers all scenarios: start-local-resume-remote, start-remote-resume-local,
+  mouse drag, the yank tool — on any OSC52 terminal (Ghostty / Kitty / Windows
+  Terminal). OSC52 is also correct for WSL over Windows Terminal (clip.exe would
+  write the wrong machine's clipboard when SSH'd).
+
+**`dot_tmux/dot_tmux.conf`** — mouse highlight-to-copy needed one more flip:
+`@yank_with_mouse 'off'` → `'on'`. Evidence: the osc52copy debug log showed the
+mouse copy never invoked osc52copy at all (only keyboard `y` did), so the drag
+wasn't triggering a copy. `@yank_with_mouse` is tmux-yank's master switch for
+copy-on-drag; with it off the drag only selected, never piped. With it on, mouse
+drag routes through `@override_copy_command` = osc52copy (the same wrapped path
+keyboard uses). Confirmed working 2026-06-23 (kinto, mouse + keyboard both land).
+Needs a config reload / tmux-yank re-init to take effect (prefix-r, or
+kill-server).
+
+### Still open (separate surface)
+- **Neovim yank**: nvim is on `vim.opt.clipboard = "unnamedplus"` + the built-in
+  provider (the custom osc52copy override was removed earlier, see nvim log). That
+  auto-provider has the SAME bug class (picks pbcopy locally → wrong clipboard on
+  reattach; and may rely on tmux-forward which method 3 showed is unreliable).
+  TO TEST like we tested copy-mode, then likely point nvim's clipboard provider
+  at osc52copy (or an osc52-passthrough provider) so it funnels through the one
+  confirmed-working path.
+
 ## 2026-03-31 — Stop macOS panes from being named reattach-to-user-namespace
 
 ### Problem

@@ -1,5 +1,112 @@
 # Codex config changes log
 
+## 2026-07-15 — Use the signed native CUA Driver in Codex
+
+Installed the official native CUA Driver app and replaced the cache-backed
+`uvx cua-driver mcp` registration with the canonical absolute command emitted by
+`cua-driver mcp-config --client codex`: `/Users/rai/.local/bin/cua-driver mcp`.
+This gives app-launched Codex sessions a stable path and makes macOS Accessibility
+and Screen Recording grants attach to the signed `com.trycua.driver` bundle.
+
+## 2026-07-14 — Remove chisel MCP server
+
+Rai retired `chisel`. Removed `chisel` from `BASE["mcp_servers"]` in
+`dot_codex/modify_private_config.toml` and dropped it from the Windows `pop()`
+list (now `("tempograph", "oss-autopilot")`). Applied `chezmoi apply --force
+~/.codex/config.toml` (python modify script, no 1Password) — live config now
+chisel-free, diff empty. Also removed from the claude modify script the same day;
+see logs/chezmoi-modify-scripts.md (pi inherits MCP via discovery, no pi-native
+config to edit).
+
+## 2026-07-13 — Fix `HOME` NameError in the kinto Florence codex section
+
+Bug (pre-existing, kinto-only): the Florence `obsidian` entry used a bare,
+undefined `HOME` — `os.path.join(HOME, "focused", "vault")` — so the whole modify
+script raised `NameError` and **every kinto `chezmoi apply ~/.codex/config.toml`
+was failing** (surfaced while rolling out mobile-mcp/cua-driver). Fixed to
+`os.path.expanduser("~")` → `/Users/rai/focused/vault` (verified against Florence's
+live `~/focused/.mcp.json`). nimbus never hit it (kinto-gated branch).
+
+## 2026-07-13 — Add mobile-mcp (android) + cua-driver (computer-use) to Codex
+
+### Change
+Added two MCP servers to `BASE["mcp_servers"]` in
+`dot_codex/modify_private_config.toml` (shared base — both machines), part of the
+cross-harness android/computer-use rollout (see logs/claude.md same date for the
+survey rationale and the full picture):
+- `mobile-mcp` → `npx -y @mobilenext/mobile-mcp@latest` (android device control;
+  needs adb + a device to operate).
+- `cua-driver` → `uvx cua-driver mcp` (trycua/cua computer-use; macOS needs
+  `cua-driver permissions grant` once).
+
+Note: nimbus Codex still carries ChatGPT-desktop's own `node_repl` + `computer-use`
+(app-managed, preserved by the merge logic) alongside `cua-driver` — both by design.
+
+### Verification
+`chezmoi apply ~/.codex/config.toml` on nimbus (python modify script, no 1Password);
+both `[mcp_servers.mobile-mcp]` and `[mcp_servers.cua-driver]` present, exa key intact.
+Kinto synced via `chezmoi update`.
+
+## 2026-07-13 — Set approval_policy back to `never` (full auto-approval)
+
+### Problem
+Rai asked Codex to stop prompting for approval and just auto-grant it. Codex CLI
+0.144.1 uses the permission-profile scheme; per the official docs
+(https://learn.chatgpt.com/docs/config-file/config-reference), fully autonomous
+no-prompt operation is exactly `approval_policy = "never"` +
+`default_permissions = ":danger-full-access"`. The base already had
+`:danger-full-access`, so the only key still forcing prompts was
+`approval_policy = "on-request"`.
+
+### Changes
+- **`dot_codex/modify_private_config.toml`**: `BASE["approval_policy"]` changed
+  from `"on-request"` back to `"never"`.
+
+### Note — this reverses the entry directly below (same day)
+Earlier today `never` was switched to `on-request` because, paired with the
+*legacy `[sandbox]`* config, `never` left Codex unable to escalate past a
+sandbox block. That reasoning no longer applies: the same earlier change also
+removed the legacy sandbox and set `default_permissions = ":danger-full-access"`
+(unrestricted local access), so there is nothing left to block/escalate. With
+full access already granted, `never` is the intended "no safety net, fully
+autonomous" mode — which is what Rai explicitly requested.
+
+### Verification
+`chezmoi apply ~/.codex/config.toml` (scoped; this source is a `modify_` python
+script, not a template — no 1Password needed). Deployed `~/.codex/config.toml`
+now shows `approval_policy = "never"` and `default_permissions = ":danger-full-access"`.
+
+## 2026-07-13 — Remove sandbox friction and allow escalation
+
+### Problem
+Codex desktop sessions were restricted to workspace writes and blocked outbound SSH to Tailscale hosts. `approval_policy = "never"` prevented Codex from requesting an escalation, while the legacy `[sandbox]` configuration did not provide the intended unrestricted local access.
+
+### Changes
+- Changed the managed approval policy from `never` to `on-request` so Codex can request confirmation when a separate safety rule requires it.
+- Set `default_permissions = ":danger-full-access"` for unrestricted local filesystem and network execution on Rai's personal machines.
+- Removed the legacy `sandbox` settings from the managed base and explicitly delete stale `sandbox`, `sandbox_mode`, and `sandbox_workspace_write` keys while merging an existing deployed config, preventing old sandbox policy from overriding the permission profile.
+- Preserved desktop-app-owned `node_repl`, computer-use, bundled, and primary-runtime integration entries during authoritative merges; added Slack to the managed curated plugin set. This prevents a targeted Codex config apply from deleting working integrations discovered in the live config.
+
+## 2026-07-11 — Use high reasoning effort for GPT-5.6 SOL
+
+Changed the managed Codex default `model_reasoning_effort` from `medium` to
+`high`. The default model remains `gpt-5.6-sol`.
+
+## 2026-07-07 — Convert codex-teammate into a faithful Sonnet-low relay
+
+### Problem
+The `codex-teammate` agent and the `/wave` Codex reviewer were defined so that a host Opus agent would gather context, read files, call Codex, then rewrite Codex's answer ("synthesize, don't parrot"). This defeated both reasons to use Codex: it contaminated Codex's **independent** second-model read (Opus framed the input and editorialized the output), and it burned Anthropic tokens doing work Codex should do itself. The "Opus does the work then relays" behavior lived entirely in these markdown files, not in the `claude-codex-bridge` MCP server (which already passes prompts to `codex exec` verbatim).
+
+### Changes
+- `dot_claude/agents/codex-teammate.md` — rewrote into a deliberately cheap, faithful **relay**:
+  - Frontmatter pinned to `model: sonnet` + `effort: low`, and a `tools:` allowlist restricted to only the six `mcp__codex__codex_*` tools so it *structurally* cannot read files.
+  - Body inverted: no file reading, no context gathering, no opinion forming, no synthesis. It routes to the right Codex tool, always passes `workingDirectory` (Codex reads the repo itself), forwards the caller's task verbatim (self-contained, since Codex can't see chat history), and returns Codex's output under a fixed `— Codex —` header with nothing added.
+- `dot_claude/skills/codex/SKILL.md` — left as the **synthesized, human-readable** `/codex` path (intended); added one line distinguishing it from the relay agent.
+- `dot_claude/skills/wave/SKILL.md` — wired the "Agent 2 (Codex)" review-gate reviewer to dispatch via the `codex-teammate` agent with **no spawn-time `model` override** (a spawn-time model beats frontmatter and would force Opus, re-breaking independence). Scoped its inputs to the review target + caller-known paths, not Agent 1's "read the diff" instructions; narrowed the inline fallback to genuine agent-unavailability.
+
+### Process
+Implemented by a Sonnet subagent, then dual-reviewed by Codex + Opus in parallel. Codex initially FAILed (missing `tools:` allowlist; `context` param invited background-gathering; `/wave` "same inputs as Agent 1" re-imported read instructions). Applied all findings, re-reviewed, Codex PASSed. Deployed via `chezmoi apply` (plain `.md` files — no 1Password session needed). Takes effect in new Claude Code sessions.
+
 ## 2026-03-28 — Fix macOS editor path and template Codex home paths
 
 ### Problem
@@ -115,3 +222,14 @@ Codex (Tael) calls were taking 5-10 minutes each, and one timed out entirely. Co
 
 ### Solution/Fix
 Changed `model_reasoning_effort` from `"high"` to `"low"` in `dot_codex/modify_private_config.toml` BASE dict. Applied via `chezmoi apply`. Should significantly reduce Tael dispatch latency.
+
+## 2026-07-10 — Revert codex-teammate to vanilla (Sonnet-low relay was a no-op)
+
+### Problem
+The 2026-07-07 "faithful Sonnet-low relay" (`model: sonnet`, `effort: low`, tools pinned to the six `mcp__codex__codex_*` only) did not route in practice: dispatched as the Codex reviewer for PR #571 it returned with `tool_uses: 0`, produced no findings, and just echoed its system preamble (~66k tokens spent, zero Codex calls). A review gate that silently yields nothing is worse than a slightly less "independent" but functioning one.
+
+### Change
+- `dot_claude/agents/codex-teammate.md` — reverted to the vanilla `c51f71d` definition (the one shipped with the bridge): no `model`/`effort`/`tools` frontmatter (inherits the caller's model + full tools), body reads context, calls the right Codex tool, and synthesizes. Applied via `chezmoi apply`.
+
+### Trade-off accepted
+Loses the strict "uncontaminated independent read" the relay aimed for; regains an actually-working Codex second opinion. Rai's call. Agent-definition changes take effect in new Claude Code sessions.

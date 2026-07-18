@@ -1,5 +1,178 @@
 # Claude Code config changes log
 
+## 2026-07-13 — Roll out mobile-mcp (android) + cua-driver (computer-use) everywhere
+
+### Context
+Next step after round-1 cleanup: pick the best Android + Computer-use MCP from
+the vault surveys (`~/expedition/References/Android and Mobile MCP Servers…`,
+`…Open-source Computer-use MCPs…`) and wire them into every harness.
+- **Android winner: `mobile-next/mobile-mcp`** (`@mobilenext/mobile-mcp`) — 5.4k★,
+  a11y-tree-first hybrid, full app lifecycle; npx (portable).
+- **Computer-use winner: Cua `cua-driver`** (trycua/cua, ~19.5k★) — background,
+  accessibility-grounded. It's a **PyPI package** (`cua-driver 0.7.1`), so invoked
+  via `uvx cua-driver mcp` (no global binary — consistent with our other uvx MCPs,
+  works identically on both machines, and fixes the previously-dead
+  `command:"cua-driver"` entry that had no binary anywhere).
+
+### Changes (`modify_dot_claude.json.tmpl`)
+- Moved `mobile-mcp` + `cua-driver` **out of the nimbus-only block into the shared
+  base** so kinto/Florence get them too.
+- `cua-driver` command changed from bare `cua-driver` → `uvx cua-driver mcp`.
+- `cortex` and `serena` stay nimbus-gated (Florence has her own serena).
+
+### Runtime prerequisites (not config)
+- `cua-driver` on macOS needs Accessibility + Screen-Recording grants once:
+  `cua-driver permissions grant`.
+- `mobile-mcp` needs `adb` (Android platform-tools) + a connected/emulated device
+  to actually operate; the server itself starts fine without them.
+- nimbus Codex also keeps ChatGPT-desktop's own `computer-use`/`node_repl` (app-
+  managed) alongside `cua-driver` — both present by design.
+
+### Verification
+`chezmoi apply` on nimbus; live `~/.claude.json` cua-driver = `uvx cua-driver mcp`,
+mobile-mcp present. Codex + OpenCode got both too (see logs/codex.md, logs/opencode.md).
+Kinto synced via `chezmoi update`. Takes effect in new sessions.
+
+## 2026-07-13 — MCP cleanup round 1 (Claude-side dedup + prune)
+
+### Context
+First round of a cross-harness MCP cleanup initiative (anchor:
+`~/expedition/Installed Agent Harnesses/`). This round does only the
+unambiguous Claude-side removals/dedup; android/computer-use rollout is a
+separate later step.
+
+### Changes
+- **Removed `open-websearch`** from `modify_dot_claude.json.tmpl` base mcpServers
+  (all machines) — redundant with `exa`.
+- **Deduped `context7`**: Claude was loading it *twice per session* — the managed
+  global stdio (`npx @upstash/context7-mcp`) **and** the
+  `context7@claude-plugins-official` plugin (also npx, identical mechanism). Kept
+  the managed global stdio; added `context7` to the `del()` list in
+  `dot_claude/modify_settings.json` so the plugin is stripped on apply.
+- **Removed `chrome-devtools-mcp@claude-plugins-official`** plugin (dropped from
+  base + added to the `del()` list) — browser control is covered by `playwright`.
+- **Enabled serena for nimbus Navi**: added a **nimbus-gated** `serena` entry to
+  `modify_dot_claude.json.tmpl` mcpServers — `uvx --from
+  git+https://github.com/oraios/serena serena start-mcp-server --context
+  claude-code`, mirroring Florence's kinto `~/focused/.mcp.json` entry. Done via
+  mcpServers (not the plugin, kept deliberately off) so kinto/Florence — which
+  already has serena in its own `.mcp.json` — doesn't double-load. Verified the 7
+  serena tools referenced in `~/.claude/rules/serena.md`
+  (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`,
+  `replace_symbol_body`, `insert_before_symbol`, `insert_after_symbol`,
+  `rename_symbol`) are all current, real serena tools.
+
+### Deferred to the next step (not this round)
+`mobile-mcp` (android) + `cua-driver` (computer-use) "available everywhere incl.
+Codex". `cua-driver` has **no binary on either nimbus or kinto** — so it's
+currently a dead entry even on nimbus. Rolling it out belongs to the vault-driven
+"select best android + computer-use MCP, then install" step, which will install
+the binary first.
+
+### Verification
+`chezmoi apply --force ~/.claude.json ~/.claude/settings.json` on nimbus (EXA_API_KEY
+confirmed in env first — the modify script injects it, empty would blank the exa
+key). Live `~/.claude.json` mcpServers now include `serena`, no `open-websearch`;
+`enabledPlugins` has no `context7`/`chrome-devtools-mcp`; exa key intact. Kinto
+brought in sync via `chezmoi update`. serena takes effect in new Claude sessions.
+
+## 2026-07-13 — Disable the `Claude-Session:` commit trailer (`attribution.sessionUrl: false`)
+
+### Context
+Claude Code appends a `Claude-Session: https://claude.ai/code/session_...` git
+trailer to commit messages by default when running from a web or Remote Control
+session. This is AI attribution, and it leaked into a commit in an easyJet-owned
+client repo (`~/focused/launchpad/`), where Rai must be the sole attributed
+author. It had to be caught and stripped by hand — a Brita-filter violation:
+anything that depends on a human remembering will eventually fail.
+
+`attribution.commit: ""` (already set) only suppresses the `Co-Authored-By:`
+trailer. The session link is a separate flag. Per the docs
+(https://code.claude.com/docs/en/settings#attribution-settings): "`sessionUrl` —
+Whether to append the claude.ai session link as a `Claude-Session` trailer on
+commits and a link in pull request descriptions when running from a web or
+Remote Control session. Defaults to `true`. Set to `false` to omit the link." The
+same section notes `attribution` supersedes the deprecated `includeCoAuthoredBy`
+key, and that hiding all attribution needs `commit` + `pr` empty **and**
+`sessionUrl: false`.
+
+### Changes
+- **`dot_claude/modify_settings.json`**: base config `attribution` block now
+  `{"commit": "", "pr": "", "sessionUrl": false}`. `attribution` is a
+  fully-managed key in the jq merge, so this deploys to every machine.
+
+### Verification
+`chezmoi apply ~/.claude/settings.json` (scoped, no 1Password needed — this
+source file is not a template). Deployed `~/.claude/settings.json` now has
+`.attribution == {"commit": "", "pr": "", "sessionUrl": false}` and is valid JSON.
+
+## 2026-06-24 — Remove all `.claude.json` cache scrubs (supersedes 2026-06-22)
+
+### Context
+During a `/chezmoi-sync` reconciliation, `.claude.json` again showed `MM` drift.
+Per Rai's call, the 1M-context entitlement cache poisoning (#45449) "is no
+longer a thing" — so the `modify_dot_claude.json.tmpl` scrub block is now
+obsolete. This **overrides the 2026-06-22 finding** below, which had concluded
+the scrub was still needed because the machine kept getting re-poisoned. Rai is
+deliberately overriding that verification.
+
+### Changes
+- **`modify_dot_claude.json.tmpl`**: Removed the entire cache-scrub `del()`
+  chain from the jq transform — `cachedExtraUsageDisabledReason`,
+  `hasAvailableSubscription`, `s1mAccessCache`, `passesEligibilityCache`,
+  `clientDataCache`, and `oauthAccount.hasExtraUsageEnabled`. Also removed the
+  now-stale explanatory comment block referencing #45449. The script now only
+  manages `mcpServers`, built-in `enabledMcpServers`, and `remoteControlAtStartup`.
+- Applied `chezmoi apply --force ~/.claude.json`. Deployed file keeps all its
+  runtime fields untouched; the only residual diff is a trailing-newline (jq
+  emits one, Claude Code writes none) — cosmetic and harmless.
+
+### Side effect — less drift
+Removing the scrub also reduces `.claude.json`'s perpetual churn: the script no
+longer deletes the runtime keys Claude Code re-writes, so the modify output and
+the live file now agree on those keys. The 1M model is still pinned separately
+via `ANTHROPIC_DEFAULT_OPUS_MODEL` in `dot_zshenv.tmpl` (left in place).
+
+## 2026-06-22 — Verified entitlement-cache scrub is STILL needed (keep it)
+
+### Context
+While reconciling chezmoi drift, `.claude.json` kept showing as drifted right
+after `chezmoi apply`. Questioned whether the `modify_dot_claude.json.tmpl`
+entitlement-cache scrub (`del(.cachedExtraUsageDisabledReason)` + 4 siblings,
+added 2026-04-12 for the `/model opus[1m]` gate bug #45449) was now obsolete on
+Opus 4.8.
+
+### Finding — NOT obsolete, do not remove
+- **Issue [#45449] is closed as NOT_PLANNED** — auto-closed by the
+  github-actions bot for inactivity ("Closing for now — inactive for too long"),
+  **not** because it was fixed. No fix shipped; last human comment just restates
+  the env-var workaround.
+- **Live machine is still being re-poisoned.** Applied `.claude.json` (scrub
+  deletes the keys), then `jq` on `~/.claude.json` showed
+  `cachedExtraUsageDisabledReason: true` back, plus `hasAvailableSubscription`,
+  `s1mAccessCache`, `passesEligibilityCache`, `clientDataCache` all repopulated.
+  So Claude Code re-writes the poisoned keys at runtime between applies.
+
+### Conclusion
+The scrub is actively doing its job; removing it would re-break
+`/model opus[1m]`. **Keep both** the scrub and `ANTHROPIC_DEFAULT_OPUS_MODEL`.
+This re-poisoning is also the root cause of `.claude.json`'s perpetual drift —
+expected and benign (a `modify_` script over a runtime-churned file will always
+diff). Track [#45449] for an eventual real fix before removing either workaround.
+
+[#45449]: https://github.com/anthropics/claude-code/issues/45449
+
+## 2026-06-03 — Re-add Opus model pin as 4.8, conditional on host group
+
+### Problem
+
+The Opus 4.6 model pin was removed on 2026-06-01 but the value persisted in all shells via tmux's global environment (the tmux server was started when the old export was still active). Re-adding the pin as Opus 4.8 with a host-group conditional: work machines (`latios`, `kinto`) get `claude-opus-4-8[1m]` (1M context), others get `claude-opus-4-8`.
+
+### Changes
+
+- **`dot_zshenv.tmpl`**: Added conditional `ANTHROPIC_DEFAULT_OPUS_MODEL` export under the Claude Code section — `claude-opus-4-8[1m]` for `host_groups.work`, `claude-opus-4-8` for others.
+- **tmux global env**: Updated stale `ANTHROPIC_DEFAULT_OPUS_MODEL` from `claude-opus-4-6[1m]` to `claude-opus-4-8[1m]` via `tmux set-environment -g`.
+
 ## 2026-06-01 — Remove Opus 4.6 model pin
 
 ### Problem
@@ -189,3 +362,25 @@ Added `DATABASE_URL` as a shell-level env var in `dot_zshenv.tmpl` with a nimbus
 - Removed `pty-mcp` from `modify_dot_claude.json.tmpl` (broken `oneOf` schema, already removed from Codex on 2026-04-21)
 - Removed `obsidian` (`@bitbonsai/mcpvault`) from `modify_dot_claude.json.tmpl` (also removed from Codex config)
 - Added `perplexity` (`@perplexity-ai/mcp-server`) MCP server — API key inherited from shell env
+
+## 2026-07-17 — Remove personal-host CLAUDE_CODE_OAUTH_TOKEN export from claude-ai.zsh
+
+### Problem
+
+Every `chezmoi apply` re-injected `CLAUDE_CODE_OAUTH_TOKEN` into the shell environment via the else-branch in `dot_config/zsh/claude-ai.zsh.tmpl` (personal hosts, `op://Private/claude code token/credential`). An ambient env token takes precedence over keychain/`claude auth login` credentials, flipping the CLI to API-key billing — the same conflict documented in the 2026-era removal that was later reverted. Rai has moved off this token entirely.
+
+### Verification
+
+- Empirical: `env -u CLAUDE_CODE_OAUTH_TOKEN -u ANTHROPIC_API_KEY claude -p 'reply ok' --model haiku` succeeds via keychain on nimbus — headless mode needs no token env var.
+- Docs (code.claude.com/docs/en/authentication): `CLAUDE_CODE_OAUTH_TOKEN` is step 5 in the credential precedence chain; subscription OAuth from `/login` (macOS Keychain) is the default step 6 and works in `--print` mode. The token is only *required* for `--bare` mode or environments with no keychain/login (CI).
+
+### Changes
+
+- **`dot_config/zsh/claude-ai.zsh.tmpl`**: Removed the personal-host `export CLAUDE_CODE_OAUTH_TOKEN=…` else-branch; work hosts keep `CLAUDE_CODE_OAUTH_TOKEN_WORK`. Added a comment explaining why.
+- **Deployed `~/.config/zsh/claude-ai.zsh`**: Edited directly to match the new render (1Password signin failed in-session, so `chezmoi apply` couldn't render the template). No functional diff vs source.
+- Kept the `unset CLAUDE_CODE_OAUTH_TOKEN` alias in `dot_aliases.tmpl` (per Rai) — harmless, and still useful in shells with a stale env.
+
+### Not touched (separate consumers with their own token copies)
+
+- `dot_config/impulse/dot_env.tmpl` (ark-spawn jobs) and the PowerShell profile still template the token.
+- `~/Library/LaunchAgents/com.lumiere.discord-text-plugin.plist` hardcodes a literal token (not chezmoi-managed); lumiere `apps/ark/.env` and `infra/cortex-lab/**/.env` hold three more distinct literal tokens. These should be revoked/migrated to keychain auth as a follow-up.

@@ -1,5 +1,177 @@
 # chezmoi config changes log
 
+## 2026-07-14 — chezmoi-sync: kill recurring claude.json / npmrc drift + merge ark.json
+
+### Context
+`/chezmoi-sync` run. Detector flagged 4 drifted files, all templates:
+`.claude.json`, `focused/ark.json`, `.env`, `.npmrc`. Two were *recurring*
+drift (self-inflicted by tooling), so the fix was structural, not a one-off
+reconcile — Rai's directive was "make the trailing newline a non-factor" and
+"convert npmrc into a modify script and leave the auth token out of it".
+
+### `.claude.json` — permanent trailing-newline fix (modify script)
+- Symptom: perpetual 1-byte drift. `modify_dot_claude.json.tmpl` ended with
+  `jq`, which always emits a trailing newline; Claude Code rewrites
+  `~/.claude.json` with **no** trailing newline → drifts every session.
+- Fix: capture the `jq` output in `result=$(…)` (strips trailing newlines) and
+  emit with `printf '%s' "$result"` (no newline). Output now byte-identical to
+  Claude's own writes. Drift can't recur. (See chezmoi-modify-scripts.md.)
+
+### `focused/ark.json` — merge (kept deployed + re-added hang-fix)
+- Deployed (07-03) had diverged from source (07-01) *both ways*: deployed used
+  `ark-discord` channelSource + had `snooze`/`recap`/`email` blocks but had
+  **lost** the `--disallowedTools AskUserQuestion` hang-fix; source used
+  `discord-text-plugin`, dropped those blocks, kept the hang-fix.
+- Resolution (Rai's call): treat live 07-03 config as canonical, rewrite
+  `focused/ark.json.tmpl` to match it (ark-discord, snooze, recap, email) **and**
+  re-add `--disallowedTools AskUserQuestion`, then `apply --force` so the live
+  file actually regains the hang-fix. Florence picks it up on next reload.
+
+### `.env` — keep source (apply --force)
+- Only diff was an additive comment block documenting why `ANTHROPIC_API_KEY` is
+  intentionally absent (rank-3 API key would outrank the Max /login creds). No
+  secret-value change. Applied; no source edit.
+
+### `.npmrc` — converted to modify script, auth token now untracked
+- Deployed npm token (07-11, `…0OghvD`) was **newer** than the 1Password item
+  `op://Private/npm auth/credential` (06-22, `…0fxfxI`) — a local `npm login`
+  rotated it, 1Password never caught up. Blind `apply --force` would have
+  reverted npm auth to the stale token.
+- Fix (Rai's call): retired `private_dot_npmrc.tmpl` (1Password-templated) for
+  `modify_private_dot_npmrc`. It emits the managed supply-chain directive block
+  and preserves any `^//` registry line (tokens/creds) verbatim from the
+  existing file. Token is no longer tracked in chezmoi *or* 1Password → drift
+  can't recur. `private_` prefix keeps 0600. (See npm.md.)
+
+## 2026-07-13 — chezmoi-sync: finish `main` merge + reconcile deployed drift
+
+### Context
+Session started mid-merge (`git merge` of `origin/main`, 13 commits behind) with
+a single conflict in `logs/codex.md`, followed by a full `/chezmoi-sync` run.
+
+### Merge
+- Resolved `logs/codex.md` by keeping **both** log entries newest-first
+  (2026-07-13 sandbox-friction on top, then 2026-07-11 GPT-5.6 reasoning), then
+  committed the merge (`8bb7a66`) and pushed. A stray `pull --rebase --autostash`
+  re-triggered the same conflict; aborted the rebase back to the clean merge
+  (I was already `ahead 3, behind 0`, so the pull was a no-op anyway).
+
+### 1Password gate
+- `op whoami` reports "no active session" (stale `OP_SESSION_personal` env var),
+  but the **1Password desktop-app CLI integration** authorizes `op read`/`op vault
+  list` directly — so templates render fine despite `whoami` failing. The sync
+  detector only needs `chezmoi status` to succeed, which it does.
+- The deployed `detect-drift.sh` was the **old** pre-merge version
+  (`${CHEZMOI:-chezmoi}` + 20s timeout), so it errored `chezmoi-not-found`;
+  ran `chezmoi status` directly instead. Applying Group A updated the deployed
+  detector to the fixed `$CHEZMOI_SYNC_BIN`/180s version.
+
+### Group A — un-applied merge (source authoritative; `apply --force`)
+Deployed this machine's copies of the just-merged source (nothing deployed-side
+to lose — all ` M`/new/benign-churn): `codex-teammate.md`, `settings.json`,
+`detect-drift.sh`, `herdr/config.toml`, `.pi/agent/auth.json` (had to `mkdir -p
+~/.pi/agent` first), `.ssh/config`, and the re-merge modify-scripts
+(`.claude.json`, `.codex/config.toml`, `.config/impulse/jobs.json`).
+
+### Group B — genuine deployed drift, kept deployed by updating source
+- **`dot_tool-versions`**: `chezmoi add` — source said `bun 1.3.9`, deployed (and
+  kinto) run `bun 1.3.14`. Kept deployed.
+- **`dot_zshrc.tmpl`**: appended the `# >>> grok installer >>>` PATH/compinit
+  block the grok installer had added to the live `~/.zshrc`.
+- See `logs/ssh.md` (authorized_keys) and `logs/ark.md` (navi) for the other two.
+
+### Residual
+`.claude.json` still shows `MM` — a trailing-newline-only diff (jq emits `\n`,
+Claude Code doesn't). Documented benign churn (see 2026-06-24 in `logs/claude.md`);
+left as-is.
+
+### Verification
+Each Group B template re-rendered with `chezmoi execute-template` and `diff`-ed
+byte-for-byte against its deployed file — all identical. Committed only the four
+touched source paths (+ these logs); pushed.
+
+## 2026-07-13 — Fix chezmoi-sync detector: `$CHEZMOI` env var collision
+
+### Problem
+
+`/chezmoi-sync` failed immediately with `ERROR | chezmoi-not-found`, even though
+`chezmoi` was on PATH (`~/.asdf/shims/chezmoi`). The detector took its binary
+path from an env override, `CHEZMOI="${CHEZMOI:-chezmoi}"` — but `CHEZMOI=1` was
+already exported in the environment (chezmoi sets `CHEZMOI=1` in scripts it
+runs, and the session inherited it). So the script resolved the binary to the
+literal string `1`, and `command -v 1` failed the presence check.
+
+### What changed
+
+- **`dot_claude/skills/chezmoi-sync/detect-drift.sh`**: The override variable is
+  now `CHEZMOI_SYNC_BIN` instead of `CHEZMOI`, with a comment explaining why the
+  bare name is unusable. Applied to the deployed skill.
+
+With the fix, the detector reaches `chezmoi status` and fails cleanly on the
+1Password gate (exit 1, "multiple accounts found") rather than hanging. That gate
+was then fixed separately — see logs/zshenv.md, 2026-07-13 (OP_ACCOUNT).
+
+### Second bug: timeout far too short
+
+Once 1Password was selecting an account correctly, the detector still reported
+`STATUS_BLOCKED | need-op-session` — a false alarm. A full `chezmoi status` walk
+renders every template and so pays one `op` round-trip per secret: measured at
+**87s** on this repo with a perfectly healthy session. The detector's default
+`STATUS_TIMEOUT` was 20s, so it tripped the timeout and blamed the op session.
+
+- **`dot_claude/skills/chezmoi-sync/detect-drift.sh`**: default
+  `CHEZMOI_SYNC_STATUS_TIMEOUT` raised 20s → 180s.
+
+Both fixes verified together: the detector now runs from a clean shell with no
+sign-in and no env overrides, listing drift in ~90s.
+
+## 2026-07-01 — Bake the "never leave the source repo dirty" golden rule into CLAUDE.md + AGENTS.md
+
+### Motivation
+
+Rai's standing golden rule (2026-07-01): whenever an agent finds this chezmoi source repo dirty, it must commit and push it, never stash-and-forget. Previously this lived only in Florence's bd memory (`chezmoi-golden-rule`), so it depended on Florence remembering. Baking it into the repo's agent-guidance file makes any agent touching chezmoi (Claude Code, Codex, etc.) obey it without external memory (Brita filter).
+
+### What changed
+
+- Added a **"Golden Rule: never leave the source repo dirty"** section to `CLAUDE.md`, right after Agent requirements: inspect all drift (including un-authored), commit sane diffs with a clear message + push, surface suspicious diffs to Rai, never leave dirty.
+- Created `AGENTS.md` as a **symlink to `CLAUDE.md`** so cross-tool agents (Codex and anything reading AGENTS.md) get the same guidance from a single source of truth (no duplication → no drift, fitting given the topic).
+
+Both are plain files (no 1Password), safe to commit without a session.
+
+## 2026-06-03 — Add io.focused.nightly-health launchd plist
+
+### Motivation
+
+The nightly system-health job (OpenSpec change `nightly-system-health`, tasks 6.1/6.2) needed a launchd plist managed via chezmoi so the schedule is version-controlled and deployed deterministically, but inert until manually armed.
+
+### What changed
+
+Added `Library/LaunchAgents/io.focused.nightly-health.plist` to the chezmoi source. This is a plain XML file (no 1Password template functions), so `chezmoi apply ~/Library/LaunchAgents/io.focused.nightly-health.plist` is safe to run without a 1Password session.
+
+The plist configures:
+- Label: `io.focused.nightly-health`
+- ProgramArguments: `/bin/bash /Users/rai/focused/scripts/health/nightly-health.sh`
+- StartCalendarInterval: five entries for Weekday 1-5 (Mon-Fri), Hour 7, Minute 0
+- RunAtLoad: false (inert until armed)
+- EnvironmentVariables: HOME, PATH (including .asdf/shims for node/ark), ARK_WORKSPACE_ROOT
+- StandardOutPath/StandardErrorPath: `scripts/health/logs/nightly-health-launchd{,-error}.log`
+
+### Arm / disarm
+
+```bash
+# Arm (deploy + load):
+chezmoi apply ~/Library/LaunchAgents/io.focused.nightly-health.plist
+launchctl load ~/Library/LaunchAgents/io.focused.nightly-health.plist
+
+# Disarm (stop schedule, keep file):
+launchctl unload ~/Library/LaunchAgents/io.focused.nightly-health.plist
+
+# Verify:
+launchctl list | grep nightly-health
+```
+
+Companion wrapper: `~/focused/scripts/health/nightly-health.sh` (runs run.sh first, then optional ark narration step, with overall deadline watchdog). Narration disabled pending task-0.4 spike.
+
 ## 2026-05-01 — Fix `chezmoi apply` failing with multiple 1Password accounts on WSL
 
 ### Problem
