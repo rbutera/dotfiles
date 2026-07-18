@@ -1,5 +1,35 @@
 # chezmoi config changes log
 
+## 2026-07-18 — latios: resolve 47-file merge conflict by taking remote main wholesale
+
+### Context
+`git pull` on latios had left a merge in progress with 47 conflicted files —
+nearly every tracked file showed `AA` (added-by-both). Root cause: the repo's
+history was rewritten at some point, so latios's local `main` (418 commits) and
+remote `main` (543 commits) only shared the ancient 2022 base `d4084ef "add
+.tmux"`, making git treat every file as independently added on both sides.
+
+### Diagnosis (patch-equivalence, not eyeballing 47 diffs)
+- `git rev-list --cherry-pick` showed the two histories are mostly rebased
+  duplicates of each other. Local-unique commits since 2026-04: **zero** —
+  GELATO_API_KEY, narrate TTS switch, impulse kinto jobs etc. all exist on
+  remote under different hashes.
+- Only 3 genuinely local-unique non-merge commits, all from **2022-07** ("fix
+  github auth token", "fix hosts", "add fig and .ssh") — long superseded.
+- Local newest commit 2026-06-01 vs remote 2026-07-17 → latios was a strict
+  stale subset; remote is canonical (kinto/nimbus work).
+
+### Resolution
+- `git read-tree -u --reset MERGE_HEAD` — set index + worktree to the remote
+  tree verbatim, keeping the merge state, then committed (f95d443). Local
+  history is preserved as the merge's first parent; nothing force-pushed, no
+  `reset --hard`.
+- Pushed to origin so future pulls on any machine are ordinary merges.
+
+### Follow-up
+- `chezmoi diff`/`apply` on latios after this — the source jumped ~6 weeks, so
+  deployed configs will drift until applied (needs a 1Password session).
+
 ## 2026-07-14 — chezmoi-sync: kill recurring claude.json / npmrc drift + merge ark.json
 
 ### Context
