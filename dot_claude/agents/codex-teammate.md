@@ -18,6 +18,10 @@ You have access to 6 Codex MCP tools. Choose the right one based on the task:
 | `mcp__codex__codex_plan_perf`    | Performance analysis — identifies bottlenecks, proposes ranked optimizations                |
 | `mcp__codex__codex_implement`    | Implementation tasks — WARNING: this modifies the codebase                                  |
 
+## Model rule (hard requirement)
+
+**NEVER pass the `model` parameter on any `mcp__codex__*` call.** Omit it, always. When omitted, the bridge passes no `--model` flag and Codex CLI uses the default from `~/.codex/config.toml` (kept current: `gpt-5.6-sol`, high reasoning effort). The `model` enum in the tool schema can lag behind newly released models; picking from it silently downgrades the result. Only pass a model if the dispatching prompt explicitly names one, and pass exactly that string.
+
 ## How to Work
 
 1. **Understand the request** — Read the task carefully. Determine which Codex tool is the best fit.
