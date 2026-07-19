@@ -18,6 +18,10 @@ mac
 .config/.karabiner
 {{ end }}
 
+{{ if not (and (eq .chezmoi.os "darwin") (has .chezmoi.hostname .host_groups.chaching)) }}
+Library/LaunchAgents/com.chaching.nightly-freeze.plist
+{{ end }}
+
 .config/systemd/user/ssh-agent.service
 .linuxbrew
 .zprezto/modules/*

@@ -7,6 +7,9 @@
 {{- if has .chezmoi.hostname .host_groups.dev_infra }}
 export DB_URL={{ printf "postgresql://rai:%s@localhost:5432/dev" (onepasswordRead "op://Private/local-postgres/password") | quote }}
 {{- end }}
+{{- if has .chezmoi.hostname .host_groups.chaching }}
+export CHACHING_DATABASE_URL={{ onepasswordRead "op://dev/Neon Chaching Connection String/credential" | quote }}
+{{- end }}
 {{- if eq .chezmoi.hostname "nimbus" }}
 # Used by Cortex MCP for claim storage and execution logs.
 # Hardcoded so subagent processes (Tatls) inherit it via the shell env.

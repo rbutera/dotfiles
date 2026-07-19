@@ -8,6 +8,7 @@
   dev_infra = ["mondo"]
   work = ["latios", "kinto"]
   always_on = ["kinto"]
+  chaching = ["kinto", "latios", "nimbus"]
 
 [feature_flags]
   shared_claude_oauth = false

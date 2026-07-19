@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.chaching.nightly-freeze</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/env</string>
+		<string>chaching</string>
+		<string>stats</string>
+		<string>--no-art</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>CHACHING_NO_ART</key>
+		<string>1</string>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.vite-plus/bin:{{ .chezmoi.homeDir }}/.asdf/shims:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>23</integer>
+		<key>Minute</key>
+		<integer>50</integer>
+	</dict>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/chaching-nightly.log</string>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/chaching-nightly.log</string>
+</dict>
+</plist>
