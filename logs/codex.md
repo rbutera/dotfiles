@@ -1,6 +1,53 @@
 # Codex config changes log
 
-## 2026-07-15 — Use the signed native CUA Driver in Codex
+## 2026-07-19 — Migrate Claude→Codex leg from the bridge fork to the official OpenAI Codex plugin
+
+### Context
+The community `claude-codex-bridge` fork (deployed as the `codex` MCP server) was
+reported "saturated" under concurrent review load. Root cause: a single MCP process
+with one module-global `lastThreadId` that every concurrent tool call stomps (see
+vault `References/Codex Bridge`). Separately, the fork's `codex` MCP entry was
+hardcoded to `/Users/rai/dev/claude-codex-bridge/dist/cli.mjs` in the **shared**
+base block — a macOS path, so it was **broken on kinto/nimbus** (Linux `/home/rai`).
+
+Replacement: OpenAI's official plugin **`@openai/codex-plugin-cc`** (marketplace
+`openai-codex`, repo `openai/codex-plugin-cc`). Its runtime uses a per-repo Codex
+app-server broker with an automatic dedicated-server fallback on BUSY
+(`scripts/lib/codex.mjs`), so concurrent reviews don't collide — fixes saturation.
+Portable (npx/plugin, no absolute path). Full rollout plan + rationale:
+vault `References/Codex Bridge Migration`.
+
+### Changes (chezmoi source)
+- **`modify_dot_claude.json.tmpl`**: removed the `codex` MCP server block (the
+  Claude→Codex bridge leg). base is authoritative, so apply drops it from
+  `~/.claude.json`.
+- **`dot_claude/modify_settings.json`**: added `"codex@openai-codex": true` to the
+  managed base `enabledPlugins`, and added a managed (additive) `extraKnownMarketplaces`
+  merge registering the `openai-codex` marketplace so all machines auto-clone it on
+  launch (previously only latios knew it — `extraKnownMarketplaces` was unmanaged).
+- **`dot_claude/skills/wave/SKILL.md`**: rewired review-gate step 4c — Agent 2 (Codex)
+  now dispatches a `general-purpose` agent that runs
+  `node "$HOME/.claude/plugins/marketplaces/openai-codex/plugins/codex/scripts/codex-companion.mjs" review --base <base> --scope branch --wait`
+  and returns Codex's output verbatim, instead of the `codex-teammate` agent +
+  `mcp__codex__*` tools. `disable-model-invocation` on `/codex:review` only gates the
+  slash command, not this node runtime path — so no plugin fork was needed.
+- **Retired** (source deleted + added to new `.chezmoiremove` so apply removes the
+  deployed targets fleet-wide): `dot_claude/skills/codex/` and
+  `dot_claude/agents/codex-teammate.md` — both depended on the now-removed `codex`
+  MCP tools.
+
+### Kept (deliberately)
+- **Reverse leg unchanged**: `dot_codex/modify_private_config.toml`
+  `[mcp_servers.claude]` = `claude-codex-bridge@0.3.1 serve claude` stays. The plugin
+  is Claude→Codex only; the bridge still provides Codex→Claude.
+
+### Verification
+- Rendered both modify scripts via `chezmoi cat`: `~/.claude.json` valid JSON, `codex`
+  MCP server gone, 8 servers remain; `settings.json` valid, `codex@openai-codex`
+  enabled, `openai-codex` marketplace known, 14 other plugins preserved.
+- Per-machine `chezmoi apply` + `/reload-plugins` + `/codex:setup` done during rollout
+  (kinto first, then nimbus/latios). Focused-repo review skills (`/reviewed-implementation`,
+  `/cleanup-review`) rewired separately in the `focused` repo (not chezmoi-managed).
 
 Installed the official native CUA Driver app and replaced the cache-backed
 `uvx cua-driver mcp` registration with the canonical absolute command emitted by

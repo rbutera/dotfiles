@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins, extraKnownMarketplaces (additive)
 # Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
 set -euo pipefail
 
@@ -30,7 +30,20 @@ read -r -d '' base << 'BASE' || true
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "serena@claude-plugins-official": false
+    "serena@claude-plugins-official": false,
+    "codex@openai-codex": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    }
+  },
+  "orcaHook": {
+    "matcher": "*",
+    "hooks": [{"type": "command", "command": "if [ -x '/Users/rai/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/rai/.orca/agent-hooks/claude-hook.sh'; fi"}]
   }
 }
 BASE
@@ -41,7 +54,9 @@ BASE
 notif_channel="auto"
 case "$(uname -s)" in Darwin|Linux) notif_channel="ghostty" ;; esac
 
-# rtk hook on macOS only
+# rtk hook + Orca agent-hook on macOS only. Both are managed so `chezmoi apply`
+# preserves them (the PreToolUse array is set wholesale below); the Orca hook was
+# previously live-in-deployed-config only and would otherwise be dropped on apply.
 is_mac=false
 [ "$(uname -s)" = "Darwin" ] && is_mac=true
 
@@ -63,7 +78,8 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
         .["discord@claude-plugins-official"],
         .["context7@claude-plugins-official"],
         .["chrome-devtools-mcp@claude-plugins-official"])) |
+  .extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) * $base.extraKnownMarketplaces) |
   if $mac then
-    .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}]
+    .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}, $base.orcaHook]
   else . end
 '
