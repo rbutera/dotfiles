@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.onorca.serve</string>
+	<!--
+	  Headless Orca runtime server (Remote Orca Server), started at login so this
+	  host is always reachable as an Orca execution target from latios/lancelot/phone.
+	  Runs under a login+interactive zsh (-l -i) so it inherits Rai's FULL shell env
+	  (PATH incl. ~/.local/bin where the orca CLI symlink lives, asdf/mise shims,
+	  homebrew shellenv, etc.). Pairing address is the machine's Tailscale MagicDNS
+	  name; .local is trimmed defensively because nimbus sometimes reports nimbus.local.
+	-->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-l</string>
+		<string>-i</string>
+		<string>-c</string>
+		<string>exec orca serve --port 6768 --pairing-address {{ .chezmoi.hostname | trimSuffix ".local" }}.piranha-wyvern.ts.net</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/orca-serve.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/orca-serve.log</string>
+</dict>
+</plist>

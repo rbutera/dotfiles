@@ -2,6 +2,15 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-07-20 -- Added dev.onorca.serve (Orca Remote Server, agentic hosts)
+
+- New LaunchAgent `dev.onorca.serve.plist` runs `orca serve` (headless Remote Orca Server) at login + KeepAlive, so kinto/nimbus are always reachable as Orca execution targets from latios/lancelot/phone.
+- Runs under `zsh -l -i -c "exec orca serve ..."` so it inherits Rai's FULL login+interactive shell env (PATH incl. `~/.local/bin` for the orca CLI symlink, asdf/mise shims, brew shellenv). If `-i` ever misbehaves in the launchd (no-tty) context, drop it to `-l -c` and source the needed bits explicitly.
+- Pairing address = `{{"{{ .chezmoi.hostname | trimSuffix \".local\" }}"}}.piranha-wyvern.ts.net` (Tailscale MagicDNS). `.local` is trimmed defensively because nimbus sometimes reports `nimbus.local`. Fixed port 6768.
+- New host group `agentic = ["kinto", "nimbus"]` in `.chezmoidata.toml`; gated in `.chezmoiignore` so the plist deploys only on agentic darwin hosts (same pattern as the chaching/always_on agents).
+- Orca itself is now installed/updated via the auto-bumping cask `brew install --cask stablyai/orca/orca` (adopt existing app on kinto); future updates via `brew upgrade --cask orca`. The unrelated homebrew-core `orca` (plotly image export) is removed where present to free the name.
+- Arm/deploy: `chezmoi apply ~/Library/LaunchAgents/dev.onorca.serve.plist && launchctl load ~/Library/LaunchAgents/dev.onorca.serve.plist` (no 1Password: the plist has no secret templates).
+
 ## 2026-06-03 -- Removed both io.focused LaunchAgents (migrated to Impulse cron)
 
 - Removed `io.focused.standup-brief.plist` and `io.focused.nightly-health.plist` from chezmoi source (`Library/LaunchAgents/` dir is now empty and removed), plus their `always_on` block in `.chezmoiignore`, plus the deployed copies in `~/Library/LaunchAgents/`.

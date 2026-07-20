@@ -9,6 +9,8 @@
   work = ["latios", "kinto"]
   always_on = ["kinto"]
   chaching = ["kinto", "latios", "nimbus"]
+  # Machines that run long-lived coding-agent runtimes (Orca serve, etc.)
+  agentic = ["kinto", "nimbus"]
 
 [feature_flags]
   shared_claude_oauth = false
