@@ -2,7 +2,13 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
-## 2026-07-20 -- Added dev.onorca.serve (Orca Remote Server, agentic hosts)
+## 2026-07-20 (later) -- REMOVED dev.onorca.serve (launchd headless serve is a dead end)
+
+- Killed + removed the `dev.onorca.serve.plist` LaunchAgent (booted out, deleted deployed copy, `git rm`'d the template, removed the `.chezmoiignore` gate). Per Rai: he'll start the Orca remote session from the **desktop app** instead.
+- Why it never worked (asar-extracted from `out/main/index.js`): (1) `orca serve` is subject to the Electron **single-instance lock** and is NOT exempt (`ORCA_BYPASS_SINGLE_INSTANCE_LOCK` requires `!isServeMode`), so it silently exits whenever the desktop Orca app holds the lock; (2) even solo, a LaunchAgent's session isn't a rich enough "persistent terminal provider" for `createServeDesktopActivationGate`, so it stays stuck `initializing` and never binds. Headless serve wants a real logged-in terminal, not a plain LaunchAgent.
+- The **`agentic = ["kinto","nimbus"]` host group** in `.chezmoidata.toml` was LEFT in place (harmless, reusable for future agent-runtime services). Remove it if it stays unused.
+
+## 2026-07-20 -- Added dev.onorca.serve (Orca Remote Server, agentic hosts) [SUPERSEDED same day, see above]
 
 - New LaunchAgent `dev.onorca.serve.plist` runs `orca serve` (headless Remote Orca Server) at login + KeepAlive, so kinto/nimbus are always reachable as Orca execution targets from latios/lancelot/phone.
 - Runs under `zsh -l -i -c "exec orca serve ..."` so it inherits Rai's FULL login+interactive shell env (PATH incl. `~/.local/bin` for the orca CLI symlink, asdf/mise shims, brew shellenv). If `-i` ever misbehaves in the launchd (no-tty) context, drop it to `-l -c` and source the needed bits explicitly.
