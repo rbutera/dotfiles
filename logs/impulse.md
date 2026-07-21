@@ -1,5 +1,14 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-07-21 -- Give Majora canary and repair runs enough scheduler headroom
+
+**Motivation:** The redesigned OpenAI-only Majora engine completed its accepted live canary in five minutes, while a bounded timeout/retry can legitimately exceed the previous 600-second Impulse job limit. A scheduler kill would strand the vault lock until stale-lock recovery and turn a valid repair pass into an operational failure.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl`:**
+- Raised only the `majora-research-engine` job timeout from 600 to 900 seconds.
+- Kept `maxConcurrent: 1` and `dedupe: skip-if-running`; the 15-minute ceiling remains below the engine's 20-minute stale-lock TTL.
+- Applied the single plain-config target and re-synced the existing Hatchet cron; no other Impulse job changed.
+
 ## 2026-06-20 -- Remove session-recap-tick job (recap retired)
 
 **Motivation:** The `/recap` HTTP endpoint and `recap-cli.ts` producer were removed from discord-text-plugin (chore/retire-recap). The prose-mirror accumulator is now the sole transcript-to-Discord path. The `session-recap-tick` Impulse cron job was the producer for the now-deleted endpoint.
