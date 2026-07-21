@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>dev.onorca.serve</string>
+	<!--
+	  Headless Orca runtime server (Remote Orca Server), started at login so this
+	  host is always reachable as an Orca execution target from latios/lancelot/phone.
+	  NIMBUS ONLY (headless); kinto runs the headed desktop app instead. Gated in
+	  .chezmoiignore on hostname == nimbus.
+
+	  Direct-exec (no login/interactive shell): a login zsh fires powerlevel10k
+	  instant prompt in the no-tty launchd context and mangles the command, so we
+	  exec the orca binary with an explicit PATH (same pattern as the working
+	  com.chaching.nightly-freeze agent). orca is a self-contained Electron app; it
+	  needs HOME + a PATH good enough for the agent CLIs (claude/codex/git) it launches.
+
+	  PRECONDITIONS for headless serve to actually bind (learned the hard way, 2026-07-20/21):
+	    1. NO desktop Orca instance running (single-instance lock; serve is not exempt).
+	    2. Orca de-quarantined: `xattr -dr com.apple.quarantine /Applications/Orca.app`
+	       else the first-launch "downloaded from the internet" GUI prompt silently
+	       blocks the headless spawn.
+	    3. Loaded in the Aqua/GUI domain: `launchctl bootstrap gui/$(id -u) <plist>`
+	       (real login does this via RunAtLoad).
+
+	  Pairing address = the machine's Tailscale MagicDNS name; .local trimmed
+	  defensively (nimbus sometimes reports nimbus.local).
+	-->
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew{{ else }}/usr/local{{ end }}/bin/orca</string>
+		<string>serve</string>
+		<string>--port</string>
+		<string>6768</string>
+		<string>--pairing-address</string>
+		<string>{{ .chezmoi.hostname | trimSuffix ".local" }}.piranha-wyvern.ts.net</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.asdf/shims:{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin:/opt/homebrew/sbin{{ else }}/usr/local/bin:/usr/local/sbin{{ end }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/orca-serve.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/orca-serve.log</string>
+</dict>
+</plist>

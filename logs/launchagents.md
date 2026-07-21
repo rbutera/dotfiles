@@ -2,6 +2,12 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-07-21 -- Re-added dev.onorca.serve, NIMBUS ONLY (headless); kinto is headed
+
+- Plan (Rai): **headless Orca serve on nimbus, headed desktop Orca on kinto.** So `dev.onorca.serve.plist` is back, gated in `.chezmoiignore` on `hostname == nimbus` only (kinto uses the desktop app, no launchd).
+- The two blockers that sank it on kinto are now understood + preconditioned in the plist header: (1) single-instance lock (serve needs NO desktop Orca running), (2) macOS quarantine (`xattr -dr com.apple.quarantine /Applications/Orca.app`, else the first-launch GUI prompt silently blocks the headless spawn). Plus load in the Aqua domain (`launchctl bootstrap gui/$(id -u)`).
+- Direct-exec + explicit PATH (no login zsh -> avoids the p10k instant-prompt mangling). Arch-aware brew path.
+
 ## 2026-07-20 (later) -- REMOVED dev.onorca.serve (launchd headless serve is a dead end)
 
 - Killed + removed the `dev.onorca.serve.plist` LaunchAgent (booted out, deleted deployed copy, `git rm`'d the template, removed the `.chezmoiignore` gate). Per Rai: he'll start the Orca remote session from the **desktop app** instead.
