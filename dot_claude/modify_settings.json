@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins, extraKnownMarketplaces (additive)
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins
 # Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
 set -euo pipefail
 
@@ -30,16 +30,7 @@ read -r -d '' base << 'BASE' || true
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "serena@claude-plugins-official": false,
-    "codex@openai-codex": true
-  },
-  "extraKnownMarketplaces": {
-    "openai-codex": {
-      "source": {
-        "source": "github",
-        "repo": "openai/codex-plugin-cc"
-      }
-    }
+    "serena@claude-plugins-official": false
   },
   "orcaHook": {
     "matcher": "*",
@@ -77,8 +68,9 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
         .["slack@claude-plugins-official"],
         .["discord@claude-plugins-official"],
         .["context7@claude-plugins-official"],
-        .["chrome-devtools-mcp@claude-plugins-official"])) |
-  .extraKnownMarketplaces = ((.extraKnownMarketplaces // {}) * $base.extraKnownMarketplaces) |
+        .["chrome-devtools-mcp@claude-plugins-official"],
+        .["codex@openai-codex"])) |
+  del(.extraKnownMarketplaces["openai-codex"]) |
   if $mac then
     .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}, $base.orcaHook]
   else . end

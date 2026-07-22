@@ -27,6 +27,10 @@ read -r -d '' base_mcps << 'MCPS' || true
     "command": "npx",
     "args": ["-y", "@oss-autopilot/mcp@latest"]
   },
+  "codex": {
+    "command": "node",
+    "args": ["{{ .chezmoi.homeDir }}/dev/claude-codex-bridge/dist/cli.mjs", "serve", "codex"]
+  },
   "terminal": {
     "command": "uvx",
     "args": ["terminal-mcp"]

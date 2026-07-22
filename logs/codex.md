@@ -1,3 +1,67 @@
+## 2026-07-22 — Revert the Claude→Codex leg to the bridge fork, with the fork's real defects fixed
+
+### Why revert
+The official plugin (`@openai/codex-plugin-cc`) hardcodes the Codex sandbox in two
+places, neither configurable:
+
+- `task --write` → `workspace-write`. A git worktree's `.git` is a *file* pointing at
+  `<main-repo>/.git/worktrees/<name>`, outside the workspace, so Codex cannot commit.
+  Worse, MSBuild workers and ASP.NET `WebApplicationFactory` test hosts misbehave under
+  it, so Codex **silently excludes the tests it cannot run and reports green on the
+  remainder**. On FUS-192 wave 1 it self-reported "1,020 passed"; the real unfiltered
+  suite was 23 failed / 1161 passed / 1188 total, all 23 in the excluded hosted tests.
+- `review` / `adversarial-review` → `read-only`. The reviewer cannot build or test to
+  verify its own claims, and stalled for 7 and 21 minutes trying.
+
+### What was NOT true in the 2026-07-19 entry below
+That entry claims the fork's hardcoded `/Users/rai/...` path was "broken on kinto/nimbus
+(Linux, `/home/rai`)". **All three machines are macOS with `/Users/rai`** (verified
+2026-07-22 on kinto, nimbus and latios). The portability half of the migration rationale
+never applied. The path is now templated as `{{ .chezmoi.homeDir }}` anyway, so the
+concern is moot rather than merely wrong.
+
+### The saturation concern was real, and is now fixed at source
+Reverting alone would have re-adopted the defect the migration was for, so the fork was
+fixed first (`rbutera/claude-codex-bridge`, commit `c90a698`):
+
+1. **Shared thread pointer.** A module-global `lastThreadId` was read/written by every
+   concurrent call in the single MCP process, so parallel reviewers stomped each other.
+   Continuity is now an explicit opt-in `threadKey`; without one, every call gets its own
+   thread. This is the actual "saturation" root cause.
+2. **Silent sandbox downgrade.** `codex exec resume` accepts no `--sandbox` flag. The old
+   code resumed whenever the global was set, so `danger-full-access` silently inherited
+   the resumed thread's sandbox — only the *first* call per process lifetime ever honoured
+   its argument. A thread is now resumed only when its recorded sandbox matches.
+3. **Read-only reviewers.** The four analysis tools hardcoded `sandbox: "read-only"` —
+   the *same* defect as the plugin's review path. Sandbox is now a parameter on all four,
+   still defaulting to read-only.
+
+Plus a FIFO-fair bounded semaphore (`CODEX_BRIDGE_MAX_CONCURRENT`, default 4) so N
+reviewers cannot spawn N unmanaged subprocesses. Every new test was mutation-checked.
+
+### Changes (chezmoi source)
+- **`modify_dot_claude.json.tmpl`**: `codex` MCP server restored, path templated with
+  `{{ .chezmoi.homeDir }}` instead of the old hardcoded absolute path.
+- **`dot_claude/modify_settings.json`**: `codex@openai-codex` removed from managed base
+  **and added to the `del(...)` list** — base-removal alone is not enough, since
+  `enabledPlugins` merges with `*` and would preserve the deployed `true`. Likewise the
+  `extraKnownMarketplaces` merge is replaced by an explicit
+  `del(.extraKnownMarketplaces["openai-codex"])`, since that merge was purely additive.
+  The **`orcaHook` fold is deliberately KEPT** — it was an unrelated real fix that merely
+  rode along in the same migration commit.
+- **Restored**: `dot_claude/skills/codex/` and `dot_claude/agents/codex-teammate.md`,
+  recovered from `c823e3f^` rather than retyped.
+- **Deleted `.chezmoiremove`**: it existed solely to retire those two targets. Leaving it
+  would have silently re-deleted them on every apply.
+- **`dot_claude/skills/wave/SKILL.md`**: step 4c back to the `codex-teammate` agent, and
+  the implementer block back to `mcp__codex__codex_implement` with the worktree
+  `danger-full-access` rule. Documents the new `sandbox` and `threadKey` arguments.
+  The **test-count rule is kept** — it is the durable lesson, independent of which bridge wins.
+
+### Kept
+Reverse leg (Codex→Claude) unchanged: `[mcp_servers.claude]` = `claude-codex-bridge@0.3.1`
+via npx. Note this is the **npm package, not the fork**, so it does not carry the fork's fixes.
+
 # Codex config changes log
 
 ## 2026-07-19 — Migrate Claude→Codex leg from the bridge fork to the official OpenAI Codex plugin

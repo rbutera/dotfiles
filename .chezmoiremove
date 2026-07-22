@@ -1,6 +1,0 @@
-# Targets to remove from deployed machines on `chezmoi apply`.
-# 2026-07-19: retired the community claude-codex-bridge integration in favour of
-# the official OpenAI Codex plugin (@openai/codex-plugin-cc). See
-# vault References/Codex Bridge Migration + logs/codex-plugin-migration.md.
-.claude/skills/codex
-.claude/agents/codex-teammate.md
