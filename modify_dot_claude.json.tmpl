@@ -29,7 +29,10 @@ read -r -d '' base_mcps << 'MCPS' || true
   },
   "codex": {
     "command": "node",
-    "args": ["{{ .chezmoi.homeDir }}/dev/claude-codex-bridge/dist/cli.mjs", "serve", "codex"]
+    "args": ["{{ .chezmoi.homeDir }}/dev/claude-codex-bridge/dist/cli.mjs", "serve", "codex"],
+    "env": {
+      "CODEX_BRIDGE_BACKEND": "app-server"
+    }
   },
   "terminal": {
     "command": "uvx",
