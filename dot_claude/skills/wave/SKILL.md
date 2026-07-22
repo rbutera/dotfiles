@@ -113,6 +113,25 @@ If using OpenSpec with a schema that has an apply instruction (like fusion-workf
 - **Sonnet**: straightforward tasks (CRUD, test writing, component creation, config changes)
 - **Opus**: complex domain logic, refactoring existing code, architectural decisions, multi-file coordination
 
+**Codex as the implementation agent — use the wrapper, never `codex-companion task --write` directly.**
+
+`codex-companion.mjs task --write` hardcodes the Codex sandbox to `workspace-write`, which makes only the cwd writable. In a **git worktree** the repo metadata lives in the parent repo at `<main-repo>/.git/worktrees/<name>`, outside that boundary. Two consequences, the second far worse than the first:
+
+1. `git commit` fails outright (cannot create `index.lock`).
+2. MSBuild parallel workers and ASP.NET `WebApplicationFactory` test hosts misbehave, so the agent degrades to `-m:1 /nodeReuse:false` and **silently excludes the hosted tests it cannot run** — then reports green off the filtered subset.
+
+Dispatch Codex implementers through the wrapper instead:
+
+```bash
+node /Users/rai/focused/scripts/codex-run.mjs \
+  --cwd <worktree> --sandbox danger-full-access --effort high \
+  --log <logfile> --prompt-file <prompt.md>
+```
+
+Omit `--model` (the bridge ships a stale model enum; omitting it lets `~/.codex/config.toml` win). Tail `--log` to answer "is it stuck?" — the timestamps advancing is the liveness proof. Measured on FUS-192, 2026-07-22: the same backend suite took **31 minutes sandboxed and incomplete** vs **17 seconds** unsandboxed.
+
+Do not try to fix this via `[sandbox_workspace_write] writable_roots` in `~/.codex/config.toml`; that file is chezmoi-managed and the modify script strips `sandbox`, `sandbox_mode`, and `sandbox_workspace_write` on every apply.
+
 All independent tasks in a wave dispatch in a **single message** (parallel), and **ALWAYS with `run_in_background: true`** — never block the main session waiting on an agent. After dispatching, await each agent's completion notification, then proceed. Running in the background keeps the orchestrator responsive (e.g. to the user) while waves execute.
 
 ### 4b. Handle implementation results
@@ -224,3 +243,4 @@ All 4 tasks implemented across 3 waves. 1 review fix applied.
 - Implementation agents on the same branch can share a worktree. Different branches need separate worktrees.
 - **Run the integration/e2e gate, not just unit tests.** Unit-green hides two failure modes that only surface when the real app runs: (a) a *removed-API* call in an existing test that wasn't updated, and (b) tests still asserting the *old* behaviour a refactor replaced. A wave that changes behaviour MUST run the project's e2e/integration suite as a gate and rewrite any test that encodes the replaced behaviour — otherwise the suite passes while the observable thing is broken. (See "Verify the Observable, Not the Proxy".)
 - **A refactor/removal wave isn't done when the new code compiles — it's done when the tests of the OLD behaviour are rewritten or deleted.** Grep the test tree for references to the removed API/model before declaring a wave green.
+- **An implementation agent's "gates pass" is a CLAIM, not evidence. Re-run the gates yourself before the review gate.** An agent that cannot run part of the suite will filter it out and report green on the remainder — a check that cannot fail. Assert the **test count**, not just the exit status: pin the expected total (`1188 tests`) and treat a materially lower number as a failed gate, not a pass. FUS-192 wave 1 self-reported "1,020 passed"; the orchestrator's unfiltered run was 23 failed / 1161 passed / 1188 total, and every one of the 23 lived in the hosted tests the agent had excluded. Put the expected count in the implementation prompt so the agent can self-catch, and verify it anyway.
