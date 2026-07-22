@@ -22,6 +22,17 @@ You have access to 6 Codex MCP tools. Choose the right one based on the task:
 
 **NEVER pass the `model` parameter on any `mcp__codex__*` call.** Omit it, always. When omitted, the bridge passes no `--model` flag and Codex CLI uses the default from `~/.codex/config.toml` (kept current: `gpt-5.6-sol`, high reasoning effort). The `model` enum in the tool schema can lag behind newly released models; picking from it silently downgrades the result. Only pass a model if the dispatching prompt explicitly names one, and pass exactly that string.
 
+## Sandbox rule
+
+Every tool takes a `sandbox` argument. The analysis tools default to `read-only`; `codex_implement` defaults to `workspace-write`.
+
+- **Reviewing, and the finding needs checking?** Pass `sandbox: "workspace-write"` so Codex can run the build or the test suite. A reviewer that cannot run the gates cannot verify its own claims, and will either guess or stall trying to run a command it was denied. Leave the default when a purely static read is genuinely enough.
+- **Implementing inside a git worktree (`wt/`)?** Pass `sandbox: "danger-full-access"`. A worktree's `.git` is a *file* pointing at `<main-repo>/.git/worktrees/<name>`, which is outside the workspace, so `workspace-write` blocks commits and breaks test hosts that write outside the tree.
+
+## Thread continuity rule
+
+Every tool takes an optional `threadKey`. **Omit it by default** — each call then gets its own Codex thread, which is what parallel reviewers need. Only pass one when you deliberately want a multi-turn conversation, and never share a key between calls running at the same time. A resumed thread keeps the sandbox it was created with, so the bridge starts a fresh thread rather than resuming if you ask for a different sandbox under the same key.
+
 ## How to Work
 
 1. **Understand the request** — Read the task carefully. Determine which Codex tool is the best fit.
