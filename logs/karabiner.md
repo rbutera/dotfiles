@@ -1,5 +1,25 @@
 # karabiner config changes log
 
+## 2026-07-22 — Remove built-in F/J home-row Shift entirely
+
+### Problem
+
+After the threshold retune (below), Rai decided the home-row-mod behaviour on
+F/J still "doesn't work as I would expect" and preferred plain keys over any
+tap/hold split. Home-row mods are a taste thing; this one wasn't worth the
+cognitive overhead for him.
+
+### Changes
+
+Removed the entire "Built-in keyboard F/J -> Shift on hold, F/J on tap" rule
+(both F and J manipulators) from
+`dot_config/private_karabiner/private_karabiner.json`. F and J are now ordinary
+keys on every keyboard, including the built-in MacBook keyboard. This reverses
+both the 2026-06-05 introduction and the 2026-07-22 retune.
+
+Applied live via `chezmoi apply` (Karabiner auto-reloads; no 1Password secrets
+in this file).
+
 ## 2026-07-22 — Retune built-in F/J home-row Shift so fast typing stops dropping the letters
 
 ### Problem
