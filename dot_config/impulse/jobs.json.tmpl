@@ -1064,6 +1064,36 @@
     }
   },
   {
+    "id": "codex-quota-sensor",
+    "name": "Codex Weekly Quota Sensor (session telemetry, every 5m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/codex-quota-sensor/dist/cli.js"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "quota", "codex"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/codex-quota-sensor/dist/cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
     "id": "wellness-check",
     "name": "Navi: Tier 1 Wellness Check (flag-gated, default OFF)",
     "trigger": {
