@@ -1,5 +1,43 @@
 # karabiner config changes log
 
+## 2026-07-22 — Retune built-in F/J home-row Shift so fast typing stops dropping the letters
+
+### Problem
+
+Rai (fast typist) reported that `f`/`j` frequently get *omitted* when typing
+quickly. The built-in-keyboard rule "Built-in keyboard F/J -> Shift on hold,
+F/J on tap" used `to_if_held_down` with a `120ms` hold threshold. A fast typist
+naturally dwells on a home-row key slightly longer than 120ms while the next
+finger is already moving, so Shift engaged and swallowed the tap — once
+`to_if_held_down` fires, `to_if_alone` is suppressed, so no letter is emitted
+at all. That's the perceived "dropped key".
+
+### Changes
+
+Both the F and J manipulators in
+`dot_config/private_karabiner/private_karabiner.json`:
+
+- `basic.to_if_held_down_threshold_milliseconds`: `120` → `200` — must hold
+  clearly (~200ms) before Shift engages, so ordinary fast taps always register
+  as the letter.
+- `basic.to_if_alone_timeout_milliseconds`: `170` → `220` — lifted above the
+  hold threshold so the tap window is never the limiting factor.
+
+Supersedes the initial `120ms/170ms` timing chosen on 2026-06-05.
+
+### Tuning notes
+
+- If letters still slip through, push the hold threshold toward `220–250`.
+- If intentional Shift feels laggy, ease it back toward `180`.
+- Alternative mechanism not taken: lazy modifier
+  (`to: [{key_code: left_shift, lazy: true}]` + `to_if_alone`) registers taps
+  even more aggressively but trades in the opposite failure mode — fast rolls
+  like "fo" can come out capitalized. Rejected because the complaint was dropped
+  keys, not stray capitals.
+
+Applied live via `chezmoi apply` (Karabiner auto-reloads on file change; no
+1Password secrets in this file).
+
 ## 2026-06-25 — Dygma Defy F20 fn key and raw F16/F17/F21
 
 ### Problem
