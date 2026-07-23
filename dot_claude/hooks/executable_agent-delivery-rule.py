@@ -44,6 +44,26 @@ does not touch permissions.
 
 FAIL-OPEN, ALWAYS. Emitting nothing and exiting 0 leaves the dispatch untouched.
 A broken hook here must never be able to block agent dispatch.
+
+ADMISSION TEST FOR ANYTHING YOU WANT TO ADD TO THIS PAYLOAD
+-----------------------------------------------------------
+Inject only what is true for EVERY background agent regardless of what it was
+asked to do. The delivery rule qualifies because it is context-free: "your last
+action must be a SendMessage" is correct for a reviewer, a researcher, an
+implementer and a one-line probe alike.
+
+Anything whose correctness depends on the task belongs in the dispatch prompt,
+not here. Worked example, decided 2026-07-23: "announce when you START" was
+proposed and rejected. It only pays when the agent owns a mutable resource the
+dispatcher might touch, and this hook cannot know that, so injecting it
+unconditionally would make it wrong most of the times it fires. A rule that is
+usually wrong gets ignored on the occasions it is right, which is worse than not
+having it.
+
+That is the real risk here: a payload that accretes becomes a payload agents
+skim past, which would silently un-fix the exact bug this hook fixes, and would
+do it invisibly.
+
 """
 import json
 import sys
