@@ -11,8 +11,23 @@
 # See https://aider.chat/docs/llms.html for details.
 
 ## OpenRouter
+{{- $useOpenRouter := or .feature_flags.openrouter_api_key (has .chezmoi.hostname .host_groups.openrouter) }}
+{{- if $useOpenRouter }}
 
 OPENROUTER_API_KEY={{ onepasswordRead "op://Private/openrouter_api/credential" }}
+{{- else }}
+
+# Intentionally NO OPENROUTER_API_KEY here (opt-in, default off since 2026-07-23).
+# Agent CLIs that dotenv-load ~/.env — oh-my-pi (`omp`), aider, and friends — treat a
+# present OPENROUTER_API_KEY as "use OpenRouter", which silently hijacks provider and
+# model selection away from the subscription-backed defaults.
+#
+# To turn it back on, edit ~/.local/share/chezmoi/.chezmoidata.toml:
+#   [feature_flags] openrouter_api_key = true   # whole fleet
+#   [host_groups]   openrouter = ["nimbus"]     # just this machine
+# then: chezmoi apply ~/.env
+#OPENROUTER_API_KEY=
+{{- end }}
 
 
 ## OpenAI

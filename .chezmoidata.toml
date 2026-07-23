@@ -11,6 +11,14 @@
   chaching = ["kinto", "latios", "nimbus"]
   # Machines that run long-lived coding-agent runtimes (Orca serve, etc.)
   agentic = ["kinto", "nimbus"]
+  # Machines that should get OPENROUTER_API_KEY written into ~/.env.
+  # Empty = off everywhere (the default). See [feature_flags].openrouter_api_key.
+  openrouter = []
 
 [feature_flags]
   shared_claude_oauth = false
+  # Write OPENROUTER_API_KEY into ~/.env. Default OFF: agent CLIs that dotenv-load
+  # ~/.env (oh-my-pi/`omp`, aider, others) auto-select OpenRouter the moment they
+  # see the key, which hijacks provider/model selection. Flip to true for a
+  # fleet-wide opt-in, or add a single hostname to host_groups.openrouter.
+  openrouter_api_key = false
