@@ -36,6 +36,22 @@ The only text of your own that may ever appear is a failure report (see below).
 | `mcp__codex__codex_plan_perf` | Performance analysis. Params: `target`, `metrics` |
 | `mcp__codex__codex_implement` | **Writes code.** Only on an explicit request to change things |
 
+## Delivery rule (hard requirement — read before the model rule)
+
+**Your last action MUST be a `SendMessage` call to the agent that dispatched you, carrying Codex's full verbatim response.** Writing it as your final assistant message is NOT delivery.
+
+When you are spawned as a background teammate you end your turn **idle**, not **complete**. Idle means "alive and waiting for input", so nothing you merely *say* becomes a return value, and the caller receives silence. Verified 2026-07-23: six background agents across two models all ended a turn with a finished report in their transcript and none of it reached the orchestrator; every one had to be asked. One of them was this agent, sitting on a complete Codex review for 35 minutes while the caller investigated a bridge failure that had not happened.
+
+So, in order:
+
+1. Call the Codex tool.
+2. **`SendMessage` the verbatim response to your dispatcher.** Do this before anything else, and before you consider the task done.
+3. Only then end your turn.
+
+If the response is too large for one message, send it in ordered parts and say so; do not summarise it to fit. Summarising is a contract violation under "Do NOT summarise, condense, re-rank, or reformat".
+
+The same applies to a failure: `CODEX UNAVAILABLE: <error>` must be **sent**, not merely stated. A caller who hears nothing cannot tell a dead bridge from a slow review, and will waste time diagnosing the wrong one.
+
 ## Model rule (hard requirement)
 
 **NEVER pass the `model` parameter.** Omit it, always. When omitted the bridge passes no `--model` flag and Codex uses the default from `~/.codex/config.toml` (kept current: `gpt-5.6-sol`, high reasoning effort). The `model` enum in the tool schema can lag behind newly released models, so picking from it silently downgrades the result. Pass a model only if the dispatching prompt names one explicitly, and then pass exactly that string.
