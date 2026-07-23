@@ -34,7 +34,11 @@ read -r -d '' base << 'BASE' || true
   },
   "orcaHook": {
     "matcher": "*",
-    "hooks": [{"type": "command", "command": "if [ -x '/Users/rai/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/rai/.orca/agent-hooks/claude-hook.sh'; fi"}]
+    "hooks": [{"type": "command", "command": "if [ -f '/Users/rai/.orca/agent-hooks/claude-hook.sh' ] && [ -r '/Users/rai/.orca/agent-hooks/claude-hook.sh' ] && [ -x '/Users/rai/.orca/agent-hooks/claude-hook.sh' ]; then /bin/sh '/Users/rai/.orca/agent-hooks/claude-hook.sh'; else cat >/dev/null 2>&1 || :; fi", "timeout": 10}]
+  },
+  "agentDeliveryHook": {
+    "matcher": "Agent",
+    "hooks": [{"type": "command", "command": "python3 \"$HOME/.claude/hooks/agent-delivery-rule.py\""}]
   }
 }
 BASE
@@ -51,7 +55,15 @@ case "$(uname -s)" in Darwin|Linux) notif_channel="ghostty" ;; esac
 is_mac=false
 [ "$(uname -s)" = "Darwin" ] && is_mac=true
 
-echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjson mac "$is_mac" '
+# agent-delivery-rule hook: appends the SendMessage delivery rule to every
+# BACKGROUND Agent dispatch, so no prompt author has to remember it. See the
+# docstring in dot_claude/hooks/executable_agent-delivery-rule.py for why.
+# POSIX-only because it shells out to python3 with a $HOME path; Windows keeps
+# its existing (empty) PreToolUse config rather than getting a broken command.
+is_posix=false
+case "$(uname -s)" in Darwin|Linux) is_posix=true ;; esac
+
+echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjson mac "$is_mac" --argjson posix "$is_posix" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
   .teammateMode = $base.teammateMode |
@@ -71,7 +83,9 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
         .["chrome-devtools-mcp@claude-plugins-official"],
         .["codex@openai-codex"])) |
   del(.extraKnownMarketplaces["openai-codex"]) |
-  if $mac then
-    .hooks.PreToolUse = [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}, $base.orcaHook]
+  if ($mac or $posix) then
+    .hooks.PreToolUse =
+      (if $mac then [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}, $base.orcaHook] else [] end)
+      + (if $posix then [$base.agentDeliveryHook] else [] end)
   else . end
 '
