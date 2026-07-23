@@ -75,9 +75,12 @@ BASE = {
             "url": "https://mcp.exa.ai/mcp?enableAdvancedSearch=true",
             "headers": {"x-api-key": os.environ.get("EXA_API_KEY", "")},
         },
+        # Reverse leg (Codex -> Claude). Runs the local harness-bridge build, the
+        # same codebase as the forward leg, rather than the stale upstream npm
+        # package it used to point at. harness-bridge is not published to npm.
         "claude": {
-            "command": "npx",
-            "args": ["-y", "claude-codex-bridge@0.3.1", "serve", "claude"],
+            "command": "node",
+            "args": [os.path.expanduser("~/dev/harness-bridge/dist/cli.mjs"), "serve", "claude"],
         },
         # Android device control (mobile-next/mobile-mcp) — a11y-tree-first hybrid,
         # full app lifecycle. Needs adb (Android platform-tools) + a device/emulator.
