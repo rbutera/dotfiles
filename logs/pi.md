@@ -74,6 +74,38 @@ gave its daemon only `HOME` and `PATH`, so `omp` spawned by paseo saw only
 Fixed with a `~/bin/paseo-daemon` wrapper that sources `~/.config/zsh/*.zsh` before
 exec'ing paseo — see logs/launchagents.md 2026-07-23.
 
+### Follow-up same day — also disabled `groq` and `opencode-zen`
+
+```
+omp config set disabledProviders '["amazon-bedrock","groq","opencode-zen"]'
+```
+
+- **groq** — safe to drop: `GROQ_API_KEY` is the *whisper* key
+  (`op://Private/groq whisper api key`), and omp's STT is local
+  (`stt.modelName = parakeet`, `stt.enabled = false`), so no speech path depends
+  on the groq *provider*. The env var stays exported for other consumers.
+- **opencode-zen** — Rai's call, made with the overlap in front of him. The two
+  OpenCode providers are **not** duplicates: of 34 zen models only **13** also
+  exist on go. Zen-only (20): all 7 `claude-*`, all 5 `gemini-*`, all 3
+  `gpt-5.6-*`, `grok-build-0.1`, and the free tier (`deepseek-v4-flash-free`,
+  `laguna-s-2.1-free`, `mimo-v2.5-free`, `nemotron-3-ultra-free`,
+  `north-mini-code-free`). Go-only (10): `glm-5`, `hy3`, `hy3-preview`,
+  `kimi-k3`, `mimo-v2-omni/-pro/-2.5/-2.5-pro`, `qwen3.7-max`, `qwen3.7-plus`.
+  Rai uses OpenCode **only for glm / grok / kimi / minimax**, all of which go
+  carries, and gets Claude + GPT from the `anthropic` and `openai-codex`
+  providers instead. Accepted consequence: **no Gemini models anywhere in omp**,
+  and no free-tier models.
+- Rejected alternative (kept here in case the tradeoff is revisited):
+  `modelProviderOrder = ["opencode-go","opencode-zen"]` ranks rather than hides,
+  so go would win the 13 duplicate names while zen's 20 unique ones stayed
+  visible. Rai explicitly does not want the zen-only models listed.
+- Credit fallback is unaffected either way — running out of go credits falls back
+  to zen on OpenCode's own service, which is server-side and independent of
+  omp's provider list.
+
+**End state: 73 models across 4 providers** — `anthropic (25)`,
+`openai-codex (7)`, `opencode-go (23)`, `zai (14)` — down from 611.
+
 ### Not done
 
 `~/.omp/agent/config.yml` is **not** chezmoi-managed — omp writes to it itself
