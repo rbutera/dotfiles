@@ -26,6 +26,19 @@
 	  bundled "Paseo Helper" node runtime, so it needs HOME plus a PATH good enough
 	  for the agent CLIs (claude/codex/git/node) the daemon launches.
 
+	  PATH IS THE WHOLE GAME for provider detection. Paseo resolves each provider
+	  binary with `/usr/bin/which -a <name>` against THIS PATH and nothing else
+	  (server/src/executable-resolution/executable-resolution.ts). The login-shell
+	  env capture Paseo's docs describe lives in packages/desktop and only applies
+	  when the desktop app spawns its own daemon; a launchd-started daemon gets
+	  exactly what is listed here. So every install root that owns an agent CLI has
+	  to be enumerated below or that provider silently reports "Unavailable":
+	    * ~/.asdf/shims   -> pi, bun, node
+	    * ~/.local/bin    -> claude, cursor-agent
+	    * ~/.bun/bin      -> omp (oh-my-pi, installed via `bun install -g`)
+	  Adding an install root here is the durable fix; pinning an absolute path in
+	  ~/.paseo/config.json under agents.providers.<id>.command only fixes one CLI.
+
 	  --foreground is REQUIRED: the default daemonises and detaches, which would
 	  make launchd think the job exited instantly and thrash it against KeepAlive.
 
@@ -51,7 +64,7 @@
 		<key>HOME</key>
 		<string>{{ .chezmoi.homeDir }}</string>
 		<key>PATH</key>
-		<string>{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.asdf/shims:{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin:/opt/homebrew/sbin{{ else }}/usr/local/bin:/usr/local/sbin{{ end }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<string>{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.bun/bin:{{ .chezmoi.homeDir }}/.asdf/shims:{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin:/opt/homebrew/sbin{{ else }}/usr/local/bin:/usr/local/sbin{{ end }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
 	</dict>
 	<key>RunAtLoad</key>
 	<true/>
