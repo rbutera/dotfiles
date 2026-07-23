@@ -59,7 +59,7 @@ session's earlier reads.
 ## Step 5: prove the gate was cross-model
 
 Same rule as every omp shadow: both reviewers open with an identity line,
-`[opus / claude-opus-4-8:high]` or `[codex / gpt-5.6-sol:high]`. Confirm both
+`[opus / <provider>/<model>]` or `[codex / <provider>/<model>]`. Confirm both
 lines, from two different models, before reporting a wave as passed. If
 `opus` 401s, say so and stop, the fix is `omp auth-broker login anthropic`,
 Rai's to run, not a reason to silently gate on Codex alone.

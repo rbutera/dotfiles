@@ -58,8 +58,8 @@ gate.
 
 ## Step 3: prove the two native legs were actually cross-model
 
-`opus` and `codex` open with an identity line: `[opus / claude-opus-4-8:high]`
-or `[codex / gpt-5.6-sol:high]`. Before treating Pass 1 or Pass 2 as complete,
+`opus` and `codex` open with an identity line: `[opus / <provider>/<model>]`
+or `[codex / <provider>/<model>]`. Before treating Pass 1 or Pass 2 as complete,
 confirm both lines appeared and name two different models. A gate where both
 native voices came from the same model is a check that cannot fail, report
 it as not-run, not as a pass. The rick self-review leg is never counted toward

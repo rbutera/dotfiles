@@ -54,8 +54,8 @@ canonical file specifies, `~/focused/vault/reviews/PR<N>-claude.md` (now the
 
 ## Step 3: prove the gate was actually cross-model
 
-Both agents open with an identity line: `[opus / claude-opus-4-8:high]` or
-`[codex / gpt-5.6-sol:high]`. Before advancing to stage 06, confirm you saw
+Both agents open with an identity line: `[opus / <provider>/<model>]` or
+`[codex / <provider>/<model>]`. Before advancing to stage 06, confirm you saw
 both lines naming two different models. A dual-model gate where both voices
 came from the same model is a check that cannot fail, report it as not-run,
 never as a pass.

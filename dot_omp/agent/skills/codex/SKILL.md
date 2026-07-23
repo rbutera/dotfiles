@@ -12,7 +12,7 @@ dispatched with the `task` tool.
 
 ## How to ask Codex something
 
-Dispatch `task` → agent `codex` (`openai-codex/gpt-5.6-sol:high`). Put the full
+Dispatch `task` → agent `codex` (`openai-codex/sol:high` (latest `sol` GPT)). Put the full
 brief in the task text: what you want, the relevant files/paths, and any
 convention docs it should judge against. `codex` has `bash`, so tell it to
 build/run/test rather than reason from a diff alone whenever that's possible.
@@ -42,7 +42,7 @@ raw output.
 
 ## Prove it was actually Codex
 
-`codex` opens with an identity line: `[codex / gpt-5.6-sol:high]`. Before
+`codex` opens with an identity line: `[codex / <provider>/<model>]`. Before
 reporting its answer as a genuine second opinion, confirm that line is there
 and names that model. A "second opinion" that silently came from the same
 model already answering is a check that cannot fail, report it as not run, not

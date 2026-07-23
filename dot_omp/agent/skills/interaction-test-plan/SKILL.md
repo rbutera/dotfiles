@@ -56,7 +56,7 @@ file too, not a subagent dispatch. Do them yourself, in-session, exactly as
 ## Step 3: prove the fan-out was actually cross-model
 
 Both `opus` and `codex` open with an identity line, `[opus /
-claude-opus-4-8:high]` or `[codex / gpt-5.6-sol:high]`. Before reporting the
+<provider>/<model>]` or `[codex / <provider>/<model>]`. Before reporting the
 plan as generated, spot-check that both appear across the 12 dispatches, a
 "dual-model" fan-out where every lens actually came back from one model is a
 check that cannot fail, and the entire point of running 12 agents is that the

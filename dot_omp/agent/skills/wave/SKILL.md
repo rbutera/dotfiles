@@ -34,8 +34,8 @@ Read `~/.omp/agent/review-gate.md` for the full delegation contract. In short:
 Per wave, dispatch **both** reviewers with the `task` tool, in the same turn so
 they run concurrently:
 
-- agent `opus`, Claude Opus 4.8, high reasoning
-- agent `codex`, OpenAI gpt-5.6-sol, high reasoning
+- agent `opus`, latest Claude Opus, high reasoning
+- agent `codex`, latest OpenAI sol GPT, high reasoning
 
 Give each the same brief: the wave's scope, the changed paths, the conventions
 they must judge against, and an explicit instruction to build and test rather
@@ -46,8 +46,8 @@ fail: fix and re-run the gate.
 
 ## Step 3: prove the gate was actually cross-model
 
-Both agents open with an identity line: `[opus / claude-opus-4-8:high]` or
-`[codex / gpt-5.6-sol:high]`.
+Both agents open with an identity line: `[opus / <provider>/<model>]` or
+`[codex / <provider>/<model>]`.
 
 Before reporting a wave as passed, confirm you saw both lines and that they
 name two different models. A dual-model gate where both voices came from the

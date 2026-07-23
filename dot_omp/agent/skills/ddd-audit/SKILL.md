@@ -42,8 +42,8 @@ code rather than judging from a pasted diff alone.
 
 ## Step 3: prove the audit was actually cross-model
 
-Both agents open with an identity line: `[opus / claude-opus-4-8:high]` or
-`[codex / gpt-5.6-sol:high]`. Before writing the synthesis, confirm you saw
+Both agents open with an identity line: `[opus / <provider>/<model>]` or
+`[codex / <provider>/<model>]`. Before writing the synthesis, confirm you saw
 both lines and that they name two different models, an audit where both
 "perspectives" came from one model is a check that cannot fail, and the
 canonical file's whole point is disagreement flagging between two independent

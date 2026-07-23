@@ -45,7 +45,7 @@ contract at `~/.omp/agent/review-gate.md` if any of that is unclear.
 ## Step 3: prove the fan-out was actually cross-model
 
 Both `opus` and `codex` open with an identity line: `[opus /
-claude-opus-4-8:high]` or `[codex / gpt-5.6-sol:high]`. Before compiling Stage
+<provider>/<model>]` or `[codex / <provider>/<model>]`. Before compiling Stage
 2's vault note, confirm all four completions show the right identity for their
 row. Class A or B "opus vs codex" ideation where both sides came from the same
 model is a check that cannot fail, flag it rather than compiling it as if it

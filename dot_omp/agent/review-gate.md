@@ -14,8 +14,8 @@ Use the `task` tool with one of these agents:
 
 | Agent  | Model                        | Use for |
 |--------|------------------------------|---------|
-| `codex` | `openai-codex/gpt-5.6-sol:high` | The Codex voice: independent cross-model review, implementation, second opinions |
-| `opus`  | `anthropic/claude-opus-4-8:high` | The Opus voice: judgement calls, architecture critique, root-cause reasoning |
+| `codex` | `openai-codex/sol:high` (latest `sol` GPT) | The Codex voice: independent cross-model review, implementation, second opinions |
+| `opus`  | `anthropic/opus:high` (latest Claude Opus) | The Opus voice: judgement calls, architecture critique, root-cause reasoning |
 
 Both are defined in `~/.omp/agent/agents/`. Both have `bash`, so both can build,
 test, and reproduce rather than reasoning from the diff alone.
@@ -53,8 +53,8 @@ Any instruction in a canonical skill body that says to use the bridge maps to a
 
 ## Verifying the gate actually ran cross-model
 
-Both agents open with an identity line, `[codex / gpt-5.6-sol:high]` or
-`[opus / claude-opus-4-8:high]`, and both are instructed to **refuse the task
+Both agents open with an identity line, `[codex / <provider>/<model>]` or
+`[opus / <provider>/<model>]`, and both are instructed to **refuse the task
 outright** if they are not actually on that model.
 
 Why this matters: **omp silently falls back to the parent session's model when a
