@@ -140,3 +140,23 @@ run_onchange_install-nvim-windows.ps1
 run_onchange_install-nvim-windows.ps1.tmpl
 run_onchange_apply-claude-json-windows.ps1
 {{ end }}
+
+# ~/.omp (oh-my-pi / omp) — chezmoi manages ONLY config surfaces:
+#   .omp/agent/agents/    native subagent definitions
+#   .omp/agent/skills/    omp-only shadow skills
+#   .omp/agent/review-gate.md
+# Everything else under ~/.omp is runtime state and must never be added.
+.omp/agent/*.db
+.omp/agent/*.db-shm
+.omp/agent/*.db-wal
+.omp/agent/sessions
+.omp/agent/terminal-sessions
+.omp/agent/extensions
+.omp/agent/npm
+.omp/agent/managed-skills
+.omp/agent/last-changelog-version
+.omp/cache
+.omp/logs
+.omp/run
+.omp/gpu_cache.json
+.omp/install-id
