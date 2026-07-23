@@ -106,13 +106,15 @@ omp config set disabledProviders '["amazon-bedrock","groq","opencode-zen"]'
 **End state: 73 models across 4 providers** — `anthropic (25)`,
 `openai-codex (7)`, `opencode-go (23)`, `zai (14)` — down from 611.
 
-### Not done
+### Now chezmoi-managed (same day)
 
-`~/.omp/agent/config.yml` is **not** chezmoi-managed — omp writes to it itself
-(`setupVersion`, `modelRoles`, theme…), so `disabledProviders` was set via the
-CLI on this machine only. If the Bedrock noise shows up on kinto too, either
-re-run the `omp config set` there or bring the file under a `modify_` script
-(see logs/chezmoi-modify-scripts.md) rather than a plain managed file.
+`~/.omp/agent/config.yml` is owned by omp at runtime, so it can't be a plain
+managed file. It's now handled by **`dot_omp/agent/modify_config.yml`**, a
+plain-python modify script that owns only the `disabledProviders` key and passes
+every other key through byte-for-byte — so the pruning reaches nimbus and latios
+on their next `chezmoi apply` instead of being a kinto-only hand-edit. Full
+design notes and the seven-case test matrix are in
+logs/chezmoi-modify-scripts.md (2026-07-23).
 
 ## 2026-07-13 — Install pi + oh-my-pi on nimbus to match kinto
 

@@ -1,5 +1,53 @@
 # chezmoi modify scripts changelog
 
+## 2026-07-23 — New `dot_omp/agent/modify_config.yml` (omp provider pruning, fleet-wide)
+
+### Problem
+`omp` auto-enables a provider the moment it finds a credential, and the
+credential often arrives from somewhere unintended — OpenRouter from a stray key
+in `~/.env`, AWS Bedrock from the easyJet `AWS_PROFILE`. The model picker hit
+**611 models across 7 providers**. `disabledProviders` is the only setting that
+hides a provider outright (picker, `/login`, and background discovery probes),
+but it lives in `~/.omp/agent/config.yml`, which omp owns and rewrites at
+runtime. Setting it with `omp config set` fixed kinto and left nimbus/latios
+noisy. See logs/pi.md for the provider-by-provider rationale.
+
+### Solution
+New **plain-python** modify script (no `.tmpl` — no 1Password, no host
+branching) owning exactly one key, `disabledProviders`; everything else
+(`setupVersion`, `modelRoles`, `theme`, `task`, and any key a future omp release
+adds) passes through byte-for-byte.
+
+**Text-surgical, deliberately NOT a YAML round-trip.** omp writes a dialect with
+a trailing space after every block-opening key (`disabledProviders: `) and **no
+trailing newline at EOF**. pyyaml or `yq` would reformat the whole file and leave
+chezmoi reporting permanent drift against omp's own writes — the same class as
+the jq trailing-newline drift fixed in `modify_dot_claude.json.tmpl` on
+2026-07-14. The script reproduces omp's bytes exactly instead.
+
+The key is replaced **in place** when present, so it keeps whatever position omp
+last gave it and the diff stays minimal; appended at EOF only when absent.
+
+### Verification
+Seven cases, all passing:
+1. current file → **byte-identical** output (`cmp` clean, so no drift loop)
+2. empty stdin (fresh machine) → managed block only
+3. key absent → appended, omp's keys preserved
+4. key mid-file with stale values → replaced in place, following keys preserved
+5. inline flow style (`disabledProviders: ["openrouter","groq"]`) → normalised
+6. input with a trailing newline → stripped to match omp
+7. every output parses as valid YAML (`yaml.safe_load`)
+
+End-to-end: hand-drifted the deployed file to `disabledProviders: [openrouter]`
+plus an unrelated `someNewOmpSetting: 42`; `chezmoi status` → `MM`;
+`chezmoi apply` restored the managed list **and kept `someNewOmpSetting`**.
+`chezmoi status` clean afterwards, `omp config get disabledProviders` reads it
+back correctly.
+
+### Gotcha
+The source file needs the executable bit (`chmod +x`) like every other
+`modify_` script — it is not set by `Write`/`cp`.
+
 ## 2026-07-14 — Remove chisel MCP from claude + codex (pi inherits via discovery)
 
 ### Change

@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Modify script for ~/.omp/agent/config.yml (oh-my-pi / `omp`).
+
+chezmoi owns exactly ONE key here: `disabledProviders`. Everything else in the
+file — setupVersion, modelRoles, theme, display, bash, task, commands, and any
+key a future omp release adds — is written by omp itself at runtime and is
+passed through byte-for-byte untouched.
+
+WHY: omp auto-enables a provider the moment it finds a credential for it, and
+that credential can arrive from somewhere you didn't intend. On 2026-07-23 the
+model picker held 611 models across 7 providers; 507 of them were OpenRouter
+(377, from a stray key in ~/.env) and AWS Bedrock (130, from the easyJet
+AWS_PROFILE that work needs). `disabledProviders` is the only knob that hides a
+provider outright — from the picker, from /login, and from background discovery
+probes. Setting it by hand with `omp config set` fixed one machine and left the
+rest of the fleet noisy; hence this script. See logs/pi.md.
+
+The pruned providers and why:
+  amazon-bedrock  AWS_PROFILE=ej-dev is exported for work, but Bedrock is never
+                  used as an LLM provider. 130 models of pure noise.
+  groq            GROQ_API_KEY is the *whisper* key. omp's STT is local
+                  (stt.modelName=parakeet), so nothing speech-related needs the
+                  groq provider; only its 26 chat models, which go unused.
+  opencode-zen    Deliberate overlap prune, NOT a duplicate-removal: only 13 of
+                  zen's 34 models also exist on opencode-go. Rai uses OpenCode
+                  solely for glm / grok / kimi / minimax — all carried by go —
+                  and gets Claude + GPT from the anthropic and openai-codex
+                  providers. Accepted cost: no Gemini and no free-tier models
+                  anywhere in omp. Running out of go credits still falls back to
+                  zen server-side on OpenCode's end; that is independent of
+                  omp's provider list.
+
+FORMATTING: omp writes a YAML dialect with a trailing space after every mapping
+key that opens a block (`disabledProviders: `) and NO trailing newline at EOF.
+This script is text-surgical rather than a YAML round-trip precisely so it can
+reproduce that byte-for-byte — a pyyaml/yq rewrite would reformat the whole file
+and leave chezmoi reporting permanent drift against omp's own writes. (Same
+class as the jq trailing-newline drift fixed in modify_dot_claude.json.tmpl on
+2026-07-14; see logs/chezmoi-modify-scripts.md.)
+"""
+
+import re
+import sys
+
+MANAGED_KEY = "disabledProviders"
+DISABLED_PROVIDERS = [
+    "amazon-bedrock",
+    "groq",
+    "opencode-zen",
+]
+
+# omp's exact style: "key: " (trailing space), then 2-space-indented block seq.
+managed_block = "{}: \n".format(MANAGED_KEY) + "\n".join(
+    "  - {}".format(p) for p in DISABLED_PROVIDERS
+)
+
+current = sys.stdin.read()
+
+# Fresh machine / no existing file: the managed block is the whole file.
+if not current.strip():
+    sys.stdout.write(managed_block)
+    sys.exit(0)
+
+lines = current.split("\n")
+out = []
+i = 0
+replaced = False
+
+while i < len(lines):
+    line = lines[i]
+    if re.match(r"^{}\s*:".format(re.escape(MANAGED_KEY)), line):
+        # Drop the old key and every line belonging to its block (indented or
+        # blank). A top-level key at column 0 ends the block.
+        i += 1
+        while i < len(lines) and (lines[i].startswith((" ", "\t")) or not lines[i].strip()):
+            i += 1
+        # Replace in place rather than appending at the end, so the key keeps
+        # whatever position omp last gave it and the diff stays minimal.
+        out.extend(managed_block.split("\n"))
+        replaced = True
+        continue
+    out.append(line)
+    i += 1
+
+if not replaced:
+    # Key absent (first apply on this machine, or omp rewrote without it).
+    while out and not out[-1].strip():
+        out.pop()
+    out.extend(managed_block.split("\n"))
+
+# omp writes no trailing newline; match it or chezmoi reports 1-byte drift forever.
+sys.stdout.write("\n".join(out).rstrip("\n"))
