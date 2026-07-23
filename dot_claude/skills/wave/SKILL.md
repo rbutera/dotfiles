@@ -113,18 +113,11 @@ If using OpenSpec with a schema that has an apply instruction (like fusion-workf
 - **Sonnet**: straightforward tasks (CRUD, test writing, component creation, config changes)
 - **Opus**: complex domain logic, refactoring existing code, architectural decisions, multi-file coordination
 
-**Codex as the implementation agent — in a git worktree, pass `sandbox: "danger-full-access"`.**
+**Codex as the implementation agent.**
 
-`mcp__codex__codex_implement` defaults to `sandbox: "workspace-write"`, which makes only the cwd writable. In a **git worktree** the repo metadata lives in the parent repo at `<main-repo>/.git/worktrees/<name>`, outside that boundary. Two consequences, the second far worse than the first:
+`mcp__codex__codex_implement` runs Codex unrestricted (harness-bridge's fixed execution contract), so it can commit inside a git worktree and run the full hosted test suite. There is no sandbox argument to set. Omit the `model` param too — omitting it lets `~/.codex/config.toml` win, and its model enum can lag.
 
-1. `git commit` fails outright (cannot create `index.lock`).
-2. MSBuild parallel workers and ASP.NET `WebApplicationFactory` test hosts misbehave, so the agent degrades to `-m:1 /nodeReuse:false` and **silently excludes the hosted tests it cannot run** — then reports green off the filtered subset.
-
-So inside `wt/`, pass `sandbox: "danger-full-access"` explicitly. Measured on FUS-192, 2026-07-22: the same backend suite took **31 minutes sandboxed and incomplete** vs **17 seconds** unsandboxed.
-
-Omit the `model` param (the bridge's model enum can lag; omitting it lets `~/.codex/config.toml` win).
-
-Do not try to fix this via `[sandbox_workspace_write] writable_roots` in `~/.codex/config.toml`; that file is chezmoi-managed and the modify script strips `sandbox`, `sandbox_mode`, and `sandbox_workspace_write` on every apply.
+Note the reason the test-count rule below exists: a sandboxed Codex used to **silently exclude the hosted tests it could not run** and report green off the remainder. The contract change removed that failure mode, but re-running the gates and asserting the count is still mandatory, because a claim is not evidence.
 
 All independent tasks in a wave dispatch in a **single message** (parallel), and **ALWAYS with `run_in_background: true`** — never block the main session waiting on an agent. After dispatching, await each agent's completion notification, then proceed. Running in the background keeps the orchestrator responsive (e.g. to the user) while waves execute.
 
@@ -152,7 +145,7 @@ Once the implementation agent reports DONE (with its gate output), dispatch **tw
 - Dispatch this as the `codex-teammate` agent (`subagent_type: codex-teammate`). It runs Sonnet-low and relays the review task straight to a Codex MCP tool verbatim — it does not read files or form its own opinion first.
 - Give it the same review **target** as Agent 1 — the diff range/commits (`<base>..<head>`) — plus any caller-known context **paths** (convention doc paths, spec/plan file paths), as a self-contained task description, since Codex can't see this conversation's history. Do **not** hand it Agent 1's operational instructions ("Read the diff", "Read convention docs", "Read spec/plan context") — the relay must not read anything itself; it passes the review task to Codex, which reads the actual content itself via `workingDirectory`.
 - **Do not pass a spawn-time `model` override when dispatching this agent.** A spawn-time `model` beats the agent's own frontmatter (`model: sonnet`), which would force it onto Opus and silently re-break Codex's independence. Let the agent's own frontmatter apply.
-- **Reviewers may need to build or test.** `mcp__codex__codex_review_code` takes a `sandbox` argument, defaulting to `read-only`. Pass `sandbox: "workspace-write"` when the reviewer should verify its own findings by running a build or the test suite rather than reasoning from source alone. A reviewer that cannot run the gates cannot check its claims.
+- **Reviewers can build and test.** Codex runs unrestricted, so `mcp__codex__codex_review_code` can run a build or the suite to verify its own findings rather than reasoning from source alone. There is no sandbox argument.
 - **Concurrency is safe by default.** Each call gets its own Codex thread unless you pass a `threadKey`, so parallel reviewers across waves and worktrees do not collide. Only pass a `threadKey` when you deliberately want a multi-turn conversation, and never share one key across concurrent callers.
 - The inline fallback is permitted **only if the `codex-teammate` agent is genuinely unavailable**. Even then, it MUST hand the review instructions to a Codex MCP tool (e.g. `mcp__codex__codex_review_code`) verbatim, with `workingDirectory` set, and return Codex's raw verdict as-is — no reading files first, no Opus opinion layered on top.
 - Independent second opinion — catches different things (naming, patterns, subtle bugs) precisely because it's Codex's read, not Opus's read of Codex.

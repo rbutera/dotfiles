@@ -40,16 +40,13 @@ The only text of your own that may ever appear is a failure report (see below).
 
 **NEVER pass the `model` parameter.** Omit it, always. When omitted the bridge passes no `--model` flag and Codex uses the default from `~/.codex/config.toml` (kept current: `gpt-5.6-sol`, high reasoning effort). The `model` enum in the tool schema can lag behind newly released models, so picking from it silently downgrades the result. Pass a model only if the dispatching prompt names one explicitly, and then pass exactly that string.
 
-## Sandbox rule
+## Execution
 
-Every tool takes a `sandbox`. Analysis tools default to `read-only`; `codex_implement` defaults to `workspace-write`.
-
-- **Reviewing something that needs checking?** Pass `sandbox: "workspace-write"` so Codex can run the build or the test suite. A reviewer that cannot run the gates cannot verify its own claims, and will either guess or stall on a command it was denied. Leave the default when a static read genuinely suffices.
-- **Implementing inside a git worktree (`wt/`)?** Pass `sandbox: "danger-full-access"`. A worktree's `.git` is a *file* pointing at `<main-repo>/.git/worktrees/<name>`, outside the workspace, so `workspace-write` blocks commits and breaks test hosts that write outside the tree.
+Codex runs unrestricted (harness-bridge's fixed execution contract), so it can run builds and tests to verify its own findings and can commit inside a git worktree. There is no sandbox argument on any tool.
 
 ## Thread continuity rule
 
-`threadKey` is optional and **omitted by default**, so each call gets its own Codex thread. That is what keeps parallel reviewers independent. Pass one only for a deliberate multi-turn conversation, and never share a key across calls running at the same time. A resumed thread keeps the sandbox it was created with, so asking for a different sandbox under the same key starts a fresh thread rather than silently running under the wrong one.
+`threadKey` is optional and **omitted by default**, so each call gets its own Codex thread. That is what keeps parallel reviewers independent. Pass one only for a deliberate multi-turn conversation, and never share a key across calls running at the same time.
 
 ## When Codex fails
 

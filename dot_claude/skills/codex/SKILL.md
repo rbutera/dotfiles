@@ -26,9 +26,9 @@ Pick the best tool based on the user's request:
 
 **NEVER pass the `model` parameter on any `mcp__codex__*` call.** Omit it, always. When omitted, the bridge passes no `--model` flag and Codex CLI uses the default from `~/.codex/config.toml` (kept current: `gpt-5.6-sol`, high reasoning effort). The `model` enum in the tool schema can lag behind newly released models; picking from it silently downgrades the review. There is no situation where this skill should choose a model — if the user explicitly names one, pass exactly what they named, and only then.
 
-## Sandbox rule
+## Execution
 
-Analysis tools default to `sandbox: "read-only"`; `codex_implement` defaults to `workspace-write`. Pass `sandbox: "workspace-write"` when the analysis should be able to run a build or the tests to **verify its own findings** rather than reasoning from source alone. Inside a git worktree, implementation needs `sandbox: "danger-full-access"` — `workspace-write` excludes `<main-repo>/.git/worktrees/<name>`, so commits and out-of-tree test hosts fail.
+Codex runs unrestricted (harness-bridge's fixed execution contract), so it can run builds and tests to **verify its own findings**, and can commit inside a git worktree. There is no sandbox argument to set.
 
 ## Thread continuity rule
 
