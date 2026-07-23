@@ -65,6 +65,15 @@ counts went **`amazon-bedrock(130) groq(26) openai-codex(7) opencode-go(23)
 opencode-zen(34) openrouter(377) zai(14)` → `groq(26) openai-codex(7)
 opencode-go(23) opencode-zen(34) zai(14)`** — 611 models down to 104.
 
+### Follow-up same day — omp under paseo was missing the opencode providers
+
+Separate root cause, same "provider silently absent" symptom: the paseo LaunchAgent
+gave its daemon only `HOME` and `PATH`, so `omp` spawned by paseo saw only
+`anthropic` + `openai-codex` (its two vault-backed providers) and lost
+`opencode-zen`, `opencode-go`, `groq` and `zai`, which are env-var-discovered.
+Fixed with a `~/bin/paseo-daemon` wrapper that sources `~/.config/zsh/*.zsh` before
+exec'ing paseo — see logs/launchagents.md 2026-07-23.
+
 ### Not done
 
 `~/.omp/agent/config.yml` is **not** chezmoi-managed — omp writes to it itself

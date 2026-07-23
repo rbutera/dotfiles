@@ -2,6 +2,20 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-07-23 -- sh.paseo.daemon now execs a wrapper that sources the secret groups
+
+- **Symptom**: `omp` launched via paseo offered only the `anthropic` and `openai-codex` providers. `opencode-zen`, `opencode-go`, `groq` and `zai` were missing.
+- **Cause**: launchd hands a job only the vars in the plist's `EnvironmentVariables` dict -- here `HOME` and `PATH`. It never sources a shell, so none of the ~83 exports in `~/.config/zsh/*.zsh` (the chezmoi 1Password secret groups) exist for the daemon or anything it spawns. The two surviving omp providers are exactly the two whose credentials live in omp's HOME-based vault (`auth_credentials` in `~/.omp/agent/agent.db`); every other provider is discovered from env vars alone, so they degraded *silently* rather than erroring. Same class as the PATH-based provider detection the plist header already warned about -- env is the other half of the game.
+- **Reproduced**: `env -i HOME=... PATH=<the plist's PATH> omp models` -> `anthropic (25)`, `openai-codex (7)` and nothing else.
+- **Changes**:
+  - New `bin/executable_paseo-daemon` -> `~/bin/paseo-daemon`: plain `/bin/sh`, sources `~/.config/zsh/*.zsh`, then `exec`s the paseo shim. Args default to `daemon start --foreground` but explicit args win, so it stays testable by hand.
+  - `Library/LaunchAgents/sh.paseo.daemon.plist.tmpl`: `ProgramArguments[0]` is now `{{"{{ .chezmoi.homeDir }}"}}/bin/paseo-daemon`; header comment extended with the reasoning.
+- **Why a wrapper, not plist env vars**: templating the keys into `EnvironmentVariables` via `onepasswordRead` would put plaintext secrets in a mode-644 file in `~/Library/LaunchAgents`, and would only fix whichever keys someone remembered to enumerate. The wrapper fixes the whole class and keeps the plist secret-free (it still has zero `onepasswordRead`, so `chezmoi apply` on it needs no 1Password session).
+- **Not a login shell**, so the powerlevel10k instant-prompt mangling that forced the original direct-exec does not come back. Verified all 10 group files are pure `export NAME=value` -- no zsh-isms, no command substitution -- so `/bin/sh` sourcing is safe.
+- **Deploy gotcha**: `launchctl kickstart -k` restarts the job but does **not** re-read the plist -- `launchctl print` still showed the old `program`. Needed a full `launchctl bootout gui/$UID/sh.paseo.daemon` then `launchctl bootstrap gui/$UID ~/Library/LaunchAgents/sh.paseo.daemon.plist`. (The first bootstrap raced the bootout and returned `Input/output error`; an immediate retry succeeded.)
+- **Verification**: `launchctl print gui/$UID/sh.paseo.daemon` -> `state = running`, `program = /Users/rai/bin/paseo-daemon`, `last exit code = (never exited)`. `paseo daemon status` -> Local Daemon running, Connected Daemon reachable, relay up on kinto. Sourcing under the launchd-equivalent env restores all six providers, and `amazon-bedrock` stays suppressed even though `AWS_PROFILE=ej-dev` is now in scope (the `disabledProviders` setting from logs/pi.md is HOME-based, so it applies here too).
+- **Note**: macOS blocks `ps -E` env dumps, so the daemon's live env can't be read back directly. The proof is the `env -i` harness, which replicates the wrapper's logic exactly, plus `exec` semantics guaranteeing inheritance.
+
 ## 2026-07-21 -- Re-added dev.onorca.serve, NIMBUS ONLY (headless); kinto is headed
 
 - Plan (Rai): **headless Orca serve on nimbus, headed desktop Orca on kinto.** So `dev.onorca.serve.plist` is back, gated in `.chezmoiignore` on `hostname == nimbus` only (kinto uses the desktop app, no launchd).

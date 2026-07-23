@@ -1,0 +1,41 @@
+#!/bin/sh
+# Launcher for the paseo daemon (see ~/Library/LaunchAgents/sh.paseo.daemon.plist).
+#
+# WHY THIS EXISTS: launchd hands a job only the vars listed in the plist's
+# EnvironmentVariables dict -- for the paseo daemon that's HOME and PATH. It never
+# sources a shell, so none of the ~80 secrets exported from ~/.config/zsh/*.zsh
+# exist for the daemon or for any agent CLI it spawns.
+#
+# That silently degrades the agents rather than failing them. Observed 2026-07-23:
+# `omp` under paseo offered only the `anthropic` and `openai-codex` providers --
+# the two whose credentials live in omp's own HOME-based vault
+# (~/.omp/agent/agent.db) -- while opencode-zen, opencode-go, groq and zai all
+# vanished, because those are discovered purely from env vars. Same class of bug as
+# the PATH-based provider detection the plist comment already warns about.
+#
+# Sourcing the secret groups here (rather than templating keys into the plist)
+# keeps credentials out of a mode-644 file in ~/Library/LaunchAgents, and fixes the
+# whole class at once instead of whichever keys someone remembered to enumerate.
+#
+# Safe under /bin/sh: every ~/.config/zsh/*.zsh group file is pure
+# `export NAME=value` (verified -- no zsh-isms, no command substitution). This is
+# deliberately NOT a login zsh: that fires the powerlevel10k instant prompt in
+# launchd's no-tty context and mangles the command, which is why the plist
+# direct-execs in the first place.
+
+for __group in "$HOME"/.config/zsh/*.zsh; do
+	[ -r "$__group" ] && . "$__group"
+done
+unset __group
+
+PASEO=/Applications/Paseo.app/Contents/Resources/bin/paseo
+[ -x "$PASEO" ] || PASEO=$(command -v paseo) || {
+	echo "paseo-daemon: no paseo binary found" >&2
+	exit 127
+}
+
+# Default to the launchd invocation; explicit args win so the wrapper stays
+# testable by hand (e.g. `~/bin/paseo-daemon daemon status`).
+[ $# -gt 0 ] || set -- daemon start --foreground
+
+exec "$PASEO" "$@"

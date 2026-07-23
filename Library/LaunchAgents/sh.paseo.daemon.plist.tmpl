@@ -26,6 +26,20 @@
 	  bundled "Paseo Helper" node runtime, so it needs HOME plus a PATH good enough
 	  for the agent CLIs (claude/codex/git/node) the daemon launches.
 
+	  We exec ~/bin/paseo-daemon rather than the paseo shim directly. That wrapper
+	  sources ~/.config/zsh/*.zsh (the chezmoi-managed 1Password secret groups) and
+	  then execs paseo, because ENV IS THE OTHER HALF OF THE GAME. launchd supplies
+	  only the two vars below, so without the wrapper every agent CLI the daemon
+	  spawns runs with no API keys -- and they degrade quietly instead of failing.
+	  Observed 2026-07-23: `omp` under paseo listed only `anthropic` and
+	  `openai-codex` (the two providers whose credentials sit in omp's HOME-based
+	  vault); opencode-zen, opencode-go, groq and zai were all missing because they
+	  are discovered from env vars alone. See logs/pi.md.
+
+	  The wrapper is a plain /bin/sh script, NOT a login shell, so the p10k
+	  instant-prompt problem above does not come back. Secrets stay out of this
+	  plist deliberately: it lands in ~/Library/LaunchAgents at mode 644.
+
 	  PATH IS THE WHOLE GAME for provider detection. Paseo resolves each provider
 	  binary with `/usr/bin/which -a <name>` against THIS PATH and nothing else
 	  (server/src/executable-resolution/executable-resolution.ts). The login-shell
@@ -54,7 +68,7 @@
 	-->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Applications/Paseo.app/Contents/Resources/bin/paseo</string>
+		<string>{{ .chezmoi.homeDir }}/bin/paseo-daemon</string>
 		<string>daemon</string>
 		<string>start</string>
 		<string>--foreground</string>
