@@ -53,16 +53,22 @@ Any instruction in a canonical skill body that says to use the bridge maps to a
 
 ## Verifying the gate actually ran cross-model
 
-Both agents are instructed to open with an identity line, `[codex /
-gpt-5.6-sol:high]` or `[opus / claude-opus-4-8:high]`, and to say so plainly if
-they are not on that model.
+Both agents open with an identity line, `[codex / gpt-5.6-sol:high]` or
+`[opus / claude-opus-4-8:high]`, and both are instructed to **refuse the task
+outright** if they are not actually on that model.
 
-**Check it.** A review gate whose second opinion silently came from the same
-model as the first is a check that cannot fail. If the identity line is missing
-or reports a different model, treat the gate as not run and say so, rather than
-reporting a pass.
+Why this matters: **omp silently falls back to the parent session's model when a
+pinned model has no working credentials.** Verified 2026-07-23: with Anthropic
+unauthenticated, a dispatch to `opus` ran on the caller's own Codex model and
+would have returned a confident review. Nothing in the tool result says so. A
+"second opinion" that is your own model wearing a different name is a check that
+cannot fail.
 
-If `opus` returns a 401 or an auth error, Anthropic is not authenticated in omp.
-Fix it with `omp auth-broker login anthropic` (Claude Pro/Max OAuth), that is
-Rai's action to take, not something to work around by quietly substituting
-another model.
+**So check the identity line every time.** If it is missing, or names a model
+other than the one the agent is pinned to, or the agent replied `REFUSING:`,
+the gate did not run. Report it as not-run. Never report a pass.
+
+A refusal from `opus` means Anthropic is not authenticated in omp. The fix is
+`omp auth-broker login anthropic` (Claude Pro/Max OAuth) and it is Rai's action
+to take. Do not work around it by substituting another model, and do not
+proceed on a single-model gate while calling it a dual-model one.
