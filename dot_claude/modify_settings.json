@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
-# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins
-# Free: permissions, model, attribution, skipDangerousModePermissionPrompt, etc.
+# Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins,
+#          permissions.defaultMode
+# Free: the REST of permissions (allow/deny lists), model, attribution,
+#       skipDangerousModePermissionPrompt, etc.
+#
+# permissions.defaultMode is managed deliberately (2026-07-24). A CLI
+# --dangerously-skip-permissions flag applies only to the session you launched;
+# SPAWNED SUBAGENTS start as their own sessions, do not inherit it, and fall back
+# to these settings files. With no defaultMode set they hit a permission prompt
+# that nobody can answer and block SILENTLY - indistinguishable from slow work
+# from the orchestrator's side. Setting it here is what makes subagents inherit
+# it. Note this only sets .permissions.defaultMode, so any allow/deny list in the
+# deployed file survives untouched.
 set -euo pipefail
 
 current=$(cat)
@@ -13,6 +24,7 @@ read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
+  "permissions": {"defaultMode": "bypassPermissions"},
   "teammateMode": "in-process",
   "tui": "fullscreen",
   "editorMode": "vim",
@@ -66,6 +78,7 @@ case "$(uname -s)" in Darwin|Linux) is_posix=true ;; esac
 echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjson mac "$is_mac" --argjson posix "$is_posix" '
   .cleanupPeriodDays = $base.cleanupPeriodDays |
   .skillListingBudgetFraction = $base.skillListingBudgetFraction |
+  .permissions.defaultMode = $base.permissions.defaultMode |
   .teammateMode = $base.teammateMode |
   .tui = $base.tui |
   .editorMode = $base.editorMode |

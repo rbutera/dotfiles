@@ -1,5 +1,58 @@
 # Claude Code config changes log
 
+## 2026-07-24 — Manage `permissions.defaultMode` so SUBAGENTS stop blocking silently
+
+### Context
+A dispatched subagent doing a conflict-heavy git merge sat at zero progress for
+about 35 minutes. From the orchestrator's side this was indistinguishable from
+slow work: merge in progress, files staged, load normal, no error, no timeout,
+no idle signal. It was actually **stuck on a bash permission prompt** with nobody
+to answer it. Rai found it by running `ark attach`; approving the prompt
+unblocked it immediately (0 → 5 conflicts resolved within a minute).
+
+The cause: Rai runs his own session with the `--dangerously-skip-permissions`
+CLI flag. **A CLI flag applies only to the session it launched.** A spawned
+subagent starts as its own session, does not inherit the flag, and falls back to
+the settings files. `defaultMode` was set in NONE of the three
+(`~/.claude/settings.json`, `~/focused/.claude/settings.json`,
+`.claude/settings.local.json`), so the only thing a subagent found was a
+19-entry allow list in the project-local file. Any bash command outside those 19
+prompted, and hung.
+
+Ruled out along the way: the agent definition (`.claude/agents/rick.md`) has no
+`tools:` or permission override, only name/description/model.
+
+### Change (`dot_claude/modify_settings.json`)
+- Added `"permissions": {"defaultMode": "bypassPermissions"}` to the managed base.
+- jq now sets **`.permissions.defaultMode` only**, deliberately, so any
+  `allow`/`deny` lists already in a deployed file survive untouched. The header
+  comment was updated: `permissions.defaultMode` is now managed, the rest of
+  `permissions` stays free.
+
+### Why in settings rather than a flag
+Settings are what a subagent actually inherits. Fixing it in the deployed file
+by hand would have worked on this machine (the jq merge never touches
+`.permissions`, so it survives `chezmoi apply`), but it would be untracked, and
+a rebuilt machine would silently reacquire the bug with nobody remembering why.
+Tracked and reproducible beats locally correct.
+
+### Verification
+- Dry-run: piped the real deployed settings through the script, confirmed
+  `defaultMode` set and other managed keys intact. Calibrated the check by
+  confirming it reports `NOT SET` against the pre-change file, so a zero result
+  was demonstrably capable of being non-zero.
+- Applied with a targeted `chezmoi apply ~/.claude/settings.json` (avoids the
+  1Password prompt that a full apply triggers; no session was active).
+- End-to-end: spawned a throwaway subagent and had it run a command
+  deliberately absent from every allow list. Verdict: RAN WITHOUT PROMPT.
+
+### Blast radius (deliberate, worth knowing)
+This is global, so it applies to every machine and every agent identity,
+including Navi on nimbus. Nothing changes for an interactive session Rai
+launches with the flag; what changes is that **dispatched agents now get the
+same latitude he already has**. Given they already write to client repos on his
+behalf, that was judged the right posture. Reverting is a one-line removal.
+
 ## 2026-07-13 — Roll out mobile-mcp (android) + cua-driver (computer-use) everywhere
 
 ### Context
