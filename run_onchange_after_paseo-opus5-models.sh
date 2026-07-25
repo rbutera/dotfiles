@@ -27,17 +27,23 @@ with open(path) as f:
 
 providers = cfg.setdefault("agents", {}).setdefault("providers", {})
 
-def ensure(provider):
+def ensure(provider, enable=False):
     block = providers.setdefault(provider, {})
     models = block.setdefault("additionalModels", [])
     if not any(isinstance(m, dict) and m.get("id") == "claude-opus-5" for m in models):
         models.append({"id": "claude-opus-5", "label": "Claude Opus 5"})
+    # omp ships enabledByDefault:false upstream, so a host that has never had it
+    # switched on by hand shows the provider as "Disabled" even once the binary
+    # resolves and the models are listed. Setting it here is what stops kinto
+    # (enabled by hand on 2026-07-23) from silently diverging from the rest.
+    if enable:
+        block["enabled"] = True
 
 # Claude Code is available on every host; only wire the omp provider where OMP
 # is actually installed (or already declared) so we don't add a dead entry.
 ensure("claude")
 if os.path.exists(os.path.expanduser("~/.bun/bin/omp")) or "omp" in providers:
-    ensure("omp")
+    ensure("omp", enable=True)
 
 with open(path, "w") as f:
     json.dump(cfg, f, indent=2)
