@@ -1,5 +1,55 @@
 # shell config changes log
 
+## 2026-07-25 — One GitHub token, not three: fix gh + the Codex GitHub MCP server
+
+### Problem
+
+Three different GitHub tokens were in play, and the two that tools actually reached for
+were the two that do not work against `easyjet-dev`:
+
+| Token | Source | easyjet-dev |
+|-------|--------|-------------|
+| `op://Private/github gh PAT` | `$GITHUB_TOKEN` and friends, via `dot_config/zsh/github.zsh.tmpl` | works, has the SAML SSO grant |
+| `op://dev/github_auth` | gh's own `hosts.yml`, via `dot_config/gh/private_hosts.yml.tmpl` | 403, no SSO grant |
+| `op://Private/github llm personal access token` | `$GITHUB_LLM_PAT`, and the Codex GitHub MCP server | 404, fine-grained PAT scoped elsewhere |
+
+This was invisible day to day because `$GITHUB_TOKEN` is exported into every interactive
+shell and takes precedence over `hosts.yml`, so `gh` on the command line always picked the
+working token. Anything that did not inherit the interactive shell env fell through to the
+broken one: launchd jobs, MCP servers, subagents. The Codex GitHub MCP server was worse
+again, since it names its token explicitly and named the fine-grained PAT, so it had been
+404ing on every easyjet-dev repo.
+
+This is the other half of the 2026-04-24 entry below. That fix repointed `GITHUB_TOKEN` at
+the right 1Password item but left `hosts.yml` and the MCP server on their old ones.
+
+### Changes
+
+**`dot_config/gh/private_hosts.yml.tmpl`** - now reads `op://Private/github gh PAT`, the
+same item as `GITHUB_TOKEN`, using the same single-fetch `onepasswordDetailsFields`
+pattern as `github.zsh.tmpl`. gh now behaves identically whether or not `GITHUB_TOKEN` is
+in the environment. `op://dev/github_auth` is no longer referenced anywhere.
+
+**`dot_codex/modify_private_config.toml`** - `mcp_servers.github.bearer_token_env_var`
+changed from `GITHUB_LLM_PAT` to `GITHUB_TOKEN`, with a comment recording why.
+
+### The general shape
+
+One credential, one 1Password item, referenced by name everywhere. Two items holding two
+different tokens for the same purpose will always drift, and the drift stays hidden for as
+long as the precedence order happens to favour the good one.
+
+### Verifying
+
+```sh
+# both must print the same hash
+printf '%s' "$GITHUB_TOKEN" | shasum -a 256 | cut -c1-12
+env -u GITHUB_TOKEN -u GH_TOKEN gh auth token | shasum -a 256 | cut -c1-12
+
+# must succeed with the env var out of the way
+env -u GITHUB_TOKEN -u GH_TOKEN gh api repos/easyjet-dev/eja-orangeai-checklists --jq .full_name
+```
+
 ## 2026-07-14 — zshrc: adopt the bun completions block into the template
 
 ### Problem

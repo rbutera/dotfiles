@@ -1,3 +1,10 @@
+## 2026-07-25 — GitHub MCP server was on the wrong token
+
+`mcp_servers.github.bearer_token_env_var` in `dot_codex/modify_private_config.toml` was
+`GITHUB_LLM_PAT`, a fine-grained PAT with no access to `easyjet-dev`, so every GitHub MCP
+call against a client repo returned a bare 404. Changed to `GITHUB_TOKEN`, which carries
+the SAML SSO grant. Full write-up, including the parallel `gh` fix, in `logs/shell.md`.
+
 ## 2026-07-22 — Revert the Claude→Codex leg to the bridge fork, with the fork's real defects fixed
 
 ### Why revert

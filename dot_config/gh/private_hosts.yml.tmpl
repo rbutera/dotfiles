@@ -1,6 +1,14 @@
+{{- $ghpat := onepasswordDetailsFields "github gh PAT" "Private" }}
+# gh's stored credential. Deliberately the SAME 1Password item as GITHUB_TOKEN
+# (see dot_config/zsh/github.zsh.tmpl) so the two can never drift apart.
+#
+# This previously read op://dev/github_auth, a different GitHub token that does not
+# carry the easyjet-dev SAML SSO grant. Because $GITHUB_TOKEN shadows this file in an
+# interactive shell, gh appeared to work while silently failing in any context that
+# does not inherit the shell env (launchd jobs, MCP servers, subagents).
 github.com:
     user: rbutera
     git_protocol: ssh
     users:
-        rbutera: {oauth_token: {{ onepasswordRead "op://dev/github_auth/credential"}}}
-    oauth_token: {{ onepasswordRead "op://dev/github_auth/credential" }}
+        rbutera: {oauth_token: {{ $ghpat.credential.value | quote }}}
+    oauth_token: {{ $ghpat.credential.value | quote }}
