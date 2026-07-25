@@ -15,7 +15,27 @@ provider outright — from the picker, from /login, and from background discover
 probes. Setting it by hand with `omp config set` fixed one machine and left the
 rest of the fleet noisy; hence this script. See logs/pi.md.
 
-The pruned providers and why:
+THE RULE IS AN ALLOWLIST (Rai, 2026-07-25): omp carries exactly three providers —
+`anthropic`, `openai-codex`, `opencode-go`. Everything else is hidden. The list
+below is therefore DERIVED, not curated: it is (every provider id omp can
+discover) minus those three. Keep it that way — when omp adds a provider, add it
+here rather than deciding case-by-case whether it is noisy enough to prune.
+
+The universe was taken from omp's own discovery cache on every host, so the list
+covers providers a given machine has never seen (a denylist entry for a provider
+that is absent is a no-op, and that is the point: all three Macs get a byte-
+identical picker):
+    sqlite3 ~/.omp/agent/models.db \
+      "select distinct provider_id from model_cache;" | sed 's/:.*//'
+
+Notes on the entries that are not merely theoretical:
+  openrouter      The big one. Alone it is ~380-480 models, and on nimbus its
+                  catalog contains entries with `contextWindow: null`, which
+                  fails Paseo's zod schema for the WHOLE model list — so Paseo
+                  reported the entire omp provider as `error`, not just those
+                  models. Hiding it fixes that class outright. Credential comes
+                  from a stray OPENROUTER key in ~/.env; disabling the provider
+                  is the right knob (do not go hunting env files).
   amazon-bedrock  AWS_PROFILE=ej-dev is exported for work, but Bedrock is never
                   used as an LLM provider. 130 models of pure noise.
   groq            GROQ_API_KEY is the *whisper* key. omp's STT is local
@@ -29,6 +49,13 @@ The pruned providers and why:
                   anywhere in omp. Running out of go credits still falls back to
                   zen server-side on OpenCode's end; that is independent of
                   omp's provider list.
+  zai / zenmux /  Not in the allowlist. zai was live on kinto and xai-oauth on
+  xai-oauth       nimbus, which is exactly the fleet drift this file exists to
+                  stop.
+  llama.cpp /     Local-runtime providers; they only surface when something is
+  lm-studio /     listening locally, which makes the picker differ per machine
+  ollama          depending on what happens to be running. Pinned off.
+  google-vertex   Never used; appears from ambient Google cloud credentials.
 
 FORMATTING: omp writes a YAML dialect with a trailing space after every mapping
 key that opens a block (`disabledProviders: `) and NO trailing newline at EOF.
@@ -43,11 +70,35 @@ import re
 import sys
 
 MANAGED_KEY = "disabledProviders"
-DISABLED_PROVIDERS = [
-    "amazon-bedrock",
-    "groq",
-    "opencode-zen",
+
+# The allowlist. Everything omp can discover that is not in here gets disabled.
+ALLOWED_PROVIDERS = [
+    "anthropic",
+    "openai-codex",
+    "opencode-go",
 ]
+
+# Every provider id omp is known to be able to discover, across the whole fleet
+# (see the docstring for the query that regenerates this). Entries absent from a
+# given machine are harmless no-ops.
+KNOWN_PROVIDERS = [
+    "amazon-bedrock",
+    "anthropic",
+    "google-vertex",
+    "groq",
+    "llama.cpp",
+    "lm-studio",
+    "ollama",
+    "openai-codex",
+    "opencode-go",
+    "opencode-zen",
+    "openrouter",
+    "xai-oauth",
+    "zai",
+    "zenmux",
+]
+
+DISABLED_PROVIDERS = [p for p in KNOWN_PROVIDERS if p not in ALLOWED_PROVIDERS]
 
 # omp's exact style: "key: " (trailing space), then 2-space-indented block seq.
 managed_block = "{}: \n".format(MANAGED_KEY) + "\n".join(
