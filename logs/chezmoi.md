@@ -367,3 +367,39 @@ if [ -f "$HOME/.cargo/env" ]; then
 fi
 ```
 This keeps shell startup clean on machines where Cargo has not been initialized.
+
+## 2026-07-25 — Apply the non-1Password-dependent targets on nimbus, and make chezmoi fail fast without an `op` session
+
+### Problem
+Rai asked to bring chezmoi up to date and apply "the non-1password-reliant files" on nimbus. Three obstacles:
+
+1. **No active 1Password session.** `op whoami` returned `no active session found for account RTBK7UHJFNF7FB7ELCPJRRLDGM`. Note that `op account list` succeeds *without* a session (it only reads local account config), so it is **not** a valid session check despite being the one suggested in CLAUDE.md and in the `navi:chezmoi` skill. Use `op whoami`.
+2. **`chezmoi status` hung on an interactive prompt** rather than failing. The local config had no `[onepassword] prompt` setting, so chezmoi called `op signin` and blocked on `Enter the password for rai@rbutera.com` — unanswerable by an agent. (It then errored with `operation not supported by device` because biometric unlock is unavailable in that context.)
+3. **`chezmoi status` is NOT safe without 1Password**, contrary to the claim in both `CLAUDE.md` and `~/navi/skills/chezmoi/SKILL.md`. It renders every managed template to compute target state, so it aborts at the first `onepasswordRead`. Only per-target invocations scoped away from those templates are safe. Both docs should be corrected.
+
+### Fix
+Added to `~/.config/chezmoi/chezmoi.toml` (the local config, not the source template — this is the documented location for it):
+```toml
+[onepassword]
+  prompt = false
+```
+chezmoi now fails fast with a clear `You are not currently signed in` error instead of hanging indefinitely.
+
+Then split the 399 managed targets by whether their source actually renders a secret. The precise test is **source is a `.tmpl` AND contains `onepasswordRead`** — 25 such templates, mapping to 24 managed targets. Two earlier, looser filters were both wrong and worth recording so they are not repeated:
+- `grep onepassword` (no `Read`) over-matched 4 extra sources that only *mention* 1Password in prose or shell (`dot_claude/skills/chezmoi-sync/SKILL.md`, `detect-drift.sh`, `dot_config/aichat/messages.md`, `bin/executable_add-api-key`, plus 11 `logs/*.md`).
+- Ignoring the `.tmpl` requirement flagged verbatim-copied files as gated. chezmoi only renders templates; a non-template source containing the literal string `onepasswordRead` needs no session at all.
+
+Applied 276 targets (the 375 non-gated, minus 95 directories — passing a directory makes chezmoi recurse into gated children and abort the batch — minus 4 deliberate exclusions below). Verified: out-of-date count went from 36 to exactly the 3 deliberately-excluded entries, so the apply was complete rather than silently partial.
+
+### Deliberately NOT applied
+- **`~/.ssh/config`** (`MM`). Applying would delete two lines:
+  ```
+  Include /Users/rai/.colima/ssh_config
+  Include /Volumes/ExternalNVMe/home/.colima/ssh_config
+  ```
+  These are written by **colima itself** on start, not by Rai, so this target will re-drift to `MM` after every colima start — it is a permanent-dirty by design, not user drift. It is also directly implicated in a prior outage: the autopush scripts had to add `GIT_SSH_COMMAND="ssh -F /dev/null ..."` because git's ssh intermittently failed reading that Include off the external NVMe (`Can't open user config file ... Interrupted system call`), which silently broke the navi and expedition backups for 16 and 5 days respectively. And at the time of writing colima is down with a hung `colima start`, with an agent actively restoring it — editing this file mid-restore would corrupt that diagnosis. **Open decision for Rai:** either add the Include lines to `dot_ssh/config.tmpl` so the file stops showing as drifted forever, or accept permanent `MM` here.
+- **`~/.config/impulse/jobs.json`.** `logs/impulse.md` records that the deployed file and the template have diverged *both* ways and explicitly warns: do NOT `chezmoi apply` the template wholesale or it will regress the deployed job set. Not currently reported as out-of-date, but excluded explicitly so a future batch apply cannot catch it by accident.
+- **`~/.claude/hooks/__pycache__/` and `agent-delivery-rule.cpython-314.pyc`** (`A`). A compiled Python bytecode cache should never be a managed dotfile. The correct fix is to remove it from the source and add it to `.chezmoiignore`; deferred rather than done here to keep this change to what Rai asked for.
+
+### Also committed
+`dot_config/impulse/agents.json.tmpl` (navi `coldModeIntervalMs` 900000 → 3600000) and its `logs/impulse.md` entry had been applied to the deployed file on 2026-07-22 but never committed to the source repo, so the change existed on disk with no version history. Committed now.
