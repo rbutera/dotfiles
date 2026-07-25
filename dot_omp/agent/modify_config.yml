@@ -71,6 +71,21 @@ import sys
 
 MANAGED_KEY = "disabledProviders"
 
+# chezmoi also owns ONE nested value: modelRoles.default -- the model omp starts
+# every session on. It is pinned fleet-wide so all three Macs open on the same
+# model, and pinned to a FULL id rather than an alias because on Claude Code
+# 2.1.220 the bare `opus` alias still resolves to 4.8 (see the sibling commits
+# that pinned florence and navi for the same reason).
+#
+# Sibling roles under modelRoles are preserved: this replaces the `default:` line
+# only, never the whole block, so any per-role override omp writes later survives.
+#
+# Why it needs managing at all: this key drifted badly. kinto sat on
+# anthropic/claude-opus-4-8:high, and nimbus on xai-oauth/grok-4.5 -- a provider
+# the allowlist above now disables, which would leave omp defaulting to a model
+# it can no longer reach.
+DEFAULT_MODEL_ROLE = "anthropic/claude-opus-5:high"
+
 # The allowlist. Everything omp can discover that is not in here gets disabled.
 ALLOWED_PROVIDERS = [
     "anthropic",
@@ -105,11 +120,44 @@ managed_block = "{}: \n".format(MANAGED_KEY) + "\n".join(
     "  - {}".format(p) for p in DISABLED_PROVIDERS
 )
 
+model_roles_block = "modelRoles: \n  default: {}".format(DEFAULT_MODEL_ROLE)
+
+
+def ensure_default_model_role(lines):
+    """Pin modelRoles.default, preserving any sibling roles.
+
+    Three cases: the block exists with a `default:` (replace that one line), the
+    block exists without one (insert it first), or there is no block at all
+    (append one). Only ever touches the single `default:` line.
+    """
+    for idx, line in enumerate(lines):
+        if not re.match(r"^modelRoles\s*:", line):
+            continue
+        end = idx + 1
+        while end < len(lines) and (
+            lines[end].startswith((" ", "\t")) or not lines[end].strip()
+        ):
+            end += 1
+        for j in range(idx + 1, end):
+            if re.match(r"^\s+default\s*:", lines[j]):
+                lines[j] = "  default: {}".format(DEFAULT_MODEL_ROLE)
+                return lines
+        # Block present but no default role yet.
+        lines.insert(idx + 1, "  default: {}".format(DEFAULT_MODEL_ROLE))
+        return lines
+
+    # No modelRoles block at all (fresh machine, e.g. a just-installed omp).
+    while lines and not lines[-1].strip():
+        lines.pop()
+    lines.extend(model_roles_block.split("\n"))
+    return lines
+
+
 current = sys.stdin.read()
 
-# Fresh machine / no existing file: the managed block is the whole file.
+# Fresh machine / no existing file: the managed keys are the whole file.
 if not current.strip():
-    sys.stdout.write(managed_block)
+    sys.stdout.write(model_roles_block + "\n" + managed_block)
     sys.exit(0)
 
 lines = current.split("\n")
@@ -138,6 +186,8 @@ if not replaced:
     while out and not out[-1].strip():
         out.pop()
     out.extend(managed_block.split("\n"))
+
+out = ensure_default_model_role(out)
 
 # omp writes no trailing newline; match it or chezmoi reports 1-byte drift forever.
 sys.stdout.write("\n".join(out).rstrip("\n"))
