@@ -403,3 +403,37 @@ Applied 276 targets (the 375 non-gated, minus 95 directories — passing a direc
 
 ### Also committed
 `dot_config/impulse/agents.json.tmpl` (navi `coldModeIntervalMs` 900000 → 3600000) and its `logs/impulse.md` entry had been applied to the deployed file on 2026-07-22 but never committed to the source repo, so the change existed on disk with no version history. Committed now.
+
+## 2026-07-25 — Pin Florence to claude-opus-5 on kinto (mirror of the navi pin earlier the same day)
+
+### Problem
+Florence's `focused/ark.json.tmpl` set `"model": "opus"`. On Claude Code CLI **2.1.220** the bare
+`opus` alias resolves to **`claude-opus-4-8`**, not Opus 5 — so Florence was running a generation
+behind while her config read "opus" and looked correct. This is a wrong-side failure: the config
+string is the thing a human checks, and it said the right word while meaning the wrong model.
+
+Verified rather than assumed, three ways:
+- Her live session transcript's own assistant turns reported `model: claude-opus-4-8`.
+- `claude --model opus -p ... --output-format json` on 2.1.220 resolved to `claude-opus-4-8` (i.e.
+  the alias mapping did NOT change in the version bump — re-checked on the new CLI, not carried
+  over from the pre-update measurement).
+- `claude --model claude-opus-5 ...` returned exit 0 and resolved to `claude-opus-5`, confirming
+  the account has access before anything was pinned.
+
+### Fix
+`focused/ark.json.tmpl`: `"model": "opus"` → `"model": "claude-opus-5"`, matching the form already
+used in `navi/ark.json.tmpl` (commit `0c4b046`). Applied via `chezmoi apply ~/focused/ark.json` and
+verified by reading the deployed `~/focused/ark.json` back off disk. Same change as was made for
+navi earlier today; both agents are now pinned to the full model id and neither relies on an alias.
+
+**Rule going forward: never put a bare model alias in an `ark.json`.** Pin the full id. An alias is
+a redirect controlled by the CLI, so it can silently re-point on any update, and nothing in Ark
+will notice or complain.
+
+### Gotcha found en route (worth its own fix)
+kinto's chezmoi repo had `branch.main.remote` set to the remote **URL** (`git@github.com:rbutera/dotfiles.git`)
+instead of the remote **name** (`origin`). Consequence: `@{u}` does not resolve to a remote-tracking
+branch, so `git rev-list --left-right --count HEAD...@{u}` errors out. Push and pull still work, but
+any staleness/ahead-behind check written against `@{u}` fails on this machine — the same class of
+silent breakage that let the navi and expedition autopush jobs sit dead for 16 and 5 days. kinto was
+also 2 commits behind origin/main at the time (fast-forwarded before committing, so no divergence).
