@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "daemon": {
+    "listen": "127.0.0.1:6767",
+    "hostnames": [
+      "kinto.piranha-wyvern.ts.net"
+    ],
+    "mcp": {
+      "injectIntoAgents": true
+    },
+    "browserTools": {
+      "enabled": true
+    },
+    "autoArchiveAfterMerge": false,
+    "enableTerminalAgentHooks": false,
+    "appendSystemPrompt": "",
+    "cors": {
+      "allowedOrigins": [
+        "https://app.paseo.sh"
+      ]
+    },
+    "relay": {
+      "enabled": true
+    }
+  },
+  "app": {
+    "baseUrl": "https://app.paseo.sh"
+  },
+  "agents": {
+    "providers": {
+      "omp": {
+        "additionalModels": [
+          { "id": "claude-opus-5", "label": "Claude Opus 5" }
+        ],
+        "enabled": true
+      },
+      "claude": {
+        "additionalModels": [
+          { "id": "claude-opus-5", "label": "Claude Opus 5" }
+        ]
+      }
+    }
+  }
+}
