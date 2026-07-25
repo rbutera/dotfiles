@@ -437,3 +437,31 @@ branch, so `git rev-list --left-right --count HEAD...@{u}` errors out. Push and 
 any staleness/ahead-behind check written against `@{u}` fails on this machine — the same class of
 silent breakage that let the navi and expedition autopush jobs sit dead for 16 and 5 days. kinto was
 also 2 commits behind origin/main at the time (fast-forwarded before committing, so no divergence).
+||||||| parent of 141ed5a (chezmoi: stop managing __pycache__/*.pyc (a tracked .pyc was a permanent pending-add in status))
+
+## 2026-07-25 — Stop managing Python bytecode caches (`__pycache__` / `*.pyc`)
+
+### Problem
+`~/.claude/hooks/__pycache__/agent-delivery-rule.cpython-314.pyc` was a **tracked chezmoi source
+file** (`dot_claude/hooks/__pycache__/executable_agent-delivery-rule.cpython-314.pyc`, added 09:37
+the same morning, almost certainly swept in by a `chezmoi add` while the hook was being worked on).
+A compiled bytecode cache is a build artifact, never a dotfile.
+
+Left alone it reported as a permanently-pending `A` (would-add) entry in `chezmoi status`, forever.
+That matters more than the file does: a status output with a permanent entry in it trains us to skim
+past the whole output, which is how a real drift gets missed. Same reasoning as the vault-filename
+alarm being scoped to regressions — a lamp that is always on is read exactly as often as one that is
+always off.
+
+### Fix
+- Added `**/__pycache__` and `**/*.pyc` to `.chezmoiignore` (patterns match target paths).
+- `git rm -r dot_claude/hooks/__pycache__` — removed from index and worktree. Recoverable from git
+  history; nothing was deleted outside version control.
+- **Did NOT delete the deployed `~/.claude/hooks/__pycache__`.** Python regenerates it and it belongs
+  there. The change is that chezmoi no longer *manages* it, which is the actual defect.
+
+### Verified
+- `chezmoi status ~/.claude/hooks/__pycache__` → `not managed` (previously a pending add).
+- `chezmoi managed` still lists `~/.claude/hooks/agent-delivery-rule.py`, and the deployed hook is
+  present, 5.6k, mode `-rwxr-xr-x`. The negative check matters here: the artifact went, the source
+  hook did not.

@@ -31,6 +31,12 @@ Library/LaunchAgents/dev.onorca.serve.plist
 .zprezto/modules/*
 README.md
 
+# Python bytecode caches are build artifacts, never dotfiles.
+# (a stale .pyc was tracked at .claude/hooks/__pycache__ and showed as a
+#  permanently-pending add in chezmoi status -- see logs/chezmoi.md 2026-07-25)
+**/__pycache__
+**/*.pyc
+
 {{ if .wsl }}
 ~/.config/kanata/*
 ~/.config/kanata
