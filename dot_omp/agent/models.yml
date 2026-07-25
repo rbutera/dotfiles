@@ -1,0 +1,52 @@
+# ~/.omp/agent/models.yml -- provider/model overrides for oh-my-pi (`omp`).
+#
+# omp NEVER writes this file (unlike config.yml, which it owns and which is
+# therefore managed by a modify_ script). It is ours outright, so it is a plain
+# chezmoi-managed file.
+#
+# WHY THIS EXISTS
+# ---------------
+# Paseo builds the omp model picker by calling omp's ACP `getAvailableModels()`
+# and validating the result with a zod schema that requires `contextWindow` to be
+# a number. omp legitimately reports `contextWindow: null` for models whose
+# catalog entry does not declare one -- and zod rejects the ENTIRE list on the
+# first bad element, so two junk models take down every model from every enabled
+# provider. Symptom: Paseo shows the whole `omp` provider as `error`, and
+# `paseo provider models omp` prints a zod dump instead of a table.
+#
+# Observed 2026-07-25 on kinto and nimbus. The offenders in the ENABLED set are
+# opencode-go's `hy3` and `hy3-preview` (both `contextWindow: null` AND
+# `maxTokens: null`). They appeared in opencode-go's catalog partway through the
+# day, which is why a daemon restart -- not a config change -- was what surfaced
+# it: the restart refreshed omp's 2h models.db cache and pulled them in.
+#
+# groq (8 nulls) and opencode-zen (3, incl. gemini-3.5-flash-lite) carry the same
+# defect but are already hidden by the allowlist in modify_config.yml, so they
+# never reach Paseo. If a provider is ever added back to that allowlist, expect
+# to need entries here too. NOTE openrouter is NOT implicated: 0 of its 377
+# models have a null contextWindow.
+#
+# WHY OVERRIDE RATHER THAN HIDE
+# -----------------------------
+# omp has no model-level hide (`disabledProviders` is provider-granularity only;
+# there is no disabledModels/hiddenModels in the 17.x bundle -- checked). So the
+# only local lever is to give the bad entries a valid number.
+#
+# The values below are deliberately CONSERVATIVE rather than accurate: hy3 is an
+# unnamed free preview model with no published context size, and Rai's allowlist
+# exists so he talks to anthropic / openai-codex / opencode-go's real models. If
+# something ever does select hy3, a low window makes omp compact early and
+# truncate safely; a guessed-high value would overflow mid-conversation. This is
+# a schema-satisfying floor, not a spec claim.
+#
+# The real bug is upstream in Paseo (one malformed entry should drop that entry,
+# not invalidate the list). If that is fixed, this file can be deleted.
+providers:
+  opencode-go:
+    modelOverrides:
+      hy3:
+        contextWindow: 32768
+        maxTokens: 8192
+      hy3-preview:
+        contextWindow: 32768
+        maxTokens: 8192
