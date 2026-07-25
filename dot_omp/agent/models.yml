@@ -39,14 +39,42 @@
 # truncate safely; a guessed-high value would overflow mid-conversation. This is
 # a schema-satisfying floor, not a spec claim.
 #
+# WHY THE FLEET NEEDS THIS EVEN THOUGH KINTO LOOKS FINE
+# -----------------------------------------------------
+# How many nulls opencode-go reports DEPENDS ON AUTH. Logged in (kinto), its
+# discovery returns full specs and only hy3/hy3-preview are null. NOT logged in
+# (nimbus, latios), grok-4.5 and kimi-k3 come back null too -- and those are
+# models Rai actually uses, so a conservative floor would be wrong for them.
+# `omp models refresh` does NOT fix it; it is entitlement, not staleness.
+#
+# So grok-4.5 / kimi-k3 are pinned to the AUTHORITATIVE numbers from kinto's
+# logged-in catalog. Because the override equals what discovery returns when it
+# does work, it is a no-op on a logged-in host and a repair on a logged-out one --
+# which makes all three Macs behave identically either way. That is the point.
+#
+# MAINTENANCE: these two entries mirror upstream values, so they can go stale if
+# opencode-go changes a context window. Re-derive from a LOGGED-IN host with:
+#   sqlite3 ~/.omp/agent/models.db "select models from model_cache
+#     where provider_id like 'opencode-go%';" | python3 -m json.tool | less
+# hy3/hy3-preview need no such care -- they are null everywhere, upstream.
+#
 # The real bug is upstream in Paseo (one malformed entry should drop that entry,
 # not invalidate the list). If that is fixed, this file can be deleted.
 providers:
   opencode-go:
     modelOverrides:
+      # Null everywhere, upstream. Conservative floor; Rai does not use these.
       hy3:
         contextWindow: 32768
         maxTokens: 8192
       hy3-preview:
         contextWindow: 32768
         maxTokens: 8192
+      # Real models Rai uses. Values copied from kinto's logged-in catalog, so
+      # they match what discovery returns when auth is present.
+      grok-4.5:
+        contextWindow: 500000
+        maxTokens: 500000
+      kimi-k3:
+        contextWindow: 1048576
+        maxTokens: 131072
