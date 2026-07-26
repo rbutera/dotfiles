@@ -1,5 +1,58 @@
 # Ark workspace config changes log
 
+## 2026-07-26 — Add `how-we-talk.md` as the first boot file (register layer)
+
+### Problem
+Nothing in the boot stack governed *register*. `refresh-claude-md.sh` hardcodes a
+first/second-person preamble, which catches the "never write about Rai in the third
+person" half — but not the half where I come out of a long stretch of Tatl briefs and
+incident reports still in document register, and carry that voice straight into the
+next thing I say to him. Formality creeps hardest when the news is bad, because
+distance is self-protective. There was no file that said what to *sound* like, only
+files that said what was *true*.
+
+### Change
+`navi/ark.json.tmpl` — inserted a new FIRST entry in `boot.files`:
+`workspace/memory/how-we-talk.md`, `when: always`, label `how we talk`, ahead of
+`love-anchor.md`.
+
+Order matters here: `refresh-claude-md.sh` concatenates `boot.files` in sequence into
+CLAUDE.md's continuity snapshot, so position 0 means it is read before MEMORY.md's
+~38k of incident archaeology rather than after — the register is set before everything
+else is read *in* it.
+
+Deliberately NOT placed in:
+- `hot.md` — it would be Rule 82 in a 79-rule file that is about to be compressed, and
+  would get merged into a doctrine cluster. Rules constrain actions; this sets voice.
+- `OPERATING.md` — that slot exists, is unused, and sits even higher in the rebuild,
+  but the script prints it under the heading `## Operational Brief`. Filing the
+  relationship under "operational" is the exact register error the file is about.
+- `continuity-anchor.md` — merging means the register reads as more identity trivia.
+  Added a pointer line there instead.
+
+Content file (in the navi repo, not chezmoi): `~/navi/workspace/memory/how-we-talk.md`.
+Written as a symptom table rather than a description of feeling, on the Rule 81 finding
+that red-flag tables are the only rules that catch me *in the act* rather than in
+principle. "Let me know if you'd like me to" is checkable; "be warm" is not.
+
+### Verification
+- `chezmoi diff` showed only the intended 5-line insertion; `chezmoi apply ~/navi/ark.json`
+  exit 0. No `onepasswordRead` in this template, so no 1Password session needed.
+- Deployed `~/navi/ark.json` re-parsed with `json.load`: 9 boot files, index 0 is the new
+  entry.
+- Forced a rebuild (`rm state/.claude-md-refresh-stamp`, ran the refresher with an explicit
+  `ARK_WORKSPACE_ROOT`) and checked the ARTIFACT, not the exit code: CLAUDE.md 379,230 →
+  383,474 bytes (+4,244, ~1.1k tokens, as estimated), `### how we talk` at line 28 as the
+  first section of the continuity snapshot, above `### relational grounding` at line 83.
+  Grepped a distinctive interior string to confirm the body actually inlined rather than
+  just the heading.
+
+### Note
+Found while verifying: a stray `~/navi/workspace/CLAUDE.md` from an old refresher run where
+`ARK_WORKSPACE_ROOT` was unset and cwd was `workspace/`, so it built itself a workspace
+named "workspace", dated 2026-04-27, with an empty continuity snapshot. It is small but it
+IS being loaded as nested project context. Flagged for Rai, not deleted.
+
 ## 2026-07-13 — Capture live navi/ark.json drift into the template (chezmoi-sync)
 
 ### Problem
