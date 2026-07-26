@@ -87,10 +87,25 @@ MANAGED_KEY = "disabledProviders"
 DEFAULT_MODEL_ROLE = "anthropic/claude-opus-5:high"
 
 # The allowlist. Everything omp can discover that is not in here gets disabled.
+#
+# CORRECTED 2026-07-26. The first cut of this list was literally the three
+# providers Rai named ("anthropic and openai and opencode-go") — which also
+# disabled `xai-oauth` and `zai`, both of which were live and in use. grok
+# vanished from the picker, and nimbus's default model pointed at xai-oauth.
+# The instruction was "hide opencode-zen and openrouter", not "hide everything
+# except these three"; the allowlist is the mechanism, not the scope.
+#
+# The rule now: allow every provider Rai actually has credentials for, minus the
+# ones explicitly named as noise. A provider with no credential never reaches the
+# picker anyway, so leaving it out of this list is what keeps zenmux (205 models)
+# and google-vertex from appearing if a stray credential ever shows up — it is
+# not a claim that Rai rejected them.
 ALLOWED_PROVIDERS = [
     "anthropic",
     "openai-codex",
     "opencode-go",
+    "xai-oauth",
+    "zai",
 ]
 
 # Every provider id omp is known to be able to discover, across the whole fleet
