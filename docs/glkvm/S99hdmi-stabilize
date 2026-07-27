@@ -1,0 +1,116 @@
+#!/bin/sh
+# S99hdmi-stabilize — GL Comet (glkvm) HDMI receiver stabiliser + degradation logger.
+#
+# WHY (2026-07-27, Rai's kinto): the glkvm-fed Dell blanks for ~1s sporadically, and did
+# so repeatedly for the first ~20 minutes after a reboot. The KVM's own kernel log shows
+# the receiver losing lock -- register 0xD211 reads 0xff -- and re-detecting the source,
+# sometimes with plainly corrupt values ("1920x1080@16 fps, htotal=131070").
+#
+# The vendor's own repair for exactly this is in /etc/init.d/S23hdmi:165 --
+#   <edid tool> -e $EDID_FILE && sleep 1 && echo 1 > $DEVICES_PATH/reset
+# but that whole branch is gated on /etc/kvmd/user/edid_updated != "2" (S23hdmi:159).
+# Once a custom EDID has been applied the flag is "2" forever, so the reset NEVER runs on
+# a normal boot and the receiver is left in whatever state the source's power-on
+# negotiation happened to leave it in. That is why a hand-run reset "fixed" this before
+# and why it came back after the next reboot -- nothing re-applied it.
+#
+# This script re-applies just the reset (NOT the EDID -- the custom 4K30 Dell EDID at
+# /etc/kvmd/user/edid.txt is deliberate and must not be disturbed), then watchdogs.
+#
+# VERIFIED SAFE before shipping: `echo 1 > .../reset` takes the receiver to "no signal"
+# for ~4s and then re-locks to 3840x2160@30, while the splitter's hdmi_state and hdmi_out
+# both stay "connected" throughout. The lt6911c sits on the lt86102sxe splitter's second
+# output, so the monitor branch is independent of the capture branch -- resetting the
+# receiver does not interrupt the picture on the Dell.
+#
+# It also LOGS degradation with timestamps, because the sporadic blanks are invisible to
+# both macOS (the splitter isolates HPD from the source) and to a casual dmesg read. Log
+# lives on /userdata so it survives reboots.
+#
+# Reset storms are worse than the fault, so remediation is rate-limited by COOLDOWN and
+# only fires on repeated evidence, never a single reading.
+
+RX=/sys/bus/i2c/devices/1-002b
+LOG=/userdata/hdmi-stabilize.log
+SETTLE=90        # let the source finish power-on negotiation before touching anything
+COOLDOWN=180     # min seconds between remediation resets
+POLL=5
+THRESHOLD=2      # 0xD211 read failures within one window before we act
+
+log() { echo "$(date '+%F %T') $*" >>"$LOG"; }
+
+ff_count() { dmesg 2>/dev/null | grep -c '0xD211 is ff'; }
+res() { cat "$RX/resolution" 2>/dev/null; }
+
+do_reset() {
+	log "RESET issued ($1) [res=$(res)]"
+	echo 1 > "$RX/reset" 2>/dev/null
+	sleep 8
+	log "RESET done, res=$(res)"
+}
+
+case "$1" in
+start)
+	[ -w "$RX/reset" ] || { log "no $RX/reset -- wrong hardware, exiting"; exit 0; }
+	(
+		log "=== stabiliser start (settle ${SETTLE}s) ==="
+		sleep "$SETTLE"
+
+		# The reset S23hdmi skips because edid_updated=2. Replicates the manual fix.
+		do_reset "boot re-init"
+
+		last_ff=$(ff_count)
+		last_action=$(date +%s)
+		bad_res_since=0
+
+		while :; do
+			sleep "$POLL"
+			now=$(date +%s)
+			cur_ff=$(ff_count)
+			cur_res=$(res)
+
+			# dmesg ring can wrap; treat a decrease as a reset of the baseline.
+			[ "$cur_ff" -lt "$last_ff" ] && last_ff=$cur_ff
+
+			delta=$((cur_ff - last_ff))
+
+			case "$cur_res" in
+				*"no signal"*|"")
+					[ "$bad_res_since" -eq 0 ] && { bad_res_since=$now; log "DEGRADED res='$cur_res'"; }
+					;;
+				*)
+					[ "$bad_res_since" -ne 0 ] && log "RECOVERED res=$cur_res after $((now - bad_res_since))s"
+					bad_res_since=0
+					;;
+			esac
+
+			if [ "$delta" -ge "$THRESHOLD" ]; then
+				log "INSTABILITY $delta new 0xD211 failures (res=$cur_res)"
+				if [ $((now - last_action)) -ge "$COOLDOWN" ]; then
+					do_reset "instability delta=$delta"
+					last_action=$(date +%s)
+				else
+					log "  (in cooldown, $((COOLDOWN - (now - last_action)))s left -- logged only)"
+				fi
+				last_ff=$cur_ff
+			fi
+
+			# Stuck with no signal for a while and cooldown clear -> try recovery.
+			if [ "$bad_res_since" -ne 0 ] && [ $((now - bad_res_since)) -ge 30 ] \
+			   && [ $((now - last_action)) -ge "$COOLDOWN" ]; then
+				do_reset "no signal for $((now - bad_res_since))s"
+				last_action=$(date +%s)
+				bad_res_since=0
+			fi
+		done
+	) &
+	;;
+stop)
+	log "=== stabiliser stop ==="
+	;;
+*)
+	echo "usage: $0 {start|stop}"
+	exit 1
+	;;
+esac
+exit 0

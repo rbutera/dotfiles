@@ -1,5 +1,89 @@
 # Display / KVM changes log
 
+## 2026-07-27 (third pass) — KVM-side stabiliser + a validated instrument
+
+### The actionable finding
+`/etc/init.d/S23hdmi:159` gates the vendor's own HDMI repair on
+`/etc/kvmd/user/edid_updated != "2"`:
+
+```sh
+if [ ! -f "$EDID_UPDATED_FLAG" -o "`cat $EDID_UPDATED_FLAG`" != "2" ]; then
+    $TOOL -d /dev/i2c-1 -e $EDID_FILE && sleep 1 && echo 1 > $DEVICES_PATH/reset
+    echo 2 > $EDID_UPDATED_FLAG
+fi
+```
+
+Kinto's flag is `2` (custom 4K30 Dell EDID applied 2026-06-25 / 07-09), so **that reset has
+never run on a normal boot since**. The receiver is left in whatever state the source's
+power-on negotiation produced. That is precisely why a hand-run reset stopped this before
+and why it returned after the next reboot — nothing re-applied it. The prior session's
+truncated `echo 1 > /sys/bus/i2c/devices/$(cat /proc/gl-hw-info/hdmipatch)/…` command was
+this same write.
+
+### Changes
+**`docs/glkvm/S99hdmi-stabilize`** (new, tracked here; deployed to the KVM at
+`/etc/init.d/S99hdmi-stabilize`, persisted via the overlay at
+`/userdata/overlay/upper/etc/init.d/`). `docs/` is in `.chezmoiignore`, so this is
+version-controlled but never deployed into `$HOME`.
+
+- Waits 90s for the source to finish negotiating, then issues the reset S23hdmi skips.
+  Re-applies **only** the reset — never the EDID, since the custom 4K30 Dell EDID is
+  deliberate.
+- Then watchdogs: counts `0xD211 is ff` receiver read-failures in dmesg and watches for
+  `no signal`, logging every degradation with a timestamp to `/userdata/hdmi-stabilize.log`
+  (persistent, unlike /tmp). Remediates with a reset, rate-limited by a 180s cooldown and
+  only on repeated evidence — a reset storm would be worse than the fault.
+
+### Verified, not assumed
+```
+11:21:14 === stabiliser start (settle 90s) ===
+11:22:44 RESET issued (boot re-init) [res=3840x2160@30]
+11:22:54 RESET done, res=3840x2160@30
+```
+Deployed, `sh -n` clean, confirmed in the overlay upper dir, ran end-to-end.
+
+**The 5Hz sysfs poller is now a validated instrument.** It captured both resets exactly:
+```
+11:16:38 res 3840x2160@30 -> no signal ;  11:16:43 -> 3840x2160@30   (manual reset)
+11:22:46 res 3840x2160@30 -> no signal ;  11:22:51 -> 3840x2160@30   (stabiliser)
+tx_state / tx_out unchanged throughout all four transitions
+```
+Two consequences: a ~4s event cannot slip past it, so a future "no change" reading is
+genuine evidence; and resetting the receiver provably does **not** disturb the monitor
+branch — the lt6911c hangs off the lt86102sxe splitter's second output, so the capture and
+monitor branches are independent. Nothing on the KVM's streaming side can blank the Dell.
+
+This also makes the remaining case decisive by construction: if a blank occurs with no
+poller transition, the source and splitter are both innocent and it is monitor-side.
+
+### Retractions from earlier passes (all on evidence)
+- **`hotplug_status = error` is not a fault.** It survived a clean reset that produced a
+  good `0xD211 is 0` read. Boot dmesg explains it: `lt6911c: Failed to get hotplug-gpios if
+  lt86102sxe before is find` — with the splitter present the receiver gets no hotplug GPIO,
+  so the attribute reads `error` by design.
+- **HDMI audio renegotiation is not it.** The custom EDID does advertise audio and macOS
+  does expose `DELL 4K` as an HDMI audio endpoint (2ch, 48kHz), which was a good lead — but
+  `audio_present` has been `0` and unchanged at 5Hz throughout, with no resolution
+  re-detects. Audio is not toggling.
+- **"macOS logged nothing during the 08:21–08:42 storm" was invalid.** `log show` returns
+  **zero lines total** for that window — unified log retention does not reach back that far.
+  That was a broken instrument, not an absence of events. (The 10:58 check was inside
+  retention and does stand.)
+- Earlier retractions stand: the DCP reset loop (routine 10-minute OSLog rotation) and the
+  cable.
+
+### Honest state
+The boot-time storm now has two independent mitigations (mode pinning on the Mac, receiver
+re-init on the KVM). The sporadic ~1s blank has **never been observed inside a validated
+window**, so it is not proven fixed — but every mechanism reachable from either side has
+been tested and eliminated, the one repair the vendor's own code prescribes (and that
+previously worked by hand) is now applied persistently, and any recurrence is logged and
+self-healed rather than invisible. Next step on recurrence: read
+`/userdata/hdmi-stabilize.log` and the poller output; no poller transition means
+monitor-side.
+
+---
+
 ## 2026-07-27 (later) — CORRECTION: there are TWO blanking phenomena, not one
 
 The entry below is accurate about the **boot-time** storm and the mode-pinning fix, but it
