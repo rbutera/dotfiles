@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.rai.pin-displays</string>
+	<!--
+	  Pins the display layout at login so the glkvm-fed Dell stops blanking after a
+	  reboot.
+
+	  WHY: verified 2026-07-27 by sshing into the KVM (glkvm, 100.78.184.67) and reading
+	  its kernel log. Its HDMI receiver (lt6911c) loses lock, register 0xD211 reads 0xff,
+	  and on each re-detect the HDMI output chip (lt86102sxe) emits "Sending HDMI
+	  disconnect event" / "Sending HDMI connect event". Each pair IS one blank-and-return
+	  on the monitor. Four pairs occurred between 08:21 and 08:42 while the detected mode
+	  flapped 1920x1080@60 <-> 3840x2160@30, then it locked and stayed stable for hours.
+
+	  A boot-time negotiation storm that self-resolves, in other words -- so the fix is to
+	  remove the flap by pinning the mode rather than to replace hardware. Explicitly NOT
+	  a cable fault (Rai ruled that out; the KVM logs confirm it).
+
+	  30Hz on that panel is an accepted limitation, not a bug to chase: the KVM's EDID
+	  advertises nothing better at native 4K.
+
+	  The wrapper is self-gating -- it exits 0 unless all three of kinto's persistent
+	  screen ids are present -- so this agent is harmless on latios or nimbus. It is also
+	  idempotent: re-applying a layout forces a mode set, which itself blanks the screen,
+	  so it only acts when the mode has actually drifted.
+
+	  KeepAlive is false. This is a one-shot at login, not a daemon; the wrapper does its
+	  own bounded wait (up to 120s) for displays to attach.
+
+	  See logs/displays.md for the full investigation.
+	-->
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/bin/pin-displays</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin:/opt/homebrew/sbin{{ else }}/usr/local/bin:/usr/local/sbin{{ end }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<false/>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/pin-displays.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/pin-displays.log</string>
+</dict>
+</plist>
