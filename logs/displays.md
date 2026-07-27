@@ -1,5 +1,60 @@
 # Display / KVM changes log
 
+## 2026-07-27 (resolution) — capture hypothesis killed by experiment; blanking stopped
+
+### The controlled test that settled it
+The screen-capture loop (runaway `agent-browser`, then the omp agent's `capture.mjs`) was
+the only trigger correlating with the two sporadic blanks Rai reported (~10:37, ~10:58 —
+both after the loop started ~10:31). Rather than ship that as the cause on correlation, it
+was tested directly: 200 `screencapture -x -D 1` display captures at 2.5Hz over 100s,
+matching the runaway's observed rate.
+
+```
+probe start 11:31:18 / end 11:33:20, frames=200
+macOS logged 793 ScreenCapture events in the window   <- probe was a valid analogue
+KVM validated 5Hz poller: 0 new transitions
+stabiliser watchdog:      0 degradation entries
+kernel lt6911c/lt86102sxe: 0 new lines
+```
+
+**Display capture does not perturb the HDMI link.** The capture hypothesis is dead — and
+this is the one theory today eliminated by experiment rather than by absence of evidence.
+The agent-browser correlation was coincidence; it was nearly reported as the cause.
+
+Worth recording as a reasoning trap: kernel silence was *not* evidence either way. There
+were no `lt6911c`/`lt86102sxe` lines at all between 08:42 and 11:16 — a 2.5h window that
+*contains both reported blanks*. Any argument of the form "no kernel events, therefore
+fixed" would have been wrong on its own data.
+
+### Why the blanking stopped
+The repair is the one in the third-pass entry below: `S23hdmi:159` gates the vendor's
+receiver reset on `edid_updated != "2"`, kinto's flag is `2`, so that reset had not run on
+any boot since the custom EDID went on in June. `S99hdmi-stabilize` now applies it at boot
+and watchdogs afterwards. This matches Rai's own account exactly — hand-run reset fixed it,
+next reboot brought it back, because nothing re-applied it.
+
+### Non-recurrence evidence
+```
+validated 5Hz poller, 11:12 -> 12:01   49 min, 0 spontaneous transitions
+                                        (only the 2 deliberate resets, 11:16 and 11:22)
+watchdog degradation entries            0
+since last reported blank (10:58)      64 min
+prior observed cadence (10:37->10:58)  ~20 min  => 3.2 intervals clean
+```
+The poller is validated, not assumed: it captured both deliberate resets exactly
+(`3840x2160@30 -> no signal -> 3840x2160@30`, ~4.3s each), so a multi-second event cannot
+slip past it, and `tx_state`/`tx_out` never moved during any of them.
+
+**Basis for calling this fixed:** a mechanism-grounded repair that matches the historical
+"worked by hand, lost on reboot" pattern, plus non-recurrence across 3+ prior-cadence
+intervals on an instrument proven able to see the event. Not claimed: a directly observed
+causal trace for the two sporadic blanks specifically — they were never caught inside an
+instrumented window, since the instrument did not exist until 11:12. If it ever returns,
+`/userdata/hdmi-stabilize.log` records it and the reset self-heals; a recurrence with no
+poller transition is monitor-side by construction.
+
+---
+
 ## 2026-07-27 (third pass) — KVM-side stabiliser + a validated instrument
 
 ### The actionable finding
