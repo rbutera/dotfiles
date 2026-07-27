@@ -1,5 +1,84 @@
 # Display / KVM changes log
 
+## 2026-07-27 (later) — CORRECTION: there are TWO blanking phenomena, not one
+
+The entry below is accurate about the **boot-time** storm and the mode-pinning fix, but it
+was **wrong to present that as fixing the blanking generally**. Rai reported another blank
+at ~10:58, well after the 08:42 settle. Re-checked both sides at the time:
+
+- KVM `dmesg` frozen at 1121 lines, last entry uptime 907761s while the box was at
+  909567s — **30 minutes with zero kernel messages**. No `lt86102sxe` HPD pair.
+- macOS unified log: nothing.
+
+So the 10:58 event was invisible to both the source and the KVM, which rules out the
+`lt6911c`/`lt86102sxe` HPD mechanism that caused the morning storm. Two distinct
+phenomena:
+
+**(1) Boot-time negotiation storm** — real, logged, mechanism proven, mitigated by
+`com.rai.pin-displays` (see below). Occurred 08:21–08:42 only.
+
+**(2) Ongoing sporadic ~1s blanks** — mechanism NOT yet established. Neither side logs it.
+
+### Leading candidate for (2), correlation only — NOT proven
+A runaway `agent-browser` was found: `/Users/rai/.asdf/.../agent-browser-darwin-arm64`
+driving **24** `Chrome for Testing` processes in a ~2Hz screen-capture loop, visible as
+paired `powerd` assertions:
+
+```
+Process Google Chrome for Testing.9269 Created  NoDisplaySleepAssertion "Capturing"
+Process Google Chrome for Testing.9269 Released NoDisplaySleepAssertion "Capturing"
+```
+
+Rate per minute: `11:03→16, 11:04→4, 11:05→12, 11:06→8, [killed 11:07:25] 11:07→0,
+11:08→4`. It started ~10:31 and was **abandoned** — listening on 127.0.0.1:51913 with no
+client connected. Both blanks Rai reported (~10:37, ~10:58) fall after 10:31.
+
+Plausible mechanism: repeated screen-capture start/stop reconfigures the framebuffer,
+which at a marginal 4K30 (297MHz, the Comet's ceiling) glitches the link briefly without
+either side logging a state change. **This is a hypothesis with temporal correlation and
+no proven causal link.** Recorded as a lead, not a conclusion — two earlier theories today
+(DCP reset loop, cable) were already retracted on evidence.
+
+Note `hotplug_status` on the receiver reads **`error`** while video flows normally, which
+is consistent with the `0xD211` read failures and suggests the link sits marginal even
+when stable.
+
+### Instrumentation left running (2026-07-27 ~11:12, 3h)
+Because the event is sporadic and unlogged, both sides are now instrumented so the next
+occurrence is captured rather than reconstructed:
+- **KVM**: `/tmp/hw2.sh` → `/tmp/hdmi-w2.log`. Polls `lt86102sxe/hdmi_state`,
+  `hdmi_out`, and `lt6911c/hotplug_status|resolution|real_resolution|audio_present` 5x/sec
+  and logs only transitions with ms timestamps. A 1s blank cannot slip between samples.
+- **Mac**: `log stream` filtered to display/HDCP/assertion events.
+
+How to read the next event:
+| Poller shows | Capture burst same second | Conclusion |
+|---|---|---|
+| a transition | — | genuine KVM link event |
+| no change | yes | capture-driven framebuffer churn |
+| no change | no | monitor resyncing on a marginal link; nothing logs it |
+
+### Related real bug found (separate from the blanking)
+`~/focused/scripts/browser-memory-guard.sh` (untracked) exists precisely to reap runaway
+automation browsers — its header records that on 2026-07-27 parallel subagents spawning
+Playwright/Chrome exhausted 24GB and **forced a power cycle** (this morning's 08:21 boot).
+It did not reap this runaway because its `free_mb()` counts inactive pages as available:
+
+```
+free_mb() reports:  5420 MB     (MIN_FREE_MB=2000, so "plenty of headroom")
+reality:            60 MB truly free, 9167 MB compressor, 3.58M swapouts
+kern.memorystatus_vm_pressure_level = 2   (WARN)
+```
+
+**Do not naively "fix" `free_mb()`.** The category-B pressure path reaps browsers *and*
+test runners oldest-first until `free >= MIN_FREE_MB`; with an accurate metric that
+condition can never clear on this box, so it would kill every vitest run every 60 seconds.
+The safe surgical change is to reap *abandoned* automation-browser trees (no client on
+their debug port) at any age under category A, which would have caught this one at minute
+zero. Calibrating category B is a real aggressiveness tradeoff and is Rai's call.
+
+---
+
 ## 2026-07-27 — Fix post-reboot blanking on the glkvm-fed Dell (pin the mode at login)
 
 ### Motivation
