@@ -109,7 +109,7 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
   del(.extraKnownMarketplaces["openai-codex"]) |
   if ($mac or $posix) then
     .hooks.PreToolUse =
-      (if $mac then [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}]}, $base.orcaHook] else [] end)
+      (if $mac then [{"matcher": "Bash", "hooks": [{"type": "command", "command": "rtk hook claude"}, {"type": "command", "command": "node /Users/rai/navi/bin/shell-trap-check.mjs"}]}, $base.orcaHook] else [] end)
       + (if $posix then [$base.agentDeliveryHook] else [] end)
   else . end
 '
