@@ -1,6 +1,6 @@
 # Claude Code config changes log
 
-## 2026-07-28: shell-trap-check: shell-trap-check added as a second PreToolUse Bash hook
+## 2026-07-28: shell-trap-check added as a second PreToolUse Bash hook
 
 **Problem.** On the night of 2026-07-27/28 Navi hit five distinct instrument failures in one session: a truncated pretty-print produced a wrong count that reached Rai twice; a WebSearch summary produced a fabricated quote that reached him as fact and had to be retracted; a case-sensitive grep produced a false "that comment never landed"; a noise filter silently dropped a real member from an applicability sweep; and backticks inside a double-quoted shell string executed two bead ids as commands and deleted them from a memory file.
 
