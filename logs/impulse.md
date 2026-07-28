@@ -1,5 +1,20 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-07-28 -- Add ark-discord-failed-audio-sweep (7-day retention on preserved voice audio)
+
+**Motivation:** On 2026-07-28 a long voice utterance died to a local STT timer and was unrecoverable by construction — the audio had been streamed to Cartesia and the buffer released. Rai decided on voice at 18:31 BST that any audio which FAILS is preserved on disk for 7 days and then cleaned up, verbatim: *"it should never happen that we can't just regenerate from my audio."* The ark-discord daemon now preserves that audio (bead `workspace-ccxq7`, lumiere commit `2bfb8ade`).
+
+The daemon sweeps expired files at startup and every 6h, but the DELETE half of the decision is a privacy promise and has to hold when the daemon is dead. A retention policy that only runs when everything is fine is not a retention policy, so the same sweep also runs out of process. Impulse cron rather than a new launchd agent, per hot.md Rule 65.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl`:**
+- Added one job, `ark-discord-failed-audio-sweep`, to the **nimbus** branch only. Daily cron `10 4 * * *` Europe/London (`trigger.kind: "cron"` — `"interval"` has no execution path), `maxConcurrent: 1`, `dedupe: skip-if-running`, `quotaAware: false`, `enabled: true`.
+- Target: `node ~/dev/lumiere/apps/ark-discord/dist/failed-audio-retention-cli.js`. Same `sweepFailedAudio` the daemon calls — one implementation, two independent triggers, deliberately not a second copy of the retention rule.
+- No other job touched. kinto and the fallback branch unchanged.
+
+**NOT deployed.** Source only. `chezmoi execute-template` renders and parses (29 jobs); `chezmoi diff ~/.config/impulse/jobs.json` shows this addition and nothing else. A full `chezmoi apply` was not possible — `chezmoi status` errors on a 1Password authorization timeout, so no `op` session was live.
+
+⚠️ **Ordering matters on deploy:** the job points at a `dist/` artifact that does not exist until `nx build ark-discord` has run. Apply it AFTER the build, or it errors nightly until then.
+
 ## 2026-07-21 -- Give Majora canary and repair runs enough scheduler headroom
 
 **Motivation:** The redesigned OpenAI-only Majora engine completed its accepted live canary in five minutes, while a bounded timeout/retry can legitimately exceed the previous 600-second Impulse job limit. A scheduler kill would strand the vault lock until stale-lock recovery and turn a valid repair pass into an operational failure.

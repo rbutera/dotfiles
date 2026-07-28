@@ -1185,6 +1185,36 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/majora-gatekeeper.sh"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/majora-research-engine"
     }
+  },
+  {
+    "id": "ark-discord-failed-audio-sweep",
+    "name": "ark-discord: expire preserved failed-capture audio past 7 days",
+    "trigger": {
+      "kind": "cron",
+      "expr": "10 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord/dist/failed-audio-retention-cli.js"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["ark-discord", "voice", "privacy", "retention", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord/dist/failed-audio-retention-cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord"
+    }
   }
 ]
 {{- else }}
