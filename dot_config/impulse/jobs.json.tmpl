@@ -315,6 +315,36 @@
 {{- else if eq .chezmoi.hostname "nimbus" }}
 [
   {
+    "id": "quota-scrape-oauth",
+    "name": "Claude Quota via OAuth usage endpoint (PRIMARY, every 5m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/oauth-cli.js"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "quota", "shadow"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/oauth-cli.js"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
     "id": "dossier-refresh",
     "name": "Dossier Refresh (oldest-first, every 4h)",
     "trigger": {
@@ -1035,7 +1065,7 @@
   },
   {
     "id": "quota-scrape",
-    "name": "Claude Quota Scrape (active account, every 5m)",
+    "name": "Claude Quota Scrape via CamoFox (SHADOW, every 5m)",
     "trigger": {
       "kind": "cron",
       "expr": "*/5 * * * *",
@@ -1048,7 +1078,11 @@
     "payload": {
       "kind": "shell",
       "cmd": "node",
-      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"]
+      "args": [
+        "{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js",
+        "--output={{ .chezmoi.homeDir }}/.local/state/impulse/subscription-usage-camoufox.json",
+        "--events={{ .chezmoi.homeDir }}/.local/state/impulse/scrape-events-camoufox.jsonl"
+      ]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -1056,10 +1090,14 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["infrastructure", "quota"],
+    "tags": ["infrastructure", "quota", "shadow"],
     "inputs": {
       "cmd": "node",
-      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"],
+      "args": [
+        "{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js",
+        "--output={{ .chezmoi.homeDir }}/.local/state/impulse/subscription-usage-camoufox.json",
+        "--events={{ .chezmoi.homeDir }}/.local/state/impulse/scrape-events-camoufox.jsonl"
+      ],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   },
