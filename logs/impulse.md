@@ -1,5 +1,78 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-07-29 -- Quota producer cutover: OAuth usage endpoint replaces CamoFox as primary (nimbus only)
+
+**Motivation:** bead `workspace-cdkdk`. The CamoFox quota scraper had read
+`is_authenticated: false` / `windows: []` / `classification: terminal` for the whole
+of 2026-07-29, so every autonomy gate that consults quota proceeded blind. Its chain
+has four independent rot points: the CamoFox binary, `~/.camofox/cookies/claude.txt`
+expiry, the claude.ai session, and the page shape. Rai found tokenmaxx and asked
+whether its method was more resilient; the investigation found something better than
+tokenmaxx's undocumented response headers, namely a first-party endpoint,
+`GET https://api.anthropic.com/api/oauth/usage`, authenticated with the Claude Code
+OAuth token from the macOS Keychain. Same organisation (confirmed via the
+`anthropic-organization-id` response header matching the org id in the CamoFox URL),
+same field names, so the existing parser and every downstream consumer are unchanged.
+
+**Changed** in `dot_config/impulse/jobs.json.tmpl`, NIMBUS BRANCH ONLY:
+
+- Added `quota-scrape-oauth`, running `libs/claude-quota-scraper/dist/oauth-cli.js`,
+  every 5 minutes. It is now the PRIMARY: no `--output` override, so it writes the
+  canonical `~/.local/state/impulse/subscription-usage.json` and appends to the
+  canonical `scrape-events.jsonl`.
+- `quota-scrape` (the CamoFox scraper) is demoted to a SHADOW. It keeps its job id
+  and cron, and gains
+  `--output=~/.local/state/impulse/subscription-usage-camoufox.json` and
+  `--events=~/.local/state/impulse/scrape-events-camoufox.jsonl`.
+
+kinto and the default branch are untouched and still run CamoFox as primary: the
+OAuth reader is proven against this machine's keychain and nothing else, and Florence
+has her own credentials.
+
+**Why no job was renamed or removed:** adding or deleting a job id would need
+`sync-crons --prune` to clear the stale Hatchet cron, and prune deletes any cron whose
+job is absent from the DEPLOYED `jobs.json`. There is pre-existing drift there
+(`wttj-pipeline-tick` is in the template and not deployed, because it shipped
+deliberately unapplied on 2026-07-29 for want of a 1Password session), so a prune would
+have deleted a cron that was not mine to touch. Expressing the cutover as an args
+change on two jobs that already exist avoids the question entirely. Both ids stay
+accurate: `quota-scrape` genuinely IS the CamoFox browser scrape, and the OAuth reader
+is not scraping anything.
+
+**Why the two producers get separate `--events` files:** the quota freshness watchdog
+treats any recent terminal failure in the event tail as reason to alert the owner.
+Leaving both on one file would let the permanently-failing CamoFox shadow raise an
+alarm about a perfectly healthy primary. `--events` was added to both CLIs for this.
+
+**Applied:** by hand to `~/.config/impulse/jobs.json`, because `op whoami` reports the
+account is not signed in and `chezmoi apply` therefore cannot render the template. The
+deployed file and the template carry the identical change and were diffed key by key
+after editing, so a later `chezmoi apply` is a no-op for this file.
+
+Then `tsx src/main.ts sync-crons` from `apps/impulse` (required: the cron's stored
+input carries the args), and `launchctl kickstart -k gui/501/com.rai.impulse-worker`
+so the worker picked up two source changes in `apps/impulse` that it had been running
+without for 29 hours.
+
+**Verified live, on the real schedule rather than by kickstart:**
+
+- 20:20:00 the shadow job wrote real numbers to the shadow path while CamoFox wrote
+  `windows: []` to the canonical path at 20:20:05, proving the scheduled invocation
+  works before anything depended on it.
+- 20:25:00 after the cutover, canonical `subscription-usage.json` read
+  `source: oauth-usage-api`, `is_authenticated: true`, five_hour 3%, seven_day 60%.
+- 20:25:06 CamoFox wrote `account_session_invalid` to the shadow path, still running,
+  still not deleted.
+- 20:25:35 the restarted worker's blackboard in Postgres read
+  `quota.fiveHourPercent 3`, `quota.sevenDayPercent 60`, `quota.usedPercent 60`,
+  `quota.level healthy`. Quota is measurable again for the first time that day.
+
+**To revert:** in the nimbus branch of the template, give `quota-scrape` back its bare
+`["<home>/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"]` args and give
+`quota-scrape-oauth` the `--output`/`--events` shadow overrides (or set it
+`"enabled": false`), mirror into `~/.config/impulse/jobs.json`, run `sync-crons`, and
+restart the worker. Nothing was deleted, so the old arrangement is a config edit away.
+
 ## 2026-07-29 -- Add wttj-pipeline-tick (WTTJ job-application pipeline, shipped disabled)
 
 **Motivation:** bead `workspace-328pb`, child of `workspace-g179l`/`workspace-bgizk` (the WTTJ job-application pipeline, career-critical probation insurance). Four sibling beads had already shipped the pipeline, the phrasing library, the public sourcing adapter, and the Impulse-tick entrypoint itself (`dist/impulse-tick.js`, bead `workspace-s7aos`) — the only missing piece was scheduling it. Design doc: `~/dev/expedition/projects/career/wttj-pipeline-impulse-wiring-design-2026-07-18.md`.
