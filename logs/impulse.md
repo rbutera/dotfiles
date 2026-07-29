@@ -1,5 +1,19 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-07-29 -- Add wttj-pipeline-tick (WTTJ job-application pipeline, shipped disabled)
+
+**Motivation:** bead `workspace-328pb`, child of `workspace-g179l`/`workspace-bgizk` (the WTTJ job-application pipeline, career-critical probation insurance). Four sibling beads had already shipped the pipeline, the phrasing library, the public sourcing adapter, and the Impulse-tick entrypoint itself (`dist/impulse-tick.js`, bead `workspace-s7aos`) — the only missing piece was scheduling it. Design doc: `~/dev/expedition/projects/career/wttj-pipeline-impulse-wiring-design-2026-07-18.md`.
+
+**What changed in `dot_config/impulse/jobs.json.tmpl`:**
+- Added one job, `wttj-pipeline-tick`, to the **nimbus** branch only (end of array, after `ark-discord-failed-audio-sweep`). Cron `0 */6 * * *` Europe/London (every 6h, the design doc's proposed default — Rai did not weigh in on cadence before this ticked, so the recommended default was used per the bead's own instruction). `maxConcurrent: 1`, `dedupe: skip-if-running`, `quotaAware: false` (this job gates its own quota internally; the flag is schema-required but unconsumed for `script`-kind targets — checked against `apps/impulse` source, not assumed), `timeout: 1800`.
+- Target: `node ~/dev/lumiere/apps/wttj-pipeline/dist/impulse-tick.js` directly, no wrapper script (the entrypoint needs no local-secret loading, unlike `majora-gatekeeper.sh`). `inputs.cwd` set to the app directory — deliberately, so the entrypoint's own default state-dir resolution (`./state/wttj-pipeline` relative to cwd) lands on the exact absolute path `recap-health-monitor.mjs`'s existing WTTJ guard (`workspace-zn6mb`) already hardcodes. No `WTTJ_PIPELINE_STATE_DIR` override anywhere, by design.
+- **`enabled: false`.** `WTTJ_PIPELINE_ENABLED` (the app-level env gate) also remains unset everywhere. Both are deliberate, belt-and-suspenders (Rule 57) — this is the single decision that takes WTTJ live, and it stays Rai's.
+- No other job touched. kinto and the fallback branch unchanged.
+
+**Cadence/guard coupling checked, not assumed:** `recap-health-monitor.mjs`'s `WTTJ_PIPELINE_CADENCE_MS` constant is `6 * 60 * 60 * 1000` — matches the landed cadence exactly, so that file needed no edit. Recorded on the bead and in `wttj-pipeline-STATE.md` so the arithmetic is on record rather than trusted.
+
+**NOT deployed.** Source only. `chezmoi execute-template` renders and parses (30 jobs on nimbus); a target-scoped `chezmoi diff -- ~/.config/impulse/jobs.json` shows exactly this one addition and nothing else (`chezmoi diff` with no target failed on an unrelated file's expired 1Password read — `dot_aider.conf.yml.tmpl` — so the diff was scoped instead of skipped). A full `chezmoi apply` was not attempted: `op whoami` reports "account is not signed in" despite `op account list` succeeding (that command lists configured accounts and needs no live session — verified the distinction before trusting it), so no session is actually active.
+
 ## 2026-07-28 -- Add ark-discord-failed-audio-sweep (7-day retention on preserved voice audio)
 
 **Motivation:** On 2026-07-28 a long voice utterance died to a local STT timer and was unrecoverable by construction — the audio had been streamed to Cartesia and the buffer released. Rai decided on voice at 18:31 BST that any audio which FAILS is preserved on disk for 7 days and then cleaned up, verbatim: *"it should never happen that we can't just regenerate from my audio."* The ark-discord daemon now preserves that audio (bead `workspace-ccxq7`, lumiere commit `2bfb8ade`).
