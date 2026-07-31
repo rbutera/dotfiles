@@ -1,5 +1,44 @@
 # zshenv changelog
 
+## 2026-07-28 — Databricks prod PAT added to the work-only easyjet secrets group
+
+### Motivation
+
+Needed the easyJet **production** Databricks PAT available as an env var, on work
+machines only (`latios`, `kinto`).
+
+### Change
+
+No new file was created. `dot_config/zsh/easyjet.zsh.tmpl` already *is* the
+"work-machines-only easyjet zsh file imported by .zshenv" — it sits in the
+`~/.config/zsh/*.zsh` secrets-group directory that `.zshenv`'s loader loops over,
+and its entire body is wrapped in `{{ if has .chezmoi.hostname .host_groups.work }}`
+(`work = ["latios", "kinto"]` in `.chezmoidata.toml`). On non-work hosts it
+renders to just the header comment and performs zero `op` reads. A second file
+would have duplicated that gating for no benefit, so the export was appended to
+the existing group instead.
+
+Added:
+
+```
+export DATABRICKS_PROD_TOKEN={{ onepasswordRead "op://focused/easyjet databricks prod PAT/credential" | quote }}
+```
+
+### Why `DATABRICKS_PROD_TOKEN` and not `DATABRICKS_TOKEN`
+
+The databricks CLI and every SDK/dbx-aware tool auto-consume a bare
+`DATABRICKS_TOKEN` from the environment. Exporting the **prod** PAT under that
+name would silently point every ad-hoc `databricks ...` invocation at
+production, with no opt-in step. The explicit name forces a deliberate
+per-command opt-in:
+
+```bash
+DATABRICKS_TOKEN="$DATABRICKS_PROD_TOKEN" databricks ...
+```
+
+`DATABRICKS_HOST` was not set — the workspace URL wasn't specified and isn't
+guessable; add it to the same block when known.
+
 ## 2026-07-13 — Export OP_ACCOUNT unconditionally, by user ID (not the `personal` shorthand)
 
 ### Problem

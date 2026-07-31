@@ -1,4 +1,4 @@
-# ── Secrets group: easyJet / Atlassian / SonarQube (work hosts only) ───────────
+# ── Secrets group: easyJet / Atlassian / SonarQube / Databricks (work only) ────
 # Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
 # Apply just this group:  chezmoi apply ~/.config/zsh/easyjet.zsh
 #
@@ -26,4 +26,11 @@ export SONARQUBE_ORG=easyjet-dev
 export SONARQUBE_URL=https://sonarcloud.io
 
 export AWS_PROFILE=ej-dev
+
+# Databricks (production workspace).
+# Deliberately NOT exported as bare DATABRICKS_TOKEN: the databricks CLI/SDK and
+# every dbx-aware tool auto-pick that up, which would silently point *all*
+# ad-hoc commands at prod. Pass it explicitly instead, e.g.
+#   DATABRICKS_TOKEN="$DATABRICKS_PROD_TOKEN" databricks ...
+export DATABRICKS_PROD_TOKEN={{ onepasswordRead "op://focused/easyjet databricks prod PAT/credential" | quote }}
 {{- end }}
