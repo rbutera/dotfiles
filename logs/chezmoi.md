@@ -465,3 +465,11 @@ always off.
 - `chezmoi managed` still lists `~/.claude/hooks/agent-delivery-rule.py`, and the deployed hook is
   present, 5.6k, mode `-rwxr-xr-x`. The negative check matters here: the artifact went, the source
   hook did not.
+
+## 2026-08-02
+
+**Problem/motivation:** `CLAUDE.md` documented a way for an agent to check whether a 1Password session was active before attempting `chezmoi apply`, and that check could never return true. It said to run `op account list 2>/dev/null | grep -q personal`. Measured on this machine: `op account list` prints only URL, email and user id, and `--format=json` shows the account has no `shorthand` field at all (`url: my.1password.com`). The string `personal` appears nowhere in that output, so the grep always failed and the check could only ever report "no session" regardless of the truth. The local config agrees, identifying the account as `account = "my.1password.com"` rather than by an alias. The same broken assumption produced the `OP_SESSION_personal` variable name in the surrounding prose; no `OP_SESSION_*` variable is set in an agent shell at all, and the only `OP_*` variable present is `OP_ACCOUNT`.
+
+**Changes:** Replaced the check in `CLAUDE.md` with `timeout 12 op vault list >/dev/null 2>&1` read by EXIT CODE, which needs authentication but touches no secret. Recorded that `0` means authenticated and `124` means `op` sat waiting for an interactive unlock. Also recorded the caveat that a deliberately-invalid control returns 124 as well, because `op` prompts before it validates, so 124 means "would prompt" rather than specifically "auth failed" and `0` is the only unambiguous reading. Corrected the signin suggestion from `op signin --account personal` to `op signin`, and left the original broken command quoted in the correction notice so a future reader can see it was wrong rather than wonder why it changed.
+
+**Not changed:** the `[onepassword] prompt = false` recommendation, which was verified as already present in `~/.config/chezmoi/chezmoi.toml`, so `chezmoi apply` does fail fast rather than hanging.

@@ -30,10 +30,18 @@ If the user has recently authenticated in their shell, `OP_SESSION_personal` is 
 
 To check if a valid session exists before attempting apply:
 ```bash
-op account list 2>/dev/null | grep -q personal && echo "session active"
+timeout 12 op vault list >/dev/null 2>&1; echo $?   # 0 = authenticated, 124 = prompting (no session)
 ```
 
-If no session is active, tell the user to run `eval $(op signin --account personal)` first, then re-run the agent task.
+⚠️ **The check documented here until 2026-08-02 was `op account list 2>/dev/null | grep -q personal`, and it could NEVER return true.** Measured on this machine: `op account list` prints only URL, email and user id, and `op account list --format=json` shows the account has **no `shorthand` field at all** (`url: my.1password.com`). There is no string `personal` anywhere in that output, so the grep always failed and the check could only ever report "no session" regardless of the truth. The local chezmoi config agrees: `~/.config/chezmoi/chezmoi.toml` identifies the account as `account = "my.1password.com"`, not by an alias.
+
+The replacement uses an authenticated call that touches no secret. **Read the exit code, not the output.** `124` means `op` sat waiting for an interactive unlock, which is the real "no session" signal on this machine.
+
+⚠️ **A caveat on that check, stated because it bit the run that wrote this**: a deliberately-invalid control (`op vault get <nonexistent>`) ALSO returns 124, because it prompts before it validates. So 124 means "would prompt", not specifically "auth failed". `0` is the only unambiguous reading, and it is the one that matters here.
+
+`OP_SESSION_personal` is named above by the same broken assumption. Measured: no `OP_SESSION_*` variable is set in an agent shell at all; the only `OP_*` variable present is `OP_ACCOUNT`.
+
+If no session is active, tell the user to run `eval $(op signin)` first, then re-run the agent task.
 
 ### Config to prevent hanging on expired sessions
 
