@@ -33,7 +33,7 @@ read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
-  "model": "claude-opus-5",
+  "model": "claude-fable-5",
   "permissions": {"defaultMode": "bypassPermissions"},
   "teammateMode": "in-process",
   "tui": "fullscreen",
