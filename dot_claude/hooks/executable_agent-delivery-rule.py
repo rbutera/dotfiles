@@ -68,6 +68,36 @@ do it invisibly.
 import json
 import sys
 
+# --- Model floor (added 2026-08-02, at Rai's direction) ---------------------
+#
+# WHY: almost nothing pins a model. reviewed-implementation, review-pr, pre-push,
+# ddd-audit, pr-tend-all, breadcrumb and the impulse skills all dispatch without
+# one, so they INHERIT the main loop. Measured 2026-08-02: a general-purpose
+# subagent with no frontmatter ran 46 turns on claude-opus-5, inherited. The moment
+# the main loop becomes fable, every one of those silently becomes fable too,
+# including the review gates, and it looks identical in the transcript.
+#
+# Frontmatter cannot fix it: general-purpose, Explore and Plan are built-in types
+# with no file to edit. So the floor lives here, in the dispatch path.
+#
+# LIMITATION, stated rather than hidden: the Agent tool's `model` parameter takes
+# an ALIAS (sonnet|opus|haiku|fable), not a full model id, so this injects "opus".
+# Aliases are CLI-controlled redirects and can re-point on an update — that is
+# exactly how both agents once ran claude-opus-4-8 while every config said "opus"
+# and ark status said HEALTHY. Agent DEFINITIONS carry full ids; this cannot.
+# Verify with the transcript's per-turn model field, never with the config.
+MODEL_FLOOR = "opus"
+
+# Agents that must NOT be forced up. codex-teammate relays verbatim to Codex and
+# its own frontmatter pins sonnet deliberately; wave/SKILL.md:147 forbids a
+# spawn-time override because it beats that frontmatter and destroys the
+# independence the whole trio gate exists for. Forcing opus here would quietly
+# turn a second opinion into a first one.
+MODEL_EXEMPT = {"codex-teammate", "clarence", "ark:clarence"}
+
+# Escape hatch, same convention as shell-footgun-guard's `# FOOTGUN_OK`.
+MODEL_OPT_OUT = "# MODEL_OK"
+
 DELIVERY_RULE = """
 
 ---
@@ -88,6 +118,16 @@ This applies to failure too. `BLOCKED: <reason>` must be **sent**, not merely st
 """
 
 
+def _emit(updated: dict) -> None:
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "updatedInput": updated,
+        },
+        "suppressOutput": True,
+    }))
+
+
 def main() -> None:
     payload = json.load(sys.stdin)
 
@@ -102,24 +142,31 @@ def main() -> None:
     if not isinstance(prompt, str) or not prompt.strip():
         return
 
+    # --- model floor: applied even when the delivery rule is skipped ---------
+    model_patch = {}
+    if (
+        not tool_input.get("model")
+        and tool_input.get("subagent_type") not in MODEL_EXEMPT
+        and MODEL_OPT_OUT not in prompt
+    ):
+        model_patch["model"] = MODEL_FLOOR
+
     # Synchronous agents return their final message normally — nothing to fix.
     if tool_input.get("run_in_background") is False:
+        if model_patch:
+            _emit({**tool_input, **model_patch})
         return
 
     # The dispatching prompt already carries the rule; don't say it twice.
     if "SendMessage" in prompt:
+        if model_patch:
+            _emit({**tool_input, **model_patch})
         return
 
     updated = dict(tool_input)
+    updated.update(model_patch)
     updated["prompt"] = prompt + DELIVERY_RULE
-
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "updatedInput": updated,
-        },
-        "suppressOutput": True,
-    }))
+    _emit(updated)
 
 
 if __name__ == "__main__":
