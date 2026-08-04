@@ -86,13 +86,29 @@ import sys
 # exactly how both agents once ran claude-opus-4-8 while every config said "opus"
 # and ark status said HEALTHY. Agent DEFINITIONS carry full ids; this cannot.
 # Verify with the transcript's per-turn model field, never with the config.
+#
+# MEASURED 2026-08-02 22:00 (first fable-5 session, kinto): the alias "opus"
+# currently resolves to claude-opus-4-8, and a spawn-time model param BEATS
+# agent frontmatter. So injecting the alias into an agent whose definition pins
+# claude-opus-5 DOWNGRADED it to 4.8 (probe: ark:tatl with floor -> opus-4-8;
+# same agent with # MODEL_OK -> opus-5). The floor therefore injects ONLY for
+# built-in types with no definition file to carry a full id. Owned agents pin
+# full ids in frontmatter and must not be touched here. Residual, accepted:
+# built-ins get whatever "opus" resolves to (today 4.8, one notch below the
+# chosen opus-5) — the alias is the only lever this parameter accepts.
 MODEL_FLOOR = "opus"
+
+# Built-in agent types with no definition file: the ONLY types the floor
+# applies to. Everything else is an owned agent whose frontmatter is authority.
+# Absent subagent_type defaults to general-purpose, so it is floored too.
+MODEL_FLOOR_TYPES = {"general-purpose", "Explore", "Plan", "claude", "fork", ""}
 
 # Agents that must NOT be forced up. codex-teammate relays verbatim to Codex and
 # its own frontmatter pins sonnet deliberately; wave/SKILL.md:147 forbids a
 # spawn-time override because it beats that frontmatter and destroys the
 # independence the whole trio gate exists for. Forcing opus here would quietly
-# turn a second opinion into a first one.
+# turn a second opinion into a first one. (Retained although the floor is now
+# allowlist-based: belt and braces if the allowlist ever widens.)
 MODEL_EXEMPT = {"codex-teammate", "clarence", "ark:clarence"}
 
 # Escape hatch, same convention as shell-footgun-guard's `# FOOTGUN_OK`.
@@ -146,6 +162,7 @@ def main() -> None:
     model_patch = {}
     if (
         not tool_input.get("model")
+        and (tool_input.get("subagent_type") or "") in MODEL_FLOOR_TYPES
         and tool_input.get("subagent_type") not in MODEL_EXEMPT
         and MODEL_OPT_OUT not in prompt
     ):
