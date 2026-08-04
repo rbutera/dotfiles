@@ -37,6 +37,12 @@ export EXPEDITION_EMAIL=raibutera91@gmail.com
 export EXPEDITION_EMAIL_APP_PASSWORD={{ onepasswordRead "op://Private/google raibutera91/app_password" | quote }}
 export EXPEDITION_EMAIL_AUTHENTICATOR={{ onepasswordRead "op://Private/google raibutera91/one-time password" | quote }}
 
+# Vercel — deploy token for the whetstone app (Navi-scoped, revocable at
+# vercel.com/account/settings/tokens). Not host-gated: wanted on nimbus AND kinto.
+# VERCEL_TOKEN is the name the Vercel CLI reads directly, so `vercel --prod`
+# authenticates with no extra flag.
+export VERCEL_TOKEN={{ onepasswordRead "op://Private/vercel navi api key/credential" | quote }}
+
 # Other single-field services
 export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" | quote }}
 export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential" | quote }}
