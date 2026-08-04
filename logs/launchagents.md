@@ -2,6 +2,18 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-08-04 -- com.rai.whetstone + com.rai.whetstone-watchdog brought under chezmoi (NIMBUS ONLY, staged not applied)
+
+- **Context**: Whetstone (the certification study app) was moved off Cloudflare Workers onto nimbus and served over Tailscale at `https://nimbus.piranha-wyvern.ts.net:8444`. Rai studies from it four hours a day for eight days in Devon from 7 August, with nobody at the machine, so the service and its watchdog had to survive unattended.
+- **Problem**: both LaunchAgents existed only in `~/Library/LaunchAgents`. They survive reboots but not a machine rebuild, and an unversioned plist is invisible to review.
+- **Changes**:
+  - `Library/LaunchAgents/com.rai.whetstone.plist` -- the Next.js standalone server on `127.0.0.1:3011`, `KeepAlive`, logs to `~/.logs/`. Interpreter is the absolute asdf node path because the shim is unresolvable in launchd's minimal environment.
+  - `Library/LaunchAgents/com.rai.whetstone-watchdog.plist` -- probes the site every 120s and restarts the service only when the APP is at fault, never when only the tailnet path is.
+  - `.chezmoiignore`: both gated behind `{{ if ne .chezmoi.hostname "nimbus" }}`, matching the `dev.onorca.serve` pattern. mondo never sees them.
+- **NOT `.tmpl`, deliberately**: neither plist has anything to interpolate, so they are copied verbatim. That also means **neither contains `onepasswordRead`**, so applying them needs no 1Password session -- verified by grep on both.
+- **Credentials stay out of the plists**: the service reads `DATABASE_URL`, `AUTH_SECRET`, the GitHub OAuth pair and the five `AUTH_EMAIL_*` SMTP vars at start via node's `--env-file` from gitignored files in the app directory. That decision was made for robustness (rotate a secret, kickstart, done) and it is exactly what makes these plists safe to commit.
+- **Staged, NOT applied.** Source and deployed are byte-identical (sha256 verified both files), and `chezmoi status` on both targets is empty, so `chezmoi apply` would be a no-op for them today. Confirmed the check can go the other way by perturbing the source copy alone (`120` -> `121`), seeing `M` reported, then restoring byte-identically.
+
 ## 2026-07-23 -- sh.paseo.daemon now execs a wrapper that sources the secret groups
 
 - **Symptom**: `omp` launched via paseo offered only the `anthropic` and `openai-codex` providers. `opencode-zen`, `opencode-go`, `groq` and `zai` were missing.

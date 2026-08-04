@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rai.whetstone-watchdog</string>
+
+  <!--
+    Health watchdog for com.rai.whetstone. launchd's KeepAlive restarts a process that DIES; it is
+    entirely satisfied by a process that is alive and serving 500s. This checks that the SITE works,
+    and restarts the service only when the app itself is at fault.
+
+    It probes 127.0.0.1 (which cannot be affected by Tailscale) and the tailnet URL separately, and
+    only the local probe may authorise a restart — so a Tailscale blip can never drive a restart
+    loop. Full reasoning, fail directions and the restart budget are in the script.
+
+    Absolute interpreter path: node is managed by asdf and the shim is not resolvable from launchd's
+    minimal environment.
+  -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/rai/.asdf/installs/nodejs/24.16.0/bin/node</string>
+    <string>/Users/rai/dev/lumiere/apps/whetstone/scripts/health-watchdog.mjs</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>120</integer>
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/rai</string>
+    <key>PATH</key>
+    <string>/Users/rai/.asdf/installs/nodejs/24.16.0/bin:/bin:/usr/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <!-- Internal volume only. A LaunchAgent whose stdio path resolves onto /Volumes/ExternalNVMe
+       dies with EX_CONFIG (78) before exec, leaving a zero-byte log and no process. -->
+  <key>StandardOutPath</key>
+  <string>/Users/rai/.logs/whetstone-watchdog.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/rai/.logs/whetstone-watchdog.log</string>
+</dict>
+</plist>

@@ -26,6 +26,11 @@ Library/LaunchAgents/com.chaching.nightly-freeze.plist
 Library/LaunchAgents/dev.onorca.serve.plist
 {{ end }}
 
+{{ if ne .chezmoi.hostname "nimbus" }}
+Library/LaunchAgents/com.rai.whetstone.plist
+Library/LaunchAgents/com.rai.whetstone-watchdog.plist
+{{ end }}
+
 .config/systemd/user/ssh-agent.service
 .linuxbrew
 .zprezto/modules/*

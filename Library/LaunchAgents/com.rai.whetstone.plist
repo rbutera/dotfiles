@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rai.whetstone</string>
+
+  <!--
+    Whetstone (Next.js) served on nimbus and reached over Tailscale.
+
+    node is managed by asdf, so the shim on PATH is not resolvable from launchd's
+    minimal environment: the interpreter is given as an ABSOLUTE path to the real
+    asdf-installed binary.
+
+    Credentials are NOT stored in this plist. They are read at start from the
+    gitignored env files via node's --env-file, so rotating a secret is an edit to
+    the env file plus a kickstart. Precedence was verified empirically:
+      - a later --env-file overrides an earlier one, so .env.oauth-prod's GitHub
+        credentials win over the dev-app credentials sitting in .env;
+      - variables already present in the process environment (the
+        EnvironmentVariables dict below) are NOT overridden by --env-file, so
+        AUTH_URL and friends here are authoritative.
+    A missing env file makes node exit loudly rather than start half-configured.
+  -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/rai/.asdf/installs/nodejs/24.16.0/bin/node</string>
+    <string>--env-file=/Users/rai/dev/lumiere/apps/whetstone/.env</string>
+    <string>--env-file=/Users/rai/dev/lumiere/apps/whetstone/.env.oauth-prod</string>
+    <string>/Users/rai/dev/lumiere/apps/whetstone/.next/standalone/apps/whetstone/server.js</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/rai/dev/lumiere/apps/whetstone/.next/standalone/apps/whetstone</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- Bind loopback only. Reachability comes from `tailscale serve`, which
+         proxies the tailnet HTTPS port to 127.0.0.1 — binding 0.0.0.0 would
+         additionally expose this to the local LAN, which nobody asked for. -->
+    <key>HOSTNAME</key>
+    <string>127.0.0.1</string>
+    <key>PORT</key>
+    <string>3011</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+
+    <!-- Auth.js infers its own base URL from request headers; behind a proxy that
+         inference is what silently breaks the OAuth callback. Pin it. trustHost is
+         already hardcoded in src/server/auth.ts; AUTH_TRUST_HOST is belt-and-braces. -->
+    <key>AUTH_URL</key>
+    <string>https://nimbus.piranha-wyvern.ts.net:8444</string>
+    <key>AUTH_TRUST_HOST</key>
+    <string>true</string>
+
+    <!-- The standalone bundle has its own copy of content/, but pointing at the
+         source tree means editing a lesson does not require a rebuild to be read. -->
+    <key>WHETSTONE_CONTENT_DIR</key>
+    <string>/Users/rai/dev/lumiere/apps/whetstone/content</string>
+
+    <key>PATH</key>
+    <string>/Users/rai/.asdf/installs/nodejs/24.16.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+
+  <!-- Logs MUST stay on the internal volume. A LaunchAgent whose stdio path
+       resolves onto /Volumes/ExternalNVMe dies with EX_CONFIG (78) before exec,
+       leaving a zero-byte log and no process. ~/.logs is on /dev/disk2s5. -->
+  <key>StandardOutPath</key>
+  <string>/Users/rai/.logs/whetstone.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/rai/.logs/whetstone.err.log</string>
+</dict>
+</plist>
