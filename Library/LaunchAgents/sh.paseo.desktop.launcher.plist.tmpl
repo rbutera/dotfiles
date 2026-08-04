@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>sh.paseo.desktop.launcher</string>
+	<!--
+	  Starts the Paseo DESKTOP app at login so this host is always reachable as a
+	  Paseo execution target from the phone / latios / any other client.
+
+	  Installed on ALL Macs in the fleet (kinto, latios, nimbus). Not hostname-gated:
+	  Paseo's model is one daemon per execution host, and clients pick which host owns
+	  the work. Kinto is the one that matters most (always-on, the host Rai drives
+	  from his phone), but a daemon on each is the documented topology.
+
+	  REPLACES sh.paseo.daemon (removed 2026-07-27). That agent ran a HEADLESS
+	  `paseo daemon start --foreground`, which cannot coexist with the desktop app:
+	  Paseo.app spawns its own "Paseo Supervisor" -> daemon pair and binds
+	  127.0.0.1:6767 the moment it launches, so the headless agent always lost the
+	  port. Observed on kinto: 101 crash-loop restarts against KeepAlive, each exiting
+	  1 with "Another Paseo daemon is already running (PID 16427)". Every doomed
+	  attempt still touched the outbound relay before dying, flapping the relay route
+	  and making Paseo on the phone unresponsive -- precisely the remote-control
+	  failure the agent existed to prevent. See logs/paseo.md.
+
+	  So the desktop app now owns the daemon, and we solve the thing the headless
+	  agent was genuinely good at -- environment -- in ~/bin/paseo-desktop instead.
+	  That wrapper sources ~/.config/zsh/*.zsh (the chezmoi-managed 1Password secret
+	  groups) and then execs the app bundle, so the app, the Supervisor, the daemon
+	  and every agent CLI beneath them inherit one correct environment by ordinary
+	  process inheritance. Full rationale lives in the wrapper's header comment.
+
+	  Paseo.app ALSO performs its own login-shell env capture (`/bin/zsh -i -l -c`,
+	  30s timeout) when it spawns a daemon. The wrapper is deliberately belt-and-
+	  braces: that capture is best-effort and can time out under load, whereas
+	  sourcing the groups directly cannot.
+
+	  KeepAlive is deliberately FALSE, unlike the old headless agent. This launches a
+	  GUI app; if Rai quits Paseo he means it, and KeepAlive would resurrect it on
+	  every quit. RunAtLoad covers the only case that matters (reboot).
+
+	  Secrets stay out of this plist deliberately: it lands in ~/Library/LaunchAgents
+	  at mode 644. launchd supplies only the two vars below; the wrapper builds the
+	  rest. We also deliberately avoid `launchctl setenv`, which would expose all ~82
+	  credentials to every GUI app in the session via `launchctl getenv`.
+
+	  SECURITY POSTURE (deliberate, do not widen without Rai's say-so):
+	    * Daemon listens on 127.0.0.1:6767 only. No inbound port on any host.
+	    * Remote access is via Paseo's outbound relay (E2E encrypted; the relay sees
+	      connection metadata, never prompts, code, or responses).
+	    * Therefore the PAIRING LINK is the sole trust anchor -- treat it exactly like
+	      a password. `paseo daemon pair` prints it; never paste it anywhere.
+	    * To go relay-free instead, bind to the tailnet IP and add --no-relay. That is
+	      a bigger exposure decision on a work machine and is Rai's call, not a
+	      default.
+	-->
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{ .chezmoi.homeDir }}/bin/paseo-desktop</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/.local/bin:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.bun/bin:{{ .chezmoi.homeDir }}/.asdf/shims:{{ if eq .chezmoi.arch "arm64" }}/opt/homebrew/bin:/opt/homebrew/sbin{{ else }}/usr/local/bin:/usr/local/sbin{{ end }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<false/>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/paseo-desktop.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/paseo-desktop.log</string>
+</dict>
+</plist>

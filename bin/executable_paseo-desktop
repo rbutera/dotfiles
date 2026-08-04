@@ -1,0 +1,91 @@
+#!/bin/sh
+# Launcher for the Paseo DESKTOP app (see ~/Library/LaunchAgents/sh.paseo.desktop.launcher.plist).
+#
+# WHY THIS EXISTS: Paseo's model is one daemon per execution host. The desktop app
+# spawns its OWN daemon ("Paseo Supervisor" -> daemon, binding 127.0.0.1:6767) as
+# soon as it launches, so a separate headless `paseo daemon start` agent can never
+# win the port. Observed 2026-07-27 on kinto: the old sh.paseo.daemon LaunchAgent
+# crash-looped 101 times against KeepAlive, exiting 1 with "Another Paseo daemon is
+# already running (PID 16427)". Each doomed attempt still touched the outbound
+# relay before dying, which flapped the relay route and made Paseo on the phone
+# unresponsive -- the exact remote-control failure the old agent existed to prevent.
+#
+# So we stop fighting the desktop app and let it own the daemon, then fix the one
+# thing the headless agent was actually good at: ENV IS THE OTHER HALF OF THE GAME.
+#
+# A GUI app launched by launchd/Dock/LaunchServices gets a minimal environment, and
+# its child daemon -- plus every agent CLI that daemon spawns -- inherits that. None
+# of the ~82 secrets exported from ~/.config/zsh/*.zsh exist there (verified from a
+# clean env: 3 vars before sourcing, 85 after). That silently DEGRADES the agents
+# rather than failing them. Observed 2026-07-23: `omp` under paseo offered only the
+# `anthropic` and `openai-codex` providers -- the two whose credentials live in
+# omp's own HOME-based vault (~/.omp/agent/agent.db) -- while opencode-zen,
+# opencode-go, groq and zai all vanished, because those are discovered purely from
+# env vars. See logs/pi.md.
+#
+# Sourcing the groups here and then exec'ing the app bundle means the app, the
+# Supervisor, the daemon and every agent CLI below them all inherit one correct
+# environment by ordinary process inheritance. Nothing has to be enumerated twice.
+#
+# Deliberately NOT `open -a Paseo`: LaunchServices hands the launch off to launchd,
+# which discards our environment entirely and defeats the whole point. We exec the
+# bundle binary directly so inheritance survives.
+#
+# Deliberately NOT patched inside /Applications/Paseo.app: the app self-updates via
+# sh.paseo.desktop.ShipIt, which would replace any wrapper we put in the bundle and
+# break its code signature. Pointing AT the bundle from outside survives updates.
+#
+# Safe under /bin/sh: every ~/.config/zsh/*.zsh group file is pure `export
+# NAME=value` (verified -- no zsh-isms, no command substitution). This is
+# deliberately NOT a login zsh: that fires the powerlevel10k instant prompt in
+# launchd's no-tty context and mangles the command.
+#
+# PATH IS THE WHOLE GAME for provider detection. Paseo resolves each provider binary
+# with `/usr/bin/which -a <name>` against THIS PATH and nothing else
+# (server/src/executable-resolution/executable-resolution.ts). Every install root
+# that owns an agent CLI has to be listed or that provider silently reports
+# "Unavailable":
+#   * ~/.asdf/shims   -> pi, bun, node
+#   * ~/.local/bin    -> claude, cursor-agent
+#   * ~/.bun/bin      -> omp (oh-my-pi, installed via `bun install -g`)
+# Adding an install root here is the durable fix; pinning an absolute path in
+# ~/.paseo/config.json under agents.providers.<id>.command only fixes one CLI.
+#
+# SECURITY POSTURE (inherited from the old agent; do not widen without Rai's say-so):
+#   * The daemon listens on 127.0.0.1:6767 only. No inbound port on any host.
+#   * Remote access is via Paseo's outbound relay (E2E encrypted; the relay sees
+#     connection metadata, never prompts, code, or responses).
+#   * Therefore the PAIRING LINK is the sole trust anchor -- treat it exactly like a
+#     password. `paseo daemon pair` prints it; never paste it anywhere.
+#   * Secrets are sourced into this process only. We deliberately do NOT use
+#     `launchctl setenv`, which would expose all ~82 credentials to every GUI app in
+#     the session via `launchctl getenv`. Scoping them to the Paseo process tree is
+#     the whole reason this wrapper is a wrapper.
+
+set -u
+
+for __group in "$HOME"/.config/zsh/*.zsh; do
+	[ -r "$__group" ] && . "$__group"
+done
+unset __group
+
+# Homebrew prefix differs by arch (arm64 -> /opt/homebrew, x86_64 -> /usr/local), so
+# resolve it at runtime rather than templating: this keeps the wrapper a plain script
+# that stays testable by hand on any machine in the fleet.
+if [ -d /opt/homebrew/bin ]; then
+	__brew=/opt/homebrew
+else
+	__brew=/usr/local
+fi
+
+PATH="$HOME/.local/bin:$HOME/bin:$HOME/Library/pnpm:$HOME/.bun/bin:$HOME/.asdf/shims:$__brew/bin:$__brew/sbin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH
+unset __brew
+
+PASEO_APP=/Applications/Paseo.app/Contents/MacOS/Paseo
+[ -x "$PASEO_APP" ] || {
+	echo "paseo-desktop: Paseo.app not found at $PASEO_APP" >&2
+	exit 127
+}
+
+exec "$PASEO_APP" "$@"

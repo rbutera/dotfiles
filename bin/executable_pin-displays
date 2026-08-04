@@ -1,0 +1,88 @@
+#!/bin/sh
+# Pin the display layout at login (see ~/Library/LaunchAgents/com.rai.pin-displays.plist).
+#
+# WHY THIS EXISTS: the glkvm-fed Dell blanks repeatedly for the first ~20 minutes after
+# a reboot. Verified 2026-07-27 by sshing into the KVM (glkvm, 100.78.184.67) and reading
+# its kernel log. The chain is:
+#
+#   lt6911c 1-002b:     HDMI receiver. Loses lock, register 0xD211 reads 0xff, then
+#                       re-detects the source resolution.
+#   lt86102sxe 3-0038:  HDMI output chip feeding the Dell. On each re-detect it emits
+#                       "Sending HDMI disconnect event" / "Sending HDMI connect event".
+#
+# Every disconnect/connect pair IS one blank-and-return on the physical monitor. On the
+# 2026-07-27 boot there were four pairs between 08:21 and 08:42, while the detected mode
+# flapped 1920x1080@60 <-> 3840x2160@30 and once came back plainly corrupt
+# ("1920x1080@16 fps, htotal=131070"). At 08:42:13 0xD211 finally read 0, the mode locked
+# to 3840x2160@30, and it has been stable since. So this is a boot-time negotiation storm
+# that self-resolves -- not a cable, and not a persistent hardware fault.
+#
+# Pinning the mode explicitly removes the thing that flaps. 30Hz on that panel is an
+# accepted limitation (Rai, 2026-07-27): the KVM's EDID advertises no better at native
+# 4K, and the only >30Hz option displayplacer offers for it is 1080x1920@60. We are not
+# chasing refresh rate here, only the blanking.
+#
+# NOT persistent without this: macOS re-negotiates from scratch on every boot, which is
+# why the fix "worked" before and came back after this reboot -- it was applied by hand
+# and nothing re-applied it.
+#
+# Self-gating: exits 0 quietly unless all three of kinto's displays are present, so the
+# agent is harmless if it ever lands on latios or nimbus.
+
+set -u
+
+LOG="$HOME/Library/Logs/pin-displays.log"
+DP=/opt/homebrew/bin/displayplacer
+[ -x "$DP" ] || DP=$(command -v displayplacer) || {
+	echo "$(date '+%F %T') displayplacer not found" >>"$LOG"
+	exit 0
+}
+
+# Persistent screen ids for kinto's three panels. KVM_ID is the glkvm-fed Dell.
+KVM_ID=55252CC2-3E45-4CEB-8736-148DC5404D77
+SIDE_ID=7D883724-E7EE-4622-89B8-BC128A34E110
+MAIN_ID=B38B2F33-64DD-421A-BA9E-CEA5E614BF16
+
+LAYOUT_KVM="id:$KVM_ID res:2160x3840 hz:30 color_depth:8 enabled:true scaling:off origin:(0,0) degree:90"
+LAYOUT_SIDE="id:$SIDE_ID res:2160x3840 hz:100 color_depth:8 enabled:true scaling:off origin:(-6000,11) degree:90"
+LAYOUT_MAIN="id:$MAIN_ID res:3840x2160 hz:100 color_depth:8 enabled:true scaling:off origin:(-3840,583) degree:0"
+
+log() { echo "$(date '+%F %T') $*" >>"$LOG"; }
+
+# Wait for all three displays to attach. Post-reboot they arrive over several seconds,
+# and applying a layout that references a missing id is how you get a wrong arrangement.
+# Give up quietly rather than fighting a genuinely different setup (e.g. laptop undocked).
+i=0
+while [ "$i" -lt 40 ]; do
+	list=$("$DP" list 2>/dev/null)
+	present=0
+	for id in "$KVM_ID" "$SIDE_ID" "$MAIN_ID"; do
+		case "$list" in *"$id"*) present=$((present + 1)) ;; esac
+	done
+	[ "$present" -eq 3 ] && break
+	i=$((i + 1))
+	sleep 3
+done
+
+if [ "$present" -ne 3 ]; then
+	log "only $present/3 known displays after $((i * 3))s -- not this machine's layout, skipping"
+	exit 0
+fi
+
+# Idempotent: if the KVM panel is already at its pinned mode, do nothing. Re-applying a
+# layout itself forces a mode set, which blanks the screen -- the exact thing we are
+# trying to avoid. Only act when something actually drifted.
+current_kvm=$(printf '%s' "$list" | awk -v id="$KVM_ID" '
+	$0 ~ "Persistent screen id: " id { found = 1 }
+	found && /^Resolution:/ { res = $2 }
+	found && /^Hertz:/      { hz = $2; print res "@" hz; exit }
+')
+
+if [ "$current_kvm" = "2160x3840@30" ]; then
+	log "kvm panel already 2160x3840@30 -- no change"
+	exit 0
+fi
+
+log "kvm panel at '${current_kvm:-unknown}', pinning layout"
+"$DP" "$LAYOUT_KVM" "$LAYOUT_SIDE" "$LAYOUT_MAIN" >>"$LOG" 2>&1
+log "displayplacer exit=$?"

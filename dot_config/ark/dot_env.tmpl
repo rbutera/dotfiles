@@ -1,9 +1,24 @@
 # Ark global environment — managed by chezmoi
-# Account-specific OAuth tokens, shared across all Ark workspaces on this machine.
-# Tokens obtained via `claude setup-token` (valid ~1 year).
+# Secrets shared across all Ark workspaces on this machine.
 
 # ── Claude OAuth tokens ────────────────────────────────────────────────────────
 # These env var names match the oauthTokenEnv fields in config.json.
+# Tokens obtained via `claude setup-token` (valid ~1 year).
 # Ark's loadDotEnv() loads this file first, then the workspace .env second.
 CLAUDE_OAUTH_TOKEN_PERSONAL={{ onepasswordRead "op://Private/claude code token/credential" }}
 CLAUDE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" }}
+
+# ── Agent Discord bot tokens ───────────────────────────────────────────────────
+# Substituted into `discord.botToken` in each workspace's ark.json.
+#
+# DO NOT move these into a workspace .env (e.g. ~/focused/.env). That is where
+# they used to live, and it broke florence on 2026-07-30: a workspace .env is
+# gitignored inside the workspace repo, so it is both unmanaged (nothing can
+# recreate it) and deletable by any `git clean -fdx` in that repo. When it went
+# missing, substituteEnvVars() threw on every single ark invocation and the
+# supervised LaunchAgent crash-looped on its 30s throttle, silently, for 25min.
+#
+# Keeping them here means: chezmoi recreates the file, and it sits outside every
+# workspace repo, so no git operation in a workspace can remove it.
+# Var names are per-agent, so all agents can coexist in this one file.
+FLORENCE_DISCORD_TOKEN={{ onepasswordRead "op://focused/Flaude Discord/credential" }}
