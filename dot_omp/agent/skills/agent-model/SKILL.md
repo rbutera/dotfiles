@@ -7,16 +7,18 @@ description: Show which models the omp `codex` and `opus` review subagents are c
 
 Show, then change, which model each review subagent runs on.
 
-The `codex` and `opus` agents are pinned to floating patterns
-(`openai-codex/sol:high`, `anthropic/opus:high`) that track the newest matching
-model. This skill is for when Rai wants a specific one instead: a different GPT
-variant, an older model, a cheaper one for a throwaway pass.
+The `codex` agent uses the floating `openai-codex/sol:high` pattern. The `opus`
+agent is deliberately pinned to `anthropic/claude-opus-4-8:high` to avoid
+silently moving to a more quota-expensive release. This skill is for when Rai
+wants a different model temporarily: another GPT variant, a newer Opus, or a
+cheaper model for a throwaway pass.
 
 ## How the override works
 
 `task.agentModelOverrides` is a record keyed by agent name. omp resolves it
 **before** the agent file's own `model:`, so setting it retargets an agent
-without editing its definition, and clearing it restores the floating pin.
+without editing its definition, and clearing it restores that agent's managed
+default.
 
 Do not edit `~/.omp/agent/agents/*.md` to change a model. Those are
 chezmoi-managed; a hand edit there drifts from the source and gets reverted on
@@ -28,8 +30,9 @@ the next apply.
 omp config get task.agentModelOverrides
 ```
 
-`{}` means both agents are on their floating pins. Otherwise the record shows
-which agents are overridden.
+`{}` means both agents are on their managed defaults: floating `sol` for Codex
+and fixed Opus 4.8 for Opus. Otherwise the record shows which agents are
+overridden.
 
 Then report what they actually resolve to right now, which is not the same
 question. Dispatch both with the `task` tool, asking each only for its identity
@@ -78,7 +81,8 @@ Include a `:high` thinking suffix unless Rai asks otherwise. If the chosen model
 does not support `high`, omp clamps it; say so rather than letting it surprise
 him later.
 
-To restore a floating pin, drop that key from the record. To reset both:
+To restore an agent's managed default, drop that key from the record. To reset
+both:
 
 ```bash
 omp config set task.agentModelOverrides '{}'

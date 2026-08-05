@@ -15,7 +15,7 @@ Use the `task` tool with one of these agents:
 | Agent  | Model                        | Use for |
 |--------|------------------------------|---------|
 | `codex` | `openai-codex/sol:high` (latest `sol` GPT) | The Codex voice: independent cross-model review, implementation, second opinions |
-| `opus`  | `anthropic/opus:high` (latest Claude Opus) | The Opus voice: judgement calls, architecture critique, root-cause reasoning |
+| `opus`  | `anthropic/claude-opus-4-8:high` | The Opus voice: judgement calls, architecture critique, root-cause reasoning |
 
 Both are defined in `~/.omp/agent/agents/`. Both have `bash`, so both can build,
 test, and reproduce rather than reasoning from the diff alone.

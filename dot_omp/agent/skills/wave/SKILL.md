@@ -34,7 +34,7 @@ Read `~/.omp/agent/review-gate.md` for the full delegation contract. In short:
 Per wave, dispatch **both** reviewers with the `task` tool, in the same turn so
 they run concurrently:
 
-- agent `opus`, latest Claude Opus, high reasoning
+- agent `opus`, Claude Opus 4.8, high reasoning
 - agent `codex`, latest OpenAI sol GPT, high reasoning
 
 Give each the same brief: the wave's scope, the changed paths, the conventions

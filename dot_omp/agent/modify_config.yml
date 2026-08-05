@@ -73,9 +73,8 @@ MANAGED_KEY = "disabledProviders"
 
 # chezmoi also owns ONE nested value: modelRoles.default -- the model omp starts
 # every session on. It is pinned fleet-wide so all three Macs open on the same
-# model, and pinned to a FULL id rather than an alias because on Claude Code
-# 2.1.220 the bare `opus` alias still resolves to 4.8 (see the sibling commits
-# that pinned florence and navi for the same reason).
+# model, and pinned to a FULL id rather than the floating `opus` alias. Opus 4.8
+# is the deliberate quota-conscious fleet default shared with Florence and Navi.
 #
 # Sibling roles under modelRoles are preserved: this replaces the `default:` line
 # only, never the whole block, so any per-role override omp writes later survives.
@@ -84,7 +83,7 @@ MANAGED_KEY = "disabledProviders"
 # anthropic/claude-opus-4-8:high, and nimbus on xai-oauth/grok-4.5 -- a provider
 # the allowlist above now disables, which would leave omp defaulting to a model
 # it can no longer reach.
-DEFAULT_MODEL_ROLE = "anthropic/claude-opus-5:high"
+DEFAULT_MODEL_ROLE = "anthropic/claude-opus-4-8:high"
 
 # The allowlist. Everything omp can discover that is not in here gets disabled.
 #

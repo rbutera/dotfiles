@@ -24,3 +24,14 @@ Gotcha hit during rollout: a full `chezmoi apply` stalls on the 1Password-templa
 `.aider.conf.yml` when no interactive op session exists. Targeted applies
 (`chezmoi apply ~/focused/ark.json ~/bin/agent-model`) dodge it; the same applies
 on nimbus.
+
+## 2026-08-05: pin OMP to Opus 4.8
+
+**Problem/motivation:** OMP still opened sessions on Opus 5 and its `opus`
+reviewer floated to the latest Opus, bypassing the fleet's quota-conscious 4.8
+selection.
+
+**Changes:** Pinned both OMP's default session role and native Opus reviewer to
+`anthropic/claude-opus-4-8:high`. Updated the review-gate, wave, and model-control
+guidance so they describe the fixed 4.8 default while preserving explicit
+per-agent overrides.
