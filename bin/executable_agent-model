@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# agent-model: toggle the Ark main-session model fleet-wide (Florence + Navi).
+# Usage: agent-model fable | opus | show
+# Edits [agents].main_model in the chezmoi data file, applies locally, and
+# commits+pushes the chezmoi source so the other machine picks it up on its
+# next `chezmoi update`. Takes effect on the NEXT ark session start.
+set -euo pipefail
+
+SRC="$HOME/.local/share/chezmoi"
+DATA="$SRC/.chezmoidata.toml"
+
+current() { grep -E '^\s*main_model' "$DATA" | sed -E 's/.*= *"(.*)"/\1/'; }
+
+case "${1:-show}" in
+  show)
+    echo "current: $(current)"
+    exit 0 ;;
+  fable) TARGET="claude-fable-5" ;;
+  opus)  TARGET="claude-opus-4-8[1m]" ;;
+  *) echo "usage: agent-model fable|opus|show" >&2; exit 2 ;;
+esac
+
+if [ "$(current)" = "$TARGET" ]; then
+  echo "already set to $TARGET"
+  exit 0
+fi
+
+sed -i '' -E "s|^(\s*main_model = ).*|\1\"$TARGET\"|" "$DATA"
+chezmoi apply
+git -C "$SRC" add .chezmoidata.toml
+git -C "$SRC" commit -q -m "agent-model: main model -> $TARGET"
+git -C "$SRC" push -q
+echo "set to $TARGET, applied locally, source pushed."
+echo "Other machine: run 'chezmoi update' there (or let its next sync pull it)."
+echo "Running ark sessions keep their old model until restarted."

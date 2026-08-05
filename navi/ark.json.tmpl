@@ -26,7 +26,7 @@
     "--disallowedTools",
     "AskUserQuestion"
   ],
-  "model": "claude-fable-5",
+  "model": {{ .agents.main_model | quote }},
   "sensors": {
     "contextPressure": {
       "budgets": {

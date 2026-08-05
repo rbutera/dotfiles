@@ -22,3 +22,12 @@
   # see the key, which hijacks provider/model selection. Flip to true for a
   # fleet-wide opt-in, or add a single hostname to host_groups.openrouter.
   openrouter_api_key = false
+
+[agents]
+  # Main-session model for the Ark agents (Florence on kinto, Navi on nimbus).
+  # Toggle with `agent-model fable|opus|show` (bin/executable_agent-model), which
+  # edits this value, applies, and pushes. Takes effect on the NEXT ark session
+  # start / `ark restart`; running sessions keep their model.
+  #   fable -> "claude-fable-5"
+  #   opus  -> "claude-opus-4-8[1m]"  (1M-context Opus 4.8; verified live 2026-08-05)
+  main_model = "claude-opus-4-8[1m]"
