@@ -11,6 +11,12 @@
   chaching = ["kinto", "latios", "nimbus"]
   # Machines that run long-lived coding-agent runtimes (Orca serve, etc.)
   agentic = ["kinto", "nimbus"]
+  # Machines running the tokenmaxx multi-account proxy daemon. The daemon reads
+  # account credentials from the macOS login Keychain, so it MUST run as a
+  # GUI-session LaunchAgent (Aqua). A LaunchDaemon (system session) or an
+  # SSH-spawned daemon fails every read with "Keychain read failed".
+  # See ~/notes/2026-08-06 tokenmaxx daemon keychain + LaunchAgent.md
+  tokenmaxx = ["nimbus"]
   # Machines that should get OPENROUTER_API_KEY written into ~/.env.
   # Empty = off everywhere (the default). See [feature_flags].openrouter_api_key.
   openrouter = []

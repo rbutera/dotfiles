@@ -22,6 +22,10 @@ mac
 Library/LaunchAgents/com.chaching.nightly-freeze.plist
 {{ end }}
 
+{{ if not (and (eq .chezmoi.os "darwin") (has .chezmoi.hostname .host_groups.tokenmaxx)) }}
+Library/LaunchAgents/sh.tokenmaxx.daemon.plist
+{{ end }}
+
 {{ if ne .chezmoi.hostname "nimbus" }}
 Library/LaunchAgents/dev.onorca.serve.plist
 {{ end }}
