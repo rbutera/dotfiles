@@ -1,0 +1,10 @@
+[Unit]
+Description=Prune expired Hatchet UserSession rows
+Documentation=file:///%h/bin/hatchet-session-cleanup.sh
+
+[Service]
+Type=oneshot
+# The script is a safe no-op when Docker or the Hatchet container is absent.
+# PATH is set explicitly so the docker CLI resolves under systemd's minimal env.
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=%h/bin/hatchet-session-cleanup.sh

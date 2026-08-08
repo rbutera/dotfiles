@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rai.hatchet-session-cleanup</string>
+
+  <!--
+    Daily prune of Hatchet's UserSession table. Hatchet-lite ships no session GC, so
+    the table grows without bound (it once hit ~2.3M rows / 923MB). The script IS the
+    missing infra; it is a safe no-op when the Hatchet container is not running.
+
+    Deliberately OS-level (launchd), NOT an Impulse/Hatchet cron: this cleanup exists
+    to keep Hatchet healthy, so it must not depend on Hatchet being healthy to run.
+
+    Not a .tmpl: nothing here is interpolated and there is no onepasswordRead, so
+    `chezmoi apply` on this file needs no 1Password session (same as the whetstone
+    plists). psql runs inside the container and never sees a credential.
+  -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/rai/bin/hatchet-session-cleanup.sh</string>
+  </array>
+
+  <!-- launchd's minimal environment does not include Homebrew, where the docker CLI
+       lives (/opt/homebrew/bin/docker). Without this PATH the script's docker check
+       would falsely conclude "docker not found" and skip every night. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/rai</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <!-- Daily at 04:37 local. Off-peak and deliberately not on a round minute. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>4</integer>
+    <key>Minute</key>
+    <integer>37</integer>
+  </dict>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <!-- Internal volume only. A LaunchAgent whose stdio path resolves onto
+       /Volumes/ExternalNVMe dies with EX_CONFIG (78) before exec, leaving a
+       zero-byte log and no process. ~/.logs is on the internal disk. -->
+  <key>StandardOutPath</key>
+  <string>/Users/rai/.logs/hatchet-session-cleanup.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/rai/.logs/hatchet-session-cleanup.launchd.log</string>
+</dict>
+</plist>

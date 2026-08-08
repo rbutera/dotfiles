@@ -35,6 +35,17 @@ Library/LaunchAgents/com.rai.whetstone.plist
 Library/LaunchAgents/com.rai.whetstone-watchdog.plist
 {{ end }}
 
+# Hatchet session-cleanup: OS-specific scheduler. The script (bin/) deploys on
+# both macOS and Linux and no-ops where Hatchet is absent; only the matching
+# scheduler for each OS is applied.
+{{ if ne .chezmoi.os "darwin" }}
+Library/LaunchAgents/com.rai.hatchet-session-cleanup.plist
+{{ end }}
+{{ if ne .chezmoi.os "linux" }}
+.config/systemd/user/hatchet-session-cleanup.service
+.config/systemd/user/hatchet-session-cleanup.timer
+{{ end }}
+
 .config/systemd/user/ssh-agent.service
 .linuxbrew
 .zprezto/modules/*
