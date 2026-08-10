@@ -1,5 +1,27 @@
 # chezmoi modify scripts changelog
 
+## 2026-08-10 — `dot_claude/modify_settings.json`: stop deleting `env`, pin `ENABLE_TOOL_SEARCH=true`
+
+### Problem
+Every Claude Code session was loading ~400 MCP tool schemas (~100K tokens) into
+context up front. Tool Search (deferred tool loading) is default-on in Claude
+Code ≥2.1.121, but it **auto-disables when `ANTHROPIC_BASE_URL` points at a
+proxy** — and the whole fleet routes through the tokenmaxx quota proxy on
+127.0.0.1:8459. Verified empirically 2026-08-10: a session with
+`ENABLE_TOOL_SEARCH=true` through tokenmaxx comes up with ~11 resident tools and
+200+ deferred, no API errors.
+
+Separately, the modify script ran `del(.env)` wholesale on every apply, which
+would have wiped both the fix AND `ANTHROPIC_BASE_URL` itself (silently
+bypassing the tokenmaxx proxy on the next `chezmoi apply`).
+
+### Change
+`del(.env)` replaced with: keep only the machine-local `ANTHROPIC_BASE_URL`
+(if present), then merge `{"ENABLE_TOOL_SEARCH": "true"}`. Other stale env keys
+are still dropped, preserving the old cleanup intent. Header comment documents
+the reasoning. Pipe-tested: current deployed settings round-trip with env
+`{ANTHROPIC_BASE_URL, ENABLE_TOOL_SEARCH}`, model and hooks intact.
+
 ## 2026-07-23 — New `dot_omp/agent/modify_config.yml` (omp provider pruning, fleet-wide)
 
 ### Problem

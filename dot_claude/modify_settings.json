@@ -2,7 +2,13 @@
 # Modify script for ~/.claude/settings.json
 # Merges managed base config into existing settings.
 # Managed: cleanupPeriodDays, skillListingBudgetFraction, teammateMode, enabledPlugins,
-#          permissions.defaultMode, model
+#          permissions.defaultMode, model, env.ENABLE_TOOL_SEARCH
+# env: previously del(.env) wholesale. Since 2026-08-10 we instead keep ONLY the
+#      machine-local ANTHROPIC_BASE_URL (tokenmaxx proxy routing — deleting it would
+#      silently bypass the quota/account proxy) and pin ENABLE_TOOL_SEARCH=true:
+#      Claude Code auto-disables MCP tool-search deferral when ANTHROPIC_BASE_URL is a
+#      proxy, and without it ~400 MCP tool schemas (~100K tokens) load into every
+#      session. Verified working through tokenmaxx 2026-08-10.
 # Free: the REST of permissions (allow/deny lists), attribution,
 #       skipDangerousModePermissionPrompt, etc.
 #
@@ -97,7 +103,8 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
   .attribution = $base.attribution |
   .showThinkingSummaries = $base.showThinkingSummaries |
   .viewMode = $base.viewMode |
-  del(.env) |
+  .env = (((.env // {}) | with_entries(select(.key == "ANTHROPIC_BASE_URL")))
+          + {"ENABLE_TOOL_SEARCH": "true"}) |
   .enabledPlugins = ((.enabledPlugins // {}) * $base.enabledPlugins |
     del(.["plugin-dev@claude-plugins-official"],
         .["mcp-server-dev@claude-plugins-official"],
