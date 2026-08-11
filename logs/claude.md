@@ -451,3 +451,26 @@ Every `chezmoi apply` re-injected `CLAUDE_CODE_OAUTH_TOKEN` into the shell envir
 
 - `dot_config/impulse/dot_env.tmpl` (ark-spawn jobs) and the PowerShell profile still template the token.
 - `~/Library/LaunchAgents/com.lumiere.discord-text-plugin.plist` hardcodes a literal token (not chezmoi-managed); lumiere `apps/ark/.env` and `infra/cortex-lab/**/.env` hold three more distinct literal tokens. These should be revoked/migrated to keychain auth as a follow-up.
+
+## 2026-08-11 -- Default model pinned to `claude-opus-5[1m]` (Opus 5, 1M context)
+
+### Problem
+
+Rai asked to set the fleet default model to Opus 5 with the 1M-context window. The
+managed default in `dot_claude/modify_settings.json` (the `modify_` script that
+force-writes `.model` into `~/.claude/settings.json` on every apply) had drifted to
+`claude-fable-5`, while its own docstring still claimed `claude-opus-5`. Whatever
+`/model` writes to the deployed settings gets stomped by this script on the next
+apply, so the change has to be made at the source.
+
+### Solution
+
+- `dot_claude/modify_settings.json`: base `model` `claude-fable-5` -> `claude-opus-5[1m]`.
+- Updated the docstring to match, and re-verified the id resolves (not assumed):
+  `claude -p hi --model 'claude-opus-5[1m]' --output-format json` reports
+  `init.model=claude-opus-5[1m]` and `modelUsage=[claude-opus-5[1m]]` (2026-08-11).
+  The `[1m]` variant syntax is valid alongside the full id (same shape as the running
+  session's `claude-opus-4-8[1m]`).
+- Applied to `~/.claude/settings.json` via `chezmoi apply` (the modify script is pure
+  bash, no `onepasswordRead`, so no 1Password session needed). New sessions default to
+  Opus 5 1M; the current session keeps whatever it launched with until `/model` is run.

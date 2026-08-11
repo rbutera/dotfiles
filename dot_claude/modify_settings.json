@@ -18,14 +18,15 @@
 # Free: the REST of permissions (allow/deny lists), attribution,
 #       skipDangerousModePermissionPrompt, etc.
 #
-# model is managed as of 2026-07-25, pinned to the FULL id `claude-opus-5`.
+# model is managed as of 2026-07-25, pinned to the FULL id + 1M-context variant:
+# `claude-opus-5[1m]` (updated 2026-08-11; was briefly `claude-fable-5`, and plain
+# `claude-opus-5` before that).
 # It was previously free and set to the alias `opus` on every host -- and that
 # alias still resolves to 4.8 on CLI 2.1.220, so the whole fleet was silently
 # defaulting to Opus 4.8 while looking like it was on "opus". Verified, not
-# assumed: `claude -p hi --model opus --output-format json` reports
-# init.model=claude-opus-4-8 and modelUsage=[claude-opus-4-8], while the same
-# call with claude-opus-5 reports claude-opus-5. Pin the id, not the alias, until
-# the alias moves.
+# assumed: `claude -p hi --model claude-opus-5[1m] --output-format json` reports
+# init.model=claude-opus-5[1m] and modelUsage=[claude-opus-5[1m]] (checked
+# 2026-08-11). Pin the id + variant, not the alias, until the alias moves.
 #
 # permissions.defaultMode is managed deliberately (2026-07-24). A CLI
 # --dangerously-skip-permissions flag applies only to the session you launched;
@@ -45,7 +46,7 @@ read -r -d '' base << 'BASE' || true
 {
   "cleanupPeriodDays": 30,
   "skillListingBudgetFraction": 0.02,
-  "model": "claude-fable-5",
+  "model": "claude-opus-5[1m]",
   "outputStyle": "rai-base",
   "permissions": {"defaultMode": "bypassPermissions"},
   "teammateMode": "in-process",
