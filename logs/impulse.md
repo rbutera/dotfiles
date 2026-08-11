@@ -320,3 +320,11 @@ Rai (Discord, 14:58): *"we should retune the impulse dice rolls back down to eve
 
 ## 2026-07-22 — cold-mode roll interval 15min → 60min (Rai request, quota)
 Rai (Discord): "increase the impulse wild personal etc rolls interval to every 60 min in cold mode? I don't have much quota left" (weekly at 84% used, ~64% through the window). Changed navi's `coldModeIntervalMs` in `dot_config/impulse/agents.json.tmpl` from `900000` (15min) → `3600000` (60min). Applied via `chezmoi apply ~/.config/impulse/agents.json`, restarted `com.rai.impulse-worker` (launchctl kickstart -k). Verified live: worker log `Cold-mode heartbeat registered for agent: navi (base interval: 3600s)`. The quota modulator still stretches it longer when weekly is high — 60min is now the FLOOR, not a cap. Other agents (shikamaru/heimerdinger/etc) left at 1200000 (20min). To revert: set navi's value back to 900000 in the template, apply, restart the worker.
+
+## 2026-08-06 -- Navi dice cadence 60m -> 30m
+
+### Problem
+Rai bought a second Claude account (more weekly quota headroom) and asked to raise Navi's cold-mode dice-roll cadence from every 60m back down to every 30m, to push harder on Rennet + the WTTJ pipeline. (Yesterday it had been dropped 900000->3600000 to conserve quota; that constraint has eased.)
+
+### Solution/Fix
+Edited source `dot_config/impulse/agents.json.tmpl`, nimbus branch, agentId "navi": `coldModeIntervalMs` 3600000 -> 1800000 (30 min). Only navi/nimbus touched; shikamaru/heimerdinger/hermione/rick untouched. No onepasswordRead in the file, so applied without a 1P session. `chezmoi apply ~/.config/impulse/agents.json`, then `launchctl kickstart -k gui/501/com.rai.impulse-worker`. Verified LOADED in the running process (not just deployed): worker.stderr.log registration line at 10:55:37 reads `base interval: 1800s` (new pid 93474), history 900s->3600s->1800s.

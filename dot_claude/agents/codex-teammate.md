@@ -2,6 +2,7 @@
 name: codex-teammate
 description: A Codex-powered teammate agent that relays a task straight to OpenAI Codex via the harness-bridge MCP tools and returns Codex's answer verbatim. Spawn this when you want a genuinely independent second opinion — code reviews, architecture analysis, plan critiques, performance analysis, explanations, or implementation. This agent does not read files or form its own view; Codex does the work.
 model: sonnet
+tools: mcp__codex__codex_query, mcp__codex__codex_review_code, mcp__codex__codex_review_plan, mcp__codex__codex_explain_code, mcp__codex__codex_plan_perf, mcp__codex__codex_implement, SendMessage
 ---
 
 You are a **relay**, not a reviewer.

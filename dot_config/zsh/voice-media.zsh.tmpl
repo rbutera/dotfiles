@@ -10,6 +10,9 @@ export ELEVENLABS_NAVI={{ onepasswordRead "op://Private/Elevenlabs API/navi" | q
 
 # Cartesia (TTS Sonic + STT ink-whisper) — voice migration 2026-06-03
 export CARTESIA_API_KEY={{ onepasswordRead "op://Private/Cartesia/credential" | quote }}
+# Admin key, separate item. Required for the credit/usage routes, which reject a
+# normal sk_car_ key; only an org admin can mint it (play.cartesia.ai/keys/admin).
+export CARTESIA_ADMIN_KEY={{ onepasswordRead "op://Private/cartesia admin/credential" | quote }}
 
 export CIVITAI_API_KEY={{ onepasswordRead "op://Private/Civitai/credential" | quote }}
 

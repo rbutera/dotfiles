@@ -345,6 +345,36 @@
     }
   },
   {
+    "id": "sky-alerts",
+    "name": "Navi: sky alerts (evening, tells Rai when there is something worth going outside for)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 20 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["/Users/rai/navi/bin/sky-alerts.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["care", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["/Users/rai/navi/bin/sky-alerts.mjs"],
+      "cwd": "/Users/rai/navi"
+    }
+  },
+  {
     "id": "dossier-refresh",
     "name": "Dossier Refresh (oldest-first, every 4h)",
     "trigger": {
