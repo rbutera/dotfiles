@@ -16,7 +16,7 @@ case "${1:-show}" in
     echo "current: $(current)"
     exit 0 ;;
   fable) TARGET="claude-fable-5" ;;
-  opus)  TARGET="claude-opus-4-8[1m]" ;;
+  opus)  TARGET="claude-opus-5[1m]" ;;
   *) echo "usage: agent-model fable|opus|show" >&2; exit 2 ;;
 esac
 

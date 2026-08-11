@@ -131,3 +131,25 @@ Lumiere finished unifying the Discord plugin under `apps/ark-discord`, and the o
 - Left `extraClaudeArgs` `server:plugin:discord-voice:discord-voice` unchanged on
   purpose: `discord-voice` is the Claude plugin id (wire identifier in transcripts),
   not the directory name — the rename deliberately kept it.
+
+## 2026-08-11 -- Ark main model (Navi + Florence) -> `claude-opus-5[1m]`
+
+### Problem
+
+Rai moved the Claude Code default to Opus 5 1M, but Ark launches agents with an
+explicit `--model` flag (`lumiere/apps/ark/src/runtime.ts:2388`) sourced from the
+workspace `ark.json` `model` field, which OVERRIDES `~/.claude/settings.json`. So
+Navi (and Florence) stayed on Opus 4.8 despite the new user default. Navi's model
+comes from `.agents.main_model` (chezmoi data), shared by `navi/ark.json.tmpl` and
+`focused/ark.json.tmpl`.
+
+### Solution
+
+- `.chezmoidata.toml`: `[agents].main_model` `claude-opus-4-8[1m]` ->
+  `claude-opus-5[1m]` (comment updated; opus id re-verified live 2026-08-11).
+- `bin/executable_agent-model`: `opus` toggle target `claude-opus-4-8[1m]` ->
+  `claude-opus-5[1m]`, so `agent-model opus` no longer reverts the fleet to 4.8.
+- Applied `~/navi/ark.json`, `~/focused/ark.json`, `~/bin/agent-model` (all op-free).
+  navi/ark.json:29 now renders `claude-opus-5[1m]`.
+- Takes effect on the NEXT ark session start / `ark restart`; a running Navi session
+  keeps its old model until restarted. kinto (Florence) picks it up on `chezmoi update`.
