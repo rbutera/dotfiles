@@ -486,3 +486,16 @@ represented upstream, including the `host_groups.work` Impulse fix. Preserved th
 `rescue/pre-sync-2026-08-18-8b22486`, aborted the interrupted merge, fetched `origin`, and aligned
 `main` to `origin/main`. This avoided committing an enormous merge that would have resurrected stale
 configuration alongside the current remote state.
+
+## 2026-08-18 — Keep repo metadata and macOS LaunchAgents off Linux targets
+
+**Problem/motivation:** The first apply after recovering the checkout exposed three newly tracked
+sources as pending additions on Lancelot: the repository's root `AGENTS.md` and two macOS
+LaunchAgents. Deploying the project-specific agent guide to `~/AGENTS.md` would incorrectly scope it
+over every repository under the home directory, while creating `~/Library/LaunchAgents` on Linux is
+platform-inappropriate.
+
+**Changes:** Added `AGENTS.md` to the repo-metadata ignore list and ignored the complete `Library/`
+tree on non-darwin systems. Every tracked target in that tree is a macOS LaunchAgent, so directory-
+level exclusion also prevents empty `Library` and `Library/LaunchAgents` objects from remaining in
+`chezmoi status`. The LaunchAgents remain managed on macOS.

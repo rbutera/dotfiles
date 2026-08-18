@@ -1,6 +1,7 @@
 zplug/.git*
 
 # Repo-meta files — exist for the chezmoi repo itself, not dotfiles
+AGENTS.md
 CLAUDE.md
 docs/
 logs/
@@ -11,7 +12,7 @@ skills/
 {{ if ne .chezmoi.os "darwin" }}
 run_once_0_install-cli-tools.sh
 0_install-cli-tools.sh
-Library/Application\ Support
+Library/
 mac
 .config/iterm
 .config/iTerm
