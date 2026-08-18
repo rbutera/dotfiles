@@ -473,3 +473,16 @@ always off.
 **Changes:** Replaced the check in `CLAUDE.md` with `timeout 12 op vault list >/dev/null 2>&1` read by EXIT CODE, which needs authentication but touches no secret. Recorded that `0` means authenticated and `124` means `op` sat waiting for an interactive unlock. Also recorded the caveat that a deliberately-invalid control returns 124 as well, because `op` prompts before it validates, so 124 means "would prompt" rather than specifically "auth failed" and `0` is the only unambiguous reading. Corrected the signin suggestion from `op signin --account personal` to `op signin`, and left the original broken command quoted in the correction notice so a future reader can see it was wrong rather than wonder why it changed.
 
 **Not changed:** the `[onepassword] prompt = false` recommendation, which was verified as already present in `~/.config/chezmoi/chezmoi.toml`, so `chezmoi apply` does fail fast rather than hanging.
+
+## 2026-08-18 — Recover local checkout from a conflicted pull
+
+**Problem/motivation:** The local `main` branch was left in an interrupted merge after pulling
+`origin/main`, with 36 unmerged paths and an apparent divergence of 96 local commits versus 707
+remote commits. The commit graph had multiple merge bases, making the raw ahead/behind counts look
+more alarming than the actual content divergence.
+
+**Changes:** Verified with `git cherry -v origin/main HEAD` that every local patch was already
+represented upstream, including the `host_groups.work` Impulse fix. Preserved the pre-pull tip at
+`rescue/pre-sync-2026-08-18-8b22486`, aborted the interrupted merge, fetched `origin`, and aligned
+`main` to `origin/main`. This avoided committing an enormous merge that would have resurrected stale
+configuration alongside the current remote state.
