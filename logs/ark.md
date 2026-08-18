@@ -153,3 +153,22 @@ comes from `.agents.main_model` (chezmoi data), shared by `navi/ark.json.tmpl` a
   navi/ark.json:29 now renders `claude-opus-5[1m]`.
 - Takes effect on the NEXT ark session start / `ark restart`; a running Navi session
   keeps its old model until restarted. kinto (Florence) picks it up on `chezmoi update`.
+
+## 2026-08-18 -- Manage focused only where the workspace already exists
+
+### Problem
+
+`focused/ark.json.tmpl` caused a full apply to create `~/focused` on every machine,
+including Lancelot, where the Florence workspace does not exist. The config is useful
+only on machines that already own that workspace; chezmoi should not bootstrap the
+workspace directory itself.
+
+### Changes
+
+- Added an existence-gated `focused/` rule to `.chezmoiignore` using `stat` against
+  `{{ .chezmoi.homeDir }}/focused`.
+- Existing focused workspaces remain managed. Machines without the directory ignore
+  the tree instead of creating it.
+- Removed the `~/focused/ark.json` and `~/focused` directory created on Lancelot by
+  the preceding apply; both were timestamped during that apply and no other content
+  was present.
