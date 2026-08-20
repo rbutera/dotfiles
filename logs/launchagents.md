@@ -2,6 +2,17 @@
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
+## 2026-08-20 -- Node 24->26 upgrade: unpin 12 LaunchAgents from versioned node path (shims DO work in launchd)
+
+- **Context**: Upgraded global toolchain Node 24.16.0 -> 26.7.0 (asdf). A recon sweep found 12 deployed, non-chezmoi-managed LaunchAgents hardcoding `/Users/rai/.asdf/installs/nodejs/24.16.0/bin/node` in `ProgramArguments` -- every one would break the instant that install is removed. (18 more only carried `24.16.0` as a stale *fallback* PATH entry after a shims-first PATH; those don't break -- a missing PATH dir is skipped -- and were left alone.)
+- **Correction to prior belief**: The 2026-08-04 whetstone note (and the plist comments) claimed the asdf shim is "unresolvable in launchd's minimal environment." **This is false.** Three deployed agents already ran on `~/.asdf/shims/node`, and after this change `com.rai.decisions-refresh` was observed running live under launchd on `nodejs/26.7.0/bin/node` via the shim. Shims resolve fine in launchd; the versioned-path workaround was never necessary.
+- **Changes** (deployed `~/Library/LaunchAgents/*.plist`, edited directly since none are chezmoi-managed; backups in scratchpad `plist-backup-20260820/`):
+  - Swapped `installs/nodejs/24.16.0/bin/node` -> `.asdf/shims/node` (durable, version-independent) in: `ai.openclaw.gateway`, `com.lumiere.ark-discord`, `com.rai.birthday-delivery-monitor`, `com.rai.cli-transcripts`, `com.rai.cortex-mcp`, `com.rai.cortex-health-scan`, `com.rai.decisions-refresh` (two node calls in one `bash -c`, both swapped), `com.rai.dreamcatcher`, `com.rai.quota-usage-recorder`, `com.rai.subagent-extract`, `dev.lumiere.ark.navi`.
+  - `com.rai.obsidian-sync-expedition` was **double-pinned** (node binary + `lib/node_modules/obsidian-headless/cli.js` under the versioned dir). obsidian-headless exposes bin `ob`, so collapsed both strings into a single `~/.asdf/shims/ob` invocation -- survives all future node bumps without touching the plist again.
+  - Reloaded all via `launchctl bootout` + `bootstrap gui/$UID`. 9 loaded (scheduled jobs idle until trigger; `obsidian-sync-expedition` running on `ob` shim, `decisions-refresh` seen running on node 26).
+  - **3 left NOT LOADED on purpose**: `ai.openclaw.gateway`, `com.lumiere.ark-discord`, `dev.lumiere.ark.navi` were already `DISABLED` in launchd's override DB before this work (not running). Their plists are fixed and will use the shim when re-enabled; did not force-enable them.
+- **Chezmoi source** (managed, but dormant on this host -- not deployed to `~/Library/LaunchAgents`): `com.rai.whetstone.plist` + `com.rai.whetstone-watchdog.plist` had the same versioned node path (exec + PATH entry). Both bumped to `~/.asdf/shims/node` (exec) and `~/.asdf/shims` (PATH) for the same durability. Source-only edit; not applied.
+
 ## 2026-08-04 -- com.rai.whetstone + com.rai.whetstone-watchdog brought under chezmoi (NIMBUS ONLY, staged not applied)
 
 - **Context**: Whetstone (the certification study app) was moved off Cloudflare Workers onto nimbus and served over Tailscale at `https://nimbus.piranha-wyvern.ts.net:8444`. Rai studies from it four hours a day for eight days in Devon from 7 August, with nobody at the machine, so the service and its watchdog had to survive unattended.

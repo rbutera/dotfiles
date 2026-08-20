@@ -1,5 +1,28 @@
 # npm/pnpm config changes log
 
+## 2026-08-20 — Upgrade Node 24.16.0 → 26.7.0 (global toolchain)
+
+### Context
+Node 26 is Current (LTS lands 2026-10-28). Upgraded the local machine + global toolchain now; deployed/containerised projects stay on their pinned versions until 26 goes LTS. No project had a hard `^24`-style engines pin — all are `>=18`/`>=22` ranges, 26-compatible.
+
+### Changes
+- **`dot_tool-versions`** + **`.tool-versions`** (chezmoi source dir): `nodejs 24.16.0` → `26.7.0`. Deployed `~/.tool-versions` via targeted `chezmoi apply ~/.tool-versions` (static file, no 1Password needed).
+- **`run_once_12_install_node.sh`**: bumped `NODE_VERSION="22.18.0"` → `"26.7.0"`. This script was a **landmine** — it runs `asdf set --home nodejs "$NODE_VERSION"`, so if it ever reran it would have forced global node back to **22.18.0**. The `.chezmoiignore` globs (`*_setup_node.sh`, `*_install_node.sh`) that were meant to disable it don't match the actual filenames, so it's live. Only the version string was changed (per CLAUDE.md: don't restructure run_once scripts); the ignore-glob mismatch and the run_once_10/run_once_12 redundancy are left as-is for a future dedicated pass.
+- **`~/.default-npm-packages`** (new, NOT chezmoi-managed — lives outside the source): created from the live global node_modules listing so asdf auto-reinstalls globals on every future version switch. Previously absent, which is why version bumps silently orphaned all global CLIs (see 2026 orphan runbook below).
+
+### Global CLI reinstall
+`asdf install nodejs 26.7.0` auto-reinstalled all 25 globals via `~/.default-npm-packages`, then `asdf reshim nodejs`. All 25 present, zero `engine-strict` failures. Reinstall pulls **latest** (not the previously-pinned versions) — notable jumps: `typescript` 6.0.3 → 7.0.2, `@openai/codex` 0.144.1 → 0.147.0, `@fission-ai/openspec` 1.4.1 → latest, `@tobilu/qmd` → 2.5.3, `mcporter` → 0.13.5. This supersedes the manual per-package orphan runbook — the `.default-npm-packages` file now handles it automatically.
+
+### Verification
+- `~/.asdf/shims/node` → v26.7.0; `asdf current nodejs` → 26.7.0; `~/.vite-plus/bin/node` wrapper auto-tracks → v26.7.0.
+- 12 LaunchAgents unpinned from the versioned node path (see `logs/launchagents.md`); `decisions-refresh` observed running live on node 26 via shim under launchd.
+- pnpm (10.32.1) and bun (1.3.14) globals live in their own dirs (`~/Library/pnpm`, `~/.bun`), untouched by the switch.
+
+### Not done (deliberate)
+- Old asdf installs `22.18.0` and `24.18.0` left in place as rollback safety; remove later with `asdf uninstall nodejs 24.16.0` etc. once 26 is proven over a few days.
+- Deployed/containerised projects (opentabs-fork, lumiere Dockerfiles, anomalyco/opencode, hurdle/vercel, camofox-browser, claude-code-leaked) still pin node 20/22/24 in CI + Docker — leave until 26 LTS (Oct 2026), optionally add 26 to CI matrices early for warning.
+- `sh.tokenmaxx.daemon.plist` (chezmoi-managed) pins bun 1.3.14 the same way — same disease, different runtime; deferred with the bun upgrade.
+
 ## 2026-05-23 — Add global .npmrc with supply-chain hardening + upgrade Node to 24
 
 ### Problem

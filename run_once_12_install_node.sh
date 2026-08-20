@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-NODE_VERSION="22.18.0"
+NODE_VERSION="26.7.0"
 NPM_GLOBAL_PACKAGES=(
   "@cometix/ccline"
   "@openai/codex"
