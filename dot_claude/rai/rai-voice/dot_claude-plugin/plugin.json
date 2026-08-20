@@ -1,0 +1,9 @@
+{
+  "name": "rai-voice",
+  "displayName": "rai voice",
+  "version": "0.1.0",
+  "description": "Prose voice tools: unslop (cut AI tells from writing). Vendored from michael-denyer/pstack-claude (MIT). Disable in authored-voice workspaces.",
+  "author": { "name": "Rai Butera" },
+  "license": "MIT",
+  "keywords": ["writing", "unslop", "prose"]
+}

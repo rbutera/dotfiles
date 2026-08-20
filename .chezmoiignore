@@ -1,13 +1,16 @@
 zplug/.git*
 
-# Repo-meta files — exist for the chezmoi repo itself, not dotfiles
+# Repo-meta files — exist for the chezmoi repo itself, not dotfiles.
+# skills/ and .claude-plugin/ are anchored to root (/) so they only match the
+# chezmoi repo's OWN top-level dirs, NOT nested target dirs like
+# .claude/rai/*/.claude-plugin (rai-craft / rai-voice plugin manifests).
 AGENTS.md
 CLAUDE.md
 docs/
 logs/
 openspec/
-skills/
-.claude-plugin/
+/skills/
+/.claude-plugin/
 
 {{ if not (stat (joinPath .chezmoi.homeDir "focused")) }}
 focused/

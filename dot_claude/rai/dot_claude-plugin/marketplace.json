@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "rai",
+  "description": "Rai's personal skill marketplace. Coding discipline (craft) and prose voice (voice), toggleable per workspace.",
+  "owner": { "name": "Rai Butera" },
+  "plugins": [
+    {
+      "name": "rai-craft",
+      "description": "TypeScript + type-system/boundary/idempotency/concurrency/migration/domain principles. Safe to import anywhere that writes code (incl. navi).",
+      "source": "./rai-craft",
+      "category": "productivity"
+    },
+    {
+      "name": "rai-voice",
+      "description": "Prose voice tools (unslop). Rewrites AI tells out of writing; keep OFF in workspaces with a deliberate authored voice (e.g. navi).",
+      "source": "./rai-voice",
+      "category": "productivity"
+    }
+  ]
+}

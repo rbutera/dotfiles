@@ -62,3 +62,15 @@ would have clobbered the working token with the stale 1Password one.
 ### Note
 This supersedes the token-management half of the 2026-05-23 `dot_npmrc` design.
 The supply-chain directives are unchanged; only the auth line is now untracked.
+
+## 2026-08-18 — Global HTML/CSS parser deps for impeccable (portable via run_onchange)
+
+**Problem:** The impeccable plugin needs `htmlparser2`, `css-select`, `css-tree`, and `domutils` available as global npm modules. Installing them by hand on one machine doesn't propagate to other dev machines.
+
+**Change:** Added `run_onchange_install-npm-globals.sh` to the chezmoi source. It holds a `PACKAGES` array and installs only the missing ones (`npm ls -g` check, idempotent). Because it's a `run_onchange_` script, chezmoi re-runs it on every machine whenever the package list is edited — adding a future global package is a one-line edit to the array. Ran it on this machine: all four packages installed (htmlparser2@12.0.0, css-select@7.0.0, css-tree@3.2.1, domutils@4.0.2).
+
+**Note:** No `NODE_PATH` export was added. If impeccable fails to `require()` these despite the global install, add `export NODE_PATH="$(npm root -g)"` to `dot_zshenv.tmpl`.
+
+## 2026-08-20 — Recovered the impeccable npm-globals script after a diverged-pull reset
+
+**Context:** A local commit (`idk`, 46cd9f4) that carried `run_onchange_install-npm-globals.sh` was dropped during a `git reset --hard origin/main` reconciliation (local `main` had lost its upstream and diverged; origin was cleaner on every other file). Audit of the dropped commit found this script + the entry above were the only unique, still-wanted artifacts on it — `impeccable` is referenced nowhere in the repo, but Rai confirmed it's still in use. Restored the script verbatim from `46cd9f4` and re-added the log entry above. Everything else in `idk` was either superseded by newer live edits (superpowers/plugins) or comment-only (`permissions.allow` was documented but never implemented in the jq body).

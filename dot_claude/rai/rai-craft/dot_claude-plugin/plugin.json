@@ -1,0 +1,9 @@
+{
+  "name": "rai-craft",
+  "displayName": "rai craft",
+  "version": "0.1.0",
+  "description": "Coding-discipline skills: TypeScript best practices + type-system, boundary, idempotency, shared-state, caller-migration, and domain-modeling principles. Vendored subset of michael-denyer/pstack-claude (MIT).",
+  "author": { "name": "Rai Butera" },
+  "license": "MIT",
+  "keywords": ["typescript", "principles", "type-safety"]
+}
