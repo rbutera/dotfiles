@@ -1,5 +1,48 @@
 # pi / oh-my-pi (omp) changes log
 
+## 2026-08-21 — Stop the paseo picker force-injecting Opus 5 (finish the 4.8 migration)
+
+### Motivation
+Rai flagged the tail of a `chezmoi apply`: `run_onchange_after_paseo-opus5-
+models.sh` was printing `paseo: ensured claude-opus-5 …` — it force-injected Opus
+5 into paseo's model pickers (`agents.providers.{claude,omp}.additionalModels`) on
+every host. He wants the stack on **Opus 4.8 with the 1M-context window**, not
+Opus 5.
+
+### Context — most of this was already done fleet-wide
+By the time this was picked up, the rest of the fleet had already migrated off
+Opus 5 (all landed on `origin/main` ahead of this change):
+- **omp default** (`dot_omp/agent/modify_config.yml`): `DEFAULT_MODEL_ROLE =
+  anthropic/claude-opus-4-8:high`. (In omp, that id already IS 1M context — omp's
+  catalog reports `claude-opus-4-8` at `contextWindow: 1000000`; there is no
+  `[1m]` id in omp, that bracket is Claude-Code-only syntax.)
+- **Ark** (`navi/ark.json.tmpl`, `focused/ark.json.tmpl`): now `"model": {{ .agents.main_model | quote }}`,
+  with `.chezmoidata.toml [agents] main_model = "claude-opus-4-8[1m]"` — a single
+  source of truth toggled by `bin/executable_agent-model`.
+- **Claude Code** (`dot_claude/modify_settings.json`): `"model": "claude-opus-4-8[1m]"`.
+
+The ONE surface nobody had touched was the paseo picker run_onchange script — the
+exact thing whose output Rai noticed. This change is just that last piece.
+
+### Change
+- **`run_onchange_after_paseo-opus5-models.sh` → renamed `run_onchange_after_paseo-opus-models.sh`**,
+  inverted. It now REMOVES the `claude-opus-5` entries the old version injected
+  into both providers' `additionalModels` (chezmoi never cleans up what a
+  run_onchange wrote, so the removal is explicit and idempotent), force-adds
+  `claude-opus-4-8[1m]` to the `claude` provider so the 1M variant is pickable in
+  paseo (the `omp` provider already discovers Opus 4.8 at 1M, so no entry there),
+  and prunes any emptied `additionalModels` list. Content change + rename means it
+  re-runs once per host on next apply. A paseo daemon restart is still needed for
+  the picker to refresh.
+
+### Verification
+- Dry-run of the new script over a copy of the live `~/.paseo/config.json`:
+  dropped `claude-opus-5` from both providers, added `claude-opus-4-8[1m]` to
+  `claude`, pruned the emptied `omp.additionalModels`. `changed: True`.
+- Confirmed against `origin/main` that omp default, both Ark templates, and the
+  Claude Code model were already on Opus 4.8 (1M), so no duplicate edits were made
+  to those files.
+
 ## 2026-07-23 — Stop omp auto-enabling OpenRouter (377 models) and Bedrock (130)
 
 ### Problem
