@@ -7,6 +7,38 @@
 
 require 'mp.options'
 
+local autoloop_duration = 5
+local autoloop_applied = false
+local ignore_loop_file_change = false
+local user_disabled_autoloop = false
+
+function is_loop_enabled(value)
+    return value and value ~= "no"
+end
+
+function set_loop_file(value)
+    if is_loop_enabled(mp.get_property_native("loop-file")) == is_loop_enabled(value) then
+        return
+    end
+
+    ignore_loop_file_change = true
+    mp.set_property_native("loop-file", value)
+end
+
+function loop_file_changed(_, value)
+    if ignore_loop_file_change then
+        ignore_loop_file_change = false
+        return
+    end
+
+    if is_loop_enabled(value) then
+        user_disabled_autoloop = false
+    elseif autoloop_applied then
+        user_disabled_autoloop = true
+        autoloop_applied = false
+    end
+end
+
 function getOption()
     -- Use recommended way to get options
     local options = {autoloop_duration = 5}
@@ -33,7 +65,7 @@ function set_loop()
     local duration = mp.get_property_native("duration")
 
     -- Checks whether the loop status was changed for the last file
-    was_loop = mp.get_property_native("loop-file")
+    local was_loop = mp.get_property_native("loop-file")
 
     -- Cancel operation if there is no file duration
     if not duration then
@@ -41,15 +73,18 @@ function set_loop()
     end
 
     -- Loops file if was_loop is false, and file meets requirements
-    if not was_loop and duration <= autoloop_duration then
-        mp.set_property_native("loop-file", true)
+    if not user_disabled_autoloop and not was_loop and duration <= autoloop_duration then
+        set_loop_file(true)
+        autoloop_applied = true
         mp.set_property_bool("file-local-options/save-position-on-quit", false)
         -- Unloops file if was_loop is true, and file does not meet requirements
     elseif was_loop and duration > autoloop_duration then
-        mp.set_property_native("loop-file", false)
+        set_loop_file(false)
+        autoloop_applied = false
     end
 end
 
 
 getOption()
+mp.observe_property("loop-file", "native", loop_file_changed)
 mp.register_event("file-loaded", set_loop)

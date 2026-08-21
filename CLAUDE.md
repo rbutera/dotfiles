@@ -71,7 +71,7 @@ chezmoi apply ~/.config/hypr/custom/keybinds.conf
 chezmoi apply ~/.config/hypr/custom/general.conf
 ```
 
-**Applying individual files without 1Password:** `chezmoi apply <target-path>` processes only that file. If the source file contains no `onepasswordRead` calls, 1Password is never invoked. This is safe to do at any time for plain config files (e.g. anything under `dot_config/hypr/`).
+**Applying individual files without 1Password:** `chezmoi apply <target-path>` processes only that file. If the source file contains no `onepasswordRead` calls, 1Password is never invoked. This is safe to do at any time for plain config files (e.g. anything under `dot_config/hypr/` or the Windows main PowerShell profile at `Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl`).
 
 **To check whether a source file uses 1Password before applying:**
 ```bash
@@ -179,6 +179,7 @@ Secrets are read at template render time via:
 - `dot_aider.conf.yml.tmpl` — Aider AI config
 - `dot_ssh/` — SSH keys via `op://Private/ed25519_rbutera/openssh`
 - `run_once_11_setup_gpg.sh.tmpl` — GPG import from `op://dev/GPG_rai_at_rbutera.com/*`
+- `Documents/PowerShell/Microsoft.PowerShell_profile.secrets.ps1.tmpl` — Windows PowerShell secret environment variables. The main Windows profile template dot-sources the rendered sibling file and is safe to edit/apply without a 1Password session.
 
 ### Adding a new secret/API key
 

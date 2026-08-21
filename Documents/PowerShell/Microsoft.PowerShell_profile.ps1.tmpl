@@ -5,8 +5,8 @@
    Edit the source, not the deployed file.
 
    Mirrors the subset of dot_zshenv.tmpl + dot_aliases.tmpl that makes sense
-   on Windows. Secret env vars are rendered via onepasswordRead at apply time —
-   chezmoi must have an active 1Password CLI session to apply this file.
+   on Windows. Secret env vars live in Microsoft.PowerShell_profile.secrets.ps1.tmpl;
+   this main profile can be applied without a 1Password session.
 */ -}}
 # === suppress update nag ===
 $env:POWERSHELL_UPDATECHECK = 'Off'
@@ -18,6 +18,7 @@ $env:VISUAL  = 'nvim'
 $env:PAGER   = 'less'
 $env:LESS    = '-g -i -M -R -S -w -X -z-4'
 $env:GIT_TERMINAL_PROMPT = '0'
+$IsInteractiveProfile = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not [Console]::IsOutputRedirected
 
 # === XDG (so ~/.config-style configs work for nvim/mpv/starship/etc) ===
 $env:XDG_CONFIG_HOME = "$HOME\.config"
@@ -39,6 +40,7 @@ foreach ($p in @("$HOME\bin", "$HOME\.local\bin", "$env:GOPATH\bin", $env:PNPM_H
 $env:FZF_DEFAULT_OPTS = '--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
 
 # === Claude Code tweaks (mirrors dot_zshenv) ===
+$env:ANTHROPIC_DEFAULT_OPUS_MODEL = 'claude-opus-4-6[1m]'
 $env:CLAUDE_CODE_NO_FLICKER = '1'
 
 # === non-secret API endpoints / app config ===
@@ -54,86 +56,17 @@ $env:ARK_WORKSPACE = "$HOME\focused"
 $env:ARK_WORKSPACE = "$HOME\navi"
 {{- end }}
 
-# === secrets via 1Password (rendered at chezmoi apply time) ===
-$env:CAMOFOX_API_KEY                = '{{ onepasswordRead "op://Private/Camofox API Key/credential" }}'
-$env:FIRECRAWL_API_KEY              = '{{ onepasswordRead "op://Private/firecrawl/credential" }}'
-$env:SUPERMEMORY_OPENCLAW_API_KEY   = '{{ onepasswordRead "op://Private/supermemory api key/credential" }}'
-$env:GROQ_API_KEY                   = '{{ onepasswordRead "op://Private/groq whisper api key/credential" }}'
-$env:OPENCODE_ZEN_API_KEY           = '{{ onepasswordRead "op://Private/OpenCode Zen/credential" }}'
-$env:OPENCODE_API_KEY               = '{{ onepasswordRead "op://Private/OpenCode Zen/credential" }}'
-$env:TAILSCALE_NOCODB_CLIENT_ID     = '{{ onepasswordRead "op://Private/tailscale nocodb oauth/username" }}'
-$env:TAILSCALE_NOCODB_CLIENT_SECRET = '{{ onepasswordRead "op://Private/tailscale nocodb oauth/credential" }}'
-$env:SUPERMEMORY_CC_API_KEY         = '{{ onepasswordRead "op://Private/supermemory api key/claude" }}'
-$env:SUPERMEMORY_API_KEY            = '{{ onepasswordRead "op://Private/supermemory api key/opencode" }}'
-$env:REED_API_KEY                   = '{{ onepasswordRead "op://Private/Reed API Key/credential" }}'
-$env:ADZUNA_APPLICATION_ID          = '{{ onepasswordRead "op://Private/Adzuna API Key/username" }}'
-$env:ADZUNA_API_KEY                 = '{{ onepasswordRead "op://Private/Adzuna API Key/credential" }}'
-$env:ZAI_API_KEY                    = '{{ onepasswordRead "op://Private/Z.AI API KEY/credential" }}'
-$env:OPENCLAW_DISCORD_NAVI          = '{{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}'
-$env:OPENCLAW_DISCORD_HERMIONE      = '{{ onepasswordRead "op://Private/Navi Discord tokens/hermione" }}'
-$env:OPENCLAW_DISCORD_ZELDA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/zelda" }}'
-$env:OPENCLAW_DISCORD_HEIMERDINGER  = '{{ onepasswordRead "op://Private/Navi Discord tokens/heimerdinger" }}'
-$env:OPENCLAW_DISCORD_ROCKY         = '{{ onepasswordRead "op://Private/Navi Discord tokens/rocky" }}'
-$env:OPENCLAW_DISCORD_RICK          = '{{ onepasswordRead "op://Private/Navi Discord tokens/rick" }}'
-$env:OPENCLAW_DISCORD_SHIKAMARU     = '{{ onepasswordRead "op://Private/Navi Discord tokens/shikamaru" }}'
-$env:OPENCLAW_DISCORD_HEDWIG        = '{{ onepasswordRead "op://Private/Navi Discord tokens/hedwig" }}'
-$env:OPENCLAW_DISCORD_DOBBY         = '{{ onepasswordRead "op://Private/Navi Discord tokens/dobby" }}'
-$env:OPENCLAW_DISCORD_DUMBLEDORE    = '{{ onepasswordRead "op://Private/Navi Discord tokens/dumbledore" }}'
-$env:OPENCLAW_DISCORD_ORCA          = '{{ onepasswordRead "op://Private/Navi Discord tokens/orca" }}'
-$env:OPENCLAW_DISCORD_PLANA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/plana" }}'
-$env:OPENCLAW_DISCORD_CODA          = '{{ onepasswordRead "op://Private/Navi Discord tokens/coda" }}'
-$env:OPENCLAW_DISCORD_READA         = '{{ onepasswordRead "op://Private/Navi Discord tokens/reada" }}'
-$env:GITHUB_LLM_PAT                 = '{{ onepasswordRead "op://Private/github llm personal access token/credential" }}'
-$env:GITHUB_TOKEN                   = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
-$env:GITHUB_API_PERSONAL_ACCESS_TOKEN = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
-$env:GITHUB_PERSONAL_ACCESS_TOKEN   = '{{ onepasswordRead "op://Private/github gh PAT/credential" }}'
-$env:PERPLEXITY_API_KEY             = '{{ onepasswordRead "op://dev/perplexity_api_key/credential" }}'
-$env:EXA_API_KEY                    = '{{ onepasswordRead "op://Private/EXA API Key/credential" }}'
-$env:GOG_KEYRING_PASSWORD           = '{{ onepasswordRead "op://Private/GOG Keyring Password/credential" }}'
-$env:EXPEDITION_EMAIL_APP_PASSWORD  = '{{ onepasswordRead "op://Private/google raibutera91/app_password" }}'
-$env:EXPEDITION_EMAIL_AUTHENTICATOR = '{{ onepasswordRead "op://Private/google raibutera91/one-time password" }}'
-$env:DART_API_KEY                   = '{{ onepasswordRead "op://Private/dart ai api key/credential" }}'
-$env:RAPIDAPI_API_KEY               = '{{ onepasswordRead "op://Private/RapidAPI Token/credential" }}'
-$env:ELEVENLABS_RAI                 = '{{ onepasswordRead "op://Private/Elevenlabs API/rai" }}'
-$env:ELEVENLABS_API_KEY             = '{{ onepasswordRead "op://Private/Elevenlabs API/credential" }}'
-$env:ELEVENLABS_NAVI                = '{{ onepasswordRead "op://Private/Elevenlabs API/navi" }}'
-$env:OBSIDIAN_VAULT_PASSWORD        = '{{ onepasswordRead "op://Private/Obsidian Vault Password/password" }}'
-$env:E8N_CLOUDFLARE_API_TOKEN       = '{{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" }}'
-$env:CLI_PROXY_API_TOKEN            = '{{ onepasswordRead "op://Private/CLIProxyAPI/credential" }}'
-{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
-{{- if $useSharedClaudeOAuth }}
-$env:CLAUDE_CODE_OAUTH_TOKEN_WORK   = '{{ onepasswordRead "op://focused/claude code oauth token/credential" }}'
-{{- else }}
-$env:CLAUDE_CODE_OAUTH_TOKEN        = '{{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token" }}'
-{{- end }}
-{{- if has .chezmoi.hostname .host_groups.work }}
-$env:ATLASSIAN_API_KEY    = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
-$env:ATLASSIAN_EMAIL      = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
-$env:ATLASSIAN_BASE_URL   = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}'
-$env:JIRA_API_TOKEN       = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
-$env:JIRA_USERNAME        = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
-$env:JIRA_URL             = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}'
-$env:CONFLUENCE_API_TOKEN = '{{ onepasswordRead "op://focused/EasyJet JIRA API/credential" }}'
-$env:CONFLUENCE_USERNAME  = '{{ onepasswordRead "op://focused/EasyJet JIRA API/username" }}'
-$env:CONFLUENCE_URL       = '{{ onepasswordRead "op://focused/EasyJet JIRA API/hostname" }}/wiki'
-$env:SONARQUBE_TOKEN      = '{{ onepasswordRead "op://focused/SonarQube/credential" }}'
-$env:SONARQUBE_ORG        = 'easyjet-dev'
-$env:SONARQUBE_URL        = 'https://sonarcloud.io'
-{{- end }}
-$env:NOTION_TOKEN         = '{{ onepasswordRead "op://Private/_focused notion token/credential" }}'
-$env:TODOIST_API_TOKEN    = '{{ onepasswordRead "op://dev/todoist_api/credential" }}'
-$env:HONCHO_API_KEY       = '{{ onepasswordRead "op://Private/honcho.dev/credential" }}'
-
-# === RunPod (GPU Cloud) ===
-$env:RUNPOD_API_KEY       = '{{ onepasswordRead "op://Private/RunPod API Key/credential" }}'
-$env:RUNPOD_S3_ACCESS_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_access" }}'
-$env:RUNPOD_S3_SECRET_KEY = '{{ onepasswordRead "op://Private/RunPod API Key/s3_secret" }}'
+# === secrets via 1Password ===
+$ProfileSecretsPath = Join-Path (Split-Path -Parent $PROFILE.CurrentUserCurrentHost) 'Microsoft.PowerShell_profile.secrets.ps1'
+if (Test-Path $ProfileSecretsPath) {
+    . $ProfileSecretsPath
+}
 
 # === PSReadLine: vi mode, prediction ===
 # UpArrow/DownArrow use scriptblocks that fall back to PreviousHistory/NextHistory
 # when the buffer is empty — works around a PSReadLine null-ref in
 # HistorySearchBackward when no matching history exists.
-if (Get-Module -ListAvailable -Name PSReadLine) {
+if ($IsInteractiveProfile -and (Get-Module -ListAvailable -Name PSReadLine)) {
     Set-PSReadLineOption -EditMode Vi
     Set-PSReadLineOption -PredictionSource HistoryAndPlugin
     Set-PSReadLineOption -PredictionViewStyle ListView
@@ -161,18 +94,20 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
 }
 
 # === prompt, jump, runtimes, fuzzy ===
-if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& starship init powershell)
-}
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& zoxide init powershell --cmd cd | Out-String)
-}
-if (Get-Command mise -ErrorAction SilentlyContinue) {
-    mise activate pwsh | Out-String | Invoke-Expression
-}
-if (Get-Module -ListAvailable -Name PSFzf) {
-    Import-Module PSFzf
-    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+if ($IsInteractiveProfile) {
+    if (Get-Command starship -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& starship init powershell)
+    }
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& zoxide init powershell --cmd cd | Out-String)
+    }
+    if (Get-Command mise -ErrorAction SilentlyContinue) {
+        mise activate pwsh | Out-String | Invoke-Expression
+    }
+    if ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Module -ListAvailable -Name PSFzf)) {
+        Import-Module PSFzf
+        Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+    }
 }
 
 # === aliases & functions ported from ~/.aliases ===

@@ -253,3 +253,51 @@ worked because they had both forms listed.
 - Also added `.config/mpv/scripts/uosc/bin/ziggy-windows.exe` — the
   Windows binary for mpv's uosc plugin was being deployed unnecessarily
   on macOS/Linux.
+
+## 2026-06-03 — Split PowerShell profile secrets from startup logic
+
+**Why:** Agents need to modify and apply normal PowerShell profile startup logic
+without being blocked by 1Password rendering. The original Windows profile
+template mixed public env defaults, interactive shell setup, aliases, and
+`onepasswordRead` secret env vars in one file.
+
+**What changed:**
+
+- `Documents/PowerShell/Microsoft.PowerShell_profile.ps1.tmpl` now contains
+  the non-secret Windows profile logic and dot-sources a sibling
+  `Microsoft.PowerShell_profile.secrets.ps1` when present.
+- New
+  `Documents/PowerShell/Microsoft.PowerShell_profile.secrets.ps1.tmpl` contains
+  the 1Password-rendered secret env vars only.
+- The live Windows profile was split the same way so current shell behavior is
+  preserved, while future edits to the main profile can be applied with
+  `chezmoi apply Documents/PowerShell/Microsoft.PowerShell_profile.ps1` without
+  a 1Password session.
+- The main profile keeps the non-interactive `$IsInteractiveProfile` guard so
+  Codex-style redirected PowerShell sessions skip PSReadLine, mise, starship,
+  zoxide, and PSFzf startup hooks.
+
+## 2026-08-21 — Salvage Windows-side work + reland onto main
+
+**Why:** The Windows chezmoi clone at `C:\Users\Rai\.local\share\chezmoi` had
+drifted badly: 710 commits behind `main`, an abandoned interactive rebase from
+2026-06-03 still sitting in `.git/rebase-merge` (stopped on the PowerShell
+secrets-split conflict), and 177 working-tree files showing as modified — almost
+all of them pure CRLF line-ending churn (the repo has no `.gitattributes`, and
+the Windows clone had `core.autocrlf=false`). None of the 71 divergent commits
+were unique (all already in `main` by content).
+
+**What was genuinely unique and got relanded on `main` from WSL:**
+
+- The PowerShell profile secrets split (the abandoned June work): the resolved
+  profile was recovered from the original pre-rebase commit `743758f` (not the
+  conflict-marked working copy), plus the new `*.secrets.ps1.tmpl`, plus the
+  doc updates in `CLAUDE.md` / `README.md` and the 2026-06-03 log entry above.
+- mpv looping tweaks made on the Windows tree after June: `directory-mode=recursive`
+  in `mpv.conf`, `load_types=same` in `uosc.conf`, and the user-disabled-autoloop
+  logic in `scripts/autoloop.lua`.
+
+**Then:** the Windows clone was hard-reset to the new `origin/main` (discarding
+the abandoned rebase and the CRLF churn), `core.autocrlf=input` was set locally
+to stop the churn recurring, and `chezmoi apply` was run on Windows to redeploy
+the current config.

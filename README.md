@@ -9,6 +9,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io). Vi-mode friendly, 
 - **Terminal**: kitty, tmux with catppuccin theme
 - **Tools**: fzf, eza, delta, aichat, aider
 - **Secrets**: 1Password CLI integration for API keys and credentials
+- **Windows**: PowerShell 7 profile split into agent-editable startup logic and a separate 1Password-rendered secrets file
 
 ## Prerequisites
 
@@ -61,6 +62,8 @@ chezmoi update        # Pull and apply latest
 ├── dot_zprofile.tmpl     # Login shell config
 ├── dot_gitconfig.tmpl    # Git config
 ├── dot_claude/           # Claude Code settings
+├── Documents/
+│   └── PowerShell/       # Windows PowerShell profile and secrets template
 ├── dot_config/
 │   ├── aichat/           # AI chat tool config
 │   ├── kitty/            # Terminal config
