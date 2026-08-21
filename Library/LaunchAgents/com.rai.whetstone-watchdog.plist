@@ -19,7 +19,7 @@
   -->
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/rai/.asdf/shims/node</string>
+    <string>/Users/rai/.asdf/installs/nodejs/26.7.0/bin/node</string>
     <string>/Users/rai/dev/lumiere/apps/whetstone/scripts/health-watchdog.mjs</string>
   </array>
 
@@ -33,7 +33,7 @@
     <key>HOME</key>
     <string>/Users/rai</string>
     <key>PATH</key>
-    <string>/Users/rai/.asdf/shims:/bin:/usr/bin:/usr/sbin:/sbin</string>
+    <string>/Users/rai/.asdf/installs/nodejs/26.7.0/bin:/bin:/usr/bin:/usr/sbin:/sbin</string>
   </dict>
 
   <!-- Internal volume only. A LaunchAgent whose stdio path resolves onto /Volumes/ExternalNVMe

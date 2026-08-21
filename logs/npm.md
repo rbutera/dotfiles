@@ -1,5 +1,17 @@
 # npm/pnpm config changes log
 
+## 2026-08-21 -- CORRECTION: revert LaunchAgents to absolute node path (shims DON'T work in minimal-PATH launchd jobs)
+
+**Yesterday's 2026-08-20 change was wrong and broke 5 services.** The claim "shims resolve fine in launchd" was false. Root cause and fix:
+
+- The asdf shim `~/.asdf/shims/node` is just `exec asdf exec "node" "$@"` -- it **requires the `asdf` binary on PATH**. It only worked for the agents whose plist `EnvironmentVariables:PATH` happened to include `/opt/homebrew/bin` (where asdf lives). Agents with `PATH=<none>` or a PATH without asdf exited **127 (command not found)** and crash-looped.
+- Casualties (exit 127): `ai.openclaw.gateway`, `com.rai.cortex-mcp`, `com.rai.dreamcatcher`, `com.rai.quota-usage-recorder`, `com.rai.subagent-extract`. The original 2026-08-04 whetstone note was **correct**: the absolute versioned node path is the reliable pattern for launchd's minimal environment.
+- **Second, separate bug**: yesterday I also misread `launchctl print-disabled` output -- I grepped for the label and saw it listed, but the line actually said `=> enabled`. I wrongly concluded 3 KeepAlive daemons (`ai.openclaw.gateway`, `com.lumiere.ark-discord`, `dev.lumiere.ark.navi`) were "disabled" and left them **NOT LOADED for ~24h**. They were enabled and should have been running. (The bootstrap "Input/output error" was just a bootout-not-settled race; it clears with a `sleep` between bootout and bootstrap.)
+
+**Fix applied**: all 12 deployed agents reverted to the absolute path `/Users/rai/.asdf/installs/nodejs/26.7.0/bin/node` (obsidian: node + `.../26.7.0/lib/node_modules/obsidian-headless/cli.js`). chezmoi-source whetstone pair likewise reverted to absolute exec + PATH. All 12 verified: 6 running, 6 scheduled-idle, zero exit-127.
+
+**Consequence for future node bumps**: these plists ARE version-coupled by design -- every asdf node upgrade must update the `26.7.0` path string in all 12 deployed agents + the 2 source whetstone plists. That toil is the cost of launchd reliability; do not "fix" it with shims again unless every plist's PATH includes asdf's bin dir. Reload pattern: `launchctl bootout gui/$UID/<label>; sleep 2; launchctl bootstrap gui/$UID <plist>`.
+
 ## 2026-08-20 — Upgrade Node 24.16.0 → 26.7.0 (global toolchain)
 
 ### Context

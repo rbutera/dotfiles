@@ -24,7 +24,7 @@
   -->
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/rai/.asdf/shims/node</string>
+    <string>/Users/rai/.asdf/installs/nodejs/26.7.0/bin/node</string>
     <string>--env-file=/Users/rai/dev/lumiere/apps/whetstone/.env</string>
     <string>--env-file=/Users/rai/dev/lumiere/apps/whetstone/.env.oauth-prod</string>
     <string>/Users/rai/dev/lumiere/apps/whetstone/.next/standalone/apps/whetstone/server.js</string>
@@ -59,7 +59,7 @@
     <string>/Users/rai/dev/lumiere/apps/whetstone/content</string>
 
     <key>PATH</key>
-    <string>/Users/rai/.asdf/shims:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <string>/Users/rai/.asdf/installs/nodejs/26.7.0/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
 
   <key>RunAtLoad</key>
