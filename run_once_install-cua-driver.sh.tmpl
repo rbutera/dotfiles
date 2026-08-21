@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Install the Cua Driver (trycua/cua, MIT) — the computer-use driver Claude Code
+# reaches over MCP as `cua-driver`. Idempotent: skips if already installed.
+# --no-modify-path because chezmoi owns the shell rc / PATH, not the installer.
+set -euo pipefail
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
+
+if [ -x "$HOME/.local/bin/cua-driver" ] || command -v cua-driver >/dev/null 2>&1; then
+  echo "cua-driver already installed ($("$HOME/.local/bin/cua-driver" --version 2>/dev/null || echo present)) — skipping."
+  exit 0
+fi
+
+echo "Installing cua-driver to ~/.local/bin (trycua/cua, MIT)…"
+/bin/bash -c "$(curl -fsSL https://cua.ai/driver/install.sh)" bash --no-modify-path
+"$HOME/.local/bin/cua-driver" --version || true
+echo
+echo "Next: grant Accessibility + Screen Recording — see the guide from your Claude session."
+{{- else }}
+echo "cua-driver install skipped on {{ .chezmoi.os }} (macOS/Linux only)."
+{{- end }}

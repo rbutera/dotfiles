@@ -46,8 +46,8 @@ read -r -d '' base_mcps << 'MCPS' || true
     }
   },
   "cua-driver": {
-    "command": "uvx",
-    "args": ["cua-driver", "mcp"]
+    "command": "{{ .chezmoi.homeDir }}/.local/bin/cua-driver",
+    "args": ["mcp"]
   }
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"cortex": {
