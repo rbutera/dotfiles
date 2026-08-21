@@ -1,5 +1,22 @@
 # npm/pnpm config changes log
 
+## 2026-08-21 -- nimbus: run_once_12 rerun broke `chezmoi apply` on a dangling pnpm global (chaching)
+
+### What happened
+The 2026-08-21 `NODE_VERSION` bump in `run_once_12_install_node.sh` changed the script's hash, so `chezmoi apply` on **nimbus** re-ran it. It set node global 26.7.0 and installed npm globals fine, then died at the `pnpm add -g` step:
+`ENOENT: no such file or directory, open '/tmp/chaching-1.17.0.tgz'` → `exit status 254`.
+
+### Root cause (nimbus-local, pre-existing)
+nimbus's pnpm global manifest (`~/Library/pnpm/global/5/package.json`) pinned `"chaching": "file:/tmp/chaching-1.17.0.tgz"` — a local tarball that no longer exists (the store actually held chaching@1.15.1). `chaching` is Rai's own tool and is NOT in run_once_12's package list; it was a stray local-tgz global install. Any `pnpm add -g` re-resolves the whole manifest and chokes on the missing tarball, so the failure was latent for ALL pnpm global installs on nimbus, not specific to this bump.
+
+### Fix
+`chaching` is published on npm (1.16.0). Repointed it to the registry: `pnpm add -g chaching` (manifest entry `file:/tmp/...` → `1.16.0`). Re-ran run_once_12's full `pnpm add -g` list — exit 0. nimbus verified on node 26.7.0 with npm + pnpm globals healthy.
+
+### Finish step (owner)
+`run_once_12` is still un-recorded (it exited non-zero), so it re-runs on next `chezmoi apply` — which now succeeds and also runs `pnpm install` in `~/oclaw` + `~/dev/lumiere` (both present, few min), then records. Needs an active 1Password session first: `eval $(op signin)` then `chezmoi apply`.
+
+### Recommendation (NOT done — run_once change needs owner sign-off)
+`run_once_12` uses `set -euo pipefail` + a single `pnpm add -g <big list>` / `npm install -g <big list>`, so ONE bad dependency aborts the entire `chezmoi apply`. Consider installing globals one-by-one with a non-fatal wrapper (`|| echo "warn: <pkg> failed"`) so a single broken global degrades gracefully instead of blocking the whole machine's apply. Also still duplicates `run_once_10_setup_node.sh.tmpl` — worth consolidating in a dedicated pass.
 ## 2026-08-21 -- CORRECTION: revert LaunchAgents to absolute node path (shims DON'T work in minimal-PATH launchd jobs)
 
 **Yesterday's 2026-08-20 change was wrong and broke 5 services.** The claim "shims resolve fine in launchd" was false. Root cause and fix:
