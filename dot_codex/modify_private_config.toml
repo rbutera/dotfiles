@@ -237,4 +237,22 @@ for name, config in current.get("plugins", {}).items():
     if name.endswith(("@openai-bundled", "@openai-primary-runtime")):
         merged["plugins"][name] = config
 
+# Superpowers is uninstalled everywhere. The desktop app may re-add a plugin
+# entry, a marketplace, and a *trusted session_start hook* (hooks.state.*) that
+# keeps injecting the "using-superpowers" preamble. Strip every remnant so a
+# re-add can't survive a chezmoi apply. hooks.state is otherwise preserved by
+# deep_merge, so the plugins-are-authoritative rule above does NOT cover it.
+def _prune_superpowers(cfg: dict) -> None:
+    for tbl in ("plugins", "marketplaces"):
+        if isinstance(cfg.get(tbl), dict):
+            for k in [k for k in cfg[tbl] if "superpowers" in k]:
+                cfg[tbl].pop(k, None)
+    hooks = cfg.get("hooks")
+    if isinstance(hooks, dict) and isinstance(hooks.get("state"), dict):
+        for k in [k for k in hooks["state"] if "superpowers" in k]:
+            hooks["state"].pop(k, None)
+
+
+_prune_superpowers(merged)
+
 sys.stdout.buffer.write(tomli_w.dumps(merged).encode())

@@ -40,8 +40,8 @@ omp only defines two native subagents, `codex` and `opus`
 - **6 lens dispatches** → agent `codex`, one `task` call per lens, using the
   Codex-variant prompt at the bottom of `references/lenses.md`.
 
-Dispatch all 12 in the same turn (`superpowers:dispatching-parallel-agents`
-applies here same as always). Read-only, no worktree isolation needed. Each
+Dispatch all 12 in the same turn (standard parallel-agent dispatch applies
+here). Read-only, no worktree isolation needed. Each
 returns the same flat row schema the canonical file specifies:
 `scenario | other-elements-involved | expected | coverage (U/E/M)`.
 

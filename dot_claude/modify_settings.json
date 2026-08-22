@@ -62,7 +62,6 @@ read -r -d '' base << 'BASE' || true
     "playwright@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-supermemory@supermemory-plugins": true,
-    "superpowers@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
@@ -123,6 +122,7 @@ echo "$current" | jq --argjson base "$base" --arg notif "$notif_channel" --argjs
         .["discord@claude-plugins-official"],
         .["context7@claude-plugins-official"],
         .["chrome-devtools-mcp@claude-plugins-official"],
+        .["superpowers@claude-plugins-official"],
         .["codex@openai-codex"])) |
   del(.extraKnownMarketplaces["openai-codex"]) |
   if ($mac or $posix) then

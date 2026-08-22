@@ -26,7 +26,7 @@ Try sources in this order:
    ```
    This gives you context files, progress, and task list. If `state: "blocked"`, tell the user artifacts are missing and suggest `/opsx:continue`. If `state: "all_done"`, suggest `/opsx:archive`.
 
-2. **Plan file**: look for a `docs/superpowers/plans/*.md` or similar structured plan in the repo. Parse tasks from checkbox lists or numbered sections.
+2. **Plan file**: look for a structured plan (e.g. `docs/plans/*.md`) in the repo. Parse tasks from checkbox lists or numbered sections.
 
 3. **Explicit task list**: the user gave you tasks directly (in conversation, a markdown file, a GitHub issue). Parse them.
 

@@ -263,3 +263,36 @@ Replaced static config files with chezmoi `modify_` scripts. These scripts recei
 - To add a new MCP server to Codex across all machines, add it to the `BASE` dict in the modify script
 - To add a new Claude Code plugin across all machines, add it to the `base` JSON in the modify script
 - `yq` was evaluated for TOML but rejected — it strips quotes from keys and reformats arrays, breaking Codex's expected format
+
+## 2026-08-22 — Uninstall `superpowers` plugin across all harnesses
+
+**Why:** `superpowers` (Anthropic marketplace plugin + community marketplace) was
+still activating everywhere — including ChatGPT/Codex desktop on Windows, where a
+trusted `session_start` hook kept injecting the "using-superpowers" preamble. Rai
+wanted it completely uninstalled from every harness and machine, permanently.
+
+**What changed (both modify scripts made self-healing):**
+
+- `dot_claude/modify_settings.json`: removed `superpowers@claude-plugins-official`
+  from the managed `enabledPlugins` base, AND added it to the `del(...)` strip-list
+  (same pattern as slack/discord/context7/codex) so it's actively removed from any
+  deployed `settings.json` on every apply — the additive merge would otherwise
+  preserve an existing `superpowers: true`.
+- `dot_codex/modify_private_config.toml`: added `_prune_superpowers(merged)`. The
+  `plugins`-are-authoritative rule already dropped the plugin entry, but the
+  desktop app also writes a **`[hooks.state."superpowers@...:session_start"]`**
+  trusted-hook entry under `hooks`, which `deep_merge` preserves. The prune strips
+  any `superpowers` key from `plugins`, `marketplaces`, and `hooks.state`, so a
+  re-add by the app cannot survive a `chezmoi apply`.
+- Cleaned dangling references in `dot_claude/skills/wave/SKILL.md` (plan-file path)
+  and `dot_omp/agent/skills/interaction-test-plan/SKILL.md` (parallel-dispatch note).
+
+**Local teardown (this machine, WSL + Windows):** removed the Claude plugin dirs
+(`~/.claude/plugins/{data,marketplaces,cache}/…superpowers…`), stripped the two
+Codex `config.toml` blocks on Windows, deleted the Codex plugin files
+(`~/.codex/.tmp/plugins/plugins/superpowers`, `~/.codex/plugins/cache/claude-plugins-official/superpowers`),
+and removed the stale `opencode.json.pre-superpowers-disable.bak`.
+
+**Note:** chezmoi does not manage the plugin *cache* dirs, so other machines keep
+their leftover cache files until manually deleted — but the plugin is disabled and
+the hook stripped on their next apply, so it no longer activates.
