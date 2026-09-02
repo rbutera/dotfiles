@@ -1,5 +1,24 @@
 # zshenv changelog
 
+## 2026-09-03 — Kill the easyJet secrets group (left Focused)
+
+### Motivation
+
+No longer at Focused / easyJet. The `easyjet.zsh` group (Atlassian / JIRA /
+Confluence / SonarQube / Databricks prod PAT, `AWS_PROFILE=ej-dev`) only ever
+rendered on work hosts (kinto / latios) and has no reason to exist now.
+
+### Change
+
+- Deleted `dot_config/zsh/easyjet.zsh.tmpl`.
+- Added `.chezmoiremove` with `.config/zsh/easyjet.zsh` so the deployed file is
+  removed on every host at next `chezmoi apply` (the `.zshenv` loader globs
+  `~/.config/zsh/*.zsh`, so a stale deployed copy would keep exporting).
+- Removed the matching work-host Atlassian / JIRA / Confluence / SonarQube block
+  from `Documents/PowerShell/Microsoft.PowerShell_profile.secrets.ps1.tmpl`.
+- The 1Password items themselves (`op://focused/EasyJet JIRA API`, `SonarQube`,
+  `easyjet databricks prod PAT`) still exist; nothing in the repo reads them now.
+
 ## 2026-09-03 — Drop the dead `_focused notion token` 1Password read
 
 ### Motivation
