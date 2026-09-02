@@ -35,3 +35,35 @@ selection.
 `anthropic/claude-opus-4-8:high`. Updated the review-gate, wave, and model-control
 guidance so they describe the fixed 4.8 default while preserving explicit
 per-agent overrides.
+
+## 2026-09-02: fleet main model -> Claude Fable 5.1
+
+**Problem/motivation:** Rai asked for Navi (nimbus) and the other Ark agents
+(Florence on kinto) to default to Claude Fable 5.1. The fleet had been sitting on
+`claude-opus-4-8[1m]` since the Opus 5 rollback (commit c07e50b), and the
+`agent-model fable` target still pointed at the older `claude-fable-5`.
+
+**Changes:**
+
+- `.chezmoidata.toml`: `[agents].main_model` `claude-opus-4-8[1m]` ->
+  `claude-fable-5-1`. Verified live on nimbus first: `claude --model claude-fable-5-1
+  -p ... --output-format json` reports `model=claude-fable-5-1`, `is_error=false`.
+  (`claude-fable-5-1[1m]` also resolves, but Fable is 1M-context natively so the
+  plain id is used.)
+- `bin/executable_agent-model`: `fable` target -> `claude-fable-5-1`. Two latent
+  bugs fixed while here: the `sed` used `\s`, which BSD sed does not support, so
+  the script silently never edited the value on macOS; now `[[:space:]]`. And it
+  ran a full `chezmoi apply`, which stalls on the 1Password-templated files without
+  an op session (see 2026-08-05 entry); now applies only `~/navi/ark.json` and
+  `~/focused/ark.json` where they exist.
+- Applied `~/navi/ark.json`, `~/focused/ark.json`, `~/bin/agent-model` on nimbus.
+- Ark side note: `resolveModelFamily` in `apps/ark/src/sensors.ts` maps fable to
+  `unknown`, which falls back to the `opus` budget row, and the 1M tier is detected
+  from `~/.claude/settings.json` (`claude-opus-4-8[1m]`), so context-pressure
+  budgets are unchanged (700k on navi). If the Claude Code default ever drops its
+  `[1m]` suffix, the tier detection falls to `standard` (150k) for a 1M model.
+- Claude Code's own default (`dot_claude/modify_settings.json`) left on
+  `claude-opus-4-8[1m]`; only the Ark agents changed.
+- Takes effect on the NEXT ark session start / `ark restart`. Navi's live session
+  (started ~19h before this change) keeps Opus 4.8 until restarted. kinto picks it
+  up on `chezmoi update`.

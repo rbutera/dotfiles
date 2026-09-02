@@ -15,7 +15,7 @@ case "${1:-show}" in
   show)
     echo "current: $(current)"
     exit 0 ;;
-  fable) TARGET="claude-fable-5" ;;
+  fable) TARGET="claude-fable-5-1" ;;
   opus)  TARGET="claude-opus-5[1m]" ;;
   *) echo "usage: agent-model fable|opus|show" >&2; exit 2 ;;
 esac
@@ -25,8 +25,8 @@ if [ "$(current)" = "$TARGET" ]; then
   exit 0
 fi
 
-sed -i '' -E "s|^(\s*main_model = ).*|\1\"$TARGET\"|" "$DATA"
-chezmoi apply
+sed -i "" -E "s|^([[:space:]]*main_model = ).*|\1\"$TARGET\"|" "$DATA"
+for f in "$HOME/navi/ark.json" "$HOME/focused/ark.json"; do [ -e "$f" ] && chezmoi apply "$f"; done
 git -C "$SRC" add .chezmoidata.toml
 git -C "$SRC" commit -q -m "agent-model: main model -> $TARGET"
 git -C "$SRC" push -q
