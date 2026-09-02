@@ -2,8 +2,7 @@
 # Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
 # Apply just this group:  chezmoi apply ~/.config/zsh/tools.zsh
 
-# Notion & Todoist
-export NOTION_TOKEN={{ onepasswordRead "op://Private/_focused notion token/credential" | quote }}
+# Todoist (Notion lives in notion.zsh, work hosts only)
 export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" | quote }}
 
 # Obsidian

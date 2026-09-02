@@ -1,5 +1,30 @@
 # zshenv changelog
 
+## 2026-09-03 — Drop the dead `_focused notion token` 1Password read
+
+### Motivation
+
+`chezmoi apply` failed rendering `dot_config/zsh/tools.zsh.tmpl`:
+
+```
+could not read secret 'op://Private/_focused notion token/credential': "_focused notion token" isn't an item in the "Private" vault
+```
+
+Rai left Focused and deleted the item from 1Password. Every other
+`onepasswordRead` in the repo (86 unique refs) was checked against `op read`
+and still resolves; the `focused` vault and its items (Flaude Discord, Hatchet
+Kinto, claude code oauth token, etc.) are intact and stay referenced because
+Florence depends on them.
+
+### Change
+
+- `dot_config/zsh/tools.zsh.tmpl`: removed the `NOTION_TOKEN` export. Work
+  hosts still get `NOTION_TOKEN` from `notion.zsh.tmpl` (aliased to
+  `NOTION_API_KEY` from `op://focused/Notion API Key`); non-work hosts no
+  longer export it at all.
+- `Documents/PowerShell/Microsoft.PowerShell_profile.secrets.ps1.tmpl`: removed
+  the matching `$env:NOTION_TOKEN` line (same dead item).
+
 ## 2026-07-28 — Databricks prod PAT added to the work-only easyjet secrets group
 
 ### Motivation
