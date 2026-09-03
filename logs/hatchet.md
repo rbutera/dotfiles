@@ -1,5 +1,12 @@
 # hatchet
 
+## 2026-09-03 -- Hatchet Lite bootstrapped on latios for Tilly's Impulse worker
+
+- **Context**: kinto (and its Hatchet) died with the Focused job. Tilly's Impulse worker on latios needs a local Hatchet Lite. See `logs/ark.md` 2026-09-03.
+- **Done on latios**: `docker compose -f infra/e8n/docker-compose.hatchet.yml up -d` (colima), same ports as nimbus/kinto (`18888` API, `17077` gRPC, postgres on `5435`). Default tenant id `707d0855-80ab-4e1f-a156-f1c4546cbf52`. API token minted with `docker compose exec hatchet-lite /hatchet-admin token create --config /config --tenant-id <id> --name impulse-latios` (the binary is at `/hatchet-admin`, NOT `/hatchet/hatchet-admin`; the first attempt captured docker's "OCI runtime exec failed" line as the token and that garbage is what landed in 1Password).
+- **Keepalive**: `~/Library/LaunchAgents/com.rai.tilly-hatchet-lite.plist`, a copy of nimbus's `com.rai.navi-hatchet-lite` with the label changed, runs `apps/impulse/bin/ensure-hatchet-lite.sh` at load and every 300s. Bootstrapped and active. NOT chezmoi-managed (neither is the nimbus one).
+- **Owed**: `op://Private/Hatchet Latios` exists (API Credential, `username` = tenant id, correct) but `credential` is the garbage line; the 1Password session on nimbus expired before the corrected `op item edit` went through. The real token is stashed at `~/.local/state/impulse/hatchet-latios.env` on latios (mode 600). Fix: `op item edit "Hatchet Latios" --vault Private "credential=$(sed -n 's/^HATCHET_CLIENT_TOKEN=//p' ~/.local/state/impulse/hatchet-latios.env)"`, then delete the stash.
+
 Changelog for chezmoi-managed Hatchet infrastructure.
 
 ## 2026-08-08 -- Daily Hatchet session-cleanup job (chezmoi-managed, cross-machine)
