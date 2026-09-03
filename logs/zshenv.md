@@ -1,5 +1,11 @@
 # zshenv changelog
 
+## 2026-09-03 — Kill the Notion secrets group (Focused work tool)
+
+Notion was a Focused Labs tool. `dot_config/zsh/notion.zsh.tmpl` (work-host gated,
+read `op://focused/Notion API Key`) deleted; `.chezmoiremove` drops the deployed
+`~/.config/zsh/notion.zsh`. `NOTION_TOKEN` / `NOTION_API_KEY` are no longer exported anywhere.
+
 ## 2026-09-03 — Kill the easyJet secrets group (left Focused)
 
 ### Motivation

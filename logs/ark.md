@@ -1,5 +1,11 @@
 # Ark workspace config changes log
 
+## 2026-09-03 — Navi email whitelist: add tilly@e8n.dev
+
+`navi/ark.json.tmpl` email whitelist now includes `tilly@e8n.dev` alongside
+`florence@e8n.dev` (kept until the mailbox is retired). The `tilly@` mailbox itself
+still has to be created on the e8n side.
+
 ## 2026-09-03 — Florence becomes Tilly, kinto becomes latios
 
 ### Problem
