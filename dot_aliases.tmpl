@@ -324,18 +324,18 @@ alias updatenavi="cd ~/oclaw && git checkout main && git pull && pnpm install &&
 alias comfyui="cd /home/rai/ComfyUI && source .venv/bin/activate && python main.py"
 
 
-# flaude: start a Claude Code session in ~/focused that reuses Florence's config
+# tilly: start a Claude Code session in ~/tilly that reuses Tilly's config
 # WITHOUT the Ark runtime or the Discord/voice/email channel plugins.
-# cwd=~/focused already auto-loads CLAUDE.md + project skills + project MCP + bd hooks;
-# this just adds the Florence persona/brain. unset token = use interactive login creds.
-flaude() {
-  local brain="$HOME/dev/lumiere/apps/ark/plugin/agents/florence.md"
-  cd ~/focused && unset CLAUDE_CODE_OAUTH_TOKEN
+# cwd=~/tilly already auto-loads CLAUDE.md + project skills + project MCP + bd hooks;
+# this just adds the Tilly persona/brain. unset token = use interactive login creds.
+# (Was `flaude`/`florence` in ~/focused until 2026-09-03.)
+tilly() {
+  local brain="$HOME/dev/lumiere/apps/ark/plugin/agents/tilly.md"
+  cd ~/tilly && unset CLAUDE_CODE_OAUTH_TOKEN
   if [ -f "$brain" ]; then
     command claude --dangerously-skip-permissions --append-system-prompt-file "$brain" "$@"
   else
-    echo "flaude: brain not found at $brain, launching plain claude" >&2
+    echo "tilly: brain not found at $brain, launching plain claude" >&2
     command claude --dangerously-skip-permissions "$@"
   fi
 }
-florence() { flaude "$@"; }

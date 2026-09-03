@@ -6,7 +6,7 @@
 #
 # outputStyle is managed as of 2026-08-11, pinned to `rai-base` (the machine-wide
 # default conversational/ADHD-aware style in ~/.claude/output-styles/). Per-agent
-# workspaces override it: ~/focused/.claude/settings.json -> florence,
+# workspaces override it: ~/tilly/.claude/settings.json -> tilly,
 # ~/navi/.claude/settings.json -> navi (project settings beat user by cwd).
 #
 # env: previously del(.env) wholesale. Since 2026-08-10 we instead keep ONLY the

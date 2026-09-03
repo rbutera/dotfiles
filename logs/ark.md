@@ -1,5 +1,57 @@
 # Ark workspace config changes log
 
+## 2026-09-03 — Florence becomes Tilly, kinto becomes latios
+
+### Problem
+
+Rai left Focused Labs on 2026-09-02. kinto, the work Mac mini that ran Florence,
+went with the job. The agent continues as **Tilly** (after Beatrice "Tilly"
+Shilling, the RAE engineer who fixed the Spitfire's engine cut-out with a small
+washer) on **latios**, with a fresh workspace at `~/tilly` mined from
+`~/focused` (vault + skills carried over, easyJet-only material dropped).
+Claude accounts are pooled through tokenmaxx now, so nothing account-specific
+for her belongs in chezmoi any more.
+
+### Changes
+
+- `.chezmoidata.toml`: kinto removed from every host group; `work`,
+  `always_on` and `agentic` now name latios; latios joins `tokenmaxx` (the
+  daemon already runs there on 127.0.0.1:8459).
+- `focused/ark.json.tmpl` -> `tilly/ark.json.tmpl` (name, plugin dir, Discord
+  token var, recap channel). `.chezmoiignore` gates `tilly/` on `~/tilly`
+  existing, same trick as the old `focused/` gate. `.chezmoiremove` drops the
+  deployed `~/focused/ark.json` and `~/.claude/output-styles/florence.md`.
+- `dot_config/ark/config.json.tmpl`: the `work` account (easyJet email/org,
+  florence cookie jar, `CLAUDE_OAUTH_TOKEN_WORK`) is gone; `personal` is the
+  only account everywhere. `dot_config/ark/dot_env.tmpl`: `FLORENCE_DISCORD_TOKEN`
+  -> `TILLY_DISCORD_TOKEN`, still read from `op://focused/Flaude Discord`
+  (same bot application, rename it in the Discord developer portal).
+- Impulse (`dot_config/impulse/*`): every `kinto` branch is now `latios`;
+  agent id `tilly`; namespace `tilly` (via `IMPULSE_NAMESPACE`, the
+  `FLORENCE_SCHEDULER_*` vars were never read by impulse); workspace
+  `~/tilly`; Hatchet creds from `op://Private/Hatchet Latios` (item created
+  when Hatchet Lite was bootstrapped on latios). Jobs kept: quota-scrape,
+  morning-sweep, todoist-hygiene, lamplight x2, daily-blog. Jobs dropped as
+  Focused-only: jira-sync, standup-brief, nightly-health, demo-env-refresh.
+  Prompt file renamed `tilly-daily-blog.md`.
+- `dot_aliases.tmpl`: `flaude` / `florence` -> `tilly` (cd `~/tilly`, brain
+  `agents/tilly.md`).
+- `dot_claude/output-styles/florence.md.tmpl` -> `tilly.md.tmpl`.
+- `dot_codex/modify_private_config.toml`: kinto MCP block -> latios; keeps
+  qmd + obsidian (`~/tilly/vault`), drops atlassian / notion / sonarqube.
+- `dot_config/zsh/claude-ai.zsh.tmpl`: `CLAUDE_CODE_OAUTH_TOKEN_WORK` removed.
+
+lumiere side: `apps/ark/plugin/agents/tilly.md` (forked from florence.md,
+easyJet specifics stripped, job-hunt section added, employer brief delegated to
+the workspace CLAUDE.md) and `deploy.sh` learns `tilly=~/tilly`.
+
+### Still referencing the Focused era, deliberately
+
+`op://focused/...` items for the Discord bot and Cursor key still resolve and
+stay. `notion.zsh` (work-gated Notion key) and `CURSOR_API_KEY` are untouched;
+prune when Rai decides. `navi/ark.json.tmpl` still whitelists
+`florence@e8n.dev`; a `tilly@` mailbox does not exist yet.
+
 ## 2026-07-26 — Add `how-we-talk.md` as the first boot file (register layer)
 
 ### Problem

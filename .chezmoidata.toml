@@ -6,17 +6,19 @@
   niri = ["mondo"]
   kde  = []
   dev_infra = ["mondo"]
-  work = ["latios", "kinto"]
-  always_on = ["kinto"]
-  chaching = ["kinto", "latios", "nimbus"]
+  # kinto (work Mac mini) died with the Focused job on 2026-09-02. latios is the
+  # work machine now and hosts Tilly (was Florence). See logs/ark.md 2026-09-03.
+  work = ["latios"]
+  always_on = ["latios"]
+  chaching = ["latios", "nimbus"]
   # Machines that run long-lived coding-agent runtimes (Orca serve, etc.)
-  agentic = ["kinto", "nimbus"]
+  agentic = ["latios", "nimbus"]
   # Machines running the tokenmaxx multi-account proxy daemon. The daemon reads
   # account credentials from the macOS login Keychain, so it MUST run as a
   # GUI-session LaunchAgent (Aqua). A LaunchDaemon (system session) or an
   # SSH-spawned daemon fails every read with "Keychain read failed".
   # See ~/notes/2026-08-06 tokenmaxx daemon keychain + LaunchAgent.md
-  tokenmaxx = ["nimbus"]
+  tokenmaxx = ["nimbus", "latios"]
   # Machines that should get OPENROUTER_API_KEY written into ~/.env.
   # Empty = off everywhere (the default). See [feature_flags].openrouter_api_key.
   openrouter = []
@@ -30,7 +32,7 @@
   openrouter_api_key = false
 
 [agents]
-  # Main-session model for the Ark agents (Florence on kinto, Navi on nimbus).
+  # Main-session model for the Ark agents (Tilly on latios, Navi on nimbus).
   # Toggle with `agent-model fable|opus|show` (bin/executable_agent-model), which
   # edits this value, applies, and pushes. Takes effect on the NEXT ark session
   # start / `ark restart`; running sessions keep their model.

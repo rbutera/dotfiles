@@ -6,12 +6,8 @@
 # Personal-host CLAUDE_CODE_OAUTH_TOKEN export removed 2026-07-17: an ambient
 # env token overrides keychain/`claude auth login` credentials and flips the CLI
 # to API-key billing. Verified `claude -p` authenticates fine from the keychain
-# with no token env var. Work hosts still get the _WORK variant (not read by the
-# CLI directly; consumed by tooling that injects it explicitly).
-{{- $useSharedClaudeOAuth := or .feature_flags.shared_claude_oauth (has .chezmoi.hostname .host_groups.work) }}
-{{- if $useSharedClaudeOAuth }}
-export CLAUDE_CODE_OAUTH_TOKEN_WORK={{ onepasswordRead "op://focused/claude code oauth token/credential" | quote }}
-{{- end }}
+# with no token env var. The _WORK variant (Focused-era shared oauth token) was
+# removed 2026-09-03: all accounts are pooled through tokenmaxx now.
 
 # Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile
 export CURSOR_API_KEY={{ onepasswordRead "op://focused/cursor API key/credential" | quote }}

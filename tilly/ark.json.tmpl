@@ -1,7 +1,7 @@
 {
-  "name": "florence",
+  "name": "tilly",
   "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark/plugin",
-  "additionalPlugins": ["{{ .chezmoi.homeDir }}/focused"],
+  "additionalPlugins": ["{{ .chezmoi.homeDir }}/tilly"],
   "mainOnlyPlugins": [
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord-voice-bridge",
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin"
@@ -53,7 +53,7 @@
   },
 
   "discord": {
-    "botToken": "${FLORENCE_DISCORD_TOKEN}",
+    "botToken": "${TILLY_DISCORD_TOKEN}",
     "guildId": "1473757777078911016",
     "channelId": "1507371381623488562",
     "channelSource": { "pluginDir": "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord" },
@@ -67,7 +67,7 @@
     "snooze": {
       "quietHours": { "start": "22:00", "end": "08:00", "tz": "Europe/London" }
     },
-    "recap": { "mode": "on-return", "channel": "florence" }
+    "recap": { "mode": "on-return", "channel": "tilly" }
   },
 
   "textPlugin": {

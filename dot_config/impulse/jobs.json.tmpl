@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.hostname "kinto" }}
+{{- if eq .chezmoi.hostname "latios" }}
 [
   {
     "id": "quota-scrape",
@@ -15,7 +15,9 @@
     "payload": {
       "kind": "shell",
       "cmd": "node",
-      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"]
+      "args": [
+        "{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"
+      ]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -23,16 +25,21 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["infrastructure", "quota"],
+    "tags": [
+      "infrastructure",
+      "quota"
+    ],
     "inputs": {
       "cmd": "node",
-      "args": ["{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"],
+      "args": [
+        "{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"
+      ],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   },
   {
     "id": "morning-sweep",
-    "name": "Florence: Morning Sweep (08:30 daily)",
+    "name": "Tilly: Morning Sweep (08:30 daily)",
     "trigger": {
       "kind": "cron",
       "expr": "30 8 * * *",
@@ -40,7 +47,7 @@
     },
     "target": {
       "kind": "ark-spawn",
-      "agent": "florence",
+      "agent": "tilly",
       "model": "sonnet"
     },
     "payload": {
@@ -53,50 +60,21 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["work", "kinto"],
+    "tags": [
+      "work",
+      "latios"
+    ],
     "inputs": {
-      "agent": "florence",
-      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
       "model": "sonnet",
       "maxTurns": 30,
       "prompt": "Run /morning-sweep"
     }
   },
   {
-    "id": "jira-sync",
-    "name": "Florence: JIRA Sync (08:00 daily)",
-    "trigger": {
-      "kind": "cron",
-      "expr": "0 8 * * *",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "ark-spawn",
-      "agent": "florence",
-      "model": "sonnet"
-    },
-    "payload": {
-      "kind": "prompt",
-      "text": "Run /jira-sync"
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": true,
-      "dedupe": "skip-if-running"
-    },
-    "enabled": true,
-    "tags": ["work", "kinto"],
-    "inputs": {
-      "agent": "florence",
-      "workingDir": "{{ .chezmoi.homeDir }}/focused",
-      "model": "sonnet",
-      "maxTurns": 20,
-      "prompt": "Run /jira-sync"
-    }
-  },
-  {
     "id": "todoist-hygiene",
-    "name": "Florence: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
+    "name": "Tilly: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
     "trigger": {
       "kind": "cron",
       "expr": "15 8-20 * * *",
@@ -104,12 +82,12 @@
     },
     "target": {
       "kind": "ark-spawn",
-      "agent": "florence",
+      "agent": "tilly",
       "model": "sonnet"
     },
     "payload": {
       "kind": "prompt",
-      "text": "Run /todoist-triage in autonomous mode. Then, ONLY on the 08:xx morning run (check `date +%H` == 08), send the interactive digest: `python3 ~/focused/scripts/todoist/digest.py send`. On later hourly runs do triage only and send NO Discord message. Never send a preamble, 'summary incoming', 'test', or mid-run announcement."
+      "text": "Run /todoist-triage in autonomous mode. Then, ONLY on the 08:xx morning run (check `date +%H` == 08), send the interactive digest: `python3 ~/tilly/scripts/todoist/digest.py send`. On later hourly runs do triage only and send NO Discord message. Never send a preamble, 'summary incoming', 'test', or mid-run announcement."
     },
     "policy": {
       "maxConcurrent": 1,
@@ -117,13 +95,17 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["work", "kinto", "todoist"],
+    "tags": [
+      "work",
+      "latios",
+      "todoist"
+    ],
     "inputs": {
-      "agent": "florence",
-      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
       "model": "sonnet",
       "maxTurns": 25,
-      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Triage ALSO refreshes today's Todoist snapshot at vault/research/todoist/<date>-snapshot.json, which the digest reads. THEN decide whether to surface: run `date +%H` — if and ONLY if the hour is 08 (the morning run), send the interactive Todoist digest by running the shell command `python3 ~/focused/scripts/todoist/digest.py send`. That command builds the Components-V2 digest from the fresh snapshot + the loop ledger and POSTs it to the ark-discord daemon at 127.0.0.1:3850/todoist-digest, which DMs Rai the tappable digest (this REPLACES the old plain-text /todoist-review summary DM — do not run /todoist-review or send any plain-text summary yourself). Report the digest.py exit status. On any hourly run where the hour is NOT 08, do the triage filing only and send NO Discord message at all. If digest.py reports the daemon is unreachable or returns non-200 (e.g. the /todoist-digest route is not yet deployed), do NOT fall back to a plain-text DM — instead log the failure to vault/research/todoist/<date>-needs-review.md and send NO message. Never send any preamble, placeholder, 'summary incoming', 'test', 'heads up', or mid-run announcement message under any circumstances."
+      "prompt": "Run /todoist-triage in autonomous mode: apply safe filing (move to the right PARA project, set labels and priority, clear bogus dates) automatically, and queue any closes, graduations, or external actions to vault/research/todoist/<date>-needs-review.md for /morning-sweep to surface. Triage ALSO refreshes today's Todoist snapshot at vault/research/todoist/<date>-snapshot.json, which the digest reads. THEN decide whether to surface: run `date +%H` — if and ONLY if the hour is 08 (the morning run), send the interactive Todoist digest by running the shell command `python3 ~/tilly/scripts/todoist/digest.py send`. That command builds the Components-V2 digest from the fresh snapshot + the loop ledger and POSTs it to the ark-discord daemon at 127.0.0.1:3850/todoist-digest, which DMs Rai the tappable digest (this REPLACES the old plain-text /todoist-review summary DM — do not run /todoist-review or send any plain-text summary yourself). Report the digest.py exit status. On any hourly run where the hour is NOT 08, do the triage filing only and send NO Discord message at all. If digest.py reports the daemon is unreachable or returns non-200 (e.g. the /todoist-digest route is not yet deployed), do NOT fall back to a plain-text DM — instead log the failure to vault/research/todoist/<date>-needs-review.md and send NO message. Never send any preamble, placeholder, 'summary incoming', 'test', 'heads up', or mid-run announcement message under any circumstances."
     }
   },
   {
@@ -141,7 +123,16 @@
     "payload": {
       "kind": "shell",
       "cmd": "pnpm",
-      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"]
+      "args": [
+        "nx",
+        "run",
+        "lamplight:dev",
+        "--",
+        "breadcrumb",
+        "--date",
+        "today",
+        "--incremental"
+      ]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -149,10 +140,23 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["work", "kinto", "lamplight"],
+    "tags": [
+      "work",
+      "latios",
+      "lamplight"
+    ],
     "inputs": {
       "cmd": "pnpm",
-      "args": ["nx", "run", "lamplight:dev", "--", "breadcrumb", "--date", "today", "--incremental"],
+      "args": [
+        "nx",
+        "run",
+        "lamplight:dev",
+        "--",
+        "breadcrumb",
+        "--date",
+        "today",
+        "--incremental"
+      ],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   },
@@ -171,7 +175,15 @@
     "payload": {
       "kind": "shell",
       "cmd": "pnpm",
-      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"]
+      "args": [
+        "nx",
+        "run",
+        "lamplight:dev",
+        "--",
+        "all",
+        "--date",
+        "today"
+      ]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -179,77 +191,28 @@
       "dedupe": "skip-if-running"
     },
     "enabled": true,
-    "tags": ["work", "kinto", "lamplight"],
+    "tags": [
+      "work",
+      "latios",
+      "lamplight"
+    ],
     "inputs": {
       "cmd": "pnpm",
-      "args": ["nx", "run", "lamplight:dev", "--", "all", "--date", "today"],
+      "args": [
+        "nx",
+        "run",
+        "lamplight:dev",
+        "--",
+        "all",
+        "--date",
+        "today"
+      ],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
   },
   {
-    "id": "standup-brief",
-    "name": "Florence: Standup Brief (Mon-Fri 09:25, whisper into running session)",
-    "trigger": {
-      "kind": "cron",
-      "expr": "25 9 * * 1-5",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "script",
-      "bin": "bash"
-    },
-    "payload": {
-      "kind": "shell",
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh"]
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": false,
-      "dedupe": "skip-if-running"
-    },
-    "enabled": true,
-    "tags": ["work", "kinto", "standup"],
-    "inputs": {
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/standup-brief/standup-brief.sh"],
-      "cwd": "{{ .chezmoi.homeDir }}/focused"
-    }
-  },
-  {
-    "id": "nightly-health",
-    "name": "Florence: Nightly System Health (Mon-Fri 07:00) -- ARMED 2026-06-04",
-    "trigger": {
-      "kind": "cron",
-      "expr": "0 7 * * 1-5",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "script",
-      "bin": "bash"
-    },
-    "payload": {
-      "kind": "shell",
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh"]
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": false,
-      "dedupe": "skip-if-running",
-      "timeout": 1800
-    },
-    "enabled": true,
-    "tags": ["work", "kinto", "health"],
-    "inputs": {
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/scripts/health/nightly-health.sh"],
-      "cwd": "{{ .chezmoi.homeDir }}/focused"
-    }
-  },
-  {
     "id": "daily-blog",
-    "name": "Florence: Daily Blog (21:30 nightly, weekday=work+topic / weekend=wild)",
+    "name": "Tilly: Daily Blog (21:30 nightly, weekday=work+topic / weekend=wild)",
     "trigger": {
       "kind": "cron",
       "expr": "30 21 * * *",
@@ -257,12 +220,12 @@
     },
     "target": {
       "kind": "ark-spawn",
-      "agent": "florence",
+      "agent": "tilly",
       "model": "opus"
     },
     "payload": {
       "kind": "prompt",
-      "text": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it. Pick the mode by day of week (weekday-post Mon-Fri, weekend-post Sat-Sun). Write today's post and DM it to Rai."
+      "text": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it. Pick the mode by day of week (weekday-post Mon-Fri, weekend-post Sat-Sun). Write today's post and DM it to Rai."
     },
     "policy": {
       "maxConcurrent": 1,
@@ -271,44 +234,18 @@
       "timeout": 2700
     },
     "enabled": true,
-    "tags": ["work", "kinto", "blog"],
+    "tags": [
+      "work",
+      "latios",
+      "blog"
+    ],
     "promptFile": "prompts/florence-daily-blog.md",
     "inputs": {
-      "agent": "florence",
-      "workingDir": "{{ .chezmoi.homeDir }}/focused",
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
       "model": "opus",
       "maxTurns": 40,
-      "prompt": "Read ~/focused/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/florence.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/focused/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/focused/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
-    }
-  },
-  {
-    "id": "demo-env-refresh",
-    "name": "Fusion demo env: refresh to latest main (hourly 08-20 Mon-Fri)",
-    "trigger": {
-      "kind": "cron",
-      "expr": "0 8-20 * * 1-5",
-      "tz": "Europe/London"
-    },
-    "target": {
-      "kind": "script",
-      "bin": "bash"
-    },
-    "payload": {
-      "kind": "shell",
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/.claude/skills/demo-env/demo-env.sh", "up", "--branch", "main", "--databricks", "prod", "--flags", "all", "--rebuild", "true", "--worktree", "{{ .chezmoi.homeDir }}/focused/launchpad"]
-    },
-    "policy": {
-      "maxConcurrent": 1,
-      "quotaAware": false,
-      "dedupe": "skip-if-running"
-    },
-    "enabled": true,
-    "tags": ["work", "kinto", "demo-env"],
-    "inputs": {
-      "cmd": "bash",
-      "args": ["{{ .chezmoi.homeDir }}/focused/.claude/skills/demo-env/demo-env.sh", "up", "--branch", "main", "--databricks", "prod", "--flags", "all", "--rebuild", "true", "--worktree", "{{ .chezmoi.homeDir }}/focused/launchpad"],
-      "cwd": "{{ .chezmoi.homeDir }}/focused/launchpad"
+      "prompt": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/tilly.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/tilly/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/tilly/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
     }
   }
 ]

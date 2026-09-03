@@ -1,5 +1,12 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-09-03 -- kinto block becomes latios (Florence -> Tilly)
+
+See `logs/ark.md` 2026-09-03. Every `kinto` branch in `config.json`, `agents.json`,
+`jobs.json` and `.env` now targets latios with agent id / namespace `tilly` and
+workspace `~/tilly`. Focused-only jobs (jira-sync, standup-brief, nightly-health,
+demo-env-refresh) deleted. Hatchet creds move to `op://Private/Hatchet Latios`.
+
 ## 2026-07-29 -- Quota producer cutover: OAuth usage endpoint replaces CamoFox as primary (nimbus only)
 
 **Motivation:** bead `workspace-cdkdk`. The CamoFox quota scraper had read

@@ -12,8 +12,8 @@ openspec/
 /skills/
 /.claude-plugin/
 
-{{ if not (stat (joinPath .chezmoi.homeDir "focused")) }}
-focused/
+{{ if not (stat (joinPath .chezmoi.homeDir "tilly")) }}
+tilly/
 {{ end }}
 
 {{ if ne .chezmoi.os "darwin" }}
