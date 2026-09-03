@@ -15,7 +15,9 @@ Daemon env: `~/.claude/channels/discord/.env` (bot token, recap channel `1507371
 
 Gotchas hit: `ark` honours `ARK_WORKSPACE` over cwd, and `.zshenv` still said `~/focused` (fixed in chezmoi 2269f6d). pnpm on latios needs `CI=true` plus `--no-frozen-lockfile` under ssh (no TTY, and develop's lockfile is behind package.json). `impulse:build` depends on `impulse:test`, which fails on latios, so impulse was built by running its tsc command directly.
 
-Result: Discord client ready as `Tilly#2462` at 02:22 on 2026-09-03.
+One more: the first Claude session sat on Claude Code's "do you trust this folder" prompt for `~/tilly` inside the supervisor tmux (the watchdog killed and respawned it every ~2.5 min, `ark status` showed `BOOTING` forever). Fixed by setting `projects["/Users/rai/tilly"].hasTrustDialogAccepted=true` in `~/.claude.json` and answering the live prompt via `tmux -L arksup-tilly send-keys`. Any new Ark workspace needs that flag before `ark install`.
+
+Result: Discord client ready as `Tilly#2462` at 02:22, Ark `HEALTHY` / `boot: ready` at 02:29 on 2026-09-03, prose mirror streaming.
 
 Changelog for chezmoi-managed macOS LaunchAgents.
 
