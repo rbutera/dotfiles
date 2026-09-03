@@ -1,5 +1,12 @@
 # zshenv changelog
 
+## 2026-09-03 — ARK_WORKSPACE on work hosts: ~/focused -> ~/tilly
+
+`ark` resolves its workspace from `ARK_WORKSPACE` before cwd, so with the old
+export every `ark generate` / `ark install` run on latios silently targeted
+`~/focused/ark.json` (and failed on its retired `FLORENCE_DISCORD_TOKEN`).
+Work hosts now export `$HOME/tilly`.
+
 ## 2026-09-03 — Kill the Notion secrets group (Focused work tool)
 
 Notion was a Focused Labs tool. `dot_config/zsh/notion.zsh.tmpl` (work-host gated,
