@@ -17,6 +17,8 @@ Gotchas hit: `ark` honours `ARK_WORKSPACE` over cwd, and `.zshenv` still said `~
 
 One more: the first Claude session sat on Claude Code's "do you trust this folder" prompt for `~/tilly` inside the supervisor tmux (the watchdog killed and respawned it every ~2.5 min, `ark status` showed `BOOTING` forever). Fixed by setting `projects["/Users/rai/tilly"].hasTrustDialogAccepted=true` in `~/.claude.json` and answering the live prompt via `tmux -L arksup-tilly send-keys`. Any new Ark workspace needs that flag before `ark install`.
 
+Voice (added 03:10): `~/.claude/channels/discord/.env` on latios now carries `VOICE_GUILD_ID=1473757777078911016`, `VOICE_CHANNEL_ID=1507371381623488562`, `CARTESIA_VOICE_ID=d5f718bb-1f8c-4e15-8e79-838961219797` (both from Rai), and the Cartesia keys / provider / speed settings mirrored from nimbus's file. Daemon auto-connected and the receive pipeline went live on restart. The daemon runs on **node 24.16.0** (not 26.7.0) on purpose: `@discordjs/opus` only has the node-v137 prebuild in the monorepo and the guard's stash (`~/navi/state/native-binaries`, same default path on every host) only holds v127/v137, so a node-26 daemon (ABI v147) falls back to opusscript. nimbus's daemon plist pins 24.16.0 for the same reason. The v137 `opus.node` was copied from nimbus into both the pnpm prebuild path and the stash on latios.
+
 Result: Discord client ready as `Tilly#2462` at 02:22, Ark `HEALTHY` / `boot: ready` at 02:29 on 2026-09-03, prose mirror streaming.
 
 Changelog for chezmoi-managed macOS LaunchAgents.
