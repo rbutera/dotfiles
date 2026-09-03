@@ -230,3 +230,11 @@ workspace directory itself.
 - Removed the `~/focused/ark.json` and `~/focused` directory created on Lancelot by
   the preceding apply; both were timestamped during that apply and no other content
   was present.
+
+## 2026-09-03 — hot.md was being truncated at boot (per-file inline cap for hot rules)
+
+**Problem.** `refresh-claude-md.sh` caps every inlined boot file at 64KB (`DEFAULT_MAX_INLINE_BYTES=65536`) and labels the omitted tail "append-log history, not boot material". That is true for the daily letter and false for `workspace/memory/hot.md`, which had grown to 73,507 bytes: the cut landed on sections 10-12 (8 Cortex rules, 5 infra/system/cost rules including Rule 54 "never switch to a paid path", and the 3 creative-pipeline rules). Sixteen live rules were silently absent from every boot since the file crossed 64KB, and the boot-delta skill told the reader not to go and fetch them.
+
+**Change.** `navi/ark.json.tmpl`: added `"maxInlineBytes": 131072` to the `boot.files` entry for `workspace/memory/hot.md` (the per-entry override the script already supports). Deployed copy edited identically because no 1Password session was available for `chezmoi apply`; `chezmoi diff` reports no drift. Re-ran the refresh: manifest now shows hot rules 73,507/73,507 bytes, `truncated: false`; CLAUDE.md 185,448 bytes (+8KB).
+
+**Follow-up (lumiere, bead in navi beads).** The notice text and boot-delta wording should stop claiming "history" for non-letter files and should list the evicted headings; recap-health-monitor should alarm when any non-letter boot file is truncated.
