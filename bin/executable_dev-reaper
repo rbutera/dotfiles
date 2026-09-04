@@ -1,0 +1,332 @@
+#!/bin/zsh
+# dev-reaper
+#
+# Every 10 minutes, reap developer build/tooling processes that no longer have
+# a living owner, plus duplicate `nx mcp` server chains that agent harnesses
+# leak one-per-session and never tear down.
+#
+# Written after 2026-09-04, when this machine hit load average 72 with 36 GB of
+# 37 GB swap consumed. Two causes: six concurrent repo gates (legitimate, not
+# this script's business) and eight leaked `nx mcp` chains, four processes deep
+# each, the oldest 4 days 21 hours old, all still parented to a live host app so
+# nothing ever reaped them.
+#
+# Deliberately pure zsh + /bin + /usr/bin. No node, no npm. See
+# logs/launchagents.md 2026-08-21: LaunchAgents that invoke node are coupled to
+# an asdf version string and break on every toolchain bump. This script has no
+# such coupling and needs no maintenance across node upgrades.
+#
+# Invariants (safety rails):
+#   - Allowlist, never denylist. A process is a candidate only if its command
+#     matches REAPABLE_RE. Anything unrecognised is left alone by construction.
+#   - NEVER touches an editor, agent, or app: NEVER_RE is subtracted next and wins.
+#   - NEVER touches a process owned by another user.
+#   - NEVER touches a running gate that still has a live owner. Rules 1 and 2
+#     fire only on provable orphans (cwd deleted, or reparented to launchd).
+#   - Rule 3 always keeps the newest MCP_KEEP_NEWEST chains regardless of age.
+#   - TERM first, grace period, then KILL. Never KILL without asking politely.
+#   - The scan is two `ps` calls plus two `grep`s. It must never itself become
+#     load; per-process subshells are avoided on purpose.
+#
+# Dry-run:  DEV_REAPER_DRY_RUN=1 /Users/rai/bin/dev-reaper
+# Self-test: /Users/rai/bin/dev-reaper --selftest   (spawns fixtures, proves
+#            the reaper both does and does not fire, cleans up after itself)
+#
+# Log: /Users/rai/Library/Logs/dev-reaper.log
+
+set -u
+
+LOG=/Users/rai/Library/Logs/dev-reaper.log
+DRY_RUN=${DEV_REAPER_DRY_RUN:-0}
+MCP_MAX_AGE_HOURS=${DEV_REAPER_MCP_MAX_AGE_HOURS:-4}
+MCP_KEEP_NEWEST=${DEV_REAPER_MCP_KEEP_NEWEST:-2}
+GRACE_SECS=${DEV_REAPER_GRACE_SECS:-10}
+
+ME=$(/usr/bin/id -un)
+
+# Subtracted from the candidate set and wins over REAPABLE_RE. Editors, agents,
+# harnesses, long-lived daemons, anything inside an .app bundle, and this script
+# itself are never candidates.
+NEVER_RE='\.app/Contents|Electron|/claude|/codex|codex |tokenmaxx|paseo|tsserver|language-server|typescript-language|ssh-agent|/launchd|dev-reaper|Code Helper|T3 Code'
+
+# The only things this script will ever kill.
+REAPABLE_RE='vitest|jest|esbuild|node_modules/\.bin/(vite|nx|biome|eslint|tsc)|nx mcp|dlx nx-mcp|Caches/pnpm/dlx/'
+
+# ---------------------------------------------------------------------------
+
+mkdir -p /Users/rai/Library/Logs 2>/dev/null
+
+log() { print -r -- "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] $*" >>"$LOG" }
+
+# ps etime -> seconds. Formats: SS, MM:SS, HH:MM:SS, DD-HH:MM:SS.
+# Leading zeros are forced base-10; zsh would otherwise read "08" as bad octal.
+etime_secs() {
+  local e=$1 d=0 h=0 m=0 s=0
+  local -a parts
+  [[ $e == *-* ]] && { d=${e%%-*}; e=${e#*-} }
+  parts=(${(s.:.)e})
+  case ${#parts} in
+    3) h=${parts[1]}; m=${parts[2]}; s=${parts[3]} ;;
+    2) m=${parts[1]}; s=${parts[2]} ;;
+    1) s=${parts[1]} ;;
+    *) print 0; return ;;
+  esac
+  print $(( 10#${d:-0} * 86400 + 10#${h:-0} * 3600 + 10#${m:-0} * 60 + 10#${s:-0} ))
+}
+
+# Working directory of a pid, or empty. macOS lsof reports the ORIGINAL path for
+# a deleted cwd with no marker, so the caller must existence-test the result --
+# that is precisely the orphan signal.
+cwd_of() {
+  /usr/sbin/lsof -a -p "$1" -d cwd -Fn 2>/dev/null | /usr/bin/grep '^n' | /usr/bin/head -1 | /usr/bin/cut -c2-
+}
+
+# All descendants of a pid, deepest first, so we TERM leaves before roots.
+descendants() {
+  local root=$1 pid ppid f
+  local -a frontier next out snapshot
+  snapshot=(${(f)"$(/bin/ps -axo pid=,ppid=)"})
+  frontier=($root)
+  out=()
+  while (( ${#frontier} )); do
+    next=()
+    for line in $snapshot; do
+      local -a fld
+      fld=(${=line})
+      pid=$fld[1]; ppid=$fld[2]
+      for f in $frontier; do
+        [[ $ppid == "$f" ]] && next+=$pid
+      done
+    done
+    (( ${#next} )) || break
+    out=($next $out)
+    frontier=($next)
+  done
+  print -l -- $out
+}
+
+reap() {
+  local pid=$1 reason=$2 desc=$3 k
+  if [[ $DRY_RUN == 1 ]]; then
+    log "DRY-RUN would reap pid=$pid ($reason) :: $desc"
+    return
+  fi
+  log "reaping pid=$pid ($reason) :: $desc"
+  local -a kids
+  kids=(${(f)"$(descendants $pid)"})
+  for k in $kids; do
+    [[ -n $k ]] || continue
+    kill -TERM "$k" 2>/dev/null
+    REAPED_PIDS+=$k
+  done
+  kill -TERM "$pid" 2>/dev/null
+  REAPED_PIDS+=$pid
+}
+
+# ---------------------------------------------------------------------------
+# Rules 1 and 2: provable orphans only.
+#
+# The candidate set is narrowed by grep BEFORE the loop, so the shell iterates
+# over a handful of lines rather than a thousand, and no subshell is spawned
+# per process.
+# ---------------------------------------------------------------------------
+scan_orphans() {
+  local pid ppid user cmd cwd wt line
+  local -a fld
+  while IFS= read -r line; do
+    fld=(${=line})
+    (( ${#fld} >= 4 )) || continue
+    pid=$fld[1]; ppid=$fld[2]; user=$fld[3]
+    cmd="${fld[4,-1]}"
+
+    [[ $user == "$ME" ]] || continue
+
+    # Rule 2: reparented to launchd. None of the REAPABLE_RE patterns is ever a
+    # launchd job, so ppid 1 here means the real parent died.
+    if [[ $ppid == 1 ]]; then
+      reap "$pid" "orphan:reparented" "${cmd:0:110}"
+      continue
+    fi
+
+    # Rule 1a: command line names a worktree directory that no longer exists.
+    # Done with grep rather than zsh globbing: the `[^/]##` form needs
+    # EXTENDED_GLOB, which is off by default in a script, and would silently
+    # match nothing. The candidate set is already a handful of lines here.
+    wt=$(print -r -- "$cmd" | /usr/bin/grep -oE '/[^ ]*/worktrees/[^/ ]+' | /usr/bin/head -1)
+    if [[ -n $wt && ! -d $wt ]]; then
+      reap "$pid" "orphan:worktree-gone" "${cmd:0:110}"
+      continue
+    fi
+
+    # Rule 1b: cwd has been deleted out from under it.
+    cwd=$(cwd_of "$pid")
+    if [[ -n $cwd && ! -d $cwd ]]; then
+      reap "$pid" "orphan:cwd-deleted" "${cmd:0:110}"
+      continue
+    fi
+  done < <(/bin/ps -axww -o pid=,ppid=,user=,command= | /usr/bin/grep -E "$REAPABLE_RE" | /usr/bin/grep -vE "$NEVER_RE")
+}
+
+# ---------------------------------------------------------------------------
+# Rule 3: leaked `nx mcp` chains. Agent harnesses spawn one chain per session
+# and never reap it; the host app stays alive so the chain is never orphaned,
+# which is why rules 1 and 2 cannot see them.
+# Keep the newest MCP_KEEP_NEWEST, kill the rest once older than the threshold.
+# ---------------------------------------------------------------------------
+scan_mcp_chains() {
+  local max_age=$(( MCP_MAX_AGE_HOURS * 3600 ))
+  local pid etime user age cmd line parent pcmd entry i
+  local -a roots fld
+
+  roots=()
+  while IFS= read -r line; do
+    fld=(${=line})
+    (( ${#fld} >= 4 )) || continue
+    pid=$fld[1]; etime=$fld[2]; user=$fld[3]
+    [[ $user == "$ME" ]] || continue
+    age=$(etime_secs "$etime")
+    # Zero-pad so a plain lexical sort orders by age correctly.
+    roots+=("${(l:12::0:)age}:$pid")
+  done < <(/bin/ps -axww -o pid=,etime=,user=,command= | /usr/bin/grep -F 'node_modules/.bin/nx mcp' | /usr/bin/grep -vE 'grep|dev-reaper')
+
+  (( ${#roots} )) || { log "no nx-mcp chains found"; return }
+
+  # Youngest first, so the survivors we keep are the freshest chains.
+  roots=(${(o)roots})
+
+  i=0
+  for entry in $roots; do
+    (( i++ ))
+    age=$(( 10#${entry%%:*} ))
+    pid=${entry##*:}
+    if (( i <= MCP_KEEP_NEWEST )); then
+      log "keeping nx-mcp chain pid=$pid age=${age}s (within newest $MCP_KEEP_NEWEST)"
+      continue
+    fi
+    if (( age < max_age )); then
+      log "keeping nx-mcp chain pid=$pid age=${age}s (under ${MCP_MAX_AGE_HOURS}h)"
+      continue
+    fi
+    # Reap the whole chain including the `npm exec nx mcp` wrapper above it.
+    parent=$(/bin/ps -p "$pid" -o ppid= 2>/dev/null | /usr/bin/tr -d ' ')
+    pcmd=$(/bin/ps -p "${parent:-0}" -o command= 2>/dev/null)
+    if [[ $pcmd == *"exec nx mcp"* ]]; then
+      reap "$parent" "mcp-chain:stale age=${age}s" "${pcmd:0:110}"
+    else
+      reap "$pid" "mcp-chain:stale age=${age}s" "nx mcp"
+    fi
+  done
+}
+
+# ---------------------------------------------------------------------------
+
+main() {
+  typeset -ga REAPED_PIDS
+  REAPED_PIDS=()
+
+  scan_orphans
+  scan_mcp_chains
+
+  (( ${#REAPED_PIDS} )) || { log "nothing to reap"; return 0 }
+
+  # Grace, then KILL whatever ignored the TERM.
+  local waited=0 alive p
+  while (( waited < GRACE_SECS )); do
+    alive=0
+    for p in $REAPED_PIDS; do /bin/ps -p "$p" >/dev/null 2>&1 && (( alive++ )); done
+    (( alive )) || break
+    sleep 1
+    (( waited++ ))
+  done
+  for p in $REAPED_PIDS; do
+    if /bin/ps -p "$p" >/dev/null 2>&1; then
+      log "SIGKILL pid=$p (ignored TERM after ${GRACE_SECS}s)"
+      kill -KILL "$p" 2>/dev/null
+    fi
+  done
+  log "reaped ${#REAPED_PIDS} process(es)"
+}
+
+# ---------------------------------------------------------------------------
+# Self-test. Proves the reaper fires on an orphan and does NOT fire on a live
+# process. A control that only proves "it can kill" would not catch the failure
+# that actually matters here, which is killing something still in use.
+#
+# The fixture path deliberately avoids the string "dev-reaper", which NEVER_RE
+# excludes; a fixture under /tmp/dev-reaper-* would be skipped and the test
+# would pass for the wrong reason.
+# ---------------------------------------------------------------------------
+selftest() {
+  local base=/tmp/reapertest.$$
+  local doomed=$base/doomed live=$base/live
+  local rc=0
+  mkdir -p "$doomed" "$live"
+
+  # The fixture must match REAPABLE_RE the way a real target does, so its argv
+  # carries "vitest". It is a SCRIPT, not a copy of /bin/sleep: copying a signed
+  # macOS system binary into /tmp invalidates its signature and the kernel
+  # SIGKILLs it on exec. The first version of this test did exactly that, both
+  # fixtures died instantly, and it reported PASS for the orphan -- a pass
+  # satisfied by a process that never ran. Hence the liveness precondition and
+  # the log attribution below: "the process is gone" is not evidence the reaper
+  # did anything.
+  print '#!/bin/sh\nwhile :; do sleep 1; done' > "$base/vitest-fixture"
+  chmod +x "$base/vitest-fixture"
+
+  ( cd "$doomed" && exec /bin/sh "$base/vitest-fixture" ) &
+  local p_doomed=$!
+  ( cd "$live" && exec /bin/sh "$base/vitest-fixture" ) &
+  local p_live=$!
+  sleep 1
+
+  # Precondition. Without this the whole test passes vacuously.
+  if ! /bin/ps -p $p_doomed >/dev/null 2>&1 || ! /bin/ps -p $p_live >/dev/null 2>&1; then
+    print "ERROR: fixtures did not start (doomed=$p_doomed live=$p_live); test is meaningless"
+    kill -KILL $p_doomed $p_live 2>/dev/null; rm -rf "$base"; return 2
+  fi
+  # Precondition. The reaper must actually be able to see them as candidates.
+  if ! /bin/ps -axww -o pid=,command= | /usr/bin/grep -q "^ *$p_doomed .*vitest-fixture"; then
+    print "ERROR: fixture p$p_doomed does not match the candidate scan; test is meaningless"
+    kill -KILL $p_doomed $p_live 2>/dev/null; rm -rf "$base"; return 2
+  fi
+  print "fixtures alive and visible: doomed=$p_doomed live=$p_live"
+
+  local mark
+  mark=$(/usr/bin/wc -l < "$LOG" 2>/dev/null || print 0)
+
+  rm -rf "$doomed"
+  print "deleted $doomed, so p$p_doomed is now a cwd orphan"
+
+  main
+
+  sleep 2
+  local newlog
+  newlog=$(/usr/bin/tail -n +$(( mark + 1 )) "$LOG" 2>/dev/null)
+
+  # Attribute the kill to the reaper, not merely to the process being absent.
+  if /bin/ps -p $p_doomed >/dev/null 2>&1; then
+    print "FAIL: orphan p$p_doomed survived, reaper did not fire"; rc=1
+  elif ! print -r -- "$newlog" | /usr/bin/grep -q "pid=$p_doomed (orphan:cwd-deleted)"; then
+    print "FAIL: orphan p$p_doomed is gone but the reaper never logged reaping it"; rc=1
+  else
+    print "PASS: orphan p$p_doomed reaped, logged as orphan:cwd-deleted"
+  fi
+
+  if /bin/ps -p $p_live >/dev/null 2>&1; then
+    print "PASS: live p$p_live untouched"
+  else
+    print "FAIL: live p$p_live was killed, reaper is too aggressive"; rc=1
+  fi
+
+  kill -KILL $p_doomed $p_live 2>/dev/null
+  rm -rf "$base"
+  print "selftest rc=$rc"
+  return $rc
+}
+
+if [[ ${1:-} == "--selftest" ]]; then
+  selftest
+  exit $?
+fi
+
+main

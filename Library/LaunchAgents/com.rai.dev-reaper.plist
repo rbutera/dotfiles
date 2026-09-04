@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rai.dev-reaper</string>
+
+    <!-- Pure zsh by design: no node, no npm, so this plist is NOT coupled to an
+         asdf version string and survives every toolchain bump untouched.
+         See logs/launchagents.md 2026-08-21. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>/Users/rai/bin/dev-reaper</string>
+    </array>
+
+    <!-- 600 seconds = 10 minutes. The scan is two ps calls and two greps. -->
+    <key>StartInterval</key>
+    <integer>600</integer>
+
+    <!-- Matches the io.focused.worktree-janitor convention: no work at login,
+         when the machine is already at its busiest. First run is 10m in. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- A job that exists to reduce load must never add to it. -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>Nice</key>
+    <integer>5</integer>
+    <key>LowPriorityIO</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/dev-reaper.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/dev-reaper-error.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/rai</string>
+        <key>PATH</key>
+        <string>/Users/rai/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
