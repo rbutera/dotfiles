@@ -335,3 +335,11 @@ Rai bought a second Claude account (more weekly quota headroom) and asked to rai
 
 ### Solution/Fix
 Edited source `dot_config/impulse/agents.json.tmpl`, nimbus branch, agentId "navi": `coldModeIntervalMs` 3600000 -> 1800000 (30 min). Only navi/nimbus touched; shikamaru/heimerdinger/hermione/rick untouched. No onepasswordRead in the file, so applied without a 1P session. `chezmoi apply ~/.config/impulse/agents.json`, then `launchctl kickstart -k gui/501/com.rai.impulse-worker`. Verified LOADED in the running process (not just deployed): worker.stderr.log registration line at 10:55:37 reads `base interval: 1800s` (new pid 93474), history 900s->3600s->1800s.
+
+## 2026-09-04 -- Add deadline-radar cron (nimbus)
+
+### Problem
+The new /navi/deadlines dashboard panel (bead workspace-kss3l) reads a host-produced scan file (~/navi/state/deadline-radar.json). Nothing refreshed it on a schedule, so freshness would decay to could-not-check after 90 min.
+
+### Solution/Fix
+Added job id `deadline-radar` to `dot_config/impulse/jobs.json.tmpl` nimbus branch AND the deployed `~/.config/impulse/jobs.json` (kept in sync): cron `*/30 * * * *` Europe/London, target/payload kind script. Command is a secret-free wrapper `zsh -c 'source ~/.config/zsh/tools.zsh 2>/dev/null; exec node ~/navi/bin/deadline-radar-scan.mjs'` -- sourcing tools.zsh gives the child GOG_KEYRING_PASSWORD + TODOIST_API_TOKEN (both plain exports there) so calendar+Todoist read, with NO secret in git or the job file. Producer degrades per-source to could-not-check on any missing env, so worst case is beads-only. No `chezmoi apply` (needs 1P session); deployed copy written directly so it is live for the next worker sync-crons. To register in Hatchet now: restart com.rai.impulse-worker (run-worker.sh runs sync-crons on start).
