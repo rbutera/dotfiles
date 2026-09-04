@@ -1282,6 +1282,66 @@
       "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/deadline-radar-scan.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "disk-headroom-reclaim",
+    "name": "Disk headroom: weekly reclaim of regenerable churn (Sun 04:10)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "10 4 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/disk-headroom.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "disk", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/disk-headroom.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
+    "id": "disk-headroom-measure",
+    "name": "Disk headroom: daily measure only, no deletion (04:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/disk-headroom.mjs", "--dry-run"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "disk", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/disk-headroom.mjs", "--dry-run"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}

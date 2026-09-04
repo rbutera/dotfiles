@@ -1,5 +1,26 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-09-04 -- Disk headroom mechanism: two nimbus reclaim jobs
+
+Rai's ask (2026-09-04): a long-term fix for nimbus's internal disk, not another
+one-off purge. Added two jobs to `dot_config/impulse/jobs.json.tmpl`, NIMBUS
+BRANCH ONLY:
+
+- `disk-headroom-reclaim` -- weekly, Sunday 04:10 London, runs
+  `node ~/navi/bin/disk-headroom.mjs` (gated reclaim of regenerable churn: dead
+  agent worktrees, nx/npm caches, pnpm prune, brew, old Claude/asdf-node versions).
+- `disk-headroom-measure` -- daily, 04:00 London, runs the same with `--dry-run`
+  (measure only, keeps `~/navi/state/disk-headroom.json` fresh; does NOT advance
+  the reclaim timestamp the guard watches).
+
+Both also written into the DEPLOYED `~/.config/impulse/jobs.json` (chezmoi apply
+needs a 1Password session that was absent), and registered in Hatchet via
+`sync-crons` (navi/disk-headroom-reclaim 10 3 UTC Sun, navi/disk-headroom-measure
+0 3 UTC daily). The recap-health-monitor `disk-reclaim-stale` guard alarms if the
+last real reclaim is >8 days old. See bead workspace-n93ix and
+`~/expedition/Nimbus Disk Headroom.md`.
+
+
 ## 2026-09-03 -- kinto block becomes latios (Florence -> Tilly)
 
 See `logs/ark.md` 2026-09-03. Every `kinto` branch in `config.json`, `agents.json`,
