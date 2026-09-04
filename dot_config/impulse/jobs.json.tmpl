@@ -1342,6 +1342,37 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/disk-headroom.mjs", "--dry-run"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "role-packet-corpus",
+    "name": "Navi: Role Packet corpus (beads + notes + expedition -> state JSON, every 6h)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 */6 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/role-packet-corpus.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 180
+    },
+    "enabled": true,
+    "tags": ["career", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/role-packet-corpus.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}
