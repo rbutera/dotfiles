@@ -1,5 +1,19 @@
 # Agent runtime config
 
+## 2026-09-05: vendor Matt Pocock skills for shared agent discovery
+
+**Problem/motivation:** Rai wanted the skills and their associated scripts copied
+into chezmoi and shared across machines through `~/.agents/skills`, without plugins.
+
+**Changes:** Imported all 37 skills and their complete resources from upstream
+commit `3cca18b368ae95cdbdebbff572ccafa662551015`, retaining the MIT license.
+Renamed the conflicting `tdd` and `teach` skills to `matt-tdd` and `matt-teach`
+and updated invocation references and display names. Added a manual Python refresh
+helper and provenance/hash manifest under `docs/matt-pocock-skills`; refreshes
+refuse to overwrite local modifications. Executable resources retain their modes
+through chezmoi source naming. Deployment uses a targeted files/directories-only
+apply, avoiding bootstrap scripts and unrelated 1Password templates.
+
 Dated changelog for Ark agent runtime configuration managed through chezmoi
 (main-session models, ark.json templates, fleet toggles).
 
