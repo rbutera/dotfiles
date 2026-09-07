@@ -1,6 +1,34 @@
 # npm/pnpm config changes log
 
-## 2026-08-21 -- nimbus: run_once_12 rerun broke `chezmoi apply` on a dangling pnpm global (chaching)
+## 2026-09-07 — Relax `min-release-age` 7 → 3 days; add `npmfresh` 12h-override alias
+
+### Motivation
+Rai couldn't `npm install -g @openai/codex` because the latest release was newer
+than the 7-day supply-chain window. Wanted the default relaxed to 3 days and a
+reusable way to override the window per-install for grabbing fresh releases.
+
+### Unit check (settles the "12h" question)
+npm's `min-release-age` is defined in `@npmcli/config` with `hint: '<days>'`,
+`type: [null, Number]`, and flattens to `before = Date.now() - 86400000 * age`.
+It's a plain JS Number multiply, so **fractions work**: `0.5` = 12h. Verified
+empirically — `npm config get min-release-age --min-release-age=0.5` echoes `0.5`,
+and `--min-release-age=0` disables the window entirely (`age ? … : null`, 0 is
+falsy → `before = null`). npm 11.19.0 on node 26.7.0.
+
+### Changes
+- **`modify_private_dot_npmrc`**: `min-release-age=7` → `min-release-age=3`. The
+  `^//` auth-token preservation is untouched. Applied via targeted
+  `chezmoi apply ~/.npmrc` (pure-bash modify script, no 1Password needed);
+  deployed `npm config get min-release-age` now reports `3`.
+- **`dot_aliases.tmpl`**: added `npmfresh()` — `npm install -g
+  --min-release-age=0.5 "$@"` (12h window), with a no-arg usage guard. CLI flag
+  overrides `.npmrc`. Comment points at `--min-release-age=0` for a full bypass.
+
+### This-instance install
+`npm install -g @openai/codex@latest --min-release-age=0.5` → codex-cli
+**0.151.0 → 0.153.4** (latest; published 2026-09-04, comfortably older than 12h).
+asdf reshimmed automatically. The `--global`+`--audit` "unsupported" warning is
+pre-existing (`audit=true` lives in the managed npmrc block) and harmless.
 
 ### What happened
 The 2026-08-21 `NODE_VERSION` bump in `run_once_12_install_node.sh` changed the script's hash, so `chezmoi apply` on **nimbus** re-ran it. It set node global 26.7.0 and installed npm globals fine, then died at the `pnpm add -g` step:

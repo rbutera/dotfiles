@@ -14,7 +14,7 @@ current=$(cat)
 # ── Managed config block (authoritative for these keys) ──────────────────────
 cat <<'NPMRC'
 # Supply-chain protection
-min-release-age=7
+min-release-age=3
 save-exact=true
 engine-strict=true
 package-lock=true

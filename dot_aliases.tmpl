@@ -299,6 +299,20 @@ envkeys() {
   | sed -E 's/^\s*export\s+([A-Za-z_][A-Za-z0-9_]*)=.*/\1/'
 }
 
+# Install a global npm package with a relaxed 12h supply-chain window,
+# overriding the default min-release-age (3 days, set in ~/.npmrc via the
+# modify_private_dot_npmrc chezmoi script). Use this to grab a freshly
+# published release the normal window would otherwise block. The CLI flag
+# takes precedence over .npmrc; 0.5 = half a day = 12h. To bypass the window
+# entirely, run npm i -g --min-release-age=0 by hand instead.
+npmfresh() {
+  if [ $# -eq 0 ]; then
+    echo "usage: npmfresh <pkg> [pkg...]   # npm i -g with a 12h release-age window" >&2
+    return 1
+  fi
+  npm install -g --min-release-age=0.5 "$@"
+}
+
 alias rrnavi="openclaw gateway restart"
 alias ocfg="nvim ~/.openclaw/openclaw.json"
 
