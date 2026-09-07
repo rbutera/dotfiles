@@ -27,8 +27,19 @@ falsy → `before = null`). npm 11.19.0 on node 26.7.0.
 ### This-instance install
 `npm install -g @openai/codex@latest --min-release-age=0.5` → codex-cli
 **0.151.0 → 0.153.4** (latest; published 2026-09-04, comfortably older than 12h).
-asdf reshimmed automatically. The `--global`+`--audit` "unsupported" warning is
-pre-existing (`audit=true` lives in the managed npmrc block) and harmless.
+asdf reshimmed automatically.
+
+### Follow-up same day — drop explicit `audit=true` to kill the global-install warning
+Every `npm i -g` printed `includes both --global and --audit, which is currently
+unsupported`. Root cause in npm's `lib/arborist-cmd.js`: `audit` defaults to
+`true`; when left at default npm *silently* sets `audit=false` for global installs
+(no warning) and keeps it on for local/project installs. Setting `audit=true`
+explicitly makes `config.isDefault('audit')` false, so npm skips the silent path
+and hits the warn branch instead. Removing the explicit line therefore loses
+nothing — local installs still audit (default true) — and silences the warning.
+Kept `audit-level=high` (independent; still governs the local audit threshold).
+Verified: `npm config get audit` still `true`, and a `--dry-run` global install
+emits no warning.
 
 ### What happened
 The 2026-08-21 `NODE_VERSION` bump in `run_once_12_install_node.sh` changed the script's hash, so `chezmoi apply` on **nimbus** re-ran it. It set node global 26.7.0 and installed npm globals fine, then died at the `pnpm add -g` step:

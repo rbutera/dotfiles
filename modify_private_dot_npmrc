@@ -19,7 +19,11 @@ save-exact=true
 engine-strict=true
 package-lock=true
 strict-ssl=true
-audit=true
+# audit: left at npm's default (true). NOT set explicitly — an explicit
+# `audit=true` trips a "--global and --audit unsupported" warning on every
+# `npm i -g` (arborist-cmd: explicit audit + global → warn), whereas the
+# default silently disables audit for global installs and keeps it on for
+# local/project installs. audit-level still applies to those local audits.
 audit-level=high
 fund=false
 prefer-dedupe=true
