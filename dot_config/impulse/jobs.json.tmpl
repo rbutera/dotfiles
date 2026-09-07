@@ -252,6 +252,36 @@
 {{- else if eq .chezmoi.hostname "nimbus" }}
 [
   {
+    "id": "hatchet-session-prune",
+    "name": "Hatchet UserSession GC (daily prune of expired sessions, workspace-iedyv)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "20 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/hatchet-session-prune.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/hatchet-session-prune.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "quota-scrape-oauth",
     "name": "Claude Quota via OAuth usage endpoint (PRIMARY, every 5m)",
     "trigger": {
