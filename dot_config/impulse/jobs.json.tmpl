@@ -1496,6 +1496,37 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/recipe-register-build.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "premise-register-build",
+    "name": "Navi: rebuild the shared-signals S4 premise/assumption register (daily 04:45)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "45 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/premise-register-build.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["shared-signals", "premise-register", "navi"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/premise-register-build.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}
