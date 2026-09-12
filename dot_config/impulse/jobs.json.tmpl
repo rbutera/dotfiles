@@ -953,7 +953,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"]
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind daily --audio && ./node_modules/.bin/nx run narrate:podcast-feed"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -965,7 +965,7 @@
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"],
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind daily --audio && ./node_modules/.bin/nx run narrate:podcast-feed"],
       "cwd": "/Users/rai/dev/lumiere"
     }
   },
@@ -984,7 +984,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"]
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind weekly --audio && ./node_modules/.bin/nx run narrate:podcast-feed"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -996,7 +996,7 @@
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"],
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind weekly --audio && ./node_modules/.bin/nx run narrate:podcast-feed"],
       "cwd": "/Users/rai/dev/lumiere"
     }
   },
