@@ -73,6 +73,43 @@
     }
   },
   {
+    "id": "tailor-draft",
+    "name": "Tilly: Tailor Draft (approved cards, every 30 min)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/30 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "tilly",
+      "model": "claude-fable-5-1"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run /impulse-tailor-draft"
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": [
+      "work",
+      "latios",
+      "job-hunt",
+      "pipeline"
+    ],
+    "inputs": {
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
+      "model": "claude-fable-5-1",
+      "maxTurns": 40,
+      "prompt": "Run /impulse-tailor-draft"
+    }
+  },
+  {
     "id": "todoist-hygiene",
     "name": "Tilly: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
     "trigger": {
