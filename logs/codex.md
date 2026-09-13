@@ -1,3 +1,15 @@
+## 2026-09-13 — Default Codex model → GPT-6 Astra, reasoning effort medium
+
+Rai asked to make the default Codex agent GPT-6 Astra. Confirmed the model id is
+`gpt-6-astra` (released 2026-09-03; `gpt-6` alone is only a placeholder some
+router guides use). In `dot_codex/modify_private_config.toml`, the managed `BASE`
+dict `model` went `gpt-5.6-sol` → `gpt-6-astra`, and per Rai's follow-up
+`model_reasoning_effort` went `high` → `medium`. No provider block needed — Astra
+is OpenAI's own model, so the existing `model_providers` config is untouched.
+
+Not applied here: this modify script rebuilds `~/.codex/config.toml` on apply, but
+that's `chezmoi apply` territory. Takes effect on next apply + new Codex session.
+
 ## 2026-07-25 — GitHub MCP server was on the wrong token
 
 `mcp_servers.github.bearer_token_env_var` in `dot_codex/modify_private_config.toml` was

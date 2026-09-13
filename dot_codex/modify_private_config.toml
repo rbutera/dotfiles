@@ -27,8 +27,8 @@ except ModuleNotFoundError:
 # ── Base config: fields we want on all machines ──────────────────────────────
 BASE = {
     "personality": "pragmatic",
-    "model": "gpt-5.6-sol",
-    "model_reasoning_effort": "high",
+    "model": "gpt-6-astra",
+    "model_reasoning_effort": "medium",
     "model_reasoning_summary": "auto",
     "approval_policy": "never",
     "default_permissions": ":danger-full-access",
