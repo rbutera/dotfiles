@@ -238,3 +238,26 @@ workspace directory itself.
 **Change.** `navi/ark.json.tmpl`: added `"maxInlineBytes": 131072` to the `boot.files` entry for `workspace/memory/hot.md` (the per-entry override the script already supports). Deployed copy edited identically because no 1Password session was available for `chezmoi apply`; `chezmoi diff` reports no drift. Re-ran the refresh: manifest now shows hot rules 73,507/73,507 bytes, `truncated: false`; CLAUDE.md 185,448 bytes (+8KB).
 
 **Follow-up (lumiere, bead in navi beads).** The notice text and boot-delta wording should stop claiming "history" for non-letter files and should list the evicted headings; recap-health-monitor should alarm when any non-letter boot file is truncated.
+
+## 2026-09-12 — set Ark agents' reasoning effort to medium (navi + tilly)
+
+**Motivation.** Rai wanted Navi (this machine) and Tilly (latios) running at medium
+thinking/reasoning effort.
+
+**Change.** Claude Code exposes a `--effort <low|medium|high|xhigh|max>` CLI flag.
+Ark appends `extraClaudeArgs` to the launched `claude` command (`runtime.ts`
+`buildClaudeCommand`), so the flag belongs there.
+
+- Added `main_effort = "medium"` to `.chezmoidata.toml` `[agents]`, mirroring the
+  existing `main_model` pattern so both agent configs stay in lockstep (no drift).
+- `navi/ark.json.tmpl` and `tilly/ark.json.tmpl`: appended `"--effort"`,
+  `{{ .agents.main_effort | quote }}` to `extraClaudeArgs`. `--effort` is a named
+  flag, so it is unaffected by the `--dangerously-load-development-channels`
+  greedy-positional-consume caveat noted in the same builder.
+- Applied `~/navi/ark.json` on this machine with `--force` (deployed copy had only
+  hash drift; verified byte-identical to the template apart from the new flag). No
+  1Password session was needed — this template reads no secrets.
+
+**Takes effect on the NEXT ark session start / `ark restart`; running sessions keep
+their current effort.** Tilly on latios picks it up after the dotfiles repo is
+pushed and `chezmoi apply ~/tilly/ark.json` runs there, then an `ark restart`.
