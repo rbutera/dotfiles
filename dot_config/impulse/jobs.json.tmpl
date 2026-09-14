@@ -73,6 +73,36 @@
     }
   },
   {
+    "id": "outreach-daily",
+    "name": "Tilly: Outreach Drafts (daily 10:00)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 10 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "tilly",
+      "model": "claude-fable-5-1"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Run /impulse-outreach"
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": [
+      "work",
+      "latios",
+      "job-hunt",
+      "outreach"
+    ]
+  },
+  {
     "id": "tailor-draft",
     "name": "Tilly: Tailor Draft (approved cards, every 30 min)",
     "trigger": {
