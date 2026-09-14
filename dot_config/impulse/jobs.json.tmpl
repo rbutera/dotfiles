@@ -1527,6 +1527,138 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/premise-register-build.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "todoist-gardener",
+    "name": "Navi: Todoist gardener (file, tag, sharpen titles, enrich links; 4x daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 9,13,17,21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "claude-opus-4-8"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Groom Rai's Todoist: file, tag, sharpen vague titles into next actions, enrich link-only tasks. Structure only."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 1200
+    },
+    "enabled": false,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-gardener.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8",
+      "maxTurns": 80
+    }
+  },
+  {
+    "id": "todoist-overdue-spread",
+    "name": "Navi: Todoist overdue spread (morning; no wall of red)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 7 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "claude-opus-4-8"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Spread overdue Todoist tasks across the coming days so today is a short menu, not a wall of red. Reschedule only."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 900
+    },
+    "enabled": false,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-overdue-spread.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8",
+      "maxTurns": 60
+    }
+  },
+  {
+    "id": "todoist-tomorrow-three",
+    "name": "Navi: Todoist tomorrow's three (evening; pre-pick three)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 20 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "claude-opus-4-8"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Pick exactly three tasks for tomorrow and pin them due tomorrow morning, so the first decision of the day is made."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": false,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-tomorrow-three.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8",
+      "maxTurns": 20
+    }
+  },
+  {
+    "id": "todoist-stale-review",
+    "name": "Navi: Todoist stale review (Sun; guilt-free surface, never deletes)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 18 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "claude-opus-4-8"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Read-only: list tasks untouched 30+ days into a calm digest for Rai to decide on. Never closes or deletes."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": false,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-stale-review.md",
+    "inputs": {
+      "agent": "navi",
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8",
+      "maxTurns": 20
+    }
   }
 ]
 {{- else }}
