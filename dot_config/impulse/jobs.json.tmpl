@@ -73,6 +73,7 @@
     }
   },
   {
+    {{/* 2026-09-14: disabled by Navi at Rai's instruction ("just go") to end the two-writer conflict with the nimbus todoist-* triage jobs, which now own Todoist automation. Tilly owns any re-enable on latios. */}}
     "id": "todoist-hygiene",
     "name": "Tilly: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
     "trigger": {
@@ -94,7 +95,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": [
       "work",
       "latios",
@@ -1551,7 +1552,7 @@
       "dedupe": "skip-if-running",
       "timeout": 1200
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
     "promptFile": "prompts/todoist-gardener.md",
     "inputs": {
@@ -1582,7 +1583,7 @@
       "dedupe": "skip-if-running",
       "timeout": 900
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
     "promptFile": "prompts/todoist-overdue-spread.md",
     "inputs": {
@@ -1613,7 +1614,7 @@
       "dedupe": "skip-if-running",
       "timeout": 300
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
     "promptFile": "prompts/todoist-tomorrow-three.md",
     "inputs": {
@@ -1644,7 +1645,7 @@
       "dedupe": "skip-if-running",
       "timeout": 300
     },
-    "enabled": false,
+    "enabled": true,
     "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
     "promptFile": "prompts/todoist-stale-review.md",
     "inputs": {

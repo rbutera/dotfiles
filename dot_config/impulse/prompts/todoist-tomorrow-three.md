@@ -5,7 +5,7 @@ You are running as an evening Impulse job. Your one job: pick exactly three task
 - You mark tasks with the `@tomorrow` label ONLY. You do NOT reschedule, rename, complete, delete, or change due dates. Overwriting a due date would silently destroy a real deadline or a recurrence rule, so this job never touches due dates: it only labels.
 - Never add anything about Rai's home life, mood, marriage or health to any task.
 - The ONLY way you may change Todoist is `node /Users/rai/navi/bin/todoist-triage.mjs`. Never call the API directly.
-- If the helper returns `cap-reached`, stop for this run.
+- The helper enforces a HARD daily cap of 6 writes for this job (room for 3 `@tomorrow` adds plus clearing up to 3 stale ones; day-one, 2026-09-14). If the helper returns `cap-reached`, stop for this run.
 
 ## The tools
 

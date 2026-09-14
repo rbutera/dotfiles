@@ -1,5 +1,46 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-09-14 -- Todoist triage jobs ENABLED (Rai: "just go", 08:50)
+
+Rai gave the go by voice at 08:50. Flipped all four nimbus `todoist-*` jobs to
+`enabled: true` in `dot_config/impulse/jobs.json.tmpl`, disabled Tilly's
+`todoist-hygiene` (latios branch) to `enabled: false` with a dated Go-template
+comment naming the decision, deployed jobs.json + prompts, and restarted the
+worker (`launchctl kickstart -k gui/$(id -u)/com.rai.impulse-worker`; PID
+53892 -> 29792).
+
+- **Hard per-job day-one caps added to the helper** (`bin/todoist-triage.mjs`,
+  `DEFAULT_JOB_CAPS` + `resolveCap`): gardener 8, overdue-spread 5,
+  tomorrow-three 6, stale-review 40. The map is the CEILING; the env
+  `TODOIST_TRIAGE_DAILY_CAP` can only LOWER a job, never raise it above its
+  mapped value. Raising = editing the map (a reviewed code change). 24/24 tests,
+  red-proofed (env-wins bug returns 40 for gardener; `resolveCap('todoist-gardener','40')===8` catches it).
+- **`no-triage` label created in Todoist** via the API (id `2185069496`); label
+  set is now waiting/quick/deep/errand/someday/no-triage.
+- **First live run: the 1pm (13:00 London) gardener.** overdue-spread fires
+  tomorrow 07:30, tomorrow-three tonight 20:00, stale-review Sun 18:00.
+
+⚠️ **Cron-sync first-registration gotcha (cost me a step, worth knowing):**
+`run-worker.sh` runs `main.ts sync-crons` (with `|| true`) BEFORE the worker
+registers its Hatchet workflows. These are the FIRST sidecar-kind CRON jobs, so
+the `impulse-claude-sidecar` workflow was not yet on the Hatchet server at
+sync time; `syncCronForJob` threw `Workflow with name navi_impulse-claude-sidecar
+not found` and aborted, so the four todoist crons did NOT register on the first
+boot even though the loader saw them enabled. Fix: after the worker booted (and
+registered the sidecar workflow), re-ran `main.ts sync-crons` once and all four
+registered. Verified AT THE HATCHET LEVEL (`crons.list({workflow})`): exactly 4
+sidecar crons, correct UTC exprs (gardener `0 8,12,16,20`, etc.). This is a
+one-time bootstrap cost; the workflow persists server-side now. Follow-up
+candidate: reorder run-worker.sh (register workflows, then sync-crons) so a new
+workflow kind's first cron registers on the first boot.
+
+⛔ **Still open:** Tilly's `todoist-hygiene` is STILL enabled and its worker is
+ALIVE on latios (I confirmed via ssh). My template edit does not reach latios
+without a push (no push here) and Rai wants that handoff via Tilly. So both
+tidiers touch the same Todoist today. Rai to tell Tilly to disable it (or finish
+wiping latios). Mine are capped/logged/conservative, so overlap = churn, not damage.
+
+
 ## 2026-09-14 -- Todoist ADHD triage jobs (four, nimbus, disabled at ship)
 
 Rai's ask (voice, 08:17 London): Impulse jobs that keep his Todoist pruned,
