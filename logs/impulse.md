@@ -1,5 +1,41 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-09-14 -- Todoist ADHD triage jobs (four, nimbus, disabled at ship)
+
+Rai's ask (voice, 08:17 London): Impulse jobs that keep his Todoist pruned,
+tagged, scheduled and fleshed-out, tuned for ADHD, with a PDF report. Bead
+`workspace-a2wlr`. Added four jobs to the NIMBUS branch of
+`dot_config/impulse/jobs.json.tmpl`, all `enabled: false`:
+
+- `todoist-gardener` -- `0 9,13,17,21 * * *`. Files, tags, sharpens vague
+  titles into next actions, enriches bare links (title + one neutral line only).
+- `todoist-overdue-spread` -- `30 7 * * *`. Spreads overdue across the coming
+  days; never moves a hard-deadline task more than a day.
+- `todoist-tomorrow-three` -- `0 20 * * *`. Tags three tasks `@tomorrow` (does
+  NOT overwrite due dates).
+- `todoist-stale-review` -- `0 18 * * 0`. Tags 30+-day-stale tasks `@review`
+  and writes a digest.
+
+All four are `target.kind: "sidecar"`, `model: "claude-opus-4-8"` (full id
+pinned), `identity: "navi"` -- a bare `claude --print` worker, NOT `ark-spawn`,
+so Navi's continuity is never loaded into a task-editing run (privacy + cost).
+Model passed in both `target.model` and `inputs.model` (sidecar defaults to
+sonnet otherwise). Prompts are self-contained files under
+`dot_config/impulse/prompts/todoist-*.md`.
+
+Every write goes through `~/navi/bin/todoist-triage.mjs` (the one tested, capped,
+logged, reversible helper; no delete op). Guardrails: `no-triage` exemption
+label, global Therapy Homework project exemption (id `6hW5784gcxcxQv5G`), per-job
+daily cap (fail-closed), recurring-reschedule refusal, evidence-gated complete,
+before/after JSONL log. Deployed jobs.json + prompts with `chezmoi apply` (these
+paths have no 1Password dependency; no signin session was present, none needed).
+Wiring proven with `impulse trigger --dry-run` per job. See
+`~/expedition/Todoist Triage Jobs.md` and the report at
+`~/life/docs/todoist-triage-report-2026-09-14.pdf`.
+
+⚠️ Do NOT enable until Tilly's `todoist-hygiene` (latios, enabled, hourly) is
+confirmed dead -- it writes the same account and would fight these.
+
 ## 2026-09-04 -- Disk headroom mechanism: two nimbus reclaim jobs
 
 Rai's ask (2026-09-04): a long-term fix for nimbus's internal disk, not another
