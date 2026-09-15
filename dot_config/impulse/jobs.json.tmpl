@@ -100,7 +100,14 @@
       "latios",
       "job-hunt",
       "tracker"
-    ]
+    ],
+    "inputs": {
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
+      "model": "claude-fable-5-1",
+      "maxTurns": 40,
+      "prompt": "Run /impulse-mail-sweep"
+    }
   },
   {
     "id": "outreach-daily",
@@ -130,7 +137,14 @@
       "latios",
       "job-hunt",
       "outreach"
-    ]
+    ],
+    "inputs": {
+      "agent": "tilly",
+      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
+      "model": "claude-fable-5-1",
+      "maxTurns": 40,
+      "prompt": "Run /impulse-outreach"
+    }
   },
   {
     "id": "tailor-draft",
