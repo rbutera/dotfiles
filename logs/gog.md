@@ -19,3 +19,13 @@ Agentic work on latios (Tilly, `~/tilly`) needs Gmail access. gog was authed onl
 ### Not done
 - gog config/keyring is not chezmoi-managed (encrypted refresh tokens plus an OAuth client secret in git is not worth it). New host recipe: install gog, copy the three files above, done.
 - Refresh token is shared across hosts; revoking it (Google account security page) kills both machines at once.
+
+## 2026-09-20 — Cross-harness `gog` skill
+
+### Problem / motivation
+Only Navi had gog instructions (`~/navi/skills/gog-gmail`, Gmail only). Every harness on every machine should know how to reach Rai's mail, calendar and Drive.
+
+### What was changed
+- New skill `dot_agents/skills/gog/SKILL.md` (`~/.agents/skills/gog`): keyring unlock preamble, `--json`/`--readonly` conventions, the `threads`-not-`messages` and spam/trash search pitfalls, command cheatsheet for Gmail, Calendar, Drive/Docs/Sheets, Contacts/Tasks, approval gate for anything that sends or shares, setup/repair pointer. Flag names checked against `gog --help` (0.31.1).
+- `dot_claude/skills/symlink_gog.tmpl` and `dot_codex/skills/symlink_gog.tmpl` point `~/.claude/skills/gog` and `~/.codex/skills/gog` at the `.agents` copy, so one file serves all three harnesses. First use of chezmoi `symlink_` in this repo.
+- Applied on nimbus and latios (`chezmoi apply` on the three targets only; no 1Password needed). Latios pull surfaced 7 unpushed impulse commits and a one-hunk conflict in `dot_config/impulse/jobs.json.tmpl` (Tilly jobs vs the nimbus disable-comment); merged keeping both, rendered JSON validated, pushed.
