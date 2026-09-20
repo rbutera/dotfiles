@@ -184,6 +184,7 @@
     }
   },
   {
+    {{/* 2026-09-14: disabled by Navi at Rai's instruction ("just go") to end the two-writer conflict with the nimbus todoist-* triage jobs, which now own Todoist automation. Tilly owns any re-enable on latios. */}}
     "id": "todoist-hygiene",
     "name": "Tilly: Todoist Hygiene (triage hourly 08:15-20:15; interactive digest on 08:xx morning run)",
     "trigger": {
@@ -205,7 +206,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": [
       "work",
       "latios",
@@ -1064,7 +1065,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"]
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind daily --audio && ./node_modules/.bin/nx run narrate:podcast-feed"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -1076,7 +1077,7 @@
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind daily --audio && pnpm nx run narrate:podcast-feed"],
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind daily --audio && ./node_modules/.bin/nx run narrate:podcast-feed"],
       "cwd": "/Users/rai/dev/lumiere"
     }
   },
@@ -1095,7 +1096,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"]
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind weekly --audio && ./node_modules/.bin/nx run narrate:podcast-feed"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -1107,7 +1108,7 @@
     "tags": ["journal-pipeline", "nimbus"],
     "inputs": {
       "cmd": "bash",
-      "args": ["-c", "pnpm nx run narrate:dev -- --latest --kind weekly --audio && pnpm nx run narrate:podcast-feed"],
+      "args": ["-c", "./node_modules/.bin/nx run narrate:dev -- --latest --kind weekly --audio && ./node_modules/.bin/nx run narrate:podcast-feed"],
       "cwd": "/Users/rai/dev/lumiere"
     }
   },
@@ -1575,6 +1576,192 @@
       "cmd": "zsh",
       "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/due-bead-whisper.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
+    "id": "recipe-register-build",
+    "name": "Navi: rebuild the shared-signals S5 capability-to-recipe register (daily 04:40)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "40 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/recipe-register-build.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["shared-signals", "recipe-register", "navi"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/recipe-register-build.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
+    "id": "premise-register-build",
+    "name": "Navi: rebuild the shared-signals S4 premise/assumption register (daily 04:45)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "45 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/premise-register-build.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["shared-signals", "premise-register", "navi"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/premise-register-build.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
+    "id": "todoist-gardener",
+    "name": "Navi: Todoist gardener (file, tag, sharpen titles, enrich links; 4x daily)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 9,13,17,21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "sidecar",
+      "model": "claude-opus-4-8",
+      "identity": "navi"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Groom Rai's Todoist: file, tag, sharpen vague titles into next actions, enrich link-only tasks. Structure only."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 1200
+    },
+    "enabled": true,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-gardener.md",
+    "inputs": {
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8"
+    }
+  },
+  {
+    "id": "todoist-overdue-spread",
+    "name": "Navi: Todoist overdue spread (morning; no wall of red)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 7 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "sidecar",
+      "model": "claude-opus-4-8",
+      "identity": "navi"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Spread overdue Todoist tasks across the coming days so today is a short menu, not a wall of red. Reschedule only."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 900
+    },
+    "enabled": true,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-overdue-spread.md",
+    "inputs": {
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8"
+    }
+  },
+  {
+    "id": "todoist-tomorrow-three",
+    "name": "Navi: Todoist tomorrow's three (evening; pre-pick three)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 20 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "sidecar",
+      "model": "claude-opus-4-8",
+      "identity": "navi"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Pick exactly three tasks for tomorrow and pin them due tomorrow morning, so the first decision of the day is made."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-tomorrow-three.md",
+    "inputs": {
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8"
+    }
+  },
+  {
+    "id": "todoist-stale-review",
+    "name": "Navi: Todoist stale review (Sun; guilt-free surface, never deletes)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 18 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "sidecar",
+      "model": "claude-opus-4-8",
+      "identity": "navi"
+    },
+    "payload": {
+      "kind": "prompt",
+      "text": "Read-only: list tasks untouched 30+ days into a calm digest for Rai to decide on. Never closes or deletes."
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": true,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["todoist-triage", "adhd-scaffolding", "nimbus"],
+    "promptFile": "prompts/todoist-stale-review.md",
+    "inputs": {
+      "workingDir": "/Users/rai/navi",
+      "model": "claude-opus-4-8"
     }
   }
 ]

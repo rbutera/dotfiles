@@ -25,7 +25,9 @@
     "--dangerously-load-development-channels",
     "server:plugin:discord-voice:discord-voice",
     "--disallowedTools",
-    "AskUserQuestion"
+    "AskUserQuestion",
+    "--effort",
+    {{ .agents.main_effort | quote }}
   ],
   "model": {{ .agents.main_model | quote }},
   "sensors": {

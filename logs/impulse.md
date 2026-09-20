@@ -1,5 +1,82 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-09-14 -- Todoist triage jobs ENABLED (Rai: "just go", 08:50)
+
+Rai gave the go by voice at 08:50. Flipped all four nimbus `todoist-*` jobs to
+`enabled: true` in `dot_config/impulse/jobs.json.tmpl`, disabled Tilly's
+`todoist-hygiene` (latios branch) to `enabled: false` with a dated Go-template
+comment naming the decision, deployed jobs.json + prompts, and restarted the
+worker (`launchctl kickstart -k gui/$(id -u)/com.rai.impulse-worker`; PID
+53892 -> 29792).
+
+- **Hard per-job day-one caps added to the helper** (`bin/todoist-triage.mjs`,
+  `DEFAULT_JOB_CAPS` + `resolveCap`): gardener 8, overdue-spread 5,
+  tomorrow-three 6, stale-review 40. The map is the CEILING; the env
+  `TODOIST_TRIAGE_DAILY_CAP` can only LOWER a job, never raise it above its
+  mapped value. Raising = editing the map (a reviewed code change). 24/24 tests,
+  red-proofed (env-wins bug returns 40 for gardener; `resolveCap('todoist-gardener','40')===8` catches it).
+- **`no-triage` label created in Todoist** via the API (id `2185069496`); label
+  set is now waiting/quick/deep/errand/someday/no-triage.
+- **First live run: the 1pm (13:00 London) gardener.** overdue-spread fires
+  tomorrow 07:30, tomorrow-three tonight 20:00, stale-review Sun 18:00.
+
+⚠️ **Cron-sync first-registration gotcha (cost me a step, worth knowing):**
+`run-worker.sh` runs `main.ts sync-crons` (with `|| true`) BEFORE the worker
+registers its Hatchet workflows. These are the FIRST sidecar-kind CRON jobs, so
+the `impulse-claude-sidecar` workflow was not yet on the Hatchet server at
+sync time; `syncCronForJob` threw `Workflow with name navi_impulse-claude-sidecar
+not found` and aborted, so the four todoist crons did NOT register on the first
+boot even though the loader saw them enabled. Fix: after the worker booted (and
+registered the sidecar workflow), re-ran `main.ts sync-crons` once and all four
+registered. Verified AT THE HATCHET LEVEL (`crons.list({workflow})`): exactly 4
+sidecar crons, correct UTC exprs (gardener `0 8,12,16,20`, etc.). This is a
+one-time bootstrap cost; the workflow persists server-side now. Follow-up
+candidate: reorder run-worker.sh (register workflows, then sync-crons) so a new
+workflow kind's first cron registers on the first boot.
+
+⛔ **Still open:** Tilly's `todoist-hygiene` is STILL enabled and its worker is
+ALIVE on latios (I confirmed via ssh). My template edit does not reach latios
+without a push (no push here) and Rai wants that handoff via Tilly. So both
+tidiers touch the same Todoist today. Rai to tell Tilly to disable it (or finish
+wiping latios). Mine are capped/logged/conservative, so overlap = churn, not damage.
+
+
+## 2026-09-14 -- Todoist ADHD triage jobs (four, nimbus, disabled at ship)
+
+Rai's ask (voice, 08:17 London): Impulse jobs that keep his Todoist pruned,
+tagged, scheduled and fleshed-out, tuned for ADHD, with a PDF report. Bead
+`workspace-a2wlr`. Added four jobs to the NIMBUS branch of
+`dot_config/impulse/jobs.json.tmpl`, all `enabled: false`:
+
+- `todoist-gardener` -- `0 9,13,17,21 * * *`. Files, tags, sharpens vague
+  titles into next actions, enriches bare links (title + one neutral line only).
+- `todoist-overdue-spread` -- `30 7 * * *`. Spreads overdue across the coming
+  days; never moves a hard-deadline task more than a day.
+- `todoist-tomorrow-three` -- `0 20 * * *`. Tags three tasks `@tomorrow` (does
+  NOT overwrite due dates).
+- `todoist-stale-review` -- `0 18 * * 0`. Tags 30+-day-stale tasks `@review`
+  and writes a digest.
+
+All four are `target.kind: "sidecar"`, `model: "claude-opus-4-8"` (full id
+pinned), `identity: "navi"` -- a bare `claude --print` worker, NOT `ark-spawn`,
+so Navi's continuity is never loaded into a task-editing run (privacy + cost).
+Model passed in both `target.model` and `inputs.model` (sidecar defaults to
+sonnet otherwise). Prompts are self-contained files under
+`dot_config/impulse/prompts/todoist-*.md`.
+
+Every write goes through `~/navi/bin/todoist-triage.mjs` (the one tested, capped,
+logged, reversible helper; no delete op). Guardrails: `no-triage` exemption
+label, global Therapy Homework project exemption (id `6hW5784gcxcxQv5G`), per-job
+daily cap (fail-closed), recurring-reschedule refusal, evidence-gated complete,
+before/after JSONL log. Deployed jobs.json + prompts with `chezmoi apply` (these
+paths have no 1Password dependency; no signin session was present, none needed).
+Wiring proven with `impulse trigger --dry-run` per job. See
+`~/expedition/Todoist Triage Jobs.md` and the report at
+`~/life/docs/todoist-triage-report-2026-09-14.pdf`.
+
+⚠️ Do NOT enable until Tilly's `todoist-hygiene` (latios, enabled, hourly) is
+confirmed dead -- it writes the same account and would fight these.
+
 ## 2026-09-04 -- Disk headroom mechanism: two nimbus reclaim jobs
 
 Rai's ask (2026-09-04): a long-term fix for nimbus's internal disk, not another
@@ -377,3 +454,11 @@ Added the Impulse cron `role-packet-verdict` (`dot_config/impulse/jobs.json.tmpl
 ## 2026-09-06 — due-bead whisper alarm cron (bead workspace-bfxqs)
 
 Added the Impulse cron `due-bead-whisper` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, directly after `role-packet-verdict`): `*/15 * * * *` Europe/London, `timeout` 120, enabled, zsh wrapper that sources `tools.zsh` (for `bd` on PATH) then execs `~/navi/bin/due-bead-whisper.mjs`. Fixes the defect where a gated DELIGHT gift (e.g. the 12 Aug eclipse "same coast, same sky" note, `workspace-ut0mh`, which fired 3h late) can rot during a long live conversation, because the only thing that fires it — `bead-schedule-check.mjs --due-now` at step 0 of a heartbeat tick — is starved when no Continue/Wild/Personal tick gets a turn. The new script runs the SAME due-now scan independent of the dice; for every gated bead that is due and not yet announced for its current defer instant (state `~/navi/state/due-bead-whispers.json`, keyed by id+instant), it posts ONE whisper (POST /whisper on the Ark lifecycle server) naming ONLY the bead id (sealed-safe, Rule 83). Fails toward could-not-check on a dead scan and could-not-whisper on a non-2xx (never recording, so the next run retries). No per-job log path field: matches the `role-packet-verdict`/`deadline-radar` precedent shape (the impulse worker's own stdout/stderr lands in `~/.logs`). Template render-checked via `chezmoi execute-template` piped through a JSON parse (38 jobs, valid). Registration in Hatchet is via `impulse sync-crons`, which the worker (`com.rai.impulse-worker`) runs on start; `chezmoi apply --force ~/.config/impulse/jobs.json` is safe (no onepasswordRead refs in the file), then `launchctl kickstart -k gui/$(id -u)/com.rai.impulse-worker` to register.
+
+## 2026-09-12 -- narrate jobs run nx directly, no pnpm reconciliation (bead workspace-g79zu)
+
+### Problem
+The `abie0` decision card (2026-09-12 02:31) found the impulse-worker narrate jobs (`narrate-daily`, `narrate-weekly`, four occurrences: `payload.args` + `inputs.args` on each) shell out to `pnpm nx run narrate:dev ... && pnpm nx run narrate:podcast-feed`. Under the worker's PATH that resolves to homebrew pnpm 10.33.0, against a lumiere `node_modules` stamped by pnpm 11.0.8: the same mutation class as the chronicler job fixed in `3swmj` (lumiere `d7b7d2c8`), where running the wrong pnpm reconciles the lockfile and can strip native prebuilds mid-run.
+
+### Solution/Fix
+Source-only edit, `dot_config/impulse/jobs.json.tmpl`, lines 956/968/987/999: `pnpm nx run` -> `./node_modules/.bin/nx run` for the two narrate jobs only (both `payload.args` and `inputs.args` on each). Both jobs' `inputs.cwd` is `/Users/rai/dev/lumiere`, where `node_modules/.bin/nx` exists, so the relative path resolves; no other job in this template uses pnpm. Proved scope with `chezmoi execute-template` rendered before and after the edit: the only diff between the two renders is the four narrate lines. Diffed the after-render against the deployed `~/.config/impulse/jobs.json`: identical apart from the four narrate lines plus a pre-existing 63-line block (two register-build jobs already in the template but not yet applied to the deployed file: unrelated pending drift, not touched). Rendered JSON parses (`JSON.parse`, 41 jobs). No `chezmoi apply` (needs Rai's 1Password session; two other applies already pending for him, this is a third). Deployed jobs.json, launchd and lumiere untouched.
