@@ -335,3 +335,10 @@ The new R2-backed image-hosting library (expedition-dashboard gallery + Florence
 
 ### Solution/Fix
 Added five vars to `tools.zsh` (ungated — both Florence/kinto and Navi/nimbus need it): `CLOUDFLARE_R2_ACCOUNT_ID` (username), `CLOUDFLARE_R2_API_TOKEN` (credential; CF Bearer for R2/Images management), and `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_S3_ENDPOINT` (S3-compatible object ops for aws-sdk / rclone). Deliberately `R2_`-prefixed, NOT `AWS_*`, so they never collide with `AWS_PROFILE=ej-dev`. Source-only change; requires `chezmoi apply ~/.config/zsh/tools.zsh` with an active 1Password session.
+# 2026-09-21: LangSmith API key
+
+LangChain Academy tracing and evaluation labs need LangSmith credentials. Added
+`LANGSMITH_API_KEY` to the existing AI API secrets group using
+`op://Private/langsmith api key/credential`, with shell quoting. The existing
+`.zshenv` loader sources this group for new shells. Apply only
+`~/.config/zsh/ai-apis.zsh`; tracing and project/region settings remain unchanged.
