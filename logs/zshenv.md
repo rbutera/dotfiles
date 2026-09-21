@@ -342,3 +342,10 @@ LangChain Academy tracing and evaluation labs need LangSmith credentials. Added
 `op://Private/langsmith api key/credential`, with shell quoting. The existing
 `.zshenv` loader sources this group for new shells. Apply only
 `~/.config/zsh/ai-apis.zsh`; tracing and project/region settings remain unchanged.
+
+## 2026-09-21: Tavily API key
+
+The Academy Personal Chef project uses Tavily web search. Added `TAVILY_API_KEY`
+to the AI API secrets group from `op://Private/Tavily API Key/credential`, with
+shell quoting. Apply the same group to expose it in new shells; no key value
+is stored in Git.
