@@ -474,3 +474,39 @@ apply, so the change has to be made at the source.
 - Applied to `~/.claude/settings.json` via `chezmoi apply` (the modify script is pure
   bash, no `onepasswordRead`, so no 1Password session needed). New sessions default to
   Opus 5 1M; the current session keeps whatever it launched with until `/model` is run.
+
+## 2026-09-23 -- Default model cut over to `claude-opus-5-5[1m]` (Opus 5.5, 1M context)
+
+### Problem
+
+Rai authorised the Opus 5.5 cutover on voice (06:27, nimbus side; 06:29 "everything
+on 5.5"). Claude Code CLI 2.1.280 accepts `claude-opus-5-5` (2.1.278 rejected it);
+probe verified init.model `claude-opus-5-5[1m]`, canonicalModel `claude-opus-5-5`,
+contextWindow 1,000,000, provider firstParty. The managed defaults still pointed at
+Opus 4.8 / Fable, so the change had to be made at the chezmoi source.
+
+### Solution
+
+- `.chezmoidata.toml` `[agents].main_model` `claude-fable-5-1` -> `claude-opus-5-5[1m]`
+  and `bin/executable_agent-model` opus target -> `claude-opus-5-5[1m]` (earlier
+  commit 40e13b6's parents; navi `ark.json` targeted-applied, deployed line now reads
+  `claude-opus-5-5[1m]`).
+- `dot_claude/modify_settings.json`: base `model` `claude-opus-4-8[1m]` ->
+  `claude-opus-5-5[1m]`. Targeted-applied to `~/.claude/settings.json` (pure-bash
+  modify script, no onepasswordRead); the apply also reconciled some drifted hook
+  ordering. New interactive sessions default to Opus 5.5 1M.
+- `dot_zshenv.tmpl`: both `ANTHROPIC_DEFAULT_OPUS_MODEL` exports (work + non-work
+  branch) `claude-opus-4-8` -> `claude-opus-5-5`. SOURCE ONLY: this file has
+  onepasswordRead secrets, so it cannot be applied without a 1Password session. Apply
+  later with: eval $(op signin --account personal) && chezmoi apply ~/.zshenv
+- `dot_config/impulse/jobs.json.tmpl`: the six full-id `claude-fable-5-1` job pins
+  (all tilly/latios ark-spawn + input pins) -> `claude-opus-5-5`. These are gated off
+  nimbus, so the nimbus targeted-apply of `~/.config/impulse/jobs.json` was a no-op;
+  they take effect on latios. NOT touched: eight `claude-opus-4-8` navi-job pins (live
+  on nimbus) and 28 deliberate `sonnet` pins, left for a separate decision on whether
+  "everything on 5.5" includes them.
+- lumiere `apps/ark/plugin/agents/*.md`: navi/tilly/orca/tatl (earlier) and florence
+  (commit 892d66aa) frontmatter -> `claude-opus-5-5` (`[1m]` preserved on
+  navi/tilly/florence). clarence untouched (gpt-5.6-sol).
+- No restarts performed: running sessions keep their launch-time model until Ark is
+  restarted (Rai's call, later). Chezmoi source commit 40e13b6 on main.
