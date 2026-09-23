@@ -510,3 +510,13 @@ Opus 4.8 / Fable, so the change had to be made at the chezmoi source.
   navi/tilly/florence). clarence untouched (gpt-5.6-sol).
 - No restarts performed: running sessions keep their launch-time model until Ark is
   restarted (Rai's call, later). Chezmoi source commit 40e13b6 on main.
+
+- Follow-up (same cutover, "everything on 5.5" extended): `dot_config/impulse/jobs.json.tmpl`
+  the eight `claude-opus-4-8` navi-job pins -> `claude-opus-5-5` (4 `target.model` + 4
+  `inputs.model` across the todoist gardener/overdue-spread family). Targeted-applied to
+  nimbus `~/.config/impulse/jobs.json` (no onepasswordRead in this template): deployed now
+  8 opus-5-5, 0 opus-4-8. The 28 `sonnet` pins are the deliberate cheap tier and stay.
+  Source commit 3f5389fc. Live effect needs `impulse sync-crons` (the model travels in the
+  Hatchet cron trigger input, not re-read from jobs.json at fire time); the impulse-worker
+  launchd wrapper runs sync-crons on start, so a `launchctl kickstart -k com.rai.impulse-worker`
+  picks it up. The running worker does NOT reload jobs.json on its own.
