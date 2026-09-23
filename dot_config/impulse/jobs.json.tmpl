@@ -394,6 +394,37 @@
     }
   },
   {
+    "id": "playlist-sync",
+    "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "17 3 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/playlist.mjs", "sync", "{{ .chezmoi.homeDir }}/life/docs/music/walk-playlist.yaml"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 1800
+    },
+    "enabled": true,
+    "tags": ["music", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/playlist.mjs", "sync", "{{ .chezmoi.homeDir }}/life/docs/music/walk-playlist.yaml"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "quota-scrape-oauth",
     "name": "Claude Quota via OAuth usage endpoint (PRIMARY, every 5m)",
     "trigger": {
