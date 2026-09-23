@@ -43,4 +43,4 @@
   # Claude Code CLI `--effort` flag via extraClaudeArgs in navi/ and tilly/
   # ark.json.tmpl. Takes effect on the NEXT ark session start / `ark restart`.
   # Valid values: low, medium, high, xhigh, max.
-  main_effort = "medium"
+  main_effort = "high"
