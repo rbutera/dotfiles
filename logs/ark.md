@@ -1,5 +1,24 @@
 # Ark workspace config changes log
 
+## 2026-09-25 — Navi: Perch channel plugin (committed, not applied)
+
+### Problem
+
+Perch (rbutera/Perch#33) needs Navi's main session to load the Perch channel
+plugin so she gets the perch_* tools and pushed Senses. The Perch Service
+itself now runs on its own under launchd (`com.rai.perch`); the plugin is a
+thin loopback link to it (`PERCH_SERVICE` in `~/.claude/channels/perch/.env`).
+
+### Changes
+
+- `navi/ark.json.tmpl`: `~/dev/Perch/tools/perch-dev` added to
+  `mainOnlyPlugins` (main session only, never headless Impulse ticks), and
+  `server:plugin:perch:perch` added after discord-voice under
+  `--dangerously-load-development-channels`.
+- Navi approved the change but owns the moment: this commit is deliberately
+  **not applied**. She runs `chezmoi apply` herself right before renewing her
+  session. Cutover, verify and rollback steps are in `~/dev/Perch/docs/wiring.md`.
+
 ## 2026-09-03 — Navi email whitelist: add tilly@e8n.dev
 
 `navi/ark.json.tmpl` email whitelist now includes `tilly@e8n.dev` alongside
