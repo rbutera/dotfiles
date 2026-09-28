@@ -9,7 +9,8 @@
   "mainOnlyPlugins": [
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord-voice-bridge",
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin",
-    "{{ .chezmoi.homeDir }}/dev/Perch/tools/perch-dev"
+    "{{ .chezmoi.homeDir }}/dev/Perch/tools/perch-dev",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-relay"
   ],
   "email": {
     "address": "navi@e8n.dev",
@@ -26,6 +27,7 @@
     "--dangerously-load-development-channels",
     "server:plugin:discord-voice:discord-voice",
     "server:plugin:perch:perch",
+    "server:plugin:ark-relay:ark-relay",
     "--disallowedTools",
     "AskUserQuestion",
     "--effort",
