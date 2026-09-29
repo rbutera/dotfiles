@@ -499,3 +499,6 @@ platform-inappropriate.
 tree on non-darwin systems. Every tracked target in that tree is a macOS LaunchAgent, so directory-
 level exclusion also prevents empty `Library` and `Library/LaunchAgents` objects from remaining in
 `chezmoi status`. The LaunchAgents remain managed on macOS.
+
+## 2026-09-29
+- Added dot_config/zsh/oura.zsh.tmpl: exports OURA_CLIENT_ID / OURA_CLIENT_SECRET from the 1Password item "Oura API" (Private; fields client_id, client_secret) for ~/navi/bin/oura.mjs, which reads process.env before ~/navi/.env. Motivation: Rai set up an Oura developer app so Navi can read his ring data.

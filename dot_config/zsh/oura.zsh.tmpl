@@ -1,0 +1,7 @@
+# ── Secrets group: Oura ring API (Navi's read-only reader, ~/navi/bin/oura.mjs) ──
+# Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
+# 1Password item: "Oura API" in Private, with fields client_id and client_secret.
+# Apply just this group:  chezmoi apply ~/.config/zsh/oura.zsh
+{{- $oura := onepasswordDetailsFields "Oura API" "Private" }}
+export OURA_CLIENT_ID={{ $oura.client_id.value | quote }}
+export OURA_CLIENT_SECRET={{ $oura.client_secret.value | quote }}
