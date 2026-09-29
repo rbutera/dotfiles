@@ -119,14 +119,15 @@ printf '%s\n' "$STATUS_OUT" | while IFS= read -r line; do
 
   is_tmpl="no"
   is_secret="no"
+  # modify_ scripts count as templates too: `chezmoi add` would replace the
+  # merge script with a literal copy of the deployed file.
   case "$src" in
-    *.tmpl)
-      is_tmpl="yes"
-      if [ -f "$src" ] && grep -qE 'onepasswordRead|onepassword[ "(]' "$src" 2>/dev/null; then
-        is_secret="yes"
-      fi
-      ;;
+    *.tmpl|*/modify_*) is_tmpl="yes" ;;
   esac
+  # Any onepassword* function (onepasswordRead, onepasswordDetailsFields, ...).
+  if [ "$is_tmpl" = "yes" ] && [ -f "$src" ] && grep -q 'onepassword' "$src" 2>/dev/null; then
+    is_secret="yes"
+  fi
 
   printf '%s | %s | template=%s | secret=%s\n' "$target" "$code_disp" "$is_tmpl" "$is_secret"
 done

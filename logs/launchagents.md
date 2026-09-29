@@ -1,5 +1,10 @@
 # launchagents
 
+## 2026-09-29 — Retired com.rai.whetstone + com.rai.whetstone-watchdog from source
+
+- **Context**: Whetstone moved off nimbus to Vercel (Astro rebuild, cutover mid-September). Both plists had already been removed from `~/Library/LaunchAgents` on nimbus, so `chezmoi status` showed them as `DA` and the next apply would have re-installed a dead local server and its watchdog.
+- **Changes**: deleted `Library/LaunchAgents/com.rai.whetstone.plist` and `com.rai.whetstone-watchdog.plist` from source, and dropped their nimbus-only block from `.chezmoiignore`. `com.rai.whetstone-offline-sync` is not chezmoi-managed and was untouched. Recoverable from git history (`109c3bf`) if the local server ever comes back.
+
 ## 2026-09-03 — Tilly runtime deployed on latios (mirrors Navi on nimbus)
 
 Not chezmoi-managed (same as nimbus's equivalents); recorded here so the layout is findable.

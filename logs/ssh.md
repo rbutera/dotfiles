@@ -1,5 +1,15 @@
 # SSH Config Changelog
 
+## 2026-09-29 — Added `lancelot-win` host to the template
+
+During a `/chezmoi-sync` on nimbus, the deployed `~/.ssh/config` carried a
+`Host lancelot-win` block (Tailscale IP `100.100.75.35`, agent forwarding off,
+`IdentityAgent none`) that was never added to `dot_ssh/config.tmpl`. The next
+apply would have deleted it. Appended it to the template verbatim.
+
+The two colima `Include` lines are still deployed-only. That drift is expected
+(see 2026-07-14 below): left alone, not applied.
+
 ## 2026-07-14 — Re-removed the colima Include (self-inflicted regression) + guard comment
 
 ### What happened

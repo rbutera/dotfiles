@@ -33,7 +33,7 @@ Two hard rules, both validated live:
 1. **`chezmoi apply` REQUIRES `--force` per-file here.** A bare
    `chezmoi apply <file>` prompts for a TTY confirmation and fails / hangs
    non-interactively. Always `chezmoi apply --force <file>`.
-2. **NEVER `chezmoi add` a templated source** (`*.tmpl`, especially a secret
+2. **NEVER `chezmoi add` a templated source** (`*.tmpl` or `modify_*`, especially a secret
    one). `chezmoi add` overwrites the source with the *rendered literal* value —
    it destroys the template AND leaks the secret into source. For a templated
    file, "keep deployed" means **Rai hand-edits the template**; offer to open it,
@@ -68,7 +68,7 @@ Cheap env pre-check, then an authoritative (timeout-guarded) probe:
 # fast hint
 env | grep -q '^OP_SESSION' && echo "env: session var present" || echo "env: no session var"
 # authoritative — NEVER run a bare `op` command, it hangs on the auth prompt
-timeout 5 op whoami >/dev/null 2>&1 && echo active || echo none
+timeout 12 op vault list >/dev/null 2>&1 && echo active || echo none   # not `op whoami`: it reports no session under desktop-app integration
 ```
 
 (Use `gtimeout` if `timeout` is absent — macOS coreutils.)

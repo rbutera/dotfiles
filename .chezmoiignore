@@ -38,11 +38,6 @@ Library/LaunchAgents/sh.tokenmaxx.daemon.plist
 Library/LaunchAgents/dev.onorca.serve.plist
 {{ end }}
 
-{{ if ne .chezmoi.hostname "nimbus" }}
-Library/LaunchAgents/com.rai.whetstone.plist
-Library/LaunchAgents/com.rai.whetstone-watchdog.plist
-{{ end }}
-
 # Hatchet session-cleanup: OS-specific scheduler. The script (bin/) deploys on
 # both macOS and Linux and no-ops where Hatchet is absent; only the matching
 # scheduler for each OS is applied.

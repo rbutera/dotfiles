@@ -1,5 +1,21 @@
 # chezmoi config changes log
 
+## 2026-09-29 — chezmoi-sync on nimbus: 9 drifted files resolved, skill hardened
+
+### Resolutions
+- `~/.agents/skills/{ask-matt,implement}/SKILL.md`: kept source (the `/matt-tdd` and `/matt-teach` renames had never been applied).
+- `~/.claude/settings.json`, `~/.codex/config.toml`: kept source via `apply --force`. The drift was content-equivalent (PreToolUse hook order; TOML single vs double quotes), so the merge scripts own them.
+- `~/.config/zsh/oura.zsh`: kept source (new Oura secrets group, first deploy).
+- `~/.omp/agent`: kept deployed mode `0700` by renaming `dot_omp/agent` to `dot_omp/private_agent`. The directory holds omp's `agent.db`, so private is correct.
+- `~/.ssh/config`: see `logs/ssh.md`. whetstone plists: see `logs/launchagents.md`.
+
+### Near miss: `chezmoi add` on a `modify_` target
+`detect-drift.sh` only flagged `*.tmpl` as templates, so it reported the two `modify_` targets as `template=no`. The sync then ran `chezmoi add` on them. That replaced both merge scripts with literal copies of the deployed files, and the codex copy contained an API key (chezmoi's own secret scan warned). Caught before anything was staged: the literals were deleted and the `modify_` scripts restored from git.
+
+### Skill fixes (`dot_claude/skills/chezmoi-sync/`)
+- `detect-drift.sh`: `modify_*` sources now report `template=yes`. The secret check matches any `onepassword*` function; `oura.zsh.tmpl` uses `onepasswordDetailsFields`, which the old regex missed, so its rendered secret was shown in a diff.
+- `SKILL.md`: session probe is `op vault list`, not `op whoami`. Under desktop-app integration `whoami` reports "no active session" even while reads work. The never-add rule now names `modify_*`.
+
 ## 2026-07-18 — latios: resolve 47-file merge conflict by taking remote main wholesale
 
 ### Context
