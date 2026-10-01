@@ -1794,6 +1794,37 @@
       "workingDir": "/Users/rai/navi",
       "model": "claude-opus-5-5"
     }
+  },
+  {
+    "id": "turtle-review",
+    "name": "Navi: life review pack (Sun + Wed 17:30; assembles a private file in ~/life, then whispers a neutral pointer; sends nothing to anyone)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 17 * * 0,3",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/turtle-review.mjs --whisper"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["life", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/turtle-review.mjs --whisper"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}
