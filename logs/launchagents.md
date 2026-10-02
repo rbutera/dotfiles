@@ -1,5 +1,10 @@
 # launchagents
 
+## 2026-10-02 — Added com.rai.presence (nimbus only)
+
+- **Context**: Rai asked (voice, 2026-10-02 20:21) for his phone's Tasker geofences to tell Navi when he arrives at or leaves his parents', Emma's or the gym.
+- **Changes**: new `Library/LaunchAgents/com.rai.presence.plist` running `~/navi/bin/presence-server.mjs` (127.0.0.1:4880, KeepAlive, log `~/.logs/presence.log` on the internal disk). Gated to nimbus in `.chezmoiignore`. Deployed by hand on nimbus (copy + `launchctl bootstrap`) so it matches source. Tailnet exposure is `tailscale serve --bg --https=8446 http://127.0.0.1:4880` (not chezmoi-managed). Docs: `~/navi/docs/presence.md`.
+
 ## 2026-09-29 — Retired com.rai.whetstone + com.rai.whetstone-watchdog from source
 
 - **Context**: Whetstone moved off nimbus to Vercel (Astro rebuild, cutover mid-September). Both plists had already been removed from `~/Library/LaunchAgents` on nimbus, so `chezmoi status` showed them as `DA` and the next apply would have re-installed a dead local server and its watchdog.

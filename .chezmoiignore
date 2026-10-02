@@ -36,6 +36,7 @@ Library/LaunchAgents/sh.tokenmaxx.daemon.plist
 
 {{ if ne .chezmoi.hostname "nimbus" }}
 Library/LaunchAgents/dev.onorca.serve.plist
+Library/LaunchAgents/com.rai.presence.plist
 {{ end }}
 
 # Hatchet session-cleanup: OS-specific scheduler. The script (bin/) deploys on
