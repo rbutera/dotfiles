@@ -1856,6 +1856,37 @@
       "args": ["-lc", "exec node /Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/tripwires/tripwire.mjs >> {{ .chezmoi.homeDir }}/.logs/perch-tripwires.log 2>&1"],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
+  },
+  {
+    "id": "perch-quota-order",
+    "name": "Perch quota order: DRY-RUN decision log every 5m (never switches; flip live only via Wren)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/usr/bin/python3"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/usr/bin/python3",
+      "args": ["/Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/quota/quota-order.py"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 90
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "quota", "nimbus"],
+    "inputs": {
+      "cmd": "/usr/bin/python3",
+      "args": ["/Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/quota/quota-order.py"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}

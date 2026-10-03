@@ -1,5 +1,13 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-10-03 -- perch-quota-order cron (nimbus, dry-run)
+
+### Problem
+Perch agents and Navi share three Claude Max accounts behind tokenmaxx, and Navi switches the active account by hand (quota-steward skill). Wren wants a daemon that decides the ordering (soonest weekly reset first, skip 5h >= 85% or weekly >= 75%, never touch the reset credit) so its decisions can be compared with Navi's real switches before anything goes live.
+
+### Solution/Fix
+Added the Impulse cron `perch-quota-order` to `dot_config/impulse/jobs.json.tmpl` (nimbus branch, after `perch-tripwires`): `*/5 * * * *` Europe/London, `/usr/bin/python3 .../orch/foreman/quota/quota-order.py`, timeout 90, enabled. The script is DRY-RUN only (no switch code path), logs one JSON line per run to `~/.logs/perch-quota-order/decisions.log` (internal disk) including tokenmaxx's real activeAccountId. Impulse, not launchd, per the nimbus house rule. No onepasswordRead in the file, so `chezmoi apply ~/.config/impulse/jobs.json` ran without a 1Password session. Template render-checked (49 jobs, valid JSON). Registration in Hatchet needs `impulse sync-crons` (the worker runs it on start); worker restart left to Wren.
+
 ## 2026-09-14 -- Todoist triage jobs ENABLED (Rai: "just go", 08:50)
 
 Rai gave the go by voice at 08:50. Flipped all four nimbus `todoist-*` jobs to
