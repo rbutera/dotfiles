@@ -478,3 +478,11 @@ Wren (Perch foreman) needs delivery-flow metrics (ready-to-landed p50/p90, ready
 
 ### Solution/Fix
 Added Impulse job `perch-tripwires` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, last entry): cron `*/10 * * * *` Europe/London, `zsh -lc 'exec node .../orch/foreman/tripwires/tripwire.mjs >> ~/.logs/perch-tripwires.log 2>&1'`, timeout 240, skip-if-running. Log is on the internal disk (not /Volumes/ExternalNVMe, which kills launchd jobs with EX_CONFIG 78); no launchd plist was installed. Script, ALERT.md, latest.json and history.jsonl live in `/Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/tripwires/`. No onepasswordRead in the file, so `chezmoi apply ~/.config/impulse/jobs.json` worked without 1Password; `launchctl kickstart -k gui/501/com.rai.impulse-worker` registered it (`[sync-crons] synced ... (navi/perch-tripwires)`).
+
+## 2026-10-03 -- claude-transcript-archive weekly job (nimbus)
+
+### Problem
+Claude Code session transcripts in `~/.claude/projects` (~5.7 GB) sit on nimbus's small internal disk, and `cleanupPeriodDays: 30` in `~/.claude/settings.json` means Claude Code deletes them after 30 days. Rai wants them kept (voice, 3 Oct 17:57).
+
+### Solution/Fix
+Added Impulse job `claude-transcript-archive` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, before `playlist-sync`): cron `30 3 * * 0` Europe/London, `zsh -lc 'exec node ~/navi/bin/archive-claude-transcripts.mjs --min-age-days 14 >> ~/.logs/archive-claude-transcripts.stdout.log 2>&1'`, timeout 1800, skip-if-running. 14 days so nothing reaches the 30-day cleanup unarchived. The script writes verified tar.gz to `/Volumes/ExternalNVMe/archive/claude-transcripts/` and trashes originals only after verification; it probes NVMe writability (20 s timeout, child process) on every run and exits 2 loudly if the job context cannot write there. Same `zsh -lc` spawn pattern as `perch-tripwires`, which writes to the NVMe from the worker every 10 min. Logs internal (`~/.logs`). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets in this file) and registered via `tsx src/main.ts sync-crons` (`synced ... (navi/claude-transcript-archive) -> 30 2 * * 0 UTC`). Doc: `~/expedition/Claude Transcript Archive.md`.

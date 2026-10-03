@@ -394,6 +394,37 @@
     }
   },
   {
+    "id": "claude-transcript-archive",
+    "name": "Claude transcript archive (weekly: >14d transcripts to NVMe tar.gz, verified, originals to Trash)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 3 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/archive-claude-transcripts.mjs --min-age-days 14 >> {{ .chezmoi.homeDir }}/.logs/archive-claude-transcripts.stdout.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 1800
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/archive-claude-transcripts.mjs --min-age-days 14 >> {{ .chezmoi.homeDir }}/.logs/archive-claude-transcripts.stdout.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "playlist-sync",
     "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
     "trigger": {
