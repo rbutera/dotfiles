@@ -1825,6 +1825,37 @@
       "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/turtle-review.mjs --whisper"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "perch-tripwires",
+    "name": "Perch: delivery-flow tripwires (no LLM, every 10m; writes orch/foreman/tripwires/ALERT.md)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/10 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node /Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/tripwires/tripwire.mjs >> {{ .chezmoi.homeDir }}/.logs/perch-tripwires.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 240
+    },
+    "enabled": true,
+    "tags": ["perch", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node /Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/tripwires/tripwire.mjs >> {{ .chezmoi.homeDir }}/.logs/perch-tripwires.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}

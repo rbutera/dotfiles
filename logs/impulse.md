@@ -462,3 +462,11 @@ The `abie0` decision card (2026-09-12 02:31) found the impulse-worker narrate jo
 
 ### Solution/Fix
 Source-only edit, `dot_config/impulse/jobs.json.tmpl`, lines 956/968/987/999: `pnpm nx run` -> `./node_modules/.bin/nx run` for the two narrate jobs only (both `payload.args` and `inputs.args` on each). Both jobs' `inputs.cwd` is `/Users/rai/dev/lumiere`, where `node_modules/.bin/nx` exists, so the relative path resolves; no other job in this template uses pnpm. Proved scope with `chezmoi execute-template` rendered before and after the edit: the only diff between the two renders is the four narrate lines. Diffed the after-render against the deployed `~/.config/impulse/jobs.json`: identical apart from the four narrate lines plus a pre-existing 63-line block (two register-build jobs already in the template but not yet applied to the deployed file: unrelated pending drift, not touched). Rendered JSON parses (`JSON.parse`, 41 jobs). No `chezmoi apply` (needs Rai's 1Password session; two other applies already pending for him, this is a third). Deployed jobs.json, launchd and lumiere untouched.
+
+## 2026-10-03 -- perch-tripwires cron (Perch delivery-flow tripwires, nimbus)
+
+### Problem
+Wren (Perch foreman) needs delivery-flow metrics (ready-to-landed p50/p90, ready age, queue vs test-step time, feature-landing gap, CI commit share, postmerge cancellations, open PRs, pause page, runners) measured every 10 minutes with no LLM, so a stall shows up in a file rather than depending on an agent noticing.
+
+### Solution/Fix
+Added Impulse job `perch-tripwires` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, last entry): cron `*/10 * * * *` Europe/London, `zsh -lc 'exec node .../orch/foreman/tripwires/tripwire.mjs >> ~/.logs/perch-tripwires.log 2>&1'`, timeout 240, skip-if-running. Log is on the internal disk (not /Volumes/ExternalNVMe, which kills launchd jobs with EX_CONFIG 78); no launchd plist was installed. Script, ALERT.md, latest.json and history.jsonl live in `/Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/tripwires/`. No onepasswordRead in the file, so `chezmoi apply ~/.config/impulse/jobs.json` worked without 1Password; `launchctl kickstart -k gui/501/com.rai.impulse-worker` registered it (`[sync-crons] synced ... (navi/perch-tripwires)`).
