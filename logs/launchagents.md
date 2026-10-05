@@ -1,5 +1,14 @@
 # launchagents
 
+
+## 2026-10-05 -- com.rai.hatchet-liveness (workspace-v2bfn)
+
+### Problem
+At ~23:50 on 3 Oct the colima VM wedged and Hatchet (127.0.0.1:17077) went down, stopping every Impulse cron. Nothing alerted; it was found by hand.
+
+### Solution/Fix
+New `Library/LaunchAgents/com.rai.hatchet-liveness.plist`: every 300 s runs `~/navi/bin/hatchet-liveness.mjs` via `zsh -lc` (no asdf version coupling), logs to `~/navi/logs/hatchet-liveness.log` (internal disk). Two TCP probes 10 s apart; both failing = down; alert through recap-health-monitor `dispatchAlert` as non-vital (defers in quiet hours), escalating repeats, one recovery notice. launchd rather than Impulse because Impulse is scheduled by Hatchet. Applied with a targeted `chezmoi apply` and bootstrapped; first run exit 0, up.
+
 ## 2026-10-02 — Added com.rai.presence (nimbus only)
 
 - **Context**: Rai asked (voice, 2026-10-02 20:21) for his phone's Tasker geofences to tell Navi when he arrives at or leaves his parents', Emma's or the gym.

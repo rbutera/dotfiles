@@ -425,6 +425,37 @@
     }
   },
   {
+    "id": "bztransmit-restart",
+    "name": "Backblaze bztransmit nightly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 3 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 4096 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 4096 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "playlist-sync",
     "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
     "trigger": {

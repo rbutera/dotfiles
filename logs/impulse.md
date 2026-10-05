@@ -1,5 +1,13 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-10-05 -- bztransmit-restart nightly cron (nimbus, workspace-v2bfn)
+
+### Problem
+The 2026-10-03 04:15 kernel panic (watchdogd missed check-ins for 91 s) happened with four Backblaze bztransmit processes holding 21.7 GB of footprint on a 16 GB machine; the compressor was at 100% of its segment limit with low swap. bztransmit regrows: 5.66 GB on 4 Oct, 9.6 GB across two processes at 01:34 on 5 Oct.
+
+### Solution/Fix
+Added the `bztransmit-restart` job (nimbus branch, after `claude-transcript-archive`): `30 3 * * *` Europe/London, runs `~/navi/bin/bztransmit-restart.mjs --threshold-mb 4096`, which sums footprint via `sudo -n footprint` and TERMs every bztransmit (KILL after 15 s) when the total is over 4 GB; bzserv respawns it, so backup continues. Unreadable footprint exits 2 (could-not-check). Log: `~/.logs/bztransmit-restart.log`. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no 1Password needed), `sync-crons` run by hand: Hatchet `WorkflowTriggerCronRef` shows `navi/bztransmit-restart | 30 2 * * *` (UTC). First manual live run 01:34 restarted 9,580 MB.
+
 ## 2026-10-03 -- perch-quota-order cron (nimbus, dry-run)
 
 ### Problem
