@@ -10,10 +10,9 @@
 # removed 2026-09-03: all accounts are pooled through tokenmaxx now.
 
 # Cursor Pro — used by the opencode-cursor plugin in the `openagent` profile
-export CURSOR_API_KEY={{ onepasswordRead "op://focused/cursor API key/credential" | quote }}
 
 # OpenCode Zen — two env vars, same item/field → one fetch, reused
-{{- $opencode := onepasswordDetailsFields "OpenCode Zen" "Private" }}
+{{- $opencode := onepasswordDetailsFields "OpenCode Zen" "Rai" }}
 export OPENCODE_ZEN_API_KEY={{ $opencode.credential.value | quote }}
 export OPENCODE_API_KEY={{ $opencode.credential.value | quote }}
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=true

@@ -22,7 +22,7 @@ export R2_SECRET_ACCESS_KEY={{ onepasswordRead "op://dev/Cloudflare R2 Images CD
 export R2_S3_ENDPOINT={{ onepasswordRead "op://dev/Cloudflare R2 Images CDN /s3_api_endpoint" | quote }}
 
 # Tailscale (nocodb oauth) — two distinct fields of ONE item → one fetch
-{{- $tailscale := onepasswordDetailsFields "tailscale nocodb oauth" "Private" }}
+{{- $tailscale := onepasswordDetailsFields "tailscale nocodb oauth" "Rai" }}
 export TAILSCALE_NOCODB_CLIENT_ID={{ $tailscale.username.value | quote }}
 export TAILSCALE_NOCODB_CLIENT_SECRET={{ $tailscale.credential.value | quote }}
 

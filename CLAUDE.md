@@ -18,6 +18,23 @@ Process:
 
 Rationale (Rai, 2026-07-01): dirty source = single-source-of-truth drift between what's deployed and what's tracked. Leaving it dirty is how the deployed machine and the repo silently diverge. Pushing autonomously is expected — same posture as always-push-chezmoi-autonomously. Ties to the impulse-reload rule and the wider "kill drift in my own stack" doctrine.
 
+## Agents: run `chezmoi-agent`, never plain `chezmoi`
+
+Agents read secrets through a **1Password service account**, not Rai's Touch ID session. Use the wrapper (deployed to `~/bin/chezmoi-agent`):
+
+```bash
+chezmoi-agent diff      # or status, apply, execute-template, ...
+chezmoi-agent apply
+```
+
+- It picks the agent from `--agent NAME`, else `$ARK_AGENT`, else the hostname (nimbus -> navi, latios -> tilly), and reads the token from `~/.config/op/<agent>-token` (mode 600, never in git, never in the chezmoi source).
+- It builds a throwaway config with `[onepassword] mode = "service"` and keeps the real persistent state, so run_once scripts do not re-run.
+- **Never export `OP_SERVICE_ACCOUNT_TOKEN` in a shell.** Rai's own `chezmoi` runs in account mode, which refuses to run when that variable is set.
+- Service accounts can only read the custom vaults they were granted: `Rai` (primary, read+write) and `dev`. **Every new secret goes in `Rai` (or `dev`), never `Private`** (built-in vaults are invisible to service accounts; Emma-related items stay in Private). Use `op://Rai/<item>/<field>` and pass `"Rai"` as the vault argument to `onepasswordDetailsFields`.
+- Rai's interactive `chezmoi apply` is unchanged and still uses his own op session.
+
+The section below describes Rai's interactive path.
+
 ## Critical Constraint: chezmoi apply requires 1Password
 
 **Agents cannot run `chezmoi apply` without prior user action.**

@@ -3,7 +3,7 @@
 # Apply just this group:  chezmoi apply ~/.config/zsh/github.zsh
 
 # github gh PAT — three env vars, same item/field → one fetch, reused
-{{- $ghpat := onepasswordDetailsFields "github gh PAT" "Private" }}
+{{- $ghpat := onepasswordDetailsFields "github gh PAT" "Rai" }}
 export GITHUB_TOKEN={{ $ghpat.credential.value | quote }}
 export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}
 export GITHUB_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}

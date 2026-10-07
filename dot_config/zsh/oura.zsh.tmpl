@@ -2,6 +2,6 @@
 # Sourced by ~/.zshenv via the secrets loader. chezmoi-managed (.tmpl).
 # 1Password item: "Oura API" in Private, an API Credential item: username = client id, credential = client secret.
 # Apply just this group:  chezmoi apply ~/.config/zsh/oura.zsh
-{{- $oura := onepasswordDetailsFields "Oura API" "Private" }}
+{{- $oura := onepasswordDetailsFields "Oura API" "Rai" }}
 export OURA_CLIENT_ID={{ $oura.username.value | quote }}
 export OURA_CLIENT_SECRET={{ $oura.credential.value | quote }}
