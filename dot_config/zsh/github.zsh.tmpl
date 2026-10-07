@@ -9,4 +9,4 @@ export GITHUB_API_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}
 export GITHUB_PERSONAL_ACCESS_TOKEN={{ $ghpat.credential.value | quote }}
 
 # Separate item (LLM PAT)
-export GITHUB_LLM_PAT={{ onepasswordRead "op://Private/github llm personal access token/credential" | quote }}
+export GITHUB_LLM_PAT={{ onepasswordRead "op://Rai/github llm personal access token/credential" | quote }}

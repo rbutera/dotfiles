@@ -54,7 +54,7 @@ This makes chezmoi fail fast with an error rather than hanging on a prompt when 
 
 ### Long-term solution (not yet implemented)
 
-The proper non-interactive solution is a 1Password Service Account + new vault, but this requires migrating all `op://Private/...` secrets to a new custom vault (service accounts cannot access the built-in `Private` vault). See future work section below.
+Agents now have a non-interactive path: 1Password service accounts on the custom `Rai` and `dev` vaults (migrated from Private on 2026-10-07). See Future Work for how agents use it.
 
 ---
 
@@ -170,14 +170,14 @@ Secrets are read at template render time via:
 ```
 
 **Vaults in use:**
-- `op://Private/` — primary vault (API keys, credentials, passwords)
+- `op://Rai/` — primary vault (API keys, credentials, passwords)
 - `op://dev/` — dev vault (GitHub tokens, GPG keys)
 
 **Where secrets live in source:**
 - `dot_zshenv.tmpl` — all exported environment variables / API keys (edit this directly)
 - `dot_gitconfig.tmpl` — git user identity
 - `dot_aider.conf.yml.tmpl` — Aider AI config
-- `dot_ssh/` — SSH keys via `op://Private/ed25519_rbutera/openssh`
+- `dot_ssh/` — SSH keys via `op://Rai/ed25519_rbutera/openssh`
 - `run_once_11_setup_gpg.sh.tmpl` — GPG import from `op://dev/GPG_rai_at_rbutera.com/*`
 - `Documents/PowerShell/Microsoft.PowerShell_profile.secrets.ps1.tmpl` — Windows PowerShell secret environment variables. The main Windows profile template dot-sources the rendered sibling file and is safe to edit/apply without a 1Password session.
 
@@ -185,7 +185,7 @@ Secrets are read at template render time via:
 
 Edit `dot_zshenv.tmpl` directly. Add a new line following the existing pattern:
 ```
-export MY_NEW_KEY={{ onepasswordRead "op://Private/item-name/credential" }}
+export MY_NEW_KEY={{ onepasswordRead "op://Rai/item-name/credential" }}
 ```
 
 Do **not** use `bin/executable_add-api-key` — it's broken (runs `chezmoi apply` internally).
@@ -268,6 +268,6 @@ chezmoi status
 
 ## Future Work
 
-- **1Password service account**: Migrate all `op://Private/...` items to a new custom vault (e.g. `dotfiles-automation`), create a service account with read access, store `OP_SERVICE_ACCOUNT_TOKEN` in a systemd credential or similar, add `[onepassword] mode = "service"` to chezmoi config. This enables fully non-interactive `chezmoi apply` for agents.
+- **1Password service account**: DONE 2026-10-07. Secrets live in the custom `Rai` vault (plus `dev`); per-agent service accounts (read+write on Rai and dev, no share). Agents run chezmoi in service mode with the token from `~/.config/op/<agent>-token` (600, never in git); Rai's own runs stay in account mode (Touch ID). Never export OP_SERVICE_ACCOUNT_TOKEN in an interactive shell: account mode errors when it is set. Design: ~/expedition/1Password Service Account Design.md.
 - **Niri on `mondo`**: `.chezmoidata.toml` `host_groups.niri` is set up — templates still need conditional blocks added where relevant.
 - **Fix run_once scripts**: Audit and repair bootstrap scripts for reliable new-machine setup.

@@ -5,7 +5,7 @@
 # Host-gated: renders to nothing (and runs zero op reads) on hosts not in the
 # relevant group.
 {{- if has .chezmoi.hostname .host_groups.dev_infra }}
-export DB_URL={{ printf "postgresql://rai:%s@localhost:5432/dev" (onepasswordRead "op://Private/local-postgres/password") | quote }}
+export DB_URL={{ printf "postgresql://rai:%s@localhost:5432/dev" (onepasswordRead "op://Rai/local-postgres/password") | quote }}
 {{- end }}
 {{- if has .chezmoi.hostname .host_groups.chaching }}
 export CHACHING_DATABASE_URL={{ onepasswordRead "op://dev/Neon Chaching Connection String/credential" | quote }}
@@ -18,5 +18,5 @@ export DATABASE_URL="postgresql://expedition:expedition-pipeline-2026@127.0.0.1:
 # Home Assistant (dockerised on nimbus, see ~/expedition/Home Assistant Deployment - Nimbus.md).
 # Long-lived API token (~10yr); 1Password item: API Credential "Home Assistant nimbus".
 export HASS_SERVER="http://localhost:8123"
-export HASS_TOKEN={{ onepasswordRead "op://Private/Home Assistant nimbus/credential" | quote }}
+export HASS_TOKEN={{ onepasswordRead "op://Rai/Home Assistant nimbus/credential" | quote }}
 {{- end }}

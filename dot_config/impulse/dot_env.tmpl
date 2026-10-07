@@ -4,16 +4,16 @@
 # ── Hatchet (local infrastructure) ──────────────────────────────────────────
 # Locally-generated tokens for the self-hosted Hatchet instance.
 # ACTION REQUIRED: Store the nimbus Hatchet token and tenant ID in 1Password:
-#   op://Private/Hatchet Nimbus/token        → HATCHET_CLIENT_TOKEN
-#   op://Private/Hatchet Nimbus/tenant_id    → HATCHET_CLIENT_TENANT_ID
+#   op://Rai/Hatchet Nimbus/token        → HATCHET_CLIENT_TOKEN
+#   op://Rai/Hatchet Nimbus/tenant_id    → HATCHET_CLIENT_TENANT_ID
 {{- if eq .chezmoi.hostname "nimbus" }}
-HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Private/Hatchet Nimbus/token" }}
-HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Private/Hatchet Nimbus/tenant_id" }}
+HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Rai/Hatchet Nimbus/token" }}
+HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Rai/Hatchet Nimbus/tenant_id" }}
 HATCHET_CLIENT_API_URL=http://127.0.0.1:18888
 HATCHET_CLIENT_HOST_PORT=127.0.0.1:17077
 {{- else if eq .chezmoi.hostname "latios" }}
-HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Private/Hatchet Latios/credential" }}
-HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Private/Hatchet Latios/username" }}
+HATCHET_CLIENT_TOKEN={{ onepasswordRead "op://Rai/Hatchet Latios/credential" }}
+HATCHET_CLIENT_TENANT_ID={{ onepasswordRead "op://Rai/Hatchet Latios/username" }}
 HATCHET_CLIENT_API_URL=http://127.0.0.1:18888
 HATCHET_CLIENT_HOST_PORT=127.0.0.1:17077
 {{- else }}
@@ -40,7 +40,7 @@ NAVI_SCHEDULER_NAMESPACE=navi
 {{- if has .chezmoi.hostname .host_groups.work }}
 TILLY_DISCORD_TOKEN={{ onepasswordRead "op://focused/Flaude Discord/credential" }}
 {{- else }}
-OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Private/Navi Discord tokens/credential" }}
+OPENCLAW_DISCORD_NAVI={{ onepasswordRead "op://Rai/Navi Discord tokens/credential" }}
 {{- end }}
 
 {{- if eq .chezmoi.hostname "nimbus" }}
@@ -59,4 +59,4 @@ NAVI_SCHEDULER_RAI_USER_ID=124046285308166146
 {{- end }}
 
 # ── Claude Code OAuth (for ark-spawn jobs) ──────────────────────────────────
-CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Private/Anthropic/Saved on console.anthropic.com/token" }}
+CLAUDE_CODE_OAUTH_TOKEN={{ onepasswordRead "op://Rai/Anthropic/Saved on console.anthropic.com/token" }}

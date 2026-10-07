@@ -11,7 +11,7 @@ Sure, we can convert your aichat config file to use a chezmoi template with 1Pas
 
    ```toml
    [anthropic]
-   api_key = {{ onepasswordRead "op://Private/Anthropic API Key/password" }}
+   api_key = {{ onepasswordRead "op://Rai/Anthropic API Key/password" }}
    ```
 
 3. Make sure you have the 1Password CLI installed and authenticated.

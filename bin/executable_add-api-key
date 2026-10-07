@@ -119,7 +119,7 @@ def main():
         field_name = "credential"
     
     # Construct the 1Password path
-    op_path = f"op://Private/{vault_item}/{field_name}"
+    op_path = f"op://Rai/{vault_item}/{field_name}"
     
     # Show summary
     print_section("Summary")

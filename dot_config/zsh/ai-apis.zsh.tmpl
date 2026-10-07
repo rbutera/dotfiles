@@ -3,15 +3,15 @@
 # Apply just this group:  chezmoi apply ~/.config/zsh/ai-apis.zsh
 
 export PERPLEXITY_API_KEY={{ onepasswordRead "op://dev/perplexity_api_key/credential" | quote }}
-export EXA_API_KEY={{ onepasswordRead "op://Private/EXA API Key/credential" | quote }}
-export LANGSMITH_API_KEY={{ onepasswordRead "op://Private/langsmith api key/credential" | quote }}
-export TAVILY_API_KEY={{ onepasswordRead "op://Private/Tavily API Key/credential" | quote }}
-export GROQ_API_KEY={{ onepasswordRead "op://Private/groq whisper api key/credential" | quote }}
-export ZAI_API_KEY={{ onepasswordRead "op://Private/Z.AI API KEY/credential" | quote }}
-export FIRECRAWL_API_KEY={{ onepasswordRead "op://Private/firecrawl/credential" | quote }}
-export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Private/CLIProxyAPI/credential" | quote }}
-export RAPIDAPI_API_KEY={{ onepasswordRead "op://Private/RapidAPI Token/credential" | quote }}
+export EXA_API_KEY={{ onepasswordRead "op://Rai/EXA API Key/credential" | quote }}
+export LANGSMITH_API_KEY={{ onepasswordRead "op://Rai/langsmith api key/credential" | quote }}
+export TAVILY_API_KEY={{ onepasswordRead "op://Rai/Tavily API Key/credential" | quote }}
+export GROQ_API_KEY={{ onepasswordRead "op://Rai/groq whisper api key/credential" | quote }}
+export ZAI_API_KEY={{ onepasswordRead "op://Rai/Z.AI API KEY/credential" | quote }}
+export FIRECRAWL_API_KEY={{ onepasswordRead "op://Rai/firecrawl/credential" | quote }}
+export CLI_PROXY_API_TOKEN={{ onepasswordRead "op://Rai/CLIProxyAPI/credential" | quote }}
+export RAPIDAPI_API_KEY={{ onepasswordRead "op://Rai/RapidAPI Token/credential" | quote }}
 
 # Honcho
-export HONCHO_API_KEY={{ onepasswordRead "op://Private/honcho.dev/credential" | quote }}
+export HONCHO_API_KEY={{ onepasswordRead "op://Rai/honcho.dev/credential" | quote }}
 export HONCHO_PEER_NAME="Rai"

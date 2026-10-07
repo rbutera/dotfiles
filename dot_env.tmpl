@@ -14,7 +14,7 @@
 {{- $useOpenRouter := or .feature_flags.openrouter_api_key (has .chezmoi.hostname .host_groups.openrouter) }}
 {{- if $useOpenRouter }}
 
-OPENROUTER_API_KEY={{ onepasswordRead "op://Private/openrouter_api/credential" }}
+OPENROUTER_API_KEY={{ onepasswordRead "op://Rai/openrouter_api/credential" }}
 {{- else }}
 
 # Intentionally NO OPENROUTER_API_KEY here (opt-in, default off since 2026-07-23).

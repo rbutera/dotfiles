@@ -6,10 +6,10 @@
 export TODOIST_API_TOKEN={{ onepasswordRead "op://dev/todoist_api/credential" | quote }}
 
 # Obsidian
-export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Private/Obsidian Vault Password/password" | quote }}
+export OBSIDIAN_VAULT_PASSWORD={{ onepasswordRead "op://Rai/Obsidian Vault Password/password" | quote }}
 
 # Cloudflare
-export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Private/openclaw e8n cloudflare/credential" | quote }}
+export E8N_CLOUDFLARE_API_TOKEN={{ onepasswordRead "op://Rai/openclaw e8n cloudflare/credential" | quote }}
 
 # Cloudflare R2 image CDN (shared by Florence + Navi, all hosts). Two auth sets:
 # the CF API token (+ account id) for R2/Images management, and the S3-compatible
@@ -28,22 +28,22 @@ export TAILSCALE_NOCODB_CLIENT_SECRET={{ $tailscale.credential.value | quote }}
 
 # Camofox
 export CAMOFOX_URL="http://localhost:9377"
-export CAMOFOX_API_KEY={{ onepasswordRead "op://Private/Camofox API Key/credential" | quote }}
+export CAMOFOX_API_KEY={{ onepasswordRead "op://Rai/Camofox API Key/credential" | quote }}
 
 # Expedition email — both fields live in a 1Password section, so they're absent
 # from onepasswordDetailsFields' top-level map. Read each by label via op.
 export EXPEDITION_EMAIL=raibutera91@gmail.com
-export EXPEDITION_EMAIL_APP_PASSWORD={{ onepasswordRead "op://Private/google raibutera91/app_password" | quote }}
-export EXPEDITION_EMAIL_AUTHENTICATOR={{ onepasswordRead "op://Private/google raibutera91/one-time password" | quote }}
+export EXPEDITION_EMAIL_APP_PASSWORD={{ onepasswordRead "op://Rai/google raibutera91/app_password" | quote }}
+export EXPEDITION_EMAIL_AUTHENTICATOR={{ onepasswordRead "op://Rai/google raibutera91/one-time password" | quote }}
 
 # Vercel — deploy token for the whetstone app (Navi-scoped, revocable at
 # vercel.com/account/settings/tokens). Not host-gated: wanted on nimbus AND kinto.
 # VERCEL_TOKEN is the name the Vercel CLI reads directly, so `vercel --prod`
 # authenticates with no extra flag.
-export VERCEL_TOKEN={{ onepasswordRead "op://Private/vercel navi api key/credential" | quote }}
+export VERCEL_TOKEN={{ onepasswordRead "op://Rai/vercel navi api key/credential" | quote }}
 
 # Other single-field services
-export DART_API_KEY={{ onepasswordRead "op://Private/dart ai api key/credential" | quote }}
-export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Private/GOG Keyring Password/credential" | quote }}
-export NTFY_TOKEN={{ onepasswordRead "op://Private/ntfy.sh/credential" | quote }}
-export DOCKER_TOKEN={{ onepasswordRead "op://Private/docker raigasm/credential" | quote }}
+export DART_API_KEY={{ onepasswordRead "op://Rai/dart ai api key/credential" | quote }}
+export GOG_KEYRING_PASSWORD={{ onepasswordRead "op://Rai/GOG Keyring Password/credential" | quote }}
+export NTFY_TOKEN={{ onepasswordRead "op://Rai/ntfy.sh/credential" | quote }}
+export DOCKER_TOKEN={{ onepasswordRead "op://Rai/docker raigasm/credential" | quote }}

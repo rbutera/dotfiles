@@ -126,7 +126,7 @@ Host groups are defined in `.chezmoidata.toml`. The MCP server config itself sta
 If a new MCP server needs an API key or token:
 
 1. Store the secret in 1Password
-2. Add an export to `dot_zshenv.tmpl`: `export TOKEN_NAME={{ onepasswordRead "op://Private/item/field" }}`
+2. Add an export to `dot_zshenv.tmpl`: `export TOKEN_NAME={{ onepasswordRead "op://Rai/item/field" }}`
 3. Reference the env var in the MCP config via `bearer_token_env_var` (Codex) or rely on the server reading it from the environment (Claude Code)
 
 ## Removing a Global MCP Server
