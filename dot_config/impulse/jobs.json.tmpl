@@ -1949,6 +1949,37 @@
       "args": ["/Volumes/ExternalNVMe/Perch-port/unity-sandbox/orch/foreman/quota/quota-order.py"],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
+  },
+  {
+    "id": "weekly-tdee",
+    "name": "Weekly TDEE and calorie goal (Mondays after weigh-in)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 9 * * 1",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/weekly-tdee.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["health", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/weekly-tdee.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}
