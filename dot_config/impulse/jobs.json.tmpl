@@ -1291,7 +1291,8 @@
       "quotaAware": false,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
+    "disabledReason": "2026-10-08 (bead workspace-997st): failed every run since claude.ai cookies expired (account_session_invalid), left orphan scraper processes for hours; shadow only, nothing reads its output. Re-enable after Rai re-auths ~/.camofox/cookies/claude.txt.",
     "tags": ["infrastructure", "quota", "shadow"],
     "inputs": {
       "cmd": "node",

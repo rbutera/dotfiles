@@ -1,5 +1,13 @@
 # Impulse XDG Config — Chezmoi Management Log
 
+## 2026-10-08 -- disable nimbus quota-scrape CamoFox shadow (workspace-997st)
+
+### Problem
+The nimbus `quota-scrape` job (a CamoFox shadow since 2026-07-29; the canonical file is written by `quota-scrape-oauth`) failed every run on 7 Oct (286 FAILED in Hatchet) with `account_session_invalid`: the claude.ai cookies at `~/.camofox/cookies/claude.txt` have expired. Failed runs left scraper `node` processes alive for hours (two found at 5h55m and 7h40m). Nothing reads its output (`subscription-usage-camoufox.json`).
+
+### Change
+`enabled: false` plus a `disabledReason` on the nimbus shadow entry in `dot_config/impulse/jobs.json.tmpl`; the latios entry is untouched. Applied, then `impulse sync-crons --prune` removed the `navi/quota-scrape` cron (and stale crons for `chatgpt-invoice-monthly` base name and `narrate-daily`/`narrate-weekly`, all already disabled or replaced by variants). All 36 enabled cron jobs were checked as registered afterwards. Orphan processes killed. Re-enable once Rai re-auths the CamoFox cookies.
+
 ## 2026-10-05 -- bztransmit-restart nightly cron (nimbus, workspace-v2bfn)
 
 ### Problem
