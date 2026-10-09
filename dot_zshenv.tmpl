@@ -83,6 +83,18 @@ export BROWSER='wslview'
 # The user ID is the same account identifier on every machine.
 export OP_ACCOUNT=RTBK7UHJFNF7FB7ELCPJRRLDGM # rai@rbutera.com / my.1password.com
 
+# ── 1Password agent service account (agent shells only) ──────────────────────
+# Tilly (latios) and Navi (nimbus) each hold a service-account token in
+# ~/.config/op/<agent>-token (0600). Export it ONLY inside agent shells
+# (Claude Code sets CLAUDECODE=1) so agents can manage Rai's 1Password
+# non-interactively, while Rai's own terminals keep his personal account.
+if [ -n "${CLAUDECODE:-}" ] && [ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]; then
+  for __op_tok in "$HOME/.config/op/tilly-token" "$HOME/.config/op/navi-token"; do
+    if [ -r "$__op_tok" ]; then export OP_SERVICE_ACCOUNT_TOKEN="$(<"$__op_tok")"; break; fi
+  done
+  unset __op_tok
+fi
+
 # ── SSH session overrides ─────────────────────────────────────────────────────
 if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_TTY:-}" ]; then
   export OP_BIOMETRIC_UNLOCK_ENABLED=false
