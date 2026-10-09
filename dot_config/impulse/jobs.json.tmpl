@@ -2026,6 +2026,37 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/weekly-tdee.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "tft-data-refresh",
+    "name": "TFT coaching data refresh (daily: tftflow meta snapshot; set reference when the patch changes)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "20 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec {{ .chezmoi.homeDir }}/.local/bin/tft-refresh >> {{ .chezmoi.homeDir }}/.logs/tft-refresh.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "tft"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec {{ .chezmoi.homeDir }}/.local/bin/tft-refresh >> {{ .chezmoi.homeDir }}/.logs/tft-refresh.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}

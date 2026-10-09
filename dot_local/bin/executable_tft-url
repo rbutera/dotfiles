@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""tft-url <kind> [name]  -> datatft.com URL. Kinds: unit|item|trait|emblem|augment|rate|page. augment/rate resolve to /rate#N when the name is a /rate section.
+Data: ~/.claude/skills/tft-data/ids.json (re-scrape on a new patch; see tft-data SKILL.md)."""
+import sys, json, os, difflib, urllib.parse
+B = "https://www.datatft.com"
+PAGES = {"augment-tier":"/augment/tier","augment-rules":"/augment-rules","item-tier":"/item/tier","comps":"/comps","comp-rank":"/comp/rank",
+ "explorer":"/explorer","units":"/units","items":"/items","traits":"/traits","database":"/database","economy":"/economy",
+ "odds":"/calculator","calculator":"/calculator","rolldown":"/rolldown","wisp-rules":"/wisp-rules","bis":"/best-in-slot","tier-list-maker":"/tier"}
+# datatft.com/rate cheat sheet: section anchors, all deep-link verified 2026-10-09 (S18, 18.4b)
+RATE = {"basic info":1,"xp":1,"experience":1,"interest":1,"gold interest":1,"round rewards":1,"streak":1,"shop pool":2,"shop odds":2,"roll odds":2,"odds":2,
+ "augments":3,"augment refresh":3,"orbs":4,"orb":4,"coven":5,"trait ladder":6,"warpath":12,"magic roll":13,"expected unexpectedness":14,
+ "the golden egg":16,"golden egg":16,"call to chaos":17,"loot subscription":18,"slightly magic roll":22,"expedition":23,"hard commit":24,
+ "backline blueprint":25,"frontline foundation":26,"booster pack":"BoosterPack"}
+def load():
+    return json.load(open(os.path.expanduser("~/.claude/skills/tft-data/ids.json")))
+def norm(s): return "".join(c for c in s.lower() if c.isalnum())
+def pick(table, name):
+    keys = {norm(k): k for k in table}
+    n = norm(name)
+    if n in keys: return keys[n]
+    m = difflib.get_close_matches(n, list(keys), n=1, cutoff=0.6)
+    if m: return keys[m[0]]
+    sub = [k for k in keys if n in k or k in n]
+    return keys[sub[0]] if sub else None
+def main(a):
+    if len(a) < 1: print(__doc__); return 2
+    kind = a[0].lower(); name = " ".join(a[1:])
+    if kind == "page":
+        if name.lower() in ("rate", "cheatsheet", "cheat sheet"): print(B + "/rate"); return 0
+        print(B + PAGES.get(name.lower().replace(" ","-"), "/")); return 0
+    if kind in ("rate", "augment"):
+        k = pick({x: x for x in RATE}, name) if name else None
+        if k and (kind == "rate" or norm(k) == norm(name) or difflib.SequenceMatcher(None, norm(k), norm(name)).ratio() > 0.8):
+            print(f"{B}/rate#{RATE[k]}"); print(f"matched: {k}", file=sys.stderr); return 0
+        if kind == "rate": print(f"{B}/rate"); return 0
+    if kind == "augment":
+        # No per-augment page exists on datatft.com (verified 2026-10-09). The augment database tab lists all
+        # augments in the page text; ?q= does NOT filter. Search the rendered text for the name.
+        print(f"{B}/database?q={urllib.parse.quote(name)}#augment"); print("NOTE: not a /rate loot augment; falling back to the augment database (lists ALL, q does not filter). Tier ratings: "+B+"/augment/tier", file=sys.stderr); return 0
+    t = {"unit":"hero","hero":"hero","item":"equip","equip":"equip","emblem":"equip","trait":"trait"}.get(kind)
+    if not t: print("unknown kind", kind); return 2
+    d = load()[t]; k = pick(d, name + (" emblem" if kind=="emblem" and "emblem" not in name.lower() else ""))
+    if not k: print("no match for", name, file=sys.stderr); return 1
+    extra = "&traitLevelIdx=0" if t == "trait" else ""
+    print(f"{B}/detail?id={d[k]}&type={t}{extra}"); print(f"matched: {k}", file=sys.stderr); return 0
+sys.exit(main(sys.argv[1:]))

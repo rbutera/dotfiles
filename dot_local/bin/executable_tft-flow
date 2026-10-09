@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""tft-flow: read tftflow.com (server-rendered, curl-able). Set/path default: set18.
+  tft-flow patch                    # current patch + patch insights + last-updated markers
+  tft-flow comps                    # meta comps by section with econ plan, go-signal conditions, when-to-play
+  tft-flow comp "elderwood veigar"  # one comp: base tier, tier-up condition ladder, tips, economy plan
+  tft-flow cond "dawncore"          # which comps an item/augment/emblem boosts, and to what tier (from /conditions/set18)
+  tft-flow json                     # {patch, comps[]} machine-readable (used by the daily refresh)"""
+import sys, re, html, json, urllib.request, difflib
+SET = "set18"; B = "https://tftflow.com"
+def fetch(p):
+    return urllib.request.urlopen(urllib.request.Request(B + p, headers={"User-Agent": "Mozilla/5.0"}), timeout=30).read().decode("utf8", "ignore")
+def text(s):
+    s = re.sub(r"<(script|style|svg)[\s\S]*?</\1>", "", s); s = re.sub(r"<[^>]+>", "\n", s); s = html.unescape(s)
+    return [l.strip() for l in s.split("\n") if l.strip()]
+def pretty(api):
+    n = re.sub(r"^DA_(18_)?(Item_)?(Artifact_)?", "", api); n = re.sub(r"(Radiant|_Radiant)$", " (Radiant)", n); n = n.replace("Emblem", "", 1) + (" Emblem" if "Emblem" in api else "")
+    return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", n).replace("_", " ").strip()
+def home():
+    s = fetch("/"); patch = re.search(r"Patch\s*</?[^>]*>\s*([\d.]+[a-z]?)", s) or re.search(r"Patch (\d+\.\d+)", s)
+    comps = []
+    for sec in re.split(r'<div class="meta-section meta-section--', s)[1:]:
+        sname = sec.split('"')[0].replace("meta-section--mini", "other").split()[0]
+        for card in re.split(r'<div class="comp-card-wrapper">', sec)[1:]:
+            nm = re.search(r'meta-tier-comp-link">([^<]*)', card)
+            if not nm: continue
+            econ = re.search(r'econ-badge[^>]*>([^<]*)', card); slug = re.search(r'composition/' + SET + r'/([\w-]+)', card)
+            desc = re.search(r'data-wtp-description="([^"]*)"', card)
+            comps.append(dict(section=sname, name=html.unescape(nm.group(1)), econ=econ and econ.group(1), slug=slug and slug.group(1),
+                conditions=[pretty(a) for a in re.findall(r'data-(?:item|augment)-apiname="([^"]+)"', card)], when=html.unescape(desc.group(1)) if desc else ""))
+    t = text(s); i = t.index("Patch Insights") if "Patch Insights" in t else 0
+    ins = [x for x in t[i+1:i+14] if len(x) > 40][:8]
+    pm = re.search(r"Patch\s*/\s*([\d.]+)", " / ".join(text(s)[:30]))
+    return dict(patch=(pm.group(1) if pm else (patch.group(1) if patch else "?")), insights=ins, comps=comps)
+def find_comp(h, q):
+    names = {c["name"].lower(): c for c in h["comps"]}; q = q.lower()
+    if q in names: return names[q]
+    sub = [k for k in names if q in k or k in q]
+    if sub: return names[sub[0]]
+    m = difflib.get_close_matches(q, list(names), n=1, cutoff=0.5); return names[m[0]] if m else None
+def main(a):
+    cmd = a[0] if a else ""
+    if cmd == "json": print(json.dumps(home())); return
+    if cmd == "patch":
+        h = home(); print("tftflow patch:", h["patch"]); [print(" -", i) for i in h["insights"]]
+    elif cmd == "comps":
+        h = home(); print("tftflow", SET, "patch", h["patch"])
+        for c in h["comps"]:
+            print(f"[{c['section']}] {c['name']} | plan {c['econ']} | go-signals: {', '.join(c['conditions'])}" + (f" | {c['when']}" if c['when'] and 'no "When' not in c['when'] else ""))
+    elif cmd == "comp":
+        h = home(); c = find_comp(h, " ".join(a[1:])); slug = c["slug"] if c else "-".join(a[1:]).lower()
+        t = text(fetch(f"/composition/{SET}/{slug}")); j = " / ".join(t)
+        print(f"{c['name'] if c else slug}  ({B}/composition/{SET}/{slug})  patch {h['patch']}")
+        m = re.search(r"Primary / Tier / (\w[+]?)", j); print("Base tier:", m.group(1) if m else "?")
+        i = j.find("Strong Conditions"); k = j.find("Economy Strategy")
+        print("Conditions:", j[i:k].replace(" / → / ", " -> ") if i >= 0 else "none listed")
+        i = j.find("Tips & Tricks"); k = j.find("Strong Conditions")
+        print("Tips:", j[i+14:k][:1500] if i >= 0 else "")
+        k = j.find("Economy Strategy"); print("Economy:", j[k+17:k+1100] if k >= 0 else "")
+    elif cmd == "cond":
+        t = text(fetch(f"/conditions/{SET}")); q = " ".join(a[1:]).lower()
+        idx = [i for i, l in enumerate(t) if l.lower() == q or l.lower().replace("radiant ", "") == q]
+        if not idx: print("not found on /conditions/" + SET); return
+        for i in idx[:2]:
+            seg = t[i:i+60]; end = next((n for n, l in enumerate(seg[1:], 1) if re.match(r"^\+\d", l) and n > 1 and len(seg[n-1]) < 40 and not re.match(r"^[SABCD][+]?$|^OP$", seg[n-1]) and re.match(r"^[A-Z]", seg[n-1])), 30)
+            print(" / ".join(seg[:end]).replace(" / ", " | ")[:900])
+    else: print(__doc__)
+main(sys.argv[1:])

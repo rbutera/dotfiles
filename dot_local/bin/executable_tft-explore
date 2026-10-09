@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""tft-explore: query MetaTFT's explorer API (same data as metatft.com/explorer), no browser needed.
+  tft-explore third "Master Yi" "Guinsoo's Rageblade" "Edge of Night"   # best 3rd item for unit+2 items
+  tft-explore third "Master Yi" "Guinsoo's Rageblade" --artifacts        # include artifacts
+  tft-explore combo --item "Brawler Emblem" --item "Blossom Emblem"       # AND of board-level filters
+  tft-explore combo --unit "Master Yi" --trait Blossom:5                  # trait:tierIndex (NOT unit count)
+  tft-explore combo --unit "Sett" --unititem "Sett=Warmog's Armor,Gargoyle Stoneplate"
+Options: --days N (default 3) --min N (min games, default 150) --ranks R1,R2 (default PLATINUM+) --json
+Output: avg place, top4 %, win %, games, plus the explorer UI URL for the filter."""
+import sys, json, re, urllib.request, urllib.parse, argparse, difflib
+from concurrent.futures import ThreadPoolExecutor
+B = "https://api-hc.metatft.com/tft-explorer-api"
+RANKS = "CHALLENGER,DIAMOND,EMERALD,GRANDMASTER,MASTER,PLATINUM"
+def get(ep, params, days, ranks):
+    q = f"formatnoarray=true&compact=true&queue=1100&patch=current&days={days}&rank={ranks}&permit_filter_adjustment=true"
+    for k, v in params: q += f"&{k}={urllib.parse.quote(v, safe='-_%')}"
+    req = urllib.request.Request(f"{B}/{ep}?{q}", headers={"User-Agent": "Mozilla/5.0"})
+    return json.load(urllib.request.urlopen(req, timeout=25))["data"]
+def norm(s): return re.sub(r"[^a-z0-9]", "", s.lower())
+def catalog(ep, key, days, ranks):
+    ids = {}
+    for r in get(ep, [], days, ranks):
+        v = r[key]
+        if v and re.search(r"-1$", v): ids[v[:-2]] = (v, sum(r["placement_count"]))
+    return ids
+def best(name, ids, strip):
+    n = norm(name)
+    if n.endswith("emblem") and len(n) > 6: n = "emblem" + n[:-6]
+    cand = {}
+    for i, (_, cnt) in ids.items(): cand.setdefault(norm(re.sub(strip, "", i)), []).append((cnt, i))
+    pick = lambda k: max(cand[k])[1]   # ambiguous variants (e.g. Master Yi AD/AP): most-played wins
+    if n in cand: return pick(n)
+    sub = [k for k in cand if k.startswith(n) or n in k]
+    if sub: return pick(sorted(sub, key=len)[0])
+    m = difflib.get_close_matches(n, list(cand), n=1, cutoff=0.7)
+    return pick(m[0]) if m else None
+def stats(pc):
+    n = sum(pc)
+    if n == 0: return None
+    return dict(n=n, avg=sum((i+1)*c for i, c in enumerate(pc))/n, top4=sum(pc[:4])/n*100, win=pc[0]/n*100)
+def fmt(label, s): return f"{label:34s} avg {s['avg']:.2f}  top4 {s['top4']:.1f}%  win {s['win']:.1f}%  n={s['n']}"
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument("cmd"); ap.add_argument("args", nargs="*")
+    ap.add_argument("--days", default="3"); ap.add_argument("--min", type=int, default=150); ap.add_argument("--ranks", default=RANKS)
+    ap.add_argument("--artifacts", action="store_true"); ap.add_argument("--json", action="store_true")
+    ap.add_argument("--item", action="append", default=[]); ap.add_argument("--unit", action="append", default=[])
+    ap.add_argument("--trait", action="append", default=[]); ap.add_argument("--unititem", action="append", default=[])
+    a = ap.parse_args()
+    U = catalog("units_unique", "units_unique", a.days, a.ranks); I = catalog("items_unique", "items_unique", a.days, a.ranks)
+    uid = lambda n: (best(n, U, r"^DA_(18_)?|_AD$|_AP$|18") or sys.exit(f"unit not found: {n}"))
+    iid = lambda n: (best(n, I, r"^DA_(18_|Artifact_|Item_Artifact_)?|18$") or sys.exit(f"item not found: {n}"))
+    if a.cmd == "third":
+        unit = uid(a.args[0]); have = [iid(x) for x in a.args[1:]]
+        cands = [i for i in I if not re.search(r"Radiant|Emblem|Component|Potion|Spatula", i) and (a.artifacts or "Artifact" not in i) and i not in have]
+        def run(c):
+            ps = [("unit_item_unique", unit + "-1%26" + x + "-1") for x in have + [c]]  # repeated param = AND; %26 joins unit&item
+            return c, stats(get("total", ps, a.days, a.ranks)[0]["placement_count"])
+        with ThreadPoolExecutor(8) as ex: res = [r for r in ex.map(run, cands) if r[1] and r[1]["n"] >= a.min]
+        base = stats(get("total", [("unit_item_unique", unit + "-1%26" + h + "-1") for h in have], a.days, a.ranks)[0]["placement_count"])
+        res.sort(key=lambda r: r[1]["avg"])
+        if a.json: print(json.dumps([[c, s] for c, s in res])); return
+        print(f"{unit} + {', '.join(have)}  (patch current, last {a.days}d, min n={a.min})")
+        if base: print(fmt("  baseline (no 3rd item)", base))
+        for c, s in res[:10]: print(fmt("  + " + c.replace("DA_", ""), s))
+    elif a.cmd == "combo":
+        p = [("item_unique", iid(x) + "-1") for x in a.item] + [("unit_unique", uid(x) + "-1") for x in a.unit]
+        for t in a.trait:
+            name, tier = t.rsplit(":", 1); tr = [r["traits"] for r in get("traits", [], a.days, a.ranks) if r["traits"] and re.search(norm(name), norm(r["traits"].replace("DA_", "")))]
+            if not tr: sys.exit("trait not found: " + name)
+            p.append(("trait", re.sub(r"_\d+$", "", tr[0]) + "_" + tier))
+        for ui in a.unititem:
+            u, its = ui.split("=", 1); p += [("unit_item_unique", uid(u) + "-1%26" + iid(x.strip()) + "-1") for x in its.split(",")]
+        s = stats(get("total", p, a.days, a.ranks)[0]["placement_count"])
+        print(fmt(" / ".join(f"{k}={v}" for k, v in p), s) if s else "no games match (or filter name wrong: a uniform placement list means an unrecognised param)")
+    else: print(__doc__)
+main()

@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""tft-refresh [--force]: daily refresh of TFT coaching data.
+ 1. reads the current patch from tftflow.com (and Set from CommunityDragon)
+ 2. ALWAYS rewrites tft-meta/meta.md (comps, plans, go-signals; cheap, tftflow updates intra-patch)
+ 3. rewrites tft-set/set.json + set.md only when the patch changed (or --force or files missing)
+ Sources: tftflow.com (home HTML), raw.communitydragon.org/latest/cdragon/tft/en_us.json (Riot data, set key '18').
+ Exit 0 on success; non-zero + message on failure (nothing half-written: files are replaced atomically)."""
+import json, os, re, sys, datetime, subprocess, urllib.request, tempfile
+SK = os.path.expanduser("~/.claude/skills"); SETKEY = "18"
+flow = os.path.expanduser("~/.local/bin/tft-flow")
+def atomic(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path)); os.write(fd, data.encode()); os.close(fd); os.replace(tmp, path)
+def clean(h): return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ", h or "")).replace("&nbsp;", " ")
+def main(force):
+    home = json.loads(subprocess.check_output([sys.executable, flow, "json"], timeout=90))
+    patch = home["patch"]; today = datetime.date.today().isoformat()
+    if not home["comps"] or patch == "?": sys.exit("tftflow parse failed (0 comps or no patch): layout may have changed; data left untouched")
+    sp = os.path.join(SK, "tft-set", "set.json"); old = json.load(open(sp)) if os.path.exists(sp) else {}
+    changed = force or old.get("patch") != patch
+    # --- meta (always)
+    L = [f"# tftflow meta snapshot", f"patch: {patch} | set: {SETKEY} | refreshed: {today} | source: https://tftflow.com/", "",
+         "Insights (tftflow, patch-wide):"] + [f"- {i}" for i in home["insights"]] + ["", "Comps (section | name | economy plan | go-signal items/augments | when to play):"]
+    for c in home["comps"]:
+        L.append(f"- [{c['section']}] {c['name']} | {c['econ']} | {', '.join(c['conditions'])} | {c['when'] if 'no \"When' not in c['when'] else ''}")
+    atomic(os.path.join(SK, "tft-meta", "meta.md"), "\n".join(L) + "\n")
+    # --- set (on patch change)
+    if changed:
+        req = urllib.request.Request("https://raw.communitydragon.org/latest/cdragon/tft/en_us.json", headers={"User-Agent": "Mozilla/5.0"})
+        d = json.load(urllib.request.urlopen(req, timeout=180))["sets"][SETKEY]
+        champs = [dict(name=c["name"], cost=c["cost"], traits=c["traits"]) for c in d["champions"] if c.get("cost") and c["cost"] <= 5 and c.get("traits") is not None]
+        NOT_PLAYABLE = {"Training Dummy", "Voidspawn", "Rift Herald", "Rift Scuttler", "Golem", "Razorbeak", "Murk Wolf"}
+        seen = set(); out = []
+        for c in champs:   # drop non-playable placeholders and duplicate rows (CommunityDragon repeats some names)
+            if c["name"].startswith("Lux (") or c["name"] in NOT_PLAYABLE or c["name"] in seen or c["cost"] not in (1, 2, 3, 4, 5): continue
+            seen.add(c["name"]); out.append(c)
+        champs = out
+        traits = []
+        for t in d["traits"]:
+            bps = sorted({e["minUnits"] for e in t.get("effects", []) if e.get("minUnits") is not None})
+            traits.append(dict(name=t["name"], breakpoints=bps, desc=clean(t.get("desc", ""))[:400]))
+        counts = {}
+        for c in home["comps"]:
+            if c["section"] in ("default", "meta"):
+                k = "reroll" if (c["econ"] or "").isdigit() else (c["econ"] or "?"); counts[k] = counts.get(k, 0) + 1
+        obj = dict(set=SETKEY, patch=patch, refreshed=today, champions=sorted(champs, key=lambda c: (c["cost"], c["name"])), traits=sorted(traits, key=lambda t: t["name"]),
+                   sources=["https://raw.communitydragon.org/latest/cdragon/tft/en_us.json", "https://tftflow.com/"], econ_mix_default_and_meta=counts, insights=home["insights"])
+        atomic(sp, json.dumps(obj, indent=1))
+        M = [f"# Set {SETKEY} reference (generated)", f"patch {patch}, refreshed {today}. Sources: CommunityDragon en_us.json (units, costs, traits, breakpoints); tftflow.com (patch character).", "",
+             f"## Patch character", f"Economy plans among Default+Meta comps on tftflow: {counts} (numbers = 'N-cost reroll', else Fast 8 / Fast 9).", *[f"- {i}" for i in home["insights"]], "", "## Units by cost"]
+        for cost in range(1, 6):
+            M.append(f"- {cost}-cost: " + "; ".join(f"{c['name']} ({'/'.join(c['traits']) or 'no trait'})" for c in obj["champions"] if c["cost"] == cost))
+        M += ["", "## Traits (breakpoints)"] + [f"- {t['name']}: {'/'.join(map(str, t['breakpoints'])) or 'see datatft'}" for t in obj["traits"]]
+        atomic(os.path.join(SK, "tft-set", "set.md"), "\n".join(M) + "\n")
+    print(f"tft-refresh ok: patch {patch}, set data {'REFRESHED' if changed else 'unchanged'}, meta refreshed, {today}")
+main("--force" in sys.argv)
