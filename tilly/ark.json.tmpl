@@ -4,11 +4,15 @@
   "additionalPlugins": ["{{ .chezmoi.homeDir }}/tilly"],
   "mainOnlyPlugins": [
     "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-discord-voice-bridge",
-    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin"
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-email-plugin",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-relay",
+    "{{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-summons"
   ],
   "extraClaudeArgs": [
     "--dangerously-load-development-channels",
     "server:plugin:discord-voice:discord-voice",
+    "server:plugin:ark-relay:ark-relay",
+    "server:plugin:ark-summons:ark-summons",
     "--disallowedTools",
     "AskUserQuestion",
     "--effort",
