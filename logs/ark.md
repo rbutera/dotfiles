@@ -1,5 +1,25 @@
 # Ark workspace config changes log
 
+## 2026-10-11 — Navi: yesterday's letter inlines only its last writeback (committed, not applied)
+
+### Problem
+
+Bead workspace-fa5t1: Navi's boot is ~232k tokens. Yesterday's continuity letter
+was inlined whole every morning (~40 KB, ~15k tokens), though only its last
+writeback block carries live state.
+
+### Change
+
+`navi/ark.json.tmpl`: the `{yesterday}` boot.files entry gains
+`"inline": "last-writeback"` (new Ark refresher mode, lumiere apps/ark
+refresh-claude-md.sh): only the tail from the last `**[` heading is inlined.
+
+### Not applied
+
+The local source was 3 commits behind origin (incl. 5b55d0f, ark-summons), so a
+`chezmoi apply` from this tree would have REMOVED ark-summons from the deployed
+ark.json. Pull/rebase first, then apply.
+
 ## 2026-09-25 — Navi: Perch channel plugin (committed, not applied)
 
 ### Problem
