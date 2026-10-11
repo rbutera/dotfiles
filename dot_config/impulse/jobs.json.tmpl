@@ -2057,6 +2057,37 @@
       "args": ["-lc", "exec {{ .chezmoi.homeDir }}/.local/bin/tft-refresh >> {{ .chezmoi.homeDir }}/.logs/tft-refresh.log 2>&1"],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
+  },
+  {
+    "id": "npm-exempt-update",
+    "name": "Update age-rule-exempt global npm packages (daily 05:10, e.g. @openai/codex)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "10 5 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/npm-exempt-update.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/npm-exempt-update.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}

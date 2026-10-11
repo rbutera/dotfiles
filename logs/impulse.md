@@ -510,3 +510,11 @@ Claude Code session transcripts in `~/.claude/projects` (~5.7 GB) sit on nimbus'
 
 ### Solution/Fix
 Added Impulse job `claude-transcript-archive` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, before `playlist-sync`): cron `30 3 * * 0` Europe/London, `zsh -lc 'exec node ~/navi/bin/archive-claude-transcripts.mjs --min-age-days 14 >> ~/.logs/archive-claude-transcripts.stdout.log 2>&1'`, timeout 1800, skip-if-running. 14 days so nothing reaches the 30-day cleanup unarchived. The script writes verified tar.gz to `/Volumes/ExternalNVMe/archive/claude-transcripts/` and trashes originals only after verification; it probes NVMe writability (20 s timeout, child process) on every run and exits 2 loudly if the job context cannot write there. Same `zsh -lc` spawn pattern as `perch-tripwires`, which writes to the NVMe from the worker every 10 min. Logs internal (`~/.logs`). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets in this file) and registered via `tsx src/main.ts sync-crons` (`synced ... (navi/claude-transcript-archive) -> 30 2 * * 0 UTC`). Doc: `~/expedition/Claude Transcript Archive.md`.
+
+## 2026-10-11 -- npm-exempt-update daily job (nimbus)
+
+### Problem
+`~/.npmrc` carries `min-release-age=3` (supply-chain rule), so `npm i -g @openai/codex@latest` skips releases younger than 3 days. Rai wants Codex always on the latest version (voice, 11 Oct 15:15) while keeping the rule for everything else.
+
+### Solution/Fix
+Added Impulse job `npm-exempt-update` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, last entry): cron `10 5 * * *` Europe/London, `node ~/navi/bin/npm-exempt-update.mjs`, timeout 300, skip-if-running. The script reads the exemption list `~/.config/npm-age-exempt/packages.txt` (one package per line; starts with `@openai/codex`), compares `npm view <pkg> version` to the installed global version, and installs `<pkg>@latest --min-release-age=0` only for listed packages when newer. Logs old->new to `~/.logs/npm-exempt-update.log`, exits non-zero on any failed install, supports `--dry-run`. `~/.npmrc` is untouched. To exempt another package, add a line to the list. `chezmoi apply` is PENDING (not run by the agent); after apply, register with `launchctl kickstart -k gui/501/com.rai.impulse-worker`.
