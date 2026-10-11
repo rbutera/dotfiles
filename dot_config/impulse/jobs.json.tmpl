@@ -24,7 +24,7 @@
       "quotaAware": false,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": [
       "infrastructure",
       "quota"
@@ -35,7 +35,8 @@
         "{{ .chezmoi.homeDir }}/dev/lumiere/libs/claude-quota-scraper/dist/cli.js"
       ],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
-    }
+    },
+    "disabledReason": "2026-10-11 (Tilly): failed every run on latios (missing_cookies_file; ~/.camofox/cookies does not exist here; 23.5k failures in the worker log). tokenmaxx is the quota sensor's live source, so nothing reads this output. Mirrors the nimbus shadow disable (workspace-997st). Re-enable only if tokenmaxx is removed and CamoFox cookies are re-authed."
   },
   {
     "id": "morning-sweep",
@@ -131,7 +132,7 @@
       "quotaAware": true,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": [
       "work",
       "latios",
@@ -155,20 +156,22 @@
       "tz": "Europe/London"
     },
     "target": {
-      "kind": "ark-spawn",
-      "agent": "tilly",
-      "model": "claude-opus-5-5"
+      "kind": "script",
+      "bin": "bash"
     },
     "payload": {
-      "kind": "prompt",
-      "text": "Run /impulse-tailor-draft"
+      "kind": "shell",
+      "cmd": "bash",
+      "args": [
+        "{{ .chezmoi.homeDir }}/tilly/scripts/impulse/tailor-gate.sh"
+      ]
     },
     "policy": {
       "maxConcurrent": 1,
-      "quotaAware": true,
+      "quotaAware": false,
       "dedupe": "skip-if-running"
     },
-    "enabled": true,
+    "enabled": false,
     "tags": [
       "work",
       "latios",
@@ -176,11 +179,11 @@
       "pipeline"
     ],
     "inputs": {
-      "agent": "tilly",
-      "workingDir": "{{ .chezmoi.homeDir }}/tilly",
-      "model": "claude-opus-5-5",
-      "maxTurns": 40,
-      "prompt": "Run /impulse-tailor-draft"
+      "cmd": "bash",
+      "args": [
+        "{{ .chezmoi.homeDir }}/tilly/scripts/impulse/tailor-gate.sh"
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}/tilly"
     }
   },
   {
@@ -324,10 +327,10 @@
   },
   {
     "id": "daily-blog",
-    "name": "Tilly: Daily Blog (21:30 nightly, weekday=work+topic / weekend=wild)",
+    "name": "Tilly: Daily Blog (19:30 nightly, weekday=work+topic / weekend=wild)",
     "trigger": {
       "kind": "cron",
-      "expr": "30 21 * * *",
+      "expr": "30 19 * * *",
       "tz": "Europe/London"
     },
     "target": {
@@ -337,7 +340,7 @@
     },
     "payload": {
       "kind": "prompt",
-      "text": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it. Pick the mode by day of week (weekday-post Mon-Fri, weekend-post Sat-Sun). Write today's post and DM it to Rai."
+      "text": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it. Pick the mode by day of week (weekday-post Mon-Fri, weekend-post Sat-Sun). Write today's post, publish it (skill Step 7) and DM Rai the link."
     },
     "policy": {
       "maxConcurrent": 1,
@@ -351,13 +354,55 @@
       "latios",
       "blog"
     ],
-    "promptFile": "prompts/florence-daily-blog.md",
     "inputs": {
       "agent": "tilly",
       "workingDir": "{{ .chezmoi.homeDir }}/tilly",
       "model": "opus",
       "maxTurns": 40,
-      "prompt": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/tilly.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/tilly/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/tilly/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then DM it to Rai on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. Internal audience only."
+      "prompt": "Read ~/tilly/.claude/skills/daily-blog/SKILL.md and follow it as the source of truth, reading the reference docs your mode requires. Read ~/dev/lumiere/apps/ark/plugin/agents/tilly.md for voice. Pick the mode by day of week per the skill's Step 0 (run `date +%u`): Monday-Friday is weekday-post (the work plus one researched topic), Saturday-Sunday is weekend-post (personal / wild). Read the day's material (today's breadcrumb, the lamplight Daily summary, recent session transcripts) and the last 5-7 prior posts in ~/tilly/vault/Blog/ for voice continuity, and do the dedup-title check. Write the post to ~/tilly/vault/Blog/{date} {Title}.md with the frontmatter the skill specifies, then publish it per the skill's Step 7 (run ~/tilly/scripts/blog-publish.sh; if it fails, say so in the DM and don't claim it's live), then DM Rai the post and its link on Discord (chat_id 1499031021746913341). If an exact Rai quote cannot be recovered, omit it rather than invent one. No em dashes. The blog is PUBLIC: apply the skill's Guardrails scrub (no company, interviewer or recruiter names, no pay figures)."
+    }
+  },
+  {
+    "id": "navi-shift-handover",
+    "name": "Tilly: shift handover fyi to Navi (weekdays 18:45)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "45 18 * * 1-5",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/tilly/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/tilly --source impulse-navi-handover \"$1\"",
+        "handover",
+        "Shift handover to Navi: follow the 'Shift handover over the relay' section of ~/tilly/.claude/skills/letter-to-navi/SKILL.md and send her ONE relay fyi now. Nothing to Rai."
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": [
+      "work",
+      "latios",
+      "navi"
+    ],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/tilly/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/tilly --source impulse-navi-handover \"$1\"",
+        "handover",
+        "Shift handover to Navi: follow the 'Shift handover over the relay' section of ~/tilly/.claude/skills/letter-to-navi/SKILL.md and send her ONE relay fyi now. Nothing to Rai."
+      ]
     }
   }
 ]

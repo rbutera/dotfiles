@@ -1,3 +1,11 @@
+## 2026-10-11 -- latios jobs.json: template caught up with live; quota-scrape disabled (Tilly)
+
+### Problem
+The latios `quota-scrape` job (CamoFox scraper) failed every five minutes with `missing_cookies_file` (`~/.camofox/cookies` does not exist on latios; about 23.5k failures in the worker log since early September). Nothing reads its output: the quota sensor's live source is tokenmaxx. The freshness watchdog still guarded the file and sent Rai a stale-quota Discord alert every six hours (141 sent). Separately, the live latios `~/.config/impulse/jobs.json` had drifted from this template (outreach-daily and tailor-draft paused with tailor-draft moved to `tailor-gate.sh`, daily-blog at 19:30 with the publish step, navi-shift-handover live-only), so a `chezmoi apply` would have silently re-enabled the paused job-hunt jobs.
+
+### Change
+The latios branch of `dot_config/impulse/jobs.json.tmpl` was regenerated from the live file (`/Users/rai` back to `{{ .chezmoi.homeDir }}`, the todoist-hygiene comment kept), then `quota-scrape` set `enabled: false` with a `disabledReason`. Render-checked: the rendered file equals the live file job for job except quota-scrape. Applied with `chezmoi apply --force ~/.config/impulse/jobs.json` (force because the target had been hand-edited; content verified first). `sync-crons --prune` run by hand. The watchdog fix is lumiere #155 (stands down when tokenmaxx is the live source).
+
 # Impulse XDG Config — Chezmoi Management Log
 
 ## 2026-10-08 -- disable nimbus quota-scrape CamoFox shadow (workspace-997st)
