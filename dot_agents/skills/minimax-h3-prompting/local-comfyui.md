@@ -35,3 +35,14 @@ H3 is a video model; these packs pull a single image out of it, so start frames 
 - **ComfyUI-MiniMax-H3-Edit:** samples a short clip (5 frames by default) and keeps the sharpest, most stable frame. Edit and semantic-generate roles use fl2va; native-reference generate uses ref2va. The hybrid checkpoint should cover both (unverified by the pack's author).
 - **MiniMax H3 Image Studio:** samples one latent frame through a dedicated still decoder (`H3ImageToImagePrepare`, `H3ReferenceEditPrepare`). Defaults: 3 MP, 50 steps, er_sde/simple. Turbo recipe: `minimax_h3_turbo_v4_step600_ema_pruned_comfyui` at 0.38, 20 steps.
 - Pair either pack with `h3_photoreal_ph0t0r34l_1024-step00003990` (trigger `ph0t0r34l`) for photoreal stills. Both packs call themselves experimental.
+
+## Painted stills: CyberIllustrious (semi-realistic, tag-prompted)
+
+The start-frame model when the look must be semi-realistic painted art, not photoreal. Klein SNOFS was rejected for that: it came out glossy and doll-like.
+
+- **Files:** `cyberillustriousSemi_playV4.safetensors` (CheckpointLoaderSimple, VAE baked in) + `illustrious_style_painterly_v1.1.safetensors` at 0.45 model/clip.
+- **Settings:** dpmpp_2m karras, 32 steps, CFG 4.5, 1344x768, then a 1.5x pixel-space upscale and a second pass at 0.35.
+- **Prompting:** Danbooru tags, not sentences. Start with `semi-realistic, painterly, brushstroke`. State the age (`adult woman, 21 years old, mature female`). Negatives: `photorealistic, photo, 3d, render, doll, glossy skin, large eyes, anime, cel shading`, plus anatomy terms. Add `paint splatter, spots on skin` too: the painterly LoRA leaves pink flecks otherwise.
+- **Two-tone hair:** tag weights swing it to all one colour. `(two-tone hair:1.2), aqua hair, (pink streaks:1.3), (pink highlights:1.3)` gave a usable mix.
+- **POV couple frames:** generate solo, then do a masked inpaint (denoise 0.8) of `1boy, pov, male pov, penis, vaginal`. A box mask at the crotch controls where the insertion goes. Penis length follows the gap to the frame's bottom edge: to get average size, put his pelvis in the mask close to her. Leaving `pov` out of solo prompts avoids stray viewer knees.
+- **H3 clips from these frames:** the production recipe (Sabudenego 0.6, MysticXXX 0.7, act LoRA about 0.2 under usual, "the camera holds the original framing") keeps the painted look.
