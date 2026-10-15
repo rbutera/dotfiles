@@ -1,5 +1,25 @@
 # Ark workspace config changes log
 
+## 2026-10-15 — Navi: yesterday's letter inlines handoff entries + tail (`inline: "writeback"`), applied
+
+### Problem
+
+Bead workspace-fa5t1 cut 3b. The 2026-10-11 `last-writeback` entry above was
+committed but never applied, and would not have helped: letters are now
+`- [HH:MM] ...` append-logs with no `**[` headings, so that mode falls back to
+the whole file. Yesterday's letter (~21 KB on 14 Oct, up to ~40 KB) rode whole
+into every pre-midday boot.
+
+### Change
+
+`navi/ark.json.tmpl`: the `{yesterday}` entry now uses `"inline": "writeback"`
+(new refresher mode, lumiere 7de4afea): every entry whose first line carries an
+uppercase WRITEBACK/RESUME/GOODNIGHT/HANDOFF (or a legacy `**[` heading) plus the
+last 4 KB of entries; tail only when no marker. Also a label, "yesterday's
+handoff". Applied with `chezmoi apply --force ~/navi/ark.json` (deployed file had
+been touched outside chezmoi; the diff was only this hunk). Scratch refresher run:
+CLAUDE.md 215,782 -> 199,073 bytes; yesterday section 21,033 -> 4,324.
+
 ## 2026-10-11 — Navi: yesterday's letter inlines only its last writeback (committed, not applied)
 
 ### Problem
