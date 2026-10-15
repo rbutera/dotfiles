@@ -73,3 +73,15 @@ The checkpoint is DaSiWa Hybrid v4: a pruned build that loads both fl2va and ref
 | `minimax_h3_PDMD_DMAD_4step_r256_add_fro1_turbo_lora.safetensors` | both | 1.0 | DaSiWa's own turbo, built for the hybrid checkpoint. euler, simple or beta, 4 steps. |
 | `minimax_h3_dmad_full_dareties_v4_step600_comfy_fro.safetensors` | both | 1.0 | DMAD + larryvrh merge, good audio. 6-8 steps, er_sde or lcm, simple. |
 | `minimax_h3_turbo_v4_step600_ema_pruned_comfyui.safetensors` | both | 0.38 for stills | larryvrh v4. Image Studio's still-image turbo recipe at 20 steps. |
+
+## 7. Style (painterly, semi-real, anime)
+
+For a painted look, leave every section 3 realism LoRA off and describe the style in the prompt ("semi-realistic digital painting, visible brushwork, as in <Picture 1>") in place of the template's "Live-action, raw handheld smartphone" wording. NSFW act LoRAs were trained on real footage and pull toward photoreal as strength rises: start them about 0.2 lower. None of these were tested on the pod yet.
+
+| File | Mode | Trigger | Strength | Use for |
+|---|---|---|---|---|
+| `Painterly_H3_cosmic_v1.safetensors` | fl2va (start) | none | 0.6-0.8 (start) | General painterly look. Author gave no notes. |
+| `SabudenegoH3MiniMax_minimaxh3_3274992_epoch_7.safetensors` | fl2va (start) | `Erotic digital painting video that features` (opens the prompt) | 0.8 (start) | Explicit digital-painting hentai style (Shrekman). |
+| `H3_Ref2V_Anime_Slider_v1.safetensors` | ref2va, T2V | none | -5 to 5; +3 = flat 2D anime, -3 = photoreal | Dial the style. Small positive values (+1 to +2) for semi-real. Outside the budget. |
+| `H3_R16_2.5d_style_v2_000003500.safetensors` | fl2va (start) | none | 0.8 (start) | 2.5D illustrated look (Illustrious-style renders). |
+| `minimax_h3_style_transfer_v1.0_r64.safetensors` | style-transfer workflow | `style_transfer:` | per workflow | Restyles an existing video to match a style image, keeping motion and timing. Use with the `MiniMax-H3-StyleTransfer` workflow: render the explicit clip first, then restyle it with a painted frame as the style reference. Doubles GPU time. |
