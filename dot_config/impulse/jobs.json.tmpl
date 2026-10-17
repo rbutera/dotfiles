@@ -2088,6 +2088,37 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/npm-exempt-update.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "weekly-review",
+    "name": "Navi: weekly accountability review (Sundays 18:40; generates the draft, whispers Navi to hold the 19:00 check-in with Rai)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "40 18 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/life/apps/weekly-review/generate.mjs --whisper"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["health", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/life/apps/weekly-review/generate.mjs --whisper"],
+      "cwd": "{{ .chezmoi.homeDir }}/life"
+    }
   }
 ]
 {{- else }}
