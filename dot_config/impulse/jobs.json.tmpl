@@ -1698,6 +1698,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "exec {{ .chezmoi.homeDir }}/navi/bin/pikachu-sweep.sh"] }
   },
   {
+    "id": "agents-nightly-renew",
+    "name": "Athena + Pikachu: nightly renew-if-idle at 03:10 (/clear into the idle thread agent, then 'read HANDOFF.md first'; skips busy ones)",
+    "trigger": { "kind": "cron", "expr": "10 3 * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/agents-nightly-renew.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 180 },
+    "enabled": true,
+    "tags": ["agents", "nimbus"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/agents-nightly-renew.mjs"] }
+  },
+  {
     "id": "due-bead-whisper",
     "name": "Navi: due-bead whisper alarm (calendar-style, dice-independent; whispers the live session when a gated bead comes due, every 15m)",
     "trigger": {
