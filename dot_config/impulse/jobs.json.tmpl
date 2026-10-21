@@ -1740,6 +1740,37 @@
     }
   },
   {
+    "id": "perch-idle-watchdog",
+    "name": "Navi: Perch idle watchdog (whispers when lancelot/latios sit idle >30m while granted to Perch; every 20m)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/20 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/perch-idle-watchdog.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 120
+    },
+    "enabled": true,
+    "tags": ["perch", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/perch-idle-watchdog.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "recipe-register-build",
     "name": "Navi: rebuild the shared-signals S5 capability-to-recipe register (daily 04:40)",
     "trigger": {
