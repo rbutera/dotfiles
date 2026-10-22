@@ -4,21 +4,21 @@ You are a headless Navi session fired by Impulse on the 1st of the month. Your o
 
 ## Why this is needed
 
-OpenAI does NOT email receipts (unlike Rai's other Stripe-billed tools, which the `expense-receipts.mjs` pipeline handles). The only source for a ChatGPT Pro invoice is the ChatGPT billing portal, which needs his authenticated Chrome — **which you can launch yourself** (see below). This job reads the portal via the **opentabs** MCP, then hands the invoice URL to a deterministic helper script.
+OpenAI does NOT email receipts (unlike Rai's other Stripe-billed tools, which the `expense-receipts.mjs` pipeline handles). The only source for a ChatGPT Pro invoice is the ChatGPT billing portal, which needs his authenticated Chrome — **which you can launch yourself** (see below). This job reads the portal via the **cua-driver** browser tools (`mcp__cua-driver__browser_navigate`, `get_browser_state`, `page`), then hands the invoice URL to a deterministic helper script.
 
 ## You are self-sufficient — the browser being closed is NOT a blocker
 
-You have sudo on this machine, you can launch the Chrome window that opentabs controls yourself, and you have the **automation-mcp** to drive/debug the UI directly when opentabs falls short. So do NOT bail with "the browser needs to be open." If it isn't, open it.
+You have sudo on this machine, you can launch Rai's Chrome yourself, and you have **cua-driver** (screenshots, clicks) to drive/debug the UI directly when the browser tools fall short. So do NOT bail with "the browser needs to be open." If it isn't, open it.
 
 ## Steps
 
-1. **Ensure the browser is up.** Call opentabs `browser_list_tabs`. If it returns a connection, use it. If it errors / returns nothing (Chrome not running or extension not connected), **launch Chrome yourself**: `open -a "Google Chrome"` (his default profile retains the ChatGPT login cookies), wait a few seconds, and retry `browser_list_tabs`. The opentabs extension auto-connects once Chrome is up.
+1. **Ensure the browser is up.** Call cua-driver `get_browser_state`. If it returns a page, use it. If it errors / returns nothing (Chrome not running or not reachable), **launch Chrome yourself**: `open -a "Google Chrome"` (his default profile retains the ChatGPT login cookies), wait a few seconds, and retry `get_browser_state`.
 
-2. **Open the billing page.** opentabs `browser_open_tab` → `https://chatgpt.com/#settings/Billing` (connectionId from `browser_list_tabs`). Give it a moment to render.
+2. **Open the billing page.** cua-driver `browser_navigate` → `https://chatgpt.com/#settings/Billing`. Give it a moment to render.
 
-3. **Get the latest invoice URL.** `browser_query_elements` on that tab, selector `a[href*="invoice.stripe.com"]` (attributes `["href"]`). Billing history is newest-first, so the **first** result is the latest invoice — an `https://invoice.stripe.com/i/acct_.../live_...` URL.
+3. **Get the latest invoice URL.** cua-driver `page` (query the DOM) with selector `a[href*="invoice.stripe.com"]` (attributes `["href"]`). Billing history is newest-first, so the **first** result is the latest invoice — an `https://invoice.stripe.com/i/acct_.../live_...` URL.
 
-   - If zero results: `browser_get_tab_content` to check state. If the page didn't render, give it longer / reload. If it shows the "Welcome back / log-in" state, **self-unblock first**: try logging in via "Continue with Google" (rai@rbutera.com SSO is almost always still authed) per the browsing self-unblock rule. Use **automation-mcp** (screenshot + click) if opentabs can't see the button. Only if SSO genuinely fails, DM Rai (bot MCP, userId 124046285308166146): "Couldn't grab this month's ChatGPT invoice — login's lapsed and SSO didn't re-auth. Mind logging into ChatGPT and I'll retry." Do not loop.
+   - If zero results: `get_browser_state` to check state. If the page didn't render, give it longer / reload. If it shows the "Welcome back / log-in" state, **self-unblock first**: try logging in via "Continue with Google" (rai@rbutera.com SSO is almost always still authed) per the browsing self-unblock rule. Use cua-driver (screenshot + click) if the browser tools can't see the button. Only if SSO genuinely fails, DM Rai (bot MCP, userId 124046285308166146): "Couldn't grab this month's ChatGPT invoice — login's lapsed and SSO didn't re-auth. Mind logging into ChatGPT and I'll retry." Do not loop.
 
 4. **Fetch + email it.** Run:
    ```

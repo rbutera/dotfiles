@@ -50,4 +50,4 @@ Base `https://api-hc.metatft.com/tft-explorer-api/<endpoint>?formatnoarray=true&
 
 ## Browser notes
 
-Playwright MCP (`mcp__plugin_playwright_playwright__*`) works headless for the UI pages (wait ~4 s). OpenTabs drives Rai's real Chrome. You rarely need either: the API is curl-able.
+Playwright MCP (`mcp__plugin_playwright_playwright__*`) works headless for the UI pages (wait ~4 s). cua-driver drives Rai's real Chrome. You rarely need either: the API is curl-able.

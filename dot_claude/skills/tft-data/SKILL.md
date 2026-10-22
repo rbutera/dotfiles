@@ -5,7 +5,7 @@ description: Look up TFT facts on datatft.com - the /rate cheat sheet (shop odds
 
 # tft-data (datatft.com)
 
-datatft.com is a Vue single-page app. Every path returns HTTP 200 with the same empty shell to curl, so open URLs in a browser (Playwright MCP headless, or OpenTabs for Rai's Chrome). Wait about 3 s after load, then read `document.body.innerText`. Deep links with `#N` work on a fresh load (verified). Page headers show the version (`Ver: 18.4b`), sample size and "Updated N mins ago": quote them.
+datatft.com is a Vue single-page app. Every path returns HTTP 200 with the same empty shell to curl, so open URLs in a browser (Playwright MCP headless, or cua-driver for Rai's Chrome). Wait about 3 s after load, then read `document.body.innerText`. Deep links with `#N` work on a fresh load (verified). Page headers show the version (`Ver: 18.4b`), sample size and "Updated N mins ago": quote them.
 
 ## Start here: the cheat sheet `https://www.datatft.com/rate`
 
