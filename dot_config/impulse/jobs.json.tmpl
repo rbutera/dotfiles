@@ -1709,6 +1709,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/agents-nightly-renew.mjs"] }
   },
   {
+    "id": "tcc-access-check",
+    "name": "Navi: can the Ark tmux shells still read ~/Downloads (macOS privacy)? DMs Rai the exact path to grant if not (hourly 07-22, bead workspace-z5sm4)",
+    "trigger": { "kind": "cron", "expr": "23 7-22 * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tcc-access-check.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 300 },
+    "enabled": true,
+    "tags": ["infra", "nimbus"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tcc-access-check.mjs"] }
+  },
+  {
     "id": "due-bead-whisper",
     "name": "Navi: due-bead whisper alarm (calendar-style, dice-independent; whispers the live session when a gated bead comes due, every 15m)",
     "trigger": {
