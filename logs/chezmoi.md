@@ -526,3 +526,11 @@ dot_zshenv.tmpl exported ARK_WORKSPACE unconditionally (tilly on work hosts, nav
 
 ### Solution/Fix
 Changed it to the default-only form `${ARK_WORKSPACE:-$HOME/<agent>}`. Ark sessions keep their own value, and plain shells still get the host default. The deployed ~/.zshenv was edited identically on nimbus and latios, because applying this template needs a 1Password session.
+
+## 2026-10-27 -- GOG_ACCOUNT default
+
+### Problem
+Once Tilly added a second gog account (rai@conveo.ai), every gog call without --account failed with "missing --account". That silently broke Navi's calendar, Gmail and morning jobs.
+
+### Solution/Fix
+dot_zshenv.tmpl exports GOG_ACCOUNT="${GOG_ACCOUNT:-rai@rbutera.com}" on every host. An explicit --account (Tilly's rai@conveo.ai calls) still wins. The deployed ~/.zshenv on nimbus and latios was edited identically, because applying this template needs 1Password.
