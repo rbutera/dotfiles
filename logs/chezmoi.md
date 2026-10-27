@@ -534,3 +534,11 @@ Once Tilly added a second gog account (rai@conveo.ai), every gog call without --
 
 ### Solution/Fix
 dot_zshenv.tmpl exports GOG_ACCOUNT="${GOG_ACCOUNT:-rai@rbutera.com}" on every host. An explicit --account (Tilly's rai@conveo.ai calls) still wins. The deployed ~/.zshenv on nimbus and latios was edited identically, because applying this template needs 1Password.
+
+## 2026-10-27 -- shell-trap-check hook guarded for hosts without ~/navi
+
+### Problem
+The Mac PreToolUse Bash hook ran `node /Users/rai/navi/bin/shell-trap-check.mjs`. latios has no ~/navi, so every Bash call there (Malfoy, Tilly) threw MODULE_NOT_FOUND.
+
+### Solution/Fix
+The hook is now `[ ! -f <script> ] || node <script>`. It is a no-op where the script is missing, and where it exists node's exit code (including a blocking 2) still propagates.
