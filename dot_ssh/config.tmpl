@@ -10,7 +10,9 @@ Include ~/.orbstack/ssh/config
      ssh config. A stat guard does not help — stat runs at apply time, the
      failure happens later. Colima re-injects its own Include into
      ~/.ssh/config on VM start, so the resulting ~/.ssh/config-vs-source drift
-     is expected and benign. See logs/ssh.md. */}}
+     is expected and benign. 2026-10-27: colima.yaml now has sshConfig: false so colima
+     no longer re-injects it (bead workspace-kxbh8); a Match exec guard does NOT help
+     (OpenSSH still opens the file). See logs/ssh.md. */}}
 
 Host pidgey
  User rai

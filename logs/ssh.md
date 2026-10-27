@@ -106,3 +106,11 @@ Applied via `chezmoi apply --force ~/.ssh/config`. Verified: `ssh -G github.com`
 
 ### Solution/Fix
 Updated `dot_ssh/config.tmpl` to use current Tailscale IP `100.87.255.86`. Applied via `chezmoi apply ~/.ssh/config`. Note: Tailscale IPs can change; if this happens again, check `tailscale status` for the current IP.
+
+## 2026-10-27 -- colima Include removed for good; ssh no longer touches the drive (bead workspace-kxbh8)
+
+### Problem
+On 26 Oct a cached macOS privacy deny on /Volumes/ExternalNVMe made every ssh and `git push` from the denied agent trees fail at config parsing, because `~/.ssh/config` had `Include /Users/rai/.colima/ssh_config` (a symlink onto the drive) and `Include /Volumes/ExternalNVMe/rai/.colima/ssh_config`. Measured with `ssh -F <cfg> -G localhost`: an Include of a missing file is harmless, but an Include of a chmod-000 file is FATAL ("Can't open user config file ... terminating"), and wrapping the Include in `Match exec "test -r <path>"` does not help (OpenSSH still opens the file).
+
+### Solution/Fix
+Colima re-injected the lines on every VM start, so the source alone could not hold. Set `sshConfig: false` in `~/.colima/default/colima.yaml` (original kept in the session scratchpad) and applied this source (`chezmoi apply --force ~/.ssh/config`; the only diff was the two Include lines). Verified: no Include remains, `ssh -G localhost` and `git ls-remote origin` on ~/navi work. Nothing used `ssh colima`.

@@ -1710,8 +1710,8 @@
   },
   {
     "id": "tcc-access-check",
-    "name": "Navi: can the Ark tmux shells still read ~/Downloads (macOS privacy)? DMs Rai the exact path to grant if not (hourly 07-22, bead workspace-z5sm4)",
-    "trigger": { "kind": "cron", "expr": "23 7-22 * * *", "tz": "Europe/London" },
+    "name": "Navi: can the Ark and forge-chains tmux shells still read ~/Downloads and /Volumes/ExternalNVMe/Perch-port (macOS privacy)? DMs Rai if not (every 30 min 07-22, quiet-hours aware; beads workspace-z5sm4, kxbh8)",
+    "trigger": { "kind": "cron", "expr": "23,53 7-22 * * *", "tz": "Europe/London" },
     "target": { "kind": "script", "bin": "zsh" },
     "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tcc-access-check.mjs"] },
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 300 },
