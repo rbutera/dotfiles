@@ -518,3 +518,11 @@ level exclusion also prevents empty `Library` and `Library/LaunchAgents` objects
 
 ## 2026-09-29
 - Added dot_config/zsh/oura.zsh.tmpl: exports OURA_CLIENT_ID / OURA_CLIENT_SECRET from the 1Password item "Oura API" (Private; fields client_id, client_secret) for ~/navi/bin/oura.mjs, which reads process.env before ~/navi/.env. Motivation: Rai set up an Oura developer app so Navi can read his ring data.
+
+## 2026-10-27 -- ARK_WORKSPACE no longer overrides an agent's own workspace
+
+### Problem
+dot_zshenv.tmpl exported ARK_WORKSPACE unconditionally (tilly on work hosts, navi elsewhere). Every zsh, even a child of an Ark session, reset it. Malfoy on latios therefore saw ARK_WORKSPACE=/Users/rai/tilly in her Bash tool, and Tilly on nimbus (after the ark-hop) saw /Users/rai/navi. Ark-scoped scripts (boot-complete, writeback) then pointed at another agent's workspace.
+
+### Solution/Fix
+Changed it to the default-only form `${ARK_WORKSPACE:-$HOME/<agent>}`. Ark sessions keep their own value, and plain shells still get the host default. The deployed ~/.zshenv was edited identically on nimbus and latios, because applying this template needs a 1Password session.
