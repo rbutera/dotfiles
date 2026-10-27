@@ -518,3 +518,11 @@ Added Impulse job `claude-transcript-archive` (`dot_config/impulse/jobs.json.tmp
 
 ### Solution/Fix
 Added Impulse job `npm-exempt-update` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, last entry): cron `10 5 * * *` Europe/London, `node ~/navi/bin/npm-exempt-update.mjs`, timeout 300, skip-if-running. The script reads the exemption list `~/.config/npm-age-exempt/packages.txt` (one package per line; starts with `@openai/codex`), compares `npm view <pkg> version` to the installed global version, and installs `<pkg>@latest --min-release-age=0` only for listed packages when newer. Logs old->new to `~/.logs/npm-exempt-update.log`, exits non-zero on any failed install, supports `--dry-run`. `~/.npmrc` is untouched. To exempt another package, add a line to the list. `chezmoi apply` is PENDING (not run by the agent); after apply, register with `launchctl kickstart -k gui/501/com.rai.impulse-worker`.
+
+## 2026-10-27 -- discord-profile-check daily job (nimbus)
+
+### Problem
+I promised Rai a new Discord avatar and banner every day, logged in `~/navi/state/discord-profile-log.jsonl`. Nothing scheduled a reminder, so a missed day was silent (bead workspace-83ygv).
+
+### Solution/Fix
+Added Impulse job `discord-profile-check` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `tcc-access-check`): cron `30 5 * * *` Europe/London, runs `~/navi/bin/discord-profile-check.mjs`, timeout 120, skip-if-running. If no log entry falls on today's London date it whispers the live session once per date (exit 10); unreadable or garbled log exits 2 (could-not-check, no whisper). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets), registered by `launchctl kickstart -k gui/501/com.rai.impulse-worker` (`[sync-crons] synced ... (navi/discord-profile-check)`).

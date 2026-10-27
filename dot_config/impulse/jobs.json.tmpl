@@ -1720,6 +1720,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tcc-access-check.mjs"] }
   },
   {
+    "id": "discord-profile-check",
+    "name": "Navi: daily Discord profile promise check (05:30 London; whispers my live session if no avatar/banner change is logged today; bead workspace-83ygv)",
+    "trigger": { "kind": "cron", "expr": "30 5 * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/discord-profile-check.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 120 },
+    "enabled": true,
+    "tags": ["navi", "ritual"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/discord-profile-check.mjs"] }
+  },
+  {
     "id": "due-bead-whisper",
     "name": "Navi: due-bead whisper alarm (calendar-style, dice-independent; whispers the live session when a gated bead comes due, every 15m)",
     "trigger": {
