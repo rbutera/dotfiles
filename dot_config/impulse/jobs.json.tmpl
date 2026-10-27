@@ -1693,7 +1693,7 @@
     "target": { "kind": "script", "bin": "zsh" },
     "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "exec {{ .chezmoi.homeDir }}/navi/bin/pikachu-sweep.sh"] },
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
-    "enabled": true,
+    "enabled": false,
     "tags": ["social", "nimbus"],
     "inputs": { "cmd": "zsh", "args": ["-c", "exec {{ .chezmoi.homeDir }}/navi/bin/pikachu-sweep.sh"] }
   },
