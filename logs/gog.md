@@ -29,3 +29,9 @@ Only Navi had gog instructions (`~/navi/skills/gog-gmail`, Gmail only). Every ha
 - New skill `dot_agents/skills/gog/SKILL.md` (`~/.agents/skills/gog`): keyring unlock preamble, `--json`/`--readonly` conventions, the `threads`-not-`messages` and spam/trash search pitfalls, command cheatsheet for Gmail, Calendar, Drive/Docs/Sheets, Contacts/Tasks, approval gate for anything that sends or shares, setup/repair pointer. Flag names checked against `gog --help` (0.31.1).
 - `dot_claude/skills/symlink_gog.tmpl` and `dot_codex/skills/symlink_gog.tmpl` point `~/.claude/skills/gog` and `~/.codex/skills/gog` at the `.agents` copy, so one file serves all three harnesses. First use of chezmoi `symlink_` in this repo.
 - Applied on nimbus and latios (`chezmoi apply` on the three targets only; no 1Password needed). Latios pull surfaced 7 unpushed impulse commits and a one-hunk conflict in `dot_config/impulse/jobs.json.tmpl` (Tilly jobs vs the nimbus disable-comment); merged keeping both, rendered JSON validated, pushed.
+
+## 2026-10-28
+
+**Problem:** the gog skill still said rai@rbutera.com was the only authenticated account and that the account flag was optional. Since rai@conveo.ai was added on 27 Oct, a bare call fails with `missing --account`.
+
+**Change:** `dot_agents/skills/gog/SKILL.md` now lists both accounts, says to always pass `-a`, and explains that the `GOG_ACCOUNT` fallback in zshenv does not reach launchd or node-spawned calls.

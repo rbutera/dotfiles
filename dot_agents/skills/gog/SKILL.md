@@ -1,11 +1,11 @@
 ---
 name: gog
-description: Access Rai's Google account (rai@rbutera.com) from the shell with the gog CLI — Gmail search/read/send, Calendar, Drive, Docs, Sheets, Contacts, Tasks. Use whenever a task needs Rai's email, calendar, or Drive files and no dedicated Google MCP tool is available or sufficient (MCP connectors cannot send mail).
+description: Access Rai's Google accounts (personal rai@rbutera.com, work rai@conveo.ai) from the shell with the gog CLI — Gmail search/read/send, Calendar, Drive, Docs, Sheets, Contacts, Tasks. Use whenever a task needs Rai's email, calendar, or Drive files and no dedicated Google MCP tool is available or sufficient (MCP connectors cannot send mail).
 ---
 
 # gog — Google from the shell
 
-`gog` is an unofficial Google Workspace CLI (https://gogcli.sh). It is installed and authenticated as `rai@rbutera.com` on every chezmoi-managed Mac (nimbus, latios). Full scopes: gmail, calendar, drive, docs, sheets, slides, contacts, people, tasks, chat, forms, appscript.
+`gog` is an unofficial Google Workspace CLI (https://gogcli.sh). It is installed on every chezmoi-managed Mac (nimbus, latios) with two of Rai's accounts: `rai@rbutera.com` (personal, full scopes: gmail, calendar, drive, docs, sheets, slides, contacts, people, tasks, chat, forms, appscript) and, since 27 Oct 2026, `rai@conveo.ai` (his Conveo work account: gmail, calendar, drive, docs, sheets, slides, contacts, tasks, chat). `gog auth list` shows what a host has.
 
 ## Before the first call
 
@@ -21,7 +21,7 @@ Interactive shells already have the variable. Cron, launchd, Docker, and any sub
 ## Conventions
 
 - Output for scripts: `--json` (add `--results-only` to drop the envelope). Humans: `--plain` for TSV.
-- Account is implicit (only one authed). Add `--account rai@rbutera.com` when writing anything that might run where a second account exists.
+- **Always pass `-a/--account`.** With two accounts, a bare call fails with `missing --account`. `~/.zshenv` sets `GOG_ACCOUNT=rai@rbutera.com` as a fallback, but launchd jobs, node `execFile` and anything not started from zsh never see it. Use `rai@conveo.ai` only for Conveo work, and never send work mail from the personal account or personal mail from the work one.
 - Read-only runs: add `--readonly`. Agent safety when only reading mail: `--gmail-no-send`.
 - `gmail search --json` returns `{ "threads": [...] }`, not `messages`. Reading `.messages` gives a confident zero. `gmail messages search` is the per-message variant.
 - Gmail search excludes spam and trash. Add `in:anywhere` to the query when absence matters.
