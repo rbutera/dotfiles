@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- navi-alarms: Rai's phone alarm server (lumiere apps/navi-alarms, bead workspace-h82ld).
+     127.0.0.1:3861; public via https://alarms.e8n.dev (Cloudflare tunnel -> Caddy). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rai.navi-alarms</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/rai/dev/lumiere/apps/navi-alarms/src/main.ts</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/rai/dev/lumiere/apps/navi-alarms</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/rai/.logs/navi-alarms.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/rai/.logs/navi-alarms.log</string>
+</dict>
+</plist>
