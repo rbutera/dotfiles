@@ -6,6 +6,9 @@
 	<string>sh.tokenmaxx.daemon</string>
 	<key>ProgramArguments</key>
 	<array>
+		<string>/Users/rai/.config/ark/host-guard.sh</string>
+		<string>--agent</string>
+		<string>infra</string>
 		<string>/Users/rai/.asdf/installs/bun/1.3.14/bin/bun</string>
 		<string>/Users/rai/.bun/install/global/node_modules/tokenmaxx/dist/index.js</string>
 		<string>daemon</string>
