@@ -470,6 +470,37 @@
     }
   },
   {
+    "id": "ark-hop-fence-watch",
+    "name": "ark-hop fence watch (every 2 min: DM Rai once per incident when an enrolled agent is muted while its host is up, workspace-gcvr6)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/2 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-hop/src/cli.ts watch >> {{ .chezmoi.homeDir }}/.logs/ark-hop-watch.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 110
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus", "ark-hop"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-hop/src/cli.ts watch >> {{ .chezmoi.homeDir }}/.logs/ark-hop-watch.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "bztransmit-restart",
     "name": "Backblaze bztransmit nightly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
     "trigger": {
