@@ -501,6 +501,37 @@
     }
   },
   {
+    "id": "navi-login-watch",
+    "name": "Navi login watch (every 5 min: DM Rai once when Navi's Claude login dies, once when it is back, workspace-vrzvb)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/5 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/login-watch.mjs >> {{ .chezmoi.homeDir }}/.logs/navi-login-watch.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus", "navi"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/login-watch.mjs >> {{ .chezmoi.homeDir }}/.logs/navi-login-watch.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "bztransmit-restart",
     "name": "Backblaze bztransmit nightly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
     "trigger": {
