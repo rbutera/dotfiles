@@ -532,6 +532,37 @@
     }
   },
   {
+    "id": "ark-hop-guard-audit",
+    "name": "ark-hop guard-audit (hourly, read-only: every launch agent on nimbus and each enrolled agent's hosts is guarded, allowlisted with a reason, or UNGUARDED; the fence watch DMs guard:<host> for anything new since the baseline, workspace-gc4ln)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "41 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-hop/src/cli.ts guard-audit --all --record >> {{ .chezmoi.homeDir }}/.logs/ark-hop-guard-audit.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "nimbus", "ark-hop"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/dev/lumiere/apps/ark-hop/src/cli.ts guard-audit --all --record >> {{ .chezmoi.homeDir }}/.logs/ark-hop-guard-audit.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "navi-login-watch",
     "name": "Navi login watch (every 5 min: DM Rai once when Navi's Claude login dies, once when it is back, workspace-vrzvb)",
     "trigger": {
