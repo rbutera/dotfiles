@@ -1,5 +1,17 @@
 # SSH Config Changelog
 
+## 2026-11-02 — Added `spitfire` host (Conveo Coder box) to the template
+
+Tilly is moving her primary host to spitfire, a Conveo Coder EC2 box that is
+not on Rai's tailnet. ark-hop on nimbus calls `/usr/bin/ssh spitfire` for
+rollback and remote checks, so it needs an alias that goes through Coder.
+Added `Host spitfire` (User coder, `ProxyCommand /opt/homebrew/bin/coder ssh
+--stdio spitfire`, `UserKnownHostsFile /dev/null`, `StrictHostKeyChecking no`,
+`LogLevel ERROR`) to the end of both the template and the deployed file, so
+`chezmoi diff` shows no drift. Coder authenticates the transport; the host key
+is the Coder agent's, which changes on rebuild. Not committed yet.
+Proof: `ssh -o BatchMode=yes spitfire true`. Bead `tilly-w49e`.
+
 ## 2026-09-29 — Added `lancelot-win` host to the template
 
 During a `/chezmoi-sync` on nimbus, the deployed `~/.ssh/config` carried a

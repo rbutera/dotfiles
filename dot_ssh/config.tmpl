@@ -75,3 +75,11 @@ Host lancelot-win
   IdentityFile ~/.ssh/id_ed25519
   IdentityAgent none
   ForwardAgent no
+
+# Spitfire: Conveo Coder EC2 box (Tilly's primary host, tilly-w49e). Reached through Coder, not Tailscale.
+Host spitfire
+  User coder
+  ProxyCommand /opt/homebrew/bin/coder ssh --stdio spitfire
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  LogLevel ERROR
