@@ -1,0 +1,4 @@
+#!/bin/sh
+# ark CLI for hosts without the pnpm global shim (latios, spike). Runs the built
+# lumiere ark from its checkout; nimbus keeps ~/Library/pnpm/ark (same target).
+exec node "$HOME/dev/lumiere/apps/ark/dist/main.js" "$@"

@@ -112,9 +112,10 @@ export OPENSPEC_TELEMETRY=0
 export GOG_ACCOUNT="${GOG_ACCOUNT:-rai@rbutera.com}"
 
 # ── Ark ──────────────────────────────────────────────────────────────────────
-{{- if has .chezmoi.hostname .host_groups.work }}
-export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/tilly}"
-{{- else }}
+{{- /* Default follows the host's resident agent (.ark_workspaces in .chezmoidata.toml). Unlisted work hosts get no default on purpose. */}}
+{{- if hasKey .ark_workspaces .chezmoi.hostname }}
+export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/{{ index .ark_workspaces .chezmoi.hostname }}}"
+{{- else if not (has .chezmoi.hostname .host_groups.work) }}
 export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/navi}"
 {{- end }}
 

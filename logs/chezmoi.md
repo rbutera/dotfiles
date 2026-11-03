@@ -542,3 +542,13 @@ The Mac PreToolUse Bash hook ran `node /Users/rai/navi/bin/shell-trap-check.mjs`
 
 ### Solution/Fix
 The hook is now `[ ! -f <script> ] || node <script>`. It is a no-op where the script is missing, and where it exists node's exit code (including a blocking 2) still propagates.
+
+## 2026-11-03 -- ARK_WORKSPACE default follows the host's resident agent; `ark` on latios
+
+### Problem
+dot_zshenv.tmpl defaulted ARK_WORKSPACE to ~/tilly on every host in host_groups.work (latios). Tilly now lives on spitfire; latios's resident is Malfoy and Spike's is Sage, so any `ark` command without --workspace started a stray Tilly (twice on 3 Nov, bead workspace-fk1pi). Separately latios had no `ark` on PATH: lumiere's apps/ark/bin/ark pointed at /opt/ark (absent) and ark-wrapper.sh used `node --require`, which cannot run subcommands.
+
+### Solution/Fix
+- .chezmoidata.toml: new [ark_workspaces] map (nimbus=navi, latios=malfoy, spike=sage).
+- dot_zshenv.tmpl: default from the map; unlisted non-work hosts keep navi; unlisted work hosts get NO default, so ark refuses.
+- dot_local/bin/executable_ark: runs ~/dev/lumiere/apps/ark/dist/main.js (nimbus's pnpm shim targets the same file). ~/.local/bin is on latios's PATH.

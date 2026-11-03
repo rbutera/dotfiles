@@ -23,6 +23,15 @@
   # Empty = off everywhere (the default). See [feature_flags].openrouter_api_key.
   openrouter = []
 
+# Resident agent per host: the default ARK_WORKSPACE for plain shells (dot_zshenv.tmpl).
+# Value is the directory name under $HOME. A work host missing from this map gets NO
+# default, so `ark` refuses instead of guessing (a stray Tilly started on latios twice
+# on 2026-11-03). Hostnames are the short chezmoi hostname, lowercase.
+[ark_workspaces]
+  nimbus = "navi"
+  latios = "malfoy"
+  spike  = "sage"
+
 [feature_flags]
   shared_claude_oauth = false
   # Write OPENROUTER_API_KEY into ~/.env. Default OFF: agent CLIs that dotenv-load
