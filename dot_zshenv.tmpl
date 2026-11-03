@@ -112,7 +112,11 @@ export OPENSPEC_TELEMETRY=0
 export GOG_ACCOUNT="${GOG_ACCOUNT:-rai@rbutera.com}"
 
 # ── Ark ──────────────────────────────────────────────────────────────────────
-{{- if has .chezmoi.hostname .host_groups.work }}
+# The resident agent of each host. Spike (Conveo laptop) hosts Sage; a wrong default
+# here once made `ark restart` run from ~/sage start a duplicate Tilly (3 Nov 2026).
+{{- if eq .chezmoi.hostname "spike" }}
+export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/sage}"
+{{- else if has .chezmoi.hostname .host_groups.work }}
 export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/tilly}"
 {{- else }}
 export ARK_WORKSPACE="${ARK_WORKSPACE:-$HOME/navi}"
