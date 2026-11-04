@@ -1,0 +1,21 @@
+{
+  "environment": "latios",
+  "timezone": "Europe/London",
+  "paths": {
+    "workspaceRoot": "/Users/rai/hermione",
+    "repoRoot": "/Users/rai/dev/lumiere",
+    "stateRoot": "/Users/rai/.local/state/impulse-agents/hermione/state"
+  },
+  "hatchet": {
+    "namespace": "hermione",
+    "workerName": "impulse-latios"
+  },
+  "capabilities": {
+    "cronEnabled": true,
+    "sensorsEnabled": false,
+    "heartbeatsEnabled": false,
+    "narrateQueueEnabled": false,
+    "stewardshipEnabled": false,
+    "openclawProbeEnabled": false
+  }
+}

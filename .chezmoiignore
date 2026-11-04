@@ -190,3 +190,8 @@ run_onchange_apply-claude-json-windows.ps1
 .omp/run
 .omp/gpu_cache.json
 .omp/install-id
+
+# Hermione's Impulse worker config (culture agent, 2026-11-04): latios only. Its .env (Hatchet creds) is host-local, never here.
+{{ if ne .chezmoi.hostname "latios" }}
+.config/impulse-agents/hermione
+{{ end }}
