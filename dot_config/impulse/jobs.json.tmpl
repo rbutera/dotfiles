@@ -2371,6 +2371,63 @@
       "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/gym-todoist-sync.mjs --apply"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "routine-morning-weekday",
+    "name": "Navi: Robeson Way routine, weekday morning whisper (06:20 London, after meds buffer; wakes my main session, no DM; bead workspace-uj55k)",
+    "trigger": { "kind": "cron", "expr": "20 6 * * 1-5", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "/bin/sh" },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-morning \"$1\"",
+        "routine",
+        "Routine prompt: walk Rai through today's morning checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ]
+    },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
+    "enabled": true,
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
+  },
+  {
+    "id": "routine-morning-weekend",
+    "name": "Navi: Robeson Way routine, weekend morning whisper (08:15 London; wakes my main session, no DM; bead workspace-uj55k)",
+    "trigger": { "kind": "cron", "expr": "15 8 * * 0,6", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "/bin/sh" },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-morning \"$1\"",
+        "routine",
+        "Routine prompt: walk Rai through today's morning checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ]
+    },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
+    "enabled": true,
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
+  },
+  {
+    "id": "routine-evening",
+    "name": "Navi: Robeson Way routine, evening reset whisper (21:45 London daily: night reset, WTF, tomorrow's med box by the bed, phone on charge, clothes out; bead workspace-uj55k)",
+    "trigger": { "kind": "cron", "expr": "45 21 * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "/bin/sh" },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-evening \"$1\"",
+        "routine",
+        "Routine prompt: walk Rai through today's evening checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ]
+    },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
+    "enabled": true,
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
   }
 ]
 {{- else }}
