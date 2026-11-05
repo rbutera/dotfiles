@@ -2389,7 +2389,17 @@
     },
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
     "enabled": true,
-    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+          "-c",
+          "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-morning \"$1\"",
+          "routine",
+          "Routine prompt: walk Rai through today's morning checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   },
   {
     "id": "routine-morning-weekend",
@@ -2408,7 +2418,17 @@
     },
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
     "enabled": true,
-    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+          "-c",
+          "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-morning \"$1\"",
+          "routine",
+          "Routine prompt: walk Rai through today's morning checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   },
   {
     "id": "routine-evening",
@@ -2427,7 +2447,17 @@
     },
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 60 },
     "enabled": true,
-    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"]
+    "tags": ["navi", "routine", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+          "-c",
+          "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source routine-evening \"$1\"",
+          "routine",
+          "Routine prompt: walk Rai through today's evening checklist from ~/notes/Robeson Way Routine.md, one item at a time, by voice if he's in voice else one short DM. Skip if he is in a crisis, mid-date, or asleep. On office days (check his calendar for London office / Conveo) use the short version (see 'Office-day short version' in the note)."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}
