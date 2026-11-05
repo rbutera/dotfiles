@@ -595,10 +595,10 @@
   },
   {
     "id": "bztransmit-restart",
-    "name": "Backblaze bztransmit nightly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
+    "name": "Backblaze bztransmit hourly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
     "trigger": {
       "kind": "cron",
-      "expr": "30 3 * * *",
+      "expr": "17 * * * *",
       "tz": "Europe/London"
     },
     "target": {
