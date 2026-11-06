@@ -595,10 +595,10 @@
   },
   {
     "id": "bztransmit-restart",
-    "name": "Backblaze bztransmit hourly restart if total footprint > 4 GB (memory leak guard, workspace-v2bfn)",
+    "name": "Backblaze bztransmit restart every 15 min if total footprint > 3 GB (memory leak guard, workspace-v2bfn, workspace-mrnnl)",
     "trigger": {
       "kind": "cron",
-      "expr": "17 * * * *",
+      "expr": "2,17,32,47 * * * *",
       "tz": "Europe/London"
     },
     "target": {
@@ -608,7 +608,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "zsh",
-      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 4096 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"]
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 3072 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -620,7 +620,7 @@
     "tags": ["infrastructure", "nimbus"],
     "inputs": {
       "cmd": "zsh",
-      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 4096 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"],
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 3072 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
   },
