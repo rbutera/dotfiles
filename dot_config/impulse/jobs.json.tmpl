@@ -608,7 +608,7 @@
     "payload": {
       "kind": "shell",
       "cmd": "zsh",
-      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 3072 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"]
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 8192 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"]
     },
     "policy": {
       "maxConcurrent": 1,
@@ -620,7 +620,7 @@
     "tags": ["infrastructure", "nimbus"],
     "inputs": {
       "cmd": "zsh",
-      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 3072 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"],
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bztransmit-restart.mjs --threshold-mb 8192 >> {{ .chezmoi.homeDir }}/.logs/bztransmit-restart.log 2>&1"],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
   },
