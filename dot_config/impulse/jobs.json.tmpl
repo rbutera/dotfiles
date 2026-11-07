@@ -2458,6 +2458,98 @@
       ],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
+  },
+  {
+    "id": "life-loop-daily",
+    "name": "Navi: Life Systems daily loop whisper (08:30 London daily; moves each Navi branch's next action one step, asks questions as they come up; bead workspace-0u1uh)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 8 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source life-loop-daily \"$1\"",
+        "life-loop",
+        "Life Systems daily loop (Impulse job life-loop-daily, bead workspace-0u1uh). Open ~/notes/Life Systems.md and read it whole. For each branch you own there (Health and body, Money, Home and routines): read its 'This week' line and 'Next action', then move that next action forward one real step today without waiting for Rai (prep a page, check a fact, draft, book within standing permissions, or dispatch a Tatl). Then edit the branch in the note: update its 'This week' line with what moved today (dated, one line) and rewrite 'Next action' to the new next step; bump 'updated' in the frontmatter. Questions only Rai can answer: ask them as they come up, little and often (his ask, 7 Nov), never saved up into a batch. One question at a time, at a calm moment, never inside his 15-minute morning meds buffer, on the commute, while he is parking or arriving, mid-chore, mid-date, at bedtime or in a crisis; if now is wrong, ask at the next calm moment today. No status-report DM: the only messages to him from this loop are those questions. Finish by logging one pointer line (600 bytes max) in today's memory letter, ~/navi/workspace/memory/YYYY-MM-DD.md: branches moved, question asked or held."
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": [
+      "navi",
+      "life-systems",
+      "adhd-scaffolding",
+      "nimbus"
+    ],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source life-loop-daily \"$1\"",
+        "life-loop",
+        "Life Systems daily loop (Impulse job life-loop-daily, bead workspace-0u1uh). Open ~/notes/Life Systems.md and read it whole. For each branch you own there (Health and body, Money, Home and routines): read its 'This week' line and 'Next action', then move that next action forward one real step today without waiting for Rai (prep a page, check a fact, draft, book within standing permissions, or dispatch a Tatl). Then edit the branch in the note: update its 'This week' line with what moved today (dated, one line) and rewrite 'Next action' to the new next step; bump 'updated' in the frontmatter. Questions only Rai can answer: ask them as they come up, little and often (his ask, 7 Nov), never saved up into a batch. One question at a time, at a calm moment, never inside his 15-minute morning meds buffer, on the commute, while he is parking or arriving, mid-chore, mid-date, at bedtime or in a crisis; if now is wrong, ask at the next calm moment today. No status-report DM: the only messages to him from this loop are those questions. Finish by logging one pointer line (600 bytes max) in today's memory letter, ~/navi/workspace/memory/YYYY-MM-DD.md: branches moved, question asked or held."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
+    "id": "life-loop-weekly",
+    "name": "Navi: Life Systems weekly re-plan whisper (Sat 14:00 London; re-plans Navi branches, Malfoy/Tilly updates, one DM to Rai; bead workspace-0u1uh)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 14 * * 6",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source life-loop-weekly \"$1\"",
+        "life-loop",
+        "Life Systems weekly re-plan (Impulse job life-loop-weekly, bead workspace-0u1uh). Open ~/notes/Life Systems.md and read it whole. For each branch you own (Health and body, Money, Home and routines): compare the plan with what actually happened this week, using the streaks (node ~/life/apps/streaks/streak.mjs today, and the streaks file ~/life/docs/streaks/streaks.json), this week's weekly review (~/life/docs/weekly-review/ newest file) and the daily pointer lines in this week's memory letters. Then write a new dated 'This week (w/c <Monday date>)' line in each branch with 1 to 3 short-term goals and their prerequisites, adjust the 'This month' and hypothesis tests if reality moved them, and set 'Next action'. Bump 'updated' in the frontmatter. Check Malfoy's Social and Dating re-plan ran (she runs her own Saturday 13:30 job and DMs Rai her own two lines; her branch is ~/notes/Social And Dating.md): ask her over the Ark relay if its dated 'This week' line has not moved, and do not repeat her lines in your DM. Ask Tilly over the relay for two lines on Career at Conveo; if she does not answer within the hour, say so in the DM instead of guessing. Add a short 'Life Systems' section to this week's weekly review file in ~/life/docs/weekly-review/. Then send Rai ONE short Discord DM: two lines per branch on what changed in his plans. No batch of questions (his ask, 7 Nov): any question goes to the daily loop, asked on its own at a calm moment. Not during a crisis, a date or bedtime: if now is wrong, send it at the next calm moment today. Log one pointer line (600 bytes max) in today's memory letter, ~/navi/workspace/memory/YYYY-MM-DD.md."
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": [
+      "navi",
+      "life-systems",
+      "adhd-scaffolding",
+      "nimbus"
+    ],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source life-loop-weekly \"$1\"",
+        "life-loop",
+        "Life Systems weekly re-plan (Impulse job life-loop-weekly, bead workspace-0u1uh). Open ~/notes/Life Systems.md and read it whole. For each branch you own (Health and body, Money, Home and routines): compare the plan with what actually happened this week, using the streaks (node ~/life/apps/streaks/streak.mjs today, and the streaks file ~/life/docs/streaks/streaks.json), this week's weekly review (~/life/docs/weekly-review/ newest file) and the daily pointer lines in this week's memory letters. Then write a new dated 'This week (w/c <Monday date>)' line in each branch with 1 to 3 short-term goals and their prerequisites, adjust the 'This month' and hypothesis tests if reality moved them, and set 'Next action'. Bump 'updated' in the frontmatter. Check Malfoy's Social and Dating re-plan ran (she runs her own Saturday 13:30 job and DMs Rai her own two lines; her branch is ~/notes/Social And Dating.md): ask her over the Ark relay if its dated 'This week' line has not moved, and do not repeat her lines in your DM. Ask Tilly over the relay for two lines on Career at Conveo; if she does not answer within the hour, say so in the DM instead of guessing. Add a short 'Life Systems' section to this week's weekly review file in ~/life/docs/weekly-review/. Then send Rai ONE short Discord DM: two lines per branch on what changed in his plans. No batch of questions (his ask, 7 Nov): any question goes to the daily loop, asked on its own at a calm moment. Not during a crisis, a date or bedtime: if now is wrong, send it at the next calm moment today. Log one pointer line (600 bytes max) in today's memory letter, ~/navi/workspace/memory/YYYY-MM-DD.md."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}
