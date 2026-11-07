@@ -28,7 +28,7 @@ Fetch before quoting anything numeric that could have been hotfixed. The note an
 
 ## Known live items (as of 2026-11-07)
 
-- Enhancement Shaman: Blizzard fix on Tue 10 Nov makes Strength the best stat. Collect Strength and AP gear now.
+- Enhancement Shaman: Blizzard plans hotfixes on Tue 10 Nov so Strength is always the strongest stat; "collect Strength and Attack Power gear from now on" ([blue post](https://us.forums.blizzard.com/en/wow/t/2404092/1), posted 6 Nov). Check it shipped before calling it live.
 - AH listing deposit is a 1 silver minimum for now; Blizzard says 1 copper is coming.
 - Raids (Barrow Deeps, Hyjal Summit, Onyxia) open 9 Dec 2026 at 60. Hardcore: "a little after launch", no date.
 - Guide advice past level 30 is theory (beta cap was 30).
