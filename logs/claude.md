@@ -526,3 +526,11 @@ Opus 4.8 / Fable, so the change had to be made at the chezmoi source.
 **Problem:** Rai gave Navi a new nickname, "Bubby" (his alone), and asked for it to go into her title so it sticks.
 
 **Change:** added "Rai's Bubby (his alone; he is her Hubby)" to the official title in `dot_claude/output-styles/navi.md.tmpl`; applied only that target.
+
+## 2026-11-07: wow-forever-coach skill and wowf CLI
+
+**Motivation.** Rai started World of Warcraft: Forever (Blizzard's Classic+, live 4 Nov 2026; US, Normal ruleset) and asked for Navi to coach him and keep him company on the way to his first level 60. Modelled on the tft-coach family.
+
+**Added.**
+- `dot_claude/skills/wow-forever-coach/SKILL.md`: entry skill, routes to the knowledge note `~/expedition/WoW Forever.md`, `references/classes.md` (Ret Paladin, Enhancement Shaman, BM Hunter, Warrior: talents, spells, quests, weapons, sourced) and `references/lookups.md` (Wowhead/Icy Veins/Blizzard endpoints, what curl can and cannot reach).
+- `dot_local/bin/executable_wowf`: Wowhead Forever lookups. `wowf find`, `wowf tip <type> <id>` (nether tooltip JSON), `wowf guide <slug>` (decodes `WH.markup.printHtml`), `wowf url`. Wowhead's CloudFront 403s curl's default and browser user agents on search/guide pages but accepts a plain custom UA (`wowf/1.0`); entity pages (`/forever/item=`) 403 regardless, tooltips never did. Verified 2026-11-07.
