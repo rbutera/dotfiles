@@ -23,23 +23,40 @@ def catalog(ep, key, days, ranks):
         v = r[key]
         if v and re.search(r"-1$", v): ids[v[:-2]] = (v, sum(r["placement_count"]))
     return ids
+# Trait display name -> internal DA trait id suffix, only where they differ AND an emblem exists in the API.
+# Source: ~/.claude/skills/tft-data/ids.json "trait" map (datatft display names -> DA ids), S18 18.4b.
+# Ravager -> DA_18_Slayer is CONFIRMED (DA_18_EmblemSlayer is in the live items_unique list).
+# Monolith -> DA_18_Battlemage comes from ids.json but NO Battlemage emblem is in the live API list: UNCONFIRMED.
+EMBLEM_ALIASES = {"ravager": "Slayer", "monolith": "Battlemage"}
 def best(name, ids, strip):
     n = norm(name)
-    if n.endswith("emblem") and len(n) > 6: n = "emblem" + n[:-6]
+    if n.endswith("emblem") and len(n) > 6:
+        base = n[:-6]
+        n = "emblem" + norm(EMBLEM_ALIASES.get(base, base))
     cand = {}
     for i, (_, cnt) in ids.items(): cand.setdefault(norm(re.sub(strip, "", i)), []).append((cnt, i))
-    pick = lambda k: max(cand[k])[1]   # ambiguous variants (e.g. Master Yi AD/AP): most-played wins
-    if n in cand: return pick(n)
-    sub = [k for k in cand if k.startswith(n) or n in k]
-    if sub: return pick(sorted(sub, key=len)[0])
-    m = difflib.get_close_matches(n, list(cand), n=1, cutoff=0.7)
-    return pick(m[0]) if m else None
+    if n in cand: return max(cand[n])[1]   # ambiguous variants (e.g. Master Yi AD/AP): most-played wins
+    close = difflib.get_close_matches(n, list(cand), n=5, cutoff=0.6) + [k for k in cand if n in k]
+    close = list(dict.fromkeys(close))[:6]
+    sys.exit(f"no exact match for {name!r}" + (f"; close matches: {', '.join(close)}" if close else ""))
 def stats(pc):
     n = sum(pc)
     if n == 0: return None
     return dict(n=n, avg=sum((i+1)*c for i, c in enumerate(pc))/n, top4=sum(pc[:4])/n*100, win=pc[0]/n*100)
 def fmt(label, s): return f"{label:34s} avg {s['avg']:.2f}  top4 {s['top4']:.1f}%  win {s['win']:.1f}%  n={s['n']}"
+def self_test():
+    ids = {i: (i + "-1", 1) for i in ["DA_18_EmblemSlayer", "DA_18_EmblemBrawler", "DA_18_EmblemRapidfire"]}
+    strip = r"^DA_(18_|Artifact_|Item_Artifact_)?|18$"
+    assert best("Ravager Emblem", ids, strip) == "DA_18_EmblemSlayer", "Ravager"
+    assert best("ravager emblem", ids, strip) == "DA_18_EmblemSlayer", "case"
+    assert best("Brawler Emblem", ids, strip) == "DA_18_EmblemBrawler", "Brawler"
+    for bad in ["Zzqx Emblem", "Brawl Emblem"]:
+        try: best(bad, ids, strip)
+        except SystemExit as e: assert "no exact match" in str(e.code), bad
+        else: raise AssertionError("should have errored: " + bad)
+    print("self-test ok")
 def main():
+    if "--self-test" in sys.argv: return self_test()
     ap = argparse.ArgumentParser(); ap.add_argument("cmd"); ap.add_argument("args", nargs="*")
     ap.add_argument("--days", default="3"); ap.add_argument("--min", type=int, default=150); ap.add_argument("--ranks", default=RANKS)
     ap.add_argument("--artifacts", action="store_true"); ap.add_argument("--json", action="store_true")
@@ -47,8 +64,8 @@ def main():
     ap.add_argument("--trait", action="append", default=[]); ap.add_argument("--unititem", action="append", default=[])
     a = ap.parse_args()
     U = catalog("units_unique", "units_unique", a.days, a.ranks); I = catalog("items_unique", "items_unique", a.days, a.ranks)
-    uid = lambda n: (best(n, U, r"^DA_(18_)?|_AD$|_AP$|18") or sys.exit(f"unit not found: {n}"))
-    iid = lambda n: (best(n, I, r"^DA_(18_|Artifact_|Item_Artifact_)?|18$") or sys.exit(f"item not found: {n}"))
+    uid = lambda n: best(n, U, r"^DA_(18_)?|_AD$|_AP$|18")
+    iid = lambda n: best(n, I, r"^DA_(18_|Artifact_|Item_Artifact_)?|18$")
     if a.cmd == "third":
         unit = uid(a.args[0]); have = [iid(x) for x in a.args[1:]]
         cands = [i for i in I if not re.search(r"Radiant|Emblem|Component|Potion|Spatula", i) and (a.artifacts or "Artifact" not in i) and i not in have]

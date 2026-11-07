@@ -12,3 +12,12 @@
 **Findings worth keeping.** datatft.com is a Vue SPA with no per-augment page; its `/rate` cheat sheet has anchors (Expected Unexpectedness = `/rate#14`, not sequential). MetaTFT's explorer API ignores unknown filter names and returns a uniform placement list (every slot equal) instead of an error. Repeating `unit_item_unique` ANDs items; one value with three `%26` parts returns zero.
 
 **Not applied elsewhere.** Other machines need `chezmoi apply` and a first `tft-refresh`; the job exists only in the nimbus branch.
+
+## 2026-10-11: tft-explore emblem names resolved to the wrong item (bead workspace-qw9zt)
+
+**Problem.** `tft-explore combo --item "Ravager Emblem"` silently queried `DA_18_EmblemBrawler`. MetaTFT's API exposes internal ids only; Ravager's internal trait id is `DA_18_Slayer`, so its emblem is `DA_18_EmblemSlayer`. The resolver then fell through to a substring/difflib fuzzy match and picked a different emblem without saying so.
+
+**Changed** (`dot_local/bin/executable_tft-explore`, copied to `~/.local/bin/tft-explore`).
+- `EMBLEM_ALIASES`: Ravager -> Slayer (confirmed: `DA_18_EmblemSlayer` is in the live API list); Monolith -> Battlemage (from `tft-data/ids.json` trait map; UNCONFIRMED, no Battlemage emblem is in the live API list).
+- Name resolution is exact (case/punctuation-insensitive) only. No exact match now exits 1 with `no exact match for X; close matches: ...` instead of fuzzy-picking.
+- `tft-explore --self-test` asserts Ravager Emblem -> DA_18_EmblemSlayer and that nonsense names error.
