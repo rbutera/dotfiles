@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- chaching web dashboard, loopback only, published as https://chaching.e8n.dev
+     through the e8n Cloudflare tunnel + Caddy, gated by Cloudflare Access.
+     Needs chaching >= 1.19.1 (scans and publishes at boot). serve - -port is
+     ignored, so the port comes from PORT. -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.chaching.serve</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/env</string>
+		<string>chaching</string>
+		<string>serve</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOST</key>
+		<string>127.0.0.1</string>
+		<key>PORT</key>
+		<string>4891</string>
+		<key>ORIGIN</key>
+		<string>https://chaching.e8n.dev</string>
+		<key>CHACHING_NO_ART</key>
+		<string>1</string>
+		<key>HOME</key>
+		<string>{{ .chezmoi.homeDir }}</string>
+		<key>PATH</key>
+		<string>{{ .chezmoi.homeDir }}/Library/pnpm:{{ .chezmoi.homeDir }}/.vite-plus/bin:{{ .chezmoi.homeDir }}/.asdf/shims:{{ .chezmoi.homeDir }}/bin:{{ .chezmoi.homeDir }}/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+	<key>StandardErrorPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/chaching-serve.log</string>
+	<key>StandardOutPath</key>
+	<string>{{ .chezmoi.homeDir }}/Library/Logs/chaching-serve.log</string>
+</dict>
+</plist>
