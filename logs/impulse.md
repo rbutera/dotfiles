@@ -526,3 +526,11 @@ I promised Rai a new Discord avatar and banner every day, logged in `~/navi/stat
 
 ### Solution/Fix
 Added Impulse job `discord-profile-check` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `tcc-access-check`): cron `30 5 * * *` Europe/London, runs `~/navi/bin/discord-profile-check.mjs`, timeout 120, skip-if-running. If no log entry falls on today's London date it whispers the live session once per date (exit 10); unreadable or garbled log exits 2 (could-not-check, no whisper). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets), registered by `launchctl kickstart -k gui/501/com.rai.impulse-worker` (`[sync-crons] synced ... (navi/discord-profile-check)`).
+
+## 2026-11-09 -- alarm-gap-check nightly job (nimbus)
+
+### Problem
+Four calendar-vs-alarm gaps in one week were found only by hand (an outing with no leave alarm, a TRT dose overlapping a dinner). Rule [rai/outing-ready-alarm] says every fixed-start outing gets alarms the evening before, but nothing checked it (bead workspace-rpkug).
+
+### Solution/Fix
+Added Impulse job `alarm-gap-check` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `bind-mount-guard`): cron `15 20 * * *` Europe/London, runs `~/navi/bin/alarm-gap-check.mjs --whisper`, timeout 180, skip-if-running. Read-only on gog calendar and the navi-alarms server; whispers Navi's live session on gaps (exit 10) or could-not-check (exit 2), silent when clear; never DMs Rai. Report: `~/navi/state/alarm-gap-check/latest.json`. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets), registered with `tsx src/main.ts sync-crons` (`synced ... (navi/alarm-gap-check) -> 15 20 * * * UTC`), proven with `tsx src/main.ts trigger alarm-gap-check` (exit 0, Tue 10 Nov clear) and a `--date 2026-11-15` trigger (exit 10, whisper accepted). Note: sync-crons converts to UTC at sync time, so after the BST change the cron fires 21:15 London until re-synced.
