@@ -1919,6 +1919,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/alarm-gap-check.mjs --whisper"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
   },
   {
+    "id": "staged-send-rearm",
+    "name": "Navi: re-arm staged DMs that lost their waiter to a reboot (every 15m; respawns future jobs, late-sends under 2h, else whispers Navi; bead workspace-wre58)",
+    "trigger": { "kind": "cron", "expr": "*/15 * * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/staged-send.mjs rearm"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 120 },
+    "enabled": true,
+    "tags": ["navi", "guard", "staged-send"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/staged-send.mjs rearm"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
+  },
+  {
     "id": "perch-idle-watchdog",
     "name": "Navi: Perch idle watchdog (whispers when lancelot/latios sit idle >30m while granted to Perch; every 20m)",
     "trigger": {
