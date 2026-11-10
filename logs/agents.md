@@ -81,3 +81,11 @@ per-agent overrides.
 - Takes effect on the NEXT ark session start / `ark restart`. Navi's live session
   (started ~19h before this change) keeps Opus 4.8 until restarted. kinto picks it
   up on `chezmoi update`.
+
+## 2026-11-10 -- Impulse: retire openclaw adapter agents and probe
+
+### Problem
+OpenClaw is retired at runtime, but Impulse still had four adapter "openclaw" agents (shikamaru, heimerdinger, hermione, rick) with tick and probe enabled and the nimbus capability openclawProbeEnabled true. The probe skipped every cycle because the health command fails.
+
+### Solution/Fix
+dot_config/impulse/config.json.tmpl: nimbus openclawProbeEnabled false. dot_config/impulse/agents.json.tmpl: openclawTickEnabled and openclawProbeEnabled false on the four openclaw agents (entries kept). Deployed with chezmoi apply --force (prior drift was whitespace only). Only the nimbus worker restarted; latios and spitfire pick it up on their next apply and restart.
