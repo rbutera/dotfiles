@@ -552,3 +552,11 @@ dot_zshenv.tmpl defaulted ARK_WORKSPACE to ~/tilly on every host in host_groups.
 - .chezmoidata.toml: new [ark_workspaces] map (nimbus=navi, latios=malfoy, spike=sage).
 - dot_zshenv.tmpl: default from the map; unlisted non-work hosts keep navi; unlisted work hosts get NO default, so ark refuses.
 - dot_local/bin/executable_ark: runs ~/dev/lumiere/apps/ark/dist/main.js (nimbus's pnpm shim targets the same file). ~/.local/bin is on latios's PATH.
+
+## 2026-11-10 -- Remove OpenClaw aliases and systemd drop-in
+
+### Problem
+OpenClaw is unhooked at runtime (8 Nov); aliases rrnavi, ocfg, updatenavi and the openclaw-gateway systemd env drop-in only pointed at it. No live caller found in navi/bin, skills, lumiere apps or LaunchAgents.
+
+### Solution/Fix
+Removed the three aliases (updatenavi called rrnavi) from dot_aliases.tmpl and deleted the drop-in from source. dot_zshrc.tmpl OpenClaw completion line (82-83) left: deployed ~/.zshrc has an uncommitted "Unity CLI" line absent from source, so applying would wipe it. Catch the source up to that first, then drop the completion line.

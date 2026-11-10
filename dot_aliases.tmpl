@@ -313,9 +313,6 @@ npmfresh() {
   npm install -g --min-release-age=0.5 "$@"
 }
 
-alias rrnavi="openclaw gateway restart"
-alias ocfg="nvim ~/.openclaw/openclaw.json"
-
 alias infra="docker compose -f ~/docker/compose.yml"
 claude() {
   case " $* " in
@@ -332,8 +329,6 @@ codex() {
 }
 alias yolocodex="codex --dangerously-bypass-approvals-and-sandbox"
 
-
-alias updatenavi="cd ~/oclaw && git checkout main && git pull && pnpm install && pnpm build && pnpm ui:build && rrnavi"
 
 alias comfyui="cd /home/rai/ComfyUI && source .venv/bin/activate && python main.py"
 
