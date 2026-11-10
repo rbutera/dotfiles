@@ -79,9 +79,6 @@ fi
 # starship prompt
 eval "$(starship init zsh)"
 
-# OpenClaw Completion
-[[ -f "$HOME/.openclaw/completions/openclaw.zsh" ]] && source "$HOME/.openclaw/completions/openclaw.zsh"
-
 # stop windows WSL / nodejs appearing in wsl path
 export PATH=$(echo $PATH | tr ':' '\n' | grep -v 'AppData.*npm\|nodejs' | tr '\n' ':')
 
@@ -107,3 +104,6 @@ autoload -Uz compinit && compinit -C
 # bun completions ($HOME, not the installer's hardcoded /Users/rai — this file
 # also deploys to Linux). The -s guard makes it inert where bun isn't installed.
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# Unity CLI
+. "/Users/rai/.unity/env"
