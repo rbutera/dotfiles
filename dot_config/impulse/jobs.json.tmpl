@@ -1916,7 +1916,7 @@
     "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 180 },
     "enabled": true,
     "tags": ["navi", "guard", "alarms"],
-    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/alarm-gap-check.mjs --whisper"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/alarm-gap-check.mjs --whisper"], "cwd": "{{ .chezmoi.homeDir }}/navi", "okExitCodes": [0, 10] }
   },
   {
     "id": "staged-send-rearm",
