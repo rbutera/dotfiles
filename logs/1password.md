@@ -9,3 +9,9 @@
 ## 2026-10-07 (later) — chezmoi-agent wrapper, focused vault retired
 
 **Changed:** added `bin/executable_chezmoi-agent` (service-mode chezmoi for agents, token from `~/.config/op/<agent>-token`). Repointed the six `onepasswordDetailsFields ... "Private"` calls to `"Rai"` (the first pass only caught `op://` refs). The `focused` vault is retired: Flaude Discord moved to Rai, and the Cursor API key and Claude Code OAuth token refs were removed (Rai no longer uses them). Documented in CLAUDE.md/AGENTS.md. Verified: `chezmoi-agent --agent navi status` renders every template (rc 0), and the impulse .env diff shows only comment changes, so the values are identical through the service account.
+
+## 2026-11-11 — Sage service account on Spike
+
+**Problem:** Spike (Rai's Conveo laptop, cloned from latios on 31 Oct) had no agent service account of its own. Its agent shells picked up the cloned `~/.config/op/tilly-token`, so anything Sage did in 1Password was logged as Tilly.
+
+**Changed:** Rai created a `Sage` service account with read and write on the Rai and dev vaults (item "Service Account Auth Token: Sage"; Rai chose to give Spike the Rai vault). The token is in `~/.config/op/sage-token` (600, outside git) on Spike. `dot_zshenv.tmpl` now checks `sage-token` before `tilly-token` and `navi-token`. Other machines have no sage-token, so nothing changes for them. Verified on Spike: the token is a SERVICE_ACCOUNT and lists the Rai and dev vaults. The cloned tilly-token on Spike was moved to `~/.ark/bots/from-latios-clone-20261111/`.
