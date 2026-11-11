@@ -1,7 +1,7 @@
 {
   "agents": [
     {
-      "agentId": "hermione",
+      "agentId": "summer",
       "adapter": "ark",
       "strategy": "base",
       "temperatureEnabled": false,

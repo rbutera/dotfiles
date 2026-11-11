@@ -2,12 +2,12 @@
   "environment": "latios",
   "timezone": "Europe/London",
   "paths": {
-    "workspaceRoot": "/Users/rai/hermione",
+    "workspaceRoot": "/Users/rai/summer",
     "repoRoot": "/Users/rai/dev/lumiere",
-    "stateRoot": "/Users/rai/.local/state/impulse-agents/hermione/state"
+    "stateRoot": "/Users/rai/.local/state/impulse-agents/summer/state"
   },
   "hatchet": {
-    "namespace": "hermione",
+    "namespace": "summer",
     "workerName": "impulse-latios"
   },
   "capabilities": {

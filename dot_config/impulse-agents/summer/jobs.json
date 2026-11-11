@@ -1,0 +1,76 @@
+[
+ {
+  "id": "summer-weekly-digest",
+  "name": "Summer: weekly culture digest (Sun 07:30 London)",
+  "trigger": {
+   "kind": "cron",
+   "expr": "30 7 * * 0",
+   "tz": "Europe/London"
+  },
+  "target": {
+   "kind": "ark-spawn",
+   "agent": "summer",
+   "model": "claude-opus-5-5"
+  },
+  "payload": {
+   "kind": "prompt",
+   "text": "Summer: weekly culture digest (Sun 07:30 London)"
+  },
+  "policy": {
+   "maxConcurrent": 1,
+   "quotaAware": true,
+   "dedupe": "skip-if-running",
+   "timeout": 1800
+  },
+  "enabled": true,
+  "tags": [
+   "culture",
+   "summer",
+   "latios"
+  ],
+  "promptFile": "prompts/weekly-digest.md",
+  "inputs": {
+   "agent": "summer",
+   "workingDir": "/Users/rai/summer",
+   "model": "claude-opus-5-5",
+   "maxTurns": 150
+  }
+ },
+ {
+  "id": "summer-digest-catchup",
+  "name": "Summer: digest catch-up if Sunday's was missed (Mon 07:30 London)",
+  "trigger": {
+   "kind": "cron",
+   "expr": "30 7 * * 1",
+   "tz": "Europe/London"
+  },
+  "target": {
+   "kind": "ark-spawn",
+   "agent": "summer",
+   "model": "sonnet"
+  },
+  "payload": {
+   "kind": "prompt",
+   "text": "Summer: digest catch-up if Sunday's was missed (Mon 07:30 London)"
+  },
+  "policy": {
+   "maxConcurrent": 1,
+   "quotaAware": true,
+   "dedupe": "skip-if-running",
+   "timeout": 1800
+  },
+  "enabled": true,
+  "tags": [
+   "culture",
+   "summer",
+   "latios"
+  ],
+  "promptFile": "prompts/digest-catchup.md",
+  "inputs": {
+   "agent": "summer",
+   "workingDir": "/Users/rai/summer",
+   "model": "sonnet",
+   "maxTurns": 150
+  }
+ }
+]

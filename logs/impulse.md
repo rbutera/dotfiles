@@ -1,3 +1,11 @@
+## 2026-11-11 -- Hermione's Impulse config renamed to Summer (Malfoy)
+
+### Problem
+Rai renamed the latios culture agent from Hermione to Summer (Discord 15:41, 11 Nov). A separate, new Hermione agent comes later, so the old `impulse-agents/hermione` path and the `hermione` Hatchet namespace had to be freed.
+
+### Change
+`dot_config/impulse-agents/hermione` was moved to `summer` and caught up with the live latios files: agentId and namespace `summer`, workspace `/Users/rai/summer`, job ids `summer-weekly-digest` and `summer-digest-catchup`, and prompts saying "You are Summer". The `.chezmoiignore` latios-only entry now names `summer`. On latios, the two old crons were pruned from the `hermione` namespace (`sync-crons --prune` against an emptied jobs.json) and synced under `summer`. The old live dir is kept as `~/.config/impulse-agents/hermione.retired-20261111`. The .env (Hatchet creds) stays host-local. Not applied here: latios already matches.
+
 ## 2026-10-11 -- latios jobs.json: template caught up with live; quota-scrape disabled (Tilly)
 
 ### Problem
