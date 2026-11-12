@@ -656,6 +656,37 @@
     }
   },
   {
+    "id": "todoist-stale-expiry",
+    "name": "Todoist weekly stale expiry (non-recurring tasks overdue >21d and unedited 21d move to Someday, no due date, never closed; workspace-u45us)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 18 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-stale-expiry.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-stale-expiry.out 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["todoist", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-stale-expiry.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-stale-expiry.out 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "playlist-sync",
     "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
     "trigger": {

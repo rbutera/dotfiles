@@ -550,3 +550,11 @@ Recurring Todoist habits missed on busy days piled up as overdue (48 on 11 Nov),
 
 ### Solution/Fix
 Added Impulse job `todoist-roll-habits` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, before `playlist-sync`): cron `30 3 * * *` Europe/London, `zsh -lc 'exec node ~/navi/bin/todoist-roll-habits.mjs --apply >> ~/.logs/todoist-roll-habits.out 2>&1'`, timeout 300, skip-if-running. The script re-sends the same due_string on recurring tasks overdue >24h (nothing completed); excludes Conveo, Focused Labs, Therapy Homework, labels private/no-triage. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets; diff showed only this job) and registered with `tsx src/main.ts sync-crons` (`synced ... (navi/todoist-roll-habits) -> 30 3 * * * UTC`); the worker was NOT restarted. Own log: `~/navi/logs/todoist-roll-habits.log`.
+
+## 2026-11-12 -- todoist-stale-expiry Impulse job (workspace-u45us item 3)
+
+### Problem
+One-off Todoist tasks that go stale (overdue more than 21 days, untouched) keep piling into the overdue list.
+
+### Solution/Fix
+Added Impulse job `todoist-stale-expiry` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `todoist-roll-habits`): cron `0 18 * * 0` Europe/London, `zsh -lc 'exec node ~/navi/bin/todoist-stale-expiry.mjs --apply >> ~/.logs/todoist-stale-expiry.out 2>&1'`, timeout 300, skip-if-running. Moves non-recurring tasks overdue >21d and not edited for 21d into the "Someday" project with no due date (never closes or deletes). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets; diff showed only this job) and registered with `tsx src/main.ts sync-crons`; the worker was NOT restarted. Own log with undo data: `~/navi/logs/todoist-stale-expiry.log` (`--undo <date>` reverses a run).
