@@ -687,6 +687,37 @@
     }
   },
   {
+    "id": "todoist-overdue-guard",
+    "name": "Todoist overdue guard (hourly 09-21: >10 non-recurring overdue stages a batch digest of the oldest 10 for a calm slot, once a day; workspace-u45us)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 9-21 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-overdue-guard.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-overdue-guard.out 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["todoist", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-overdue-guard.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-overdue-guard.out 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "playlist-sync",
     "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
     "trigger": {
