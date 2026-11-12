@@ -47,7 +47,11 @@ ME=$(/usr/bin/id -un)
 # Subtracted from the candidate set and wins over REAPABLE_RE. Editors, agents,
 # harnesses, long-lived daemons, anything inside an .app bundle, and this script
 # itself are never candidates.
-NEVER_RE='\.app/Contents|Electron|/claude|/codex|codex |tokenmaxx|paseo|tsserver|language-server|typescript-language|ssh-agent|/launchd|dev-reaper|Code Helper|T3 Code'
+# Globally installed CLIs (pnpm/global) are daemons or tools, never leaked dev builds.
+# Their pnpm store directory names embed peer versions (chaching@..._vite@8_esbuild@0.2_...),
+# so without this a launchd-run `chaching serve` (ppid 1) matched REAPABLE_RE on 'esbuild'
+# and was SIGTERMed every 10 minutes from 8 Nov 2026 (547 kills, each a full Neon resync).
+NEVER_RE='pnpm/global/|chaching|\.app/Contents|Electron|/claude|/codex|codex |tokenmaxx|paseo|tsserver|language-server|typescript-language|ssh-agent|/launchd|dev-reaper|Code Helper|T3 Code'
 
 # The only things this script will ever kill.
 REAPABLE_RE='vitest|jest|esbuild|node_modules/\.bin/(vite|nx|biome|eslint|tsc)|nx mcp|dlx nx-mcp|Caches/pnpm/dlx/'
