@@ -625,6 +625,37 @@
     }
   },
   {
+    "id": "todoist-roll-habits",
+    "name": "Todoist nightly habit roll-forward (recurring tasks overdue >24h move to next occurrence, nothing completed; workspace-u45us)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 3 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-roll-habits.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-roll-habits.out 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["todoist", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/todoist-roll-habits.mjs --apply >> {{ .chezmoi.homeDir }}/.logs/todoist-roll-habits.out 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "playlist-sync",
     "name": "Walk playlist sync (nightly re-verify ids + prefetch missing audio, workspace-nbsur)",
     "trigger": {

@@ -542,3 +542,11 @@ Four calendar-vs-alarm gaps in one week were found only by hand (an outing with 
 
 ### Solution/Fix
 Added Impulse job `alarm-gap-check` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `bind-mount-guard`): cron `15 20 * * *` Europe/London, runs `~/navi/bin/alarm-gap-check.mjs --whisper`, timeout 180, skip-if-running. Read-only on gog calendar and the navi-alarms server; whispers Navi's live session on gaps (exit 10) or could-not-check (exit 2), silent when clear; never DMs Rai. Report: `~/navi/state/alarm-gap-check/latest.json`. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets), registered with `tsx src/main.ts sync-crons` (`synced ... (navi/alarm-gap-check) -> 15 20 * * * UTC`), proven with `tsx src/main.ts trigger alarm-gap-check` (exit 0, Tue 10 Nov clear) and a `--date 2026-11-15` trigger (exit 10, whisper accepted). Note: sync-crons converts to UTC at sync time, so after the BST change the cron fires 21:15 London until re-synced.
+
+## 2026-11-12 -- todoist-roll-habits nightly job
+
+### Problem
+Recurring Todoist habits missed on busy days piled up as overdue (48 on 11 Nov), causing decision paralysis (bead workspace-u45us item 1).
+
+### Solution/Fix
+Added Impulse job `todoist-roll-habits` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, before `playlist-sync`): cron `30 3 * * *` Europe/London, `zsh -lc 'exec node ~/navi/bin/todoist-roll-habits.mjs --apply >> ~/.logs/todoist-roll-habits.out 2>&1'`, timeout 300, skip-if-running. The script re-sends the same due_string on recurring tasks overdue >24h (nothing completed); excludes Conveo, Focused Labs, Therapy Homework, labels private/no-triage. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets; diff showed only this job) and registered with `tsx src/main.ts sync-crons` (`synced ... (navi/todoist-roll-habits) -> 30 3 * * * UTC`); the worker was NOT restarted. Own log: `~/navi/logs/todoist-roll-habits.log`.
