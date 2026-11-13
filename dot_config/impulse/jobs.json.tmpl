@@ -656,6 +656,37 @@
     }
   },
   {
+    "id": "bd-lock-watchdog",
+    "name": "Kill any bd process older than 180s so one hung bd cannot hold the embedded-dolt lock (workspace-6yhgw)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "*/2 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bd-lock-watchdog.mjs >> {{ .chezmoi.homeDir }}/.logs/bd-lock-watchdog.out 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": ["beads", "guard", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec node {{ .chezmoi.homeDir }}/navi/bin/bd-lock-watchdog.mjs >> {{ .chezmoi.homeDir }}/.logs/bd-lock-watchdog.out 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "todoist-stale-expiry",
     "name": "Todoist weekly stale expiry (non-recurring tasks overdue >21d and unedited 21d move to Someday, no due date, never closed; workspace-u45us)",
     "trigger": {
