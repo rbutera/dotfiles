@@ -1,0 +1,4 @@
+#!/bin/sh
+# ark-hop CLI (bead workspace-hklhs). Runs the lumiere checkout's cli.ts with
+# Node 26 type stripping; same shape as the ark wrapper next to it.
+exec node "$HOME/dev/lumiere/apps/ark-hop/src/cli.ts" "$@"
