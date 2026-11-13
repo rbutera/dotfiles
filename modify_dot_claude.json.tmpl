@@ -43,8 +43,14 @@ read -r -d '' base_mcps << 'MCPS' || true
   },
   "cua-driver": {
     "command": "{{ .chezmoi.homeDir }}/.local/bin/cua-driver",
-    "args": ["mcp"]
+    "args": ["mcp"{{ if eq .chezmoi.hostname "spike" }}, "--grant", "existing-profile"{{ end }}]
   }
+{{- if eq .chezmoi.hostname "spike" }}
+  ,"aperture": {
+    "type": "http",
+    "url": "http://ai/v1/mcp"
+  }
+{{- end }}
 {{- if eq .chezmoi.hostname "nimbus" }}
   ,"cortex": {
     "command": "node",
