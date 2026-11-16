@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>GIT_SSH_COMMAND</key>
+		<string>ssh -F /dev/null -o BatchMode=yes -o IdentitiesOnly=yes -o IdentityAgent=none -i /Users/rai/.ssh/id_ed25519 -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4</string>
+		<key>HOME</key>
+		<string>/Users/rai</string>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/bin:/bin</string>
+	</dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.rai.beads-dolt-server</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/opt/homebrew/bin/dolt</string>
+		<string>sql-server</string>
+		<string>--config</string>
+		<string>/Users/rai/navi/.beads/dolt/server.yaml</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/rai/.logs/beads-dolt-server.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/rai/.logs/beads-dolt-server.log</string>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>WorkingDirectory</key>
+	<string>/Users/rai/navi/.beads/dolt</string>
+</dict>
+</plist>
