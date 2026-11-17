@@ -560,3 +560,11 @@ OpenClaw is unhooked at runtime (8 Nov); aliases rrnavi, ocfg, updatenavi and th
 
 ### Solution/Fix
 Removed the three aliases (updatenavi called rrnavi) from dot_aliases.tmpl and deleted the drop-in from source. dot_zshrc.tmpl OpenClaw completion line (82-83) left: deployed ~/.zshrc has an uncommitted "Unity CLI" line absent from source, so applying would wipe it. Catch the source up to that first, then drop the completion line.
+
+## 2026-11-17 -- qmd index.yml under chezmoi
+
+### Problem
+~/.config/qmd/index.yml (recall collections, globs, chronicler ignore list) was not backed up; a rebuild would lose it.
+
+### Solution/Fix
+Added dot_config/qmd/index.yml (no secrets, plain file). It holds nimbus-only absolute paths, so .chezmoiignore skips it on every host except nimbus.

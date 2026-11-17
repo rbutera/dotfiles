@@ -1,0 +1,57 @@
+collections:
+  notes:
+    path: /Users/rai/notes
+    pattern: "**/*.md"
+    context:
+      "": "Rai's personal Obsidian vault. Flat kepano structure (kepano-v3 migration 2026-07-04): notes live at vault root; frontmatter (tags plural, categories, status) is the taxonomy; navigate by search/backlinks/hub notes, not folders."
+      References: "Notes about external entities: people, books, games, tools, places"
+      Clippings: Content written by others (articles, pasted docs)
+      Attachments: Images, PDFs, media
+      Daily: Dated personal journal notes (YYYY-MM-DD.md)
+      Templates: Obsidian note templates
+      Inbox: Capture buffer only, machine-drained daily by the vault curator
+      Florence: Florence's letters (never modified by agents)
+      Navi: Navi relational notes (never modified without explicit task)
+  lumiere:
+    path: /Users/rai/dev/lumiere
+    pattern: "**/*.{ts,tsx,js,md,json}"
+    context:
+      "": "Nx monorepo containing all Expedition code. Apps: taskmaster (morning briefing), job-sourcing (board scrapers), jobder (job pipeline UI), logger."
+      apps/taskmaster: "Taskmaster app: fetches Todoist tasks + calendar, ranks them, outputs morning briefing. Used by Dobby."
+      apps/job-sourcing: "Job sourcing scripts: Reed, Adzuna API integrations and Playwright scrapers for job boards"
+      apps/job-sourcing-playground: Experimental job sourcing playground
+      apps/jobder: "Jobder: job pipeline UI — browse, rate, and manage job opportunities"
+      apps/logger: Logger utility app
+  clair-obscur:
+    path: /Users/rai/dev/clair-obscur/vault
+    pattern: "**/*.md"
+    context:
+      "": "Complete knowledge base for Clair Obscur: Expedition 33 — story, lore, mechanics, characters, guides, and walkthroughs."
+      character-information: "Character profiles, stats, abilities, and lore for all characters in Clair Obscur: Expedition 33"
+      character-information/characters: Full character index with detailed entries
+      character-information/attributes: Character attributes and stat systems
+      character-information/skills: Skills, abilities, and skill trees
+      character-information/status-effects: Status effects and buffs/debuffs
+  expedition:
+    path: /Users/rai/dev/expedition
+    pattern: "**/*.md"
+  expedition-vault:
+    path: /Users/rai/expedition
+    pattern: "**/*.md"
+    context:
+      "": Rai kepano Expedition Obsidian vault (flat root notes + Essays/, Playbook/, References/, Attachments/, Templates/, Inbox/), separate from the git worklog ~/dev/expedition. Frontmatter (tags/categories/status) is the taxonomy.
+  navi:
+    path: /Users/rai/navi
+    pattern: "**/*.md"
+  chronicler:
+    path: /Users/rai/navi/workspace/memory/chronicler
+    pattern: "**/*.md"
+    ignore:
+      - "**/sources.md"
+      - "clean-transcript.md"
+      - "dry-run-*"
+      - "processing-*"
+models:
+  embed: hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf
+  generate: hf:tobil/qmd-query-expansion-1.7B-gguf/qmd-query-expansion-1.7B-q4_k_m.gguf
+  rerank: hf:ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/qwen3-reranker-0.6b-q8_0.gguf

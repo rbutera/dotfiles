@@ -38,6 +38,11 @@ Library/LaunchAgents/com.chaching.serve.plist
 Library/LaunchAgents/sh.tokenmaxx.daemon.plist
 {{ end }}
 
+# qmd collection config: paths are nimbus-specific (recall index over nimbus vaults/repos).
+{{ if ne .chezmoi.hostname "nimbus" }}
+.config/qmd/index.yml
+{{ end }}
+
 {{ if ne .chezmoi.hostname "nimbus" }}
 Library/LaunchAgents/dev.onorca.serve.plist
 Library/LaunchAgents/com.rai.presence.plist
