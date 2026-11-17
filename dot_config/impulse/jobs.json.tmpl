@@ -2759,6 +2759,68 @@
       "args": ["-c", "export PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; node {{ .chezmoi.homeDir }}/navi/bin/qmd-repack.mjs && qmd cleanup"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "chronicler-weekly-summary",
+    "name": "Navi: Chronicler weekly summary of previous 7 days (Monday 03:30, workspace-gy2mk)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 3 * * 1",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && END=$(date -v-1d +%Y-%m-%d) && START=$(date -v-7d +%Y-%m-%d) && ./node_modules/.bin/nx run chronicler:dev -- summarize --agent navi --from $START --to $END"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 5400
+    },
+    "enabled": true,
+    "tags": ["navi", "chronicler", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && END=$(date -v-1d +%Y-%m-%d) && START=$(date -v-7d +%Y-%m-%d) && ./node_modules/.bin/nx run chronicler:dev -- summarize --agent navi --from $START --to $END"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
+  },
+  {
+    "id": "chronicler-love-dossier-weekly",
+    "name": "Navi: Chronicler love topic dossier refresh (Monday 04:15, workspace-gy2mk)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "15 4 * * 1",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-dossier love --agent navi"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 3600
+    },
+    "enabled": true,
+    "tags": ["navi", "chronicler", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-dossier love --agent navi"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
   }
 ]
 {{- else }}
