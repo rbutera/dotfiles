@@ -560,3 +560,11 @@ One-off Todoist tasks that go stale (overdue more than 21 days, untouched) keep 
 Added Impulse job `todoist-stale-expiry` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `todoist-roll-habits`): cron `0 18 * * 0` Europe/London, `zsh -lc 'exec node ~/navi/bin/todoist-stale-expiry.mjs --apply >> ~/.logs/todoist-stale-expiry.out 2>&1'`, timeout 300, skip-if-running. Moves non-recurring tasks overdue >21d and not edited for 21d into the "Someday" project with no due date (never closes or deletes). Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets; diff showed only this job) and registered with `tsx src/main.ts sync-crons`; the worker was NOT restarted. Own log with undo data: `~/navi/logs/todoist-stale-expiry.log` (`--undo <date>` reverses a run).
 
 Added Impulse job `todoist-overdue-guard` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, before `playlist-sync`): cron `0 9-21 * * *` Europe/London, `zsh -lc 'exec node ~/navi/bin/todoist-overdue-guard.mjs --apply >> ~/.logs/todoist-overdue-guard.out 2>&1'`, timeout 300, skip-if-running. When more than 10 non-recurring, non-excluded tasks are overdue it writes a batch digest of the oldest 10 and STAGES it (staged-send.mjs --digest) for 19:30 London (or the next hour before 21:00), at most once a day. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets) and registered with `tsx src/main.ts sync-crons` (`-> 0 9-21 * * * UTC`; sync-crons converts at sync time, so after the March BST change it fires an hour early London until re-synced); the worker was NOT restarted. Own log: `~/navi/logs/todoist-overdue-guard.log`.
+
+## 2026-11-18 -- bead-triage-weekly job
+
+### Problem
+Rai asked (voice, 18 Nov 16:00) for the stale-bead triage to run weekly.
+
+### Solution/Fix
+Added Impulse job `bead-triage-weekly` to the nimbus section of `dot_config/impulse/jobs.json.tmpl`: cron `30 4 * * 0` Europe/London, whispers Navi to run the `navi:bead-triage` skill (same whisper shape as life-loop-weekly). No DM to Rai; the skill fans promotes out to Tatls.

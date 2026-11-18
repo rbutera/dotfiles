@@ -2883,6 +2883,47 @@
       "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-refresh --agent navi --max 3 --time-budget-minutes 60"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
+  },
+  {
+    "id": "bead-triage-weekly",
+    "name": "Navi: weekly stale-bead triage (Sundays 04:30 London; whispers Navi to run the bead-triage skill, promotes get worked, no DM to Rai)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 4 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source bead-triage-weekly \"$1\"",
+        "bead-triage",
+        "Weekly stale-bead triage (Impulse job bead-triage-weekly). Run the navi:bead-triage skill (~/navi/skills/bead-triage/SKILL.md) end to end: build the stale list, dispatch one background ark:tatl per batch, merge, then work the promotes. Log the run in today's daily letter first so a renew can re-dispatch batches with no result file. Rai's rule (voice 18 Nov): NO summary message to him; results go to the run dir and a letter pointer line, autonomous promotes get worked by the next Continue ticks, only real decisions go on the Potara board."
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": ["navi", "beads", "adhd-scaffolding", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source bead-triage-weekly \"$1\"",
+        "bead-triage",
+        "Weekly stale-bead triage (Impulse job bead-triage-weekly). Run the navi:bead-triage skill (~/navi/skills/bead-triage/SKILL.md) end to end: build the stale list, dispatch one background ark:tatl per batch, merge, then work the promotes. Log the run in today's daily letter first so a renew can re-dispatch batches with no result file. Rai's rule (voice 18 Nov): NO summary message to him; results go to the run dir and a letter pointer line, autonomous promotes get worked by the next Continue ticks, only real decisions go on the Potara board."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}
