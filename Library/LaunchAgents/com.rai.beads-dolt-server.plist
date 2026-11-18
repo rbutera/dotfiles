@@ -9,7 +9,7 @@
 		<key>HOME</key>
 		<string>/Users/rai</string>
 		<key>PATH</key>
-		<string>/opt/homebrew/bin:/usr/bin:/bin</string>
+		<string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin</string>
 	</dict>
 	<key>KeepAlive</key>
 	<true/>
@@ -17,6 +17,9 @@
 	<string>com.rai.beads-dolt-server</string>
 	<key>ProgramArguments</key>
 	<array>
+		<string>/Users/rai/.config/ark/host-guard.sh</string>
+		<string>--agent</string>
+		<string>infra</string>
 		<string>/opt/homebrew/bin/dolt</string>
 		<string>sql-server</string>
 		<string>--config</string>
