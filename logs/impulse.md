@@ -1,3 +1,11 @@
+## 2026-11-18 -- stewardship-emit job (portfolio-pulse + mission-board-staleness)
+
+### Problem
+The expedition dashboard stewardship panel reads `state/portfolio-pulse/latest.json` and `state/mission-board-staleness/latest.json` (plus schedule.json for each), but only cortex-health ever wrote its files. Both rows were stuck on "not yet run" (bead workspace-tt6w).
+
+### Fix
+Added job `stewardship-emit` (cron `0 7 * * 1`, Europe/London, node script `~/navi/bin/stewardship-emit.mjs`). It writes both latest.json and schedule.json atomically from counts over PORTFOLIO.md and the mtimes of PORTFOLIO.md/MISSION.md. Tests: `~/navi/bin/stewardship-emit.test.mjs`. Rendered template checked: valid JSON, 92 jobs.
+
 ## 2026-11-18 -- bead-triage-weekly moved from ark whisper to ark-spawn
 
 ### Problem

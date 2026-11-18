@@ -1499,6 +1499,37 @@
     }
   },
   {
+    "id": "stewardship-emit",
+    "name": "Stewardship emit: portfolio-pulse + mission-board-staleness artifacts for the dashboard panel [workspace-tt6w]",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 7 * * 1",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/stewardship-emit.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 300
+    },
+    "enabled": true,
+    "tags": ["navi", "dashboard", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/stewardship-emit.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "narrate-daily",
     "name": "Narrate Daily Post",
     "trigger": {
