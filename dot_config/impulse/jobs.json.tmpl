@@ -439,6 +439,36 @@
     }
   },
   {
+    "id": "majora-todo-feed",
+    "name": "Majora To-Do feed (daily dry-run plan: gate open items, graduation needs flag file, workspace-4fjwl)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "40 4 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/majora-todo-feed.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["majora", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/majora-todo-feed.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "log-cap",
     "name": "Log cap (hourly: rotate boot-disk logs over 50 MB to .1.gz/.2.gz, truncate in place, workspace-dqw85)",
     "trigger": {

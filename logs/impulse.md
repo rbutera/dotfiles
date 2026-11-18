@@ -584,3 +584,11 @@ Bead workspace-lz6j3: `bin/detect-stale-beads.mjs` (read-only detector, navi d7a
 
 ### Solution/Fix
 Added Impulse job `stale-bead-detector-weekly` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `bead-triage-weekly`): cron `20 4 * * 0` Europe/London, `node ~/navi/bin/detect-stale-beads.mjs`, timeout 600, skip-if-running. Runs 10 minutes before the triage so a dated report (`~/dev/expedition/projects/35-autopilot/stale-beads-report-YYYY-MM-DD.md`) exists first. Never mutates beads. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no onepasswordRead) and registered with `tsx src/main.ts sync-crons`. Manual run proved it: 635 open beads, 517 candidates, report written.
+
+## 2026-11-18 -- majora-todo-feed job
+
+### Problem
+Bead workspace-4fjwl: Majora To-Do.md had a reporter but no feed step. Built `navi/bin/majora-todo-feed.mjs` (checkability gate, graduate-to-bead, auto-execute deliberately absent).
+
+### Solution/Fix
+Added Impulse job `majora-todo-feed` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `hatchet-session-prune`): cron `40 4 * * *` Europe/London, runs the feed in dry-run mode only. Graduating needs `--apply` plus `graduate: true` in `~/navi/state/majora-research/todo-feed.json` (absent, so off). The Majora engine stays paused.
