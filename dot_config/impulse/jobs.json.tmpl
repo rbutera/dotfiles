@@ -3070,6 +3070,68 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/forge-ledger-guard.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "curator-vault-health-expedition",
+    "name": "Curator vault-health (expedition vault); moved from launchd com.rai.curator-vault-health-expedition per Rule 65 [workspace-ud7w0]",
+    "trigger": {
+      "kind": "cron",
+      "expr": "22 18 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec zsh {{ .chezmoi.homeDir }}/navi/curator/run-curator.sh vault-health expedition >> {{ .chezmoi.homeDir }}/.logs/curator/launchd-vault-health-expedition.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 3600
+    },
+    "enabled": true,
+    "tags": ["navi", "curator", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec zsh {{ .chezmoi.homeDir }}/navi/curator/run-curator.sh vault-health expedition >> {{ .chezmoi.homeDir }}/.logs/curator/launchd-vault-health-expedition.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi/curator"
+    }
+  },
+  {
+    "id": "curator-vault-health-notes",
+    "name": "Curator vault-health (notes vault); moved from launchd com.rai.curator-vault-health-notes per Rule 65 [workspace-ud7w0]",
+    "trigger": {
+      "kind": "cron",
+      "expr": "27 18 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec zsh {{ .chezmoi.homeDir }}/navi/curator/run-curator.sh vault-health notes >> {{ .chezmoi.homeDir }}/.logs/curator/launchd-vault-health-notes.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 3600
+    },
+    "enabled": true,
+    "tags": ["navi", "curator", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec zsh {{ .chezmoi.homeDir }}/navi/curator/run-curator.sh vault-health notes >> {{ .chezmoi.homeDir }}/.logs/curator/launchd-vault-health-notes.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi/curator"
+    }
   }
 ]
 {{- else }}
