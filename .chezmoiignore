@@ -205,3 +205,6 @@ run_onchange_apply-claude-json-windows.ps1
 {{ if ne .chezmoi.hostname "latios" }}
 .config/impulse-agents/summer
 {{ end }}
+
+# impeccable engine binary (19M, downloaded by `npx impeccable install`, not tracked)
+.claude/skills/impeccable/scripts/bin

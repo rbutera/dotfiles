@@ -543,3 +543,14 @@ The unresolvable-bead-reference trap only fired on PreToolUse for Bash, so prose
 ### Changes
 - `dot_claude/modify_settings.json`: added a second PreToolUse entry, matcher `Edit|Write|MultiEdit`, running the same `~/navi/bin/shell-trap-check.mjs` (warn-only, exit 0). The checker itself (diff-scoped: only ids an edit ADDS are judged) lives in the navi repo, bin/shell-trap-check.mjs, with tests in bin/shell-trap-check.test.mjs.
 - Deployed `~/.claude/settings.json` was patched surgically with jq (the one entry appended) and NOT via `chezmoi apply`: the modify script's `.hooks.PreToolUse` rewrite already drifts from the deployed file (it would drop the deployed Artifact guard entry). That pre-existing drift is untouched and still needs a separate decision.
+
+## 2026-11-18 — impeccable design skill installed (bead workspace-304jc)
+
+### Motivation
+Rai asked on 2026-08-04 for the impeccable frontend taste/design skill pack on nimbus. It was never installed (only `~/.impeccable` update-check state existed).
+
+### Changes
+- Verified the artifact first: npm `impeccable` (repo github.com/pbakaus/impeccable, "Design skills, commands, and anti-pattern detection for AI coding agents"), free. Installed with its official installer `npx impeccable install -y --providers=claude --no-hooks`. Pinned to v4.9.1, not the newest 4.9.2, because this machine's npm `min-release-age=3` days refuses 4.9.2 (published 2026-11-16).
+- The installer was run with `--scope=project` in a scratch dir, then the output was added through chezmoi: `dot_claude/skills/impeccable/` (SKILL.md, reference/, scripts/) and `dot_claude/agents/impeccable-*.md` (four helper agents the installer adds). `--no-hooks` means settings.json was not touched.
+- The 19M engine binary (`scripts/bin/darwin-arm64/impeccable`) is not tracked: `.chezmoiignore` now ignores `.claude/skills/impeccable/scripts/bin`. On a new machine re-run `npx impeccable install` (or `impeccable update`) to fetch it.
+- Verified: SKILL.md frontmatter parses (name impeccable, version 4.9.1); engine `--version` prints 4.9.1; `chezmoi status` clean for these paths.
