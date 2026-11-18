@@ -624,3 +624,11 @@ Job `expedition-calibration` (Sun 19:00 Europe/London, enabled since 2026-05-10)
 
 ### Solution/Fix
 Changed the job in `dot_config/impulse/jobs.json.tmpl` to the same shape as `dream-sources-seed`: `target.kind: ark-spawn` (navi, sonnet), payload prompt "Run the expedition calibration skill.", `promptFile: prompts/expedition-calibration.md` (existing, tells the agent to follow `~/navi/skills/expedition-calibration/SKILL.md` as an outside reader), inputs workingDir `/Users/rai/dev/expedition/blog`, maxTurns 30. Schedule and enabled flag unchanged. No script written. Proof: rendered template loads through the live `loadXdgJobs` loader with the new target. Takes effect when sync-crons next runs (impulse worker not restarted).
+
+## 2026-11-18 -- curator vault-health family moved from launchd to Impulse (workspace-ud7w0, stage 1 of 4)
+
+### Problem
+Eight bespoke `com.rai.curator-*` launchd jobs drive `navi/curator/run-curator.sh` (a second scheduler, against Rule 65). The curator writes to Rai's vaults, so the migration must never half-land silently or double-fire.
+
+### Solution/Fix
+Staged, one family at a time, least destructive first. Added Impulse jobs `curator-vault-health-expedition` (Sun 07:10) and `curator-vault-health-notes` (Sun 07:40), Europe/London cron, same command and per-run log files as the plists, timeout 3600, skip-if-running. Verified at the destination: with a temporary same-day cron (18:22 and 18:27) each job fired exactly once through Impulse and completed (`[20261118-182200-vault-health-expedition] done (codex exit 0)`, `[20261118-182700-vault-health-notes] done (codex exit 0)` in `~/.logs/curator/launchd-vault-health-*.log`), then the cron was set to the real Sunday schedule and `sync-crons` re-registered (`-> 10 7 * * 0 UTC`, `-> 40 7 * * 0 UTC`). Only then were the two matching launchd jobs unloaded (`launchctl bootout`); the plist files stay in `~/Library/LaunchAgents` as backup (reload: `launchctl bootstrap gui/$(id -u) <plist>`). The other six (vault-triage, distill-and-weave, prune; daily or weekly, next fire not verifiable today) stay on launchd. First real-schedule fire to check: Sun 22 Nov 07:10 London.
