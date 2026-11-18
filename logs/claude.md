@@ -534,3 +534,12 @@ Opus 4.8 / Fable, so the change had to be made at the chezmoi source.
 **Added.**
 - `dot_claude/skills/wow-forever-coach/SKILL.md`: entry skill, routes to the knowledge note `~/expedition/WoW Forever.md`, `references/classes.md` (Ret Paladin, Enhancement Shaman, BM Hunter, Warrior: talents, spells, quests, weapons, sourced) and `references/lookups.md` (Wowhead/Icy Veins/Blizzard endpoints, what curl can and cannot reach).
 - `dot_local/bin/executable_wowf`: Wowhead Forever lookups. `wowf find`, `wowf tip <type> <id>` (nether tooltip JSON), `wowf guide <slug>` (decodes `WH.markup.printHtml`), `wowf url`. Wowhead's CloudFront 403s curl's default and browser user agents on search/guide pages but accepts a plain custom UA (`wowf/1.0`); entity pages (`/forever/item=`) 403 regardless, tooltips never did. Verified 2026-11-07.
+
+## 2026-11-18 — shell-trap-check now also watches Edit/Write/MultiEdit (bead workspace-7ttyx)
+
+### Motivation
+The unresolvable-bead-reference trap only fired on PreToolUse for Bash, so prose written through the Edit or Write tools (two of five recorded fabricated-id instances) was never checked.
+
+### Changes
+- `dot_claude/modify_settings.json`: added a second PreToolUse entry, matcher `Edit|Write|MultiEdit`, running the same `~/navi/bin/shell-trap-check.mjs` (warn-only, exit 0). The checker itself (diff-scoped: only ids an edit ADDS are judged) lives in the navi repo, bin/shell-trap-check.mjs, with tests in bin/shell-trap-check.test.mjs.
+- Deployed `~/.claude/settings.json` was patched surgically with jq (the one entry appended) and NOT via `chezmoi apply`: the modify script's `.hooks.PreToolUse` rewrite already drifts from the deployed file (it would drop the deployed Artifact guard entry). That pre-existing drift is untouched and still needs a separate decision.
