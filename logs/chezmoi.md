@@ -568,3 +568,11 @@ Removed the three aliases (updatenavi called rrnavi) from dot_aliases.tmpl and d
 
 ### Solution/Fix
 Added dot_config/qmd/index.yml (no secrets, plain file). It holds nimbus-only absolute paths, so .chezmoiignore skips it on every host except nimbus.
+
+## 2026-11-18 -- cp/mv/rm safe-ops only on a real terminal (workspace-rn4n6)
+
+### Problem
+Prezto's utility safe-ops aliased cp/mv/rm/ln to `-i`. Agent shells inherit those aliases from a shell snapshot taken by `zsh -i` with no tty (which still reports interactive), so a bare `cp a b` onto an existing file prompts and HANGS until the command times out, and later steps in the same command never run. `[[ -o interactive ]]` alone is not enough for that reason.
+
+### Solution/Fix
+dot_zpreztorc.tmpl: safe-ops is 'yes' only when `[[ -o interactive && -t 0 && -t 1 ]]`, else 'no'. Applied only ~/.zpreztorc (no onepasswordRead). Proof: `zsh -i -c` with stdin from /dev/null now shows `rm='nocorrect rm'` and `cp a b` over an existing file returns rc 0 with no prompt; `zsh -c 'cp a b'` rc 0; a python pty interactive shell still shows `cp='nocorrect cp -i'`. Agent shells pick it up when their snapshot regenerates.

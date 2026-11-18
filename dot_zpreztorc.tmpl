@@ -241,7 +241,14 @@ zstyle ':prezto:module:ssh:load' identities 'id_ed25519'
 # Enabled safe options. This aliases cp, ln, mv and rm so that they prompt
 # before deleting or overwriting files. Set to 'no' to disable this safer
 # behavior.
-zstyle ':prezto:module:utility' safe-ops 'yes'
+# Only for a real interactive terminal. Non-interactive shells AND agent shell
+# snapshots (zsh -i with no tty, which still reports interactive) must get the
+# plain cp/mv/rm, because cp -i HANGS on its prompt (workspace-rn4n6).
+if [[ -o interactive && -t 0 && -t 1 ]]; then
+  zstyle ':prezto:module:utility' safe-ops 'yes'
+else
+  zstyle ':prezto:module:utility' safe-ops 'no'
+fi
 
 # Disable grep highlighting
 zstyle ':prezto:module:utility:grep' color 'no'
