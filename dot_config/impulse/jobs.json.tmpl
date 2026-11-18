@@ -1299,27 +1299,28 @@
       "tz": "Europe/London"
     },
     "target": {
-      "kind": "script",
-      "bin": "bash"
+      "kind": "ark-spawn",
+      "agent": "navi",
+      "model": "sonnet"
     },
     "payload": {
-      "kind": "shell",
-      "cmd": "bash",
-      "args": ["/Users/rai/.config/impulse/scripts/expedition-calibration.sh"]
+      "kind": "prompt",
+      "text": "Run the expedition calibration skill."
     },
     "policy": {
       "maxConcurrent": 1,
-      "quotaAware": false,
+      "quotaAware": true,
       "dedupe": "skip-if-running"
     },
     "enabled": true,
     "tags": ["journal-pipeline", "nimbus"],
+    "promptFile": "prompts/expedition-calibration.md",
     "inputs": {
-      "cmd": "bash",
-      "args": ["/Users/rai/.config/impulse/scripts/expedition-calibration.sh"],
-      "cwd": "/Users/rai/dev/expedition/blog"
-    },
-    "promptFile": "prompts/expedition-calibration.md"
+      "agent": "navi",
+      "workingDir": "/Users/rai/dev/expedition/blog",
+      "model": "sonnet",
+      "maxTurns": 30
+    }
   },
   {
     "id": "cortex-tick",

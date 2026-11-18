@@ -608,3 +608,11 @@ Chrome leaks ~1.4 GB `code_sign_clone.*` bundle copies under /private/var/folder
 
 ### Solution/Fix
 Added Impulse job `chrome-clone-reaper` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `disk-headroom-measure`): cron `20 * * * *` Europe/London, `node ~/navi/bin/chrome-clone-reaper.mjs`, skip-if-running. The script removes only `code_sign_clone.*` children older than 1 h that `lsof +D` shows no process holding (lsof failure = skip). Test with known-bad control (held clone survives): `navi/bin/chrome-clone-reaper.test.mjs`.
+
+## 2026-11-18 -- expedition-calibration repointed from a missing script to the prompt-file form (workspace-renzj)
+
+### Problem
+Job `expedition-calibration` (Sun 19:00 Europe/London, enabled since 2026-05-10) ran `bash ~/.config/impulse/scripts/expedition-calibration.sh`, a file that has never existed in any repo's history. Hatchet ledger showed 4 of 4 Sundays in the retained window FAILED with exit 127. The weekly blog pipeline degrades silently without the calibration document, so nobody noticed. The last calibration artifact was 2026-04-26.
+
+### Solution/Fix
+Changed the job in `dot_config/impulse/jobs.json.tmpl` to the same shape as `dream-sources-seed`: `target.kind: ark-spawn` (navi, sonnet), payload prompt "Run the expedition calibration skill.", `promptFile: prompts/expedition-calibration.md` (existing, tells the agent to follow `~/navi/skills/expedition-calibration/SKILL.md` as an outside reader), inputs workingDir `/Users/rai/dev/expedition/blog`, maxTurns 30. Schedule and enabled flag unchanged. No script written. Proof: rendered template loads through the live `loadXdgJobs` loader with the new target. Takes effect when sync-crons next runs (impulse worker not restarted).
