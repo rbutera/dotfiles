@@ -2852,6 +2852,37 @@
       "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi && PREV=$(date -v1d -v-1m +%Y-%m) && ./node_modules/.bin/nx run chronicler:dev -- summarize --agent navi --monthly $PREV && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
+  },
+  {
+    "id": "chronicler-topic-refresh-weekly",
+    "name": "Navi: Chronicler refresh of the 3 stalest topic dossiers with new mentions (Monday 05:15, workspace-9kfmq)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "15 5 * * 1",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-refresh --agent navi --max 3 --time-budget-minutes 60"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 9000
+    },
+    "enabled": true,
+    "tags": ["navi", "chronicler", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-refresh --agent navi --max 3 --time-budget-minutes 60"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
   }
 ]
 {{- else }}

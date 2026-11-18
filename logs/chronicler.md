@@ -1,5 +1,13 @@
 # chronicler config changes log
 
+## 2026-11-18 -- Weekly refresh of stale topic dossiers
+
+### Problem
+23 of 25 topic dossiers were last refreshed April to August 2026; only `love` had a refresh job, so recall of Ark, Cortex, Impulse and Continuity returned a months-old picture (bead workspace-9kfmq).
+
+### Solution/Fix
+Added Impulse job `chronicler-topic-refresh-weekly` (`dot_config/impulse/jobs.json.tmpl`, after `chronicler-monthly-rollup`): cron `15 5 * * 1` Europe/London, runs `topic-refresh --agent navi --max 3 --time-budget-minutes 60` (stalest dossiers with new mention days, `love` skipped, one at a time), timeout 9000, skip-if-running. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no secrets). Pairs with lumiere `topic-freshness` and `topic-refresh`.
+
 ## 2026-10-17 — Model to gpt-6-astra (silent 3-day outage)
 
 ### Motivation
