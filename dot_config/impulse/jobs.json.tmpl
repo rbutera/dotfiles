@@ -2821,6 +2821,37 @@
       "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- topic-dossier love --agent navi"],
       "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
     }
+  },
+  {
+    "id": "chronicler-monthly-rollup",
+    "name": "Navi: Chronicler monthly rollup of previous month + arc.md + coverage (8th 06:00, workspace-ogxxs)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "0 6 8 * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi && PREV=$(date -v1d -v-1m +%Y-%m) && ./node_modules/.bin/nx run chronicler:dev -- summarize --agent navi --monthly $PREV && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 5400
+    },
+    "enabled": true,
+    "tags": ["navi", "chronicler", "nimbus"],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": ["-c", "export PATH={{ .chezmoi.homeDir }}/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin; cd {{ .chezmoi.homeDir }}/dev/lumiere && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi && PREV=$(date -v1d -v-1m +%Y-%m) && ./node_modules/.bin/nx run chronicler:dev -- summarize --agent navi --monthly $PREV && ./node_modules/.bin/nx run chronicler:dev -- summary-coverage --agent navi"],
+      "cwd": "{{ .chezmoi.homeDir }}/dev/lumiere"
+    }
   }
 ]
 {{- else }}
