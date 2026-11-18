@@ -2,27 +2,30 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Label</key>
-	<string>com.rai.lumiere-autopush</string>
-	<key>ProgramArguments</key>
-	<array>
-		<string>/Users/rai/lumiere-autopush.sh</string>
-	</array>
-	<key>StartCalendarInterval</key>
-	<dict>
-		<key>Minute</key>
-		<integer>37</integer>
-	</dict>
-	<key>StandardOutPath</key>
-	<string>/Users/rai/.logs/lumiere-autopush.log</string>
-	<key>StandardErrorPath</key>
-	<string>/Users/rai/.logs/lumiere-autopush.log</string>
 	<key>EnvironmentVariables</key>
 	<dict>
 		<key>HOME</key>
 		<string>/Users/rai</string>
 		<key>PATH</key>
-		<string>/Users/rai/.vite-plus/bin:/Users/rai/.asdf/shims:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Users/rai/.local/bin</string>
+		<string>/Users/rai/.vite-plus/bin:/Users/rai/.asdf/shims:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Users/rai/.local/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>Label</key>
+	<string>com.rai.lumiere-autopush</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/rai/.config/ark/host-guard.sh</string>
+		<string>--agent</string>
+		<string>infra</string>
+		<string>/Users/rai/lumiere-autopush.sh</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/rai/.logs/lumiere-autopush.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/rai/.logs/lumiere-autopush.log</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Minute</key>
+		<integer>37</integer>
 	</dict>
 </dict>
 </plist>
