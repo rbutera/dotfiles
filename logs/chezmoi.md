@@ -576,3 +576,11 @@ Prezto's utility safe-ops aliased cp/mv/rm/ln to `-i`. Agent shells inherit thos
 
 ### Solution/Fix
 dot_zpreztorc.tmpl: safe-ops is 'yes' only when `[[ -o interactive && -t 0 && -t 1 ]]`, else 'no'. Applied only ~/.zpreztorc (no onepasswordRead). Proof: `zsh -i -c` with stdin from /dev/null now shows `rm='nocorrect rm'` and `cp a b` over an existing file returns rc 0 with no prompt; `zsh -c 'cp a b'` rc 0; a python pty interactive shell still shows `cp='nocorrect cp -i'`. Agent shells pick it up when their snapshot regenerates.
+
+## 2026-11-18 - autopush scripts brought under chezmoi (bead workspace-wtn4j)
+
+Problem: `~/navi-autopush.sh` and `~/expedition-autopush.sh` (hourly launchd jobs that commit and push as Rai) were plain files in no repo, so any edit was an undoable deploy with no history or rollback.
+
+Change: added `executable_navi-autopush.sh` and `executable_expedition-autopush.sh` at the source root (deploy to `~/navi-autopush.sh` and `~/expedition-autopush.sh`, the exact paths the plists use, so no plist change and no bootout/bootstrap). Neither contains template syntax or onepasswordRead. Content copied byte-for-byte from the live files: `chezmoi status` and `chezmoi diff` on both targets are empty, so no apply was needed. Verified both end to end against scratch repos (expedition via HOME override, navi via NAVI_AUTOPUSH_REPO): each committed the dirty file and pushed to a scratch bare origin.
+
+Edit the source from now on, then `chezmoi apply ~/navi-autopush.sh` (safe without 1Password).
