@@ -1,3 +1,11 @@
+## 2026-11-18 -- bead-triage-weekly moved from ark whisper to ark-spawn
+
+### Problem
+The job ran `ark whisper` into Navi's main session, so a renew of that session killed the triage and its Tatls. Rai (voice, 18 Nov 16:03) wants recurring work independent of Navi's session.
+
+### Fix
+`bead-triage-weekly` is now `target.kind: ark-spawn`, agent `tatl`, cwd `~/navi`, model sonnet, maxTurns 200 (`ark run tatl -- --model sonnet --max-turns 200 <prompt>`). The prompt tells the spawned session to follow skills/bead-triage/SKILL.md, dispatch subagents in the foreground, write summary.md plus one letter pointer line, and message no one. Cron `30 4 * * 0` Europe/London unchanged.
+
 ## 2026-11-11 -- Hermione's Impulse config renamed to Summer (Malfoy)
 
 ### Problem

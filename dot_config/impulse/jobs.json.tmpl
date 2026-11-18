@@ -2886,43 +2886,34 @@
   },
   {
     "id": "bead-triage-weekly",
-    "name": "Navi: weekly stale-bead triage (Sundays 04:30 London; whispers Navi to run the bead-triage skill, promotes get worked, no DM to Rai)",
+    "name": "Navi: weekly stale-bead triage (Sundays 04:30 London; independent ark-spawn session, no whisper into Navi's main session, no DM to Rai)",
     "trigger": {
       "kind": "cron",
       "expr": "30 4 * * 0",
       "tz": "Europe/London"
     },
     "target": {
-      "kind": "script",
-      "bin": "/bin/sh"
+      "kind": "ark-spawn",
+      "agent": "tatl",
+      "model": "sonnet"
     },
     "payload": {
-      "kind": "shell",
-      "cmd": "/bin/sh",
-      "args": [
-        "-c",
-        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source bead-triage-weekly \"$1\"",
-        "bead-triage",
-        "Weekly stale-bead triage (Impulse job bead-triage-weekly). Run the navi:bead-triage skill (~/navi/skills/bead-triage/SKILL.md) end to end: build the stale list, dispatch one background ark:tatl per batch, merge, then work the promotes. Log the run in today's daily letter first so a renew can re-dispatch batches with no result file. Rai's rule (voice 18 Nov): NO summary message to him; results go to the run dir and a letter pointer line, autonomous promotes get worked by the next Continue ticks, only real decisions go on the Potara board."
-      ]
+      "kind": "prompt",
+      "text": "Run ~/navi/skills/bead-triage/SKILL.md end to end."
     },
     "policy": {
       "maxConcurrent": 1,
       "quotaAware": false,
-      "dedupe": "skip-if-running",
-      "timeout": 60
+      "dedupe": "skip-if-running"
     },
     "enabled": true,
     "tags": ["navi", "beads", "adhd-scaffolding", "nimbus"],
     "inputs": {
-      "cmd": "/bin/sh",
-      "args": [
-        "-c",
-        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source bead-triage-weekly \"$1\"",
-        "bead-triage",
-        "Weekly stale-bead triage (Impulse job bead-triage-weekly). Run the navi:bead-triage skill (~/navi/skills/bead-triage/SKILL.md) end to end: build the stale list, dispatch one background ark:tatl per batch, merge, then work the promotes. Log the run in today's daily letter first so a renew can re-dispatch batches with no result file. Rai's rule (voice 18 Nov): NO summary message to him; results go to the run dir and a letter pointer line, autonomous promotes get worked by the next Continue ticks, only real decisions go on the Potara board."
-      ],
-      "cwd": "{{ .chezmoi.homeDir }}"
+      "agent": "tatl",
+      "workingDir": "{{ .chezmoi.homeDir }}/navi",
+      "model": "sonnet",
+      "maxTurns": 200,
+      "prompt": "Weekly stale-bead triage (Impulse job bead-triage-weekly). You are an independent ephemeral session, not Navi's main session: nobody is watching you and nobody will answer questions, so decide and act. Read ~/navi/skills/bead-triage/SKILL.md and follow it end to end: Step 0 log the run, Step 1 build the stale list and batches, Step 2 triage every batch with ark:tatl subagents, Step 3 merge, Step 4 fan out the autonomous promotes in waves of about 8 until every one is worked. HEADLESS OVERRIDES to the skill: (1) Dispatch every subagent in the FOREGROUND (no run_in_background): this session exits when your final turn ends, which would kill background subagents. Send each wave of up to 8 Agent calls in ONE message so they run in parallel, and wait for the whole wave before the next. (2) There is no whisper trigger and no renew here; if today's letter already shows a triage run, reuse its dir and only re-dispatch batches with no result-N.md and promotes with no work-<id>.md. OUTPUT: write the merged summary to ~/navi/state/bead-triage-<YYYYMMDD>/summary.md (London date) and add exactly one pointer line (600 bytes max: counts, dir path) to today's daily letter with `node ~/navi/bin/letter.mjs <<'EOF' ... EOF`. Do NOT DM or message Rai or anyone (no reply tool, no send-rai-dm.mjs, no relay): Rai's rule is no summary message, the work is the output. Only genuine decisions only Rai can make go on the Potara board per the skill. Never print a secret value; no set -x; do not cat or grep .env files, tokens or op items. If you cannot dispatch subagents, say so in summary.md and triage the batches yourself in order rather than pretending."
     }
   }
 ]
