@@ -1,6 +1,16 @@
 # launchagents
 
 
+## 2026-11-18 -- com.rai.lumiere-autopush (workspace-xnv9g)
+
+### Problem
+navi and expedition push hourly, lumiere (shared multi-agent repo, branch develop, pre-push typecheck hook) had no backup push, so committed work sat only on nimbus. The navi/expedition scripts do `git add -A` + commit, which is wrong for a repo where other agents have uncommitted files.
+
+### Change
+- New `executable_lumiere-autopush.sh` (deploys to `~/lumiere-autopush.sh`) and `Library/LaunchAgents/com.rai.lumiere-autopush.plist` (fires at :37 hourly, log `~/.logs/lumiere-autopush.log`).
+- Conservative by design: never add/commit, only pushes commits already on `develop`; skips on any other branch or in-progress git operation; if behind origin it `pull --rebase`s only when no tracked file is modified (no autostash), otherwise skips; rebase conflict -> `rebase --abort`, exit 1; pre-push hook failure -> exit 1 and the same HEAD sha is not retried (state in `~/.local/state/lumiere-autopush/`); mkdir lock against overlap. `--dry-run` runs every check and `git push --dry-run` semantics (lists commits, pushes nothing).
+- Proven against scratch bare-repo clones: ahead-only push with a dirty file untouched, behind+dirty skip, behind+clean rebase+push, conflict abort with clean tree and exit 1, wrong-branch skip, hook failure not retried. Real-repo dry run on nimbus: 0 ahead, nothing to push.
+
 ## 2026-10-05 -- com.rai.hatchet-liveness (workspace-v2bfn)
 
 ### Problem
