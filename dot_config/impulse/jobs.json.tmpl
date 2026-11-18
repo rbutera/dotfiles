@@ -1934,6 +1934,36 @@
     }
   },
   {
+    "id": "chrome-clone-reaper",
+    "name": "Disk: hourly reap of leaked Chrome/Brave code_sign_clone dirs (:20, held-by-process never deleted)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "20 * * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/chrome-clone-reaper.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running"
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "disk", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/chrome-clone-reaper.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
+  },
+  {
     "id": "role-packet-corpus",
     "name": "Navi: Role Packet corpus (beads + notes + expedition -> state JSON, every 6h)",
     "trigger": {

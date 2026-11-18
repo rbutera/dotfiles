@@ -600,3 +600,11 @@ The Majora Proposal Forge's 24 proposals (21-24 Jul) all died on `bd create` and
 
 ### Fix
 New cron job `forge-ledger-guard` (every 6h, 35 past) runs `~/navi/bin/forge-ledger-guard.mjs`: records every bd-failed ledger entry verbatim into the vault note `Project Majora/Forge Proposals Awaiting Triage.md` (idempotent) and exits 1 while any is under 7 days old. Added to the first (non-fallback) branch of dot_config/impulse/jobs.json.tmpl. Not applied to ~/.config/impulse/jobs.json (single-file apply of a template without onepasswordRead is safe; Rai or the next apply picks it up).
+
+## 2026-11-18 -- chrome-clone-reaper job (workspace-q6zau)
+
+### Problem
+Chrome leaks ~1.4 GB `code_sign_clone.*` bundle copies under /private/var/folders/*/*/X/com.google.Chrome.code_sign_clone on every launch that does not exit cleanly (27 GB in 2 days on 2026-09-22); nimbus has ~7 GB free. Nothing reaped them.
+
+### Solution/Fix
+Added Impulse job `chrome-clone-reaper` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `disk-headroom-measure`): cron `20 * * * *` Europe/London, `node ~/navi/bin/chrome-clone-reaper.mjs`, skip-if-running. The script removes only `code_sign_clone.*` children older than 1 h that `lsof +D` shows no process holding (lsof failure = skip). Test with known-bad control (held clone survives): `navi/bin/chrome-clone-reaper.test.mjs`.
