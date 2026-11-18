@@ -2977,6 +2977,37 @@
       "args": ["{{ .chezmoi.homeDir }}/navi/bin/detect-stale-beads.mjs"],
       "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
+  },
+  {
+    "id": "forge-ledger-guard",
+    "name": "Navi: Proposal Forge ledger guard (every 6h; bd-failed proposals recorded to the vault and exit 1, never filed) [workspace-hc157]",
+    "trigger": {
+      "kind": "cron",
+      "expr": "35 */6 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/forge-ledger-guard.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": ["navi", "majora", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/forge-ledger-guard.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}

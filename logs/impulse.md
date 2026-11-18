@@ -592,3 +592,11 @@ Bead workspace-4fjwl: Majora To-Do.md had a reporter but no feed step. Built `na
 
 ### Solution/Fix
 Added Impulse job `majora-todo-feed` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `hatchet-session-prune`): cron `40 4 * * *` Europe/London, runs the feed in dry-run mode only. Graduating needs `--apply` plus `graduate: true` in `~/navi/state/majora-research/todo-feed.json` (absent, so off). The Majora engine stays paused.
+
+## 2026-11-18 -- forge-ledger-guard job added (workspace-hc157)
+
+### Problem
+The Majora Proposal Forge's 24 proposals (21-24 Jul) all died on `bd create` and were recorded as `filed:false, reason: bd-failed` in forge-ledger.jsonl, which nobody read. They were silently lost for days.
+
+### Fix
+New cron job `forge-ledger-guard` (every 6h, 35 past) runs `~/navi/bin/forge-ledger-guard.mjs`: records every bd-failed ledger entry verbatim into the vault note `Project Majora/Forge Proposals Awaiting Triage.md` (idempotent) and exits 1 while any is under 7 days old. Added to the first (non-fallback) branch of dot_config/impulse/jobs.json.tmpl. Not applied to ~/.config/impulse/jobs.json (single-file apply of a template without onepasswordRead is safe; Rai or the next apply picks it up).
