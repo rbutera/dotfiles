@@ -2916,6 +2916,37 @@
       "maxTurns": 200,
       "prompt": "Weekly stale-bead triage (Impulse job bead-triage-weekly). You are an independent ephemeral session, not Navi's main session: nobody is watching you and nobody will answer questions, so decide and act. Read ~/navi/skills/bead-triage/SKILL.md and follow it end to end: Step 0 log the run, Step 1 build the stale list and batches, Step 2 triage every batch with ark:tatl subagents, Step 3 merge, Step 4 fan out the autonomous promotes in waves of about 8 until every one is worked. HEADLESS OVERRIDES to the skill: (1) Dispatch every subagent in the FOREGROUND (no run_in_background): this session exits when your final turn ends, which would kill background subagents. Send each wave of up to 8 Agent calls in ONE message so they run in parallel, and wait for the whole wave before the next. (2) There is no whisper trigger and no renew here; if today's letter already shows a triage run, reuse its dir and only re-dispatch batches with no result-N.md and promotes with no work-<id>.md. OUTPUT: write the merged summary to ~/navi/state/bead-triage-<YYYYMMDD>/summary.md (London date) and add exactly one pointer line (600 bytes max: counts, dir path) to today's daily letter with `node ~/navi/bin/letter.mjs <<'EOF' ... EOF`. Do NOT DM or message Rai or anyone (no reply tool, no send-rai-dm.mjs, no relay): Rai's rule is no summary message, the work is the output. Only genuine decisions only Rai can make go on the Potara board per the skill. Never print a secret value; no set -x; do not cat or grep .env files, tokens or op items. If you cannot dispatch subagents, say so in summary.md and triage the batches yourself in order rather than pretending."
     }
+  },
+  {
+    "id": "stale-bead-detector-weekly",
+    "name": "Navi: weekly read-only stale-bead detector (Sundays 04:20 London; writes dated report to ~/dev/expedition/projects/35-autopilot/stale-beads-report-YYYY-MM-DD.md, never mutates beads) [workspace-lz6j3]",
+    "trigger": {
+      "kind": "cron",
+      "expr": "20 4 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "node"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/detect-stale-beads.mjs"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 600
+    },
+    "enabled": true,
+    "tags": ["navi", "beads", "nimbus"],
+    "inputs": {
+      "cmd": "node",
+      "args": ["{{ .chezmoi.homeDir }}/navi/bin/detect-stale-beads.mjs"],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
+    }
   }
 ]
 {{- else }}

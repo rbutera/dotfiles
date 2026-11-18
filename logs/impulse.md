@@ -576,3 +576,11 @@ Rai asked (voice, 18 Nov 16:00) for the stale-bead triage to run weekly.
 
 ### Solution/Fix
 Added Impulse job `bead-triage-weekly` to the nimbus section of `dot_config/impulse/jobs.json.tmpl`: cron `30 4 * * 0` Europe/London, whispers Navi to run the `navi:bead-triage` skill (same whisper shape as life-loop-weekly). No DM to Rai; the skill fans promotes out to Tatls.
+
+## 2026-11-18 -- stale-bead-detector-weekly job
+
+### Problem
+Bead workspace-lz6j3: `bin/detect-stale-beads.mjs` (read-only detector, navi d7abc28) existed but was never scheduled, so Rule 51 re-checks stayed manual. It is distinct from `bead-triage-weekly` (LLM Tatl triage that mutates beads); this is the cheap read-only signal sweep.
+
+### Solution/Fix
+Added Impulse job `stale-bead-detector-weekly` (`dot_config/impulse/jobs.json.tmpl`, nimbus branch, after `bead-triage-weekly`): cron `20 4 * * 0` Europe/London, `node ~/navi/bin/detect-stale-beads.mjs`, timeout 600, skip-if-running. Runs 10 minutes before the triage so a dated report (`~/dev/expedition/projects/35-autopilot/stale-beads-report-YYYY-MM-DD.md`) exists first. Never mutates beads. Applied with `chezmoi apply ~/.config/impulse/jobs.json` (no onepasswordRead) and registered with `tsx src/main.ts sync-crons`. Manual run proved it: 635 open beads, 517 candidates, report written.
