@@ -2177,6 +2177,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/action-mail-watch.mjs"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
   },
   {
+    "id": "nocap-health-watch",
+    "name": "Navi: nocap health watch (every 10m; spitfire + hogwarts via coder ssh; whispers my live session only when health gets worse (ok to degraded/down) or an arksup-* pane sits on the usage-limit menu over 2 min; loud on could-not-check at most hourly; never presses keys, never DMs Rai; bead workspace-jue8w)",
+    "trigger": { "kind": "cron", "expr": "*/10 * * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/nocap-health-watch.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 600 },
+    "enabled": true,
+    "tags": ["navi", "guard", "nocap"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/nocap-health-watch.mjs"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
+  },
+  {
     "id": "staged-send-rearm",
     "name": "Navi: re-arm staged DMs that lost their waiter to a reboot (every 15m; respawns future jobs, late-sends under 2h, else whispers Navi; bead workspace-wre58)",
     "trigger": { "kind": "cron", "expr": "*/15 * * * *", "tz": "Europe/London" },

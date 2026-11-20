@@ -640,3 +640,11 @@ Eight bespoke `com.rai.curator-*` launchd jobs drive `navi/curator/run-curator.s
 
 ### Solution/Fix
 Staged, one family at a time, least destructive first. Added Impulse jobs `curator-vault-health-expedition` (Sun 07:10) and `curator-vault-health-notes` (Sun 07:40), Europe/London cron, same command and per-run log files as the plists, timeout 3600, skip-if-running. Verified at the destination: with a temporary same-day cron (18:22 and 18:27) each job fired exactly once through Impulse and completed (`[20261118-182200-vault-health-expedition] done (codex exit 0)`, `[20261118-182700-vault-health-notes] done (codex exit 0)` in `~/.logs/curator/launchd-vault-health-*.log`), then the cron was set to the real Sunday schedule and `sync-crons` re-registered (`-> 10 7 * * 0 UTC`, `-> 40 7 * * 0 UTC`). Only then were the two matching launchd jobs unloaded (`launchctl bootout`); the plist files stay in `~/Library/LaunchAgents` as backup (reload: `launchctl bootstrap gui/$(id -u) <plist>`). The other six (vault-triage, distill-and-weave, prune; daily or weekly, next fire not verifiable today) stay on launchd. First real-schedule fire to check: Sun 22 Nov 07:10 London.
+
+## 2026-11-20 -- nocap-health-watch job
+
+### Problem
+Agents on spitfire and hogwarts froze on Claude's usage-limit menu when every nocap account passed the 99% ceiling (bead workspace-jue8w).
+
+### Solution/Fix
+Added Impulse job `nocap-health-watch` (cron `*/10 * * * *`, Europe/London) running ~/navi/bin/nocap-health-watch.mjs. Applied and armed with sync-crons --prune.
