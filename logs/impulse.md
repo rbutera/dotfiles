@@ -1,3 +1,11 @@
+## 2026-11-20 -- action-mail-watch job (bead workspace-z62pw)
+
+### Problem
+Fri 20 Nov: Tesco emailed at 07:36 that the 9-10 grocery order's payment had failed (fix by 9AM). The Auto/Receipts archive filter archived it, the 05:15 morning brief had already run, and nothing read his mail again before the deadline; Rai found it himself at 08:53.
+
+### Fix
+Added job `action-mail-watch` (cron `*/15 6-21 * * *`, Europe/London, timeout 300, node script `~/navi/bin/action-mail-watch.mjs`). It searches `in:anywhere` (so archived Auto/* mail counts) over the time since its last good check, matches subject + snippet against action-needed shapes, and whispers Navi's live session one line per new hit with any deadline. Could-not-check whispers loudly and exits 2. Tests: `~/navi/bin/action-mail-watch.test.mjs`. Applied with `chezmoi apply ~/.config/impulse/jobs.json`, then `sync-crons --prune`. Note: `~/expedition/Action Needed Mail Watch.md`.
+
 ## 2026-11-18 -- stewardship-emit job (portfolio-pulse + mission-board-staleness)
 
 ### Problem

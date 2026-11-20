@@ -2166,6 +2166,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/alarm-gap-check.mjs --whisper"], "cwd": "{{ .chezmoi.homeDir }}/navi", "okExitCodes": [0, 10] }
   },
   {
+    "id": "action-mail-watch",
+    "name": "Navi: action-needed mail watch (every 15m 06:00-21:45 London; in:anywhere so archived Auto/* mail counts; payment failed, issue with order, delivery problem, card expired, appointment changed...; whispers my live session one line per new hit with any deadline, loud on could-not-check, never DMs Rai; bead workspace-z62pw)",
+    "trigger": { "kind": "cron", "expr": "*/15 6-21 * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/action-mail-watch.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 300 },
+    "enabled": true,
+    "tags": ["navi", "guard", "mail"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/action-mail-watch.mjs"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
+  },
+  {
     "id": "staged-send-rearm",
     "name": "Navi: re-arm staged DMs that lost their waiter to a reboot (every 15m; respawns future jobs, late-sends under 2h, else whispers Navi; bead workspace-wre58)",
     "trigger": { "kind": "cron", "expr": "*/15 * * * *", "tz": "Europe/London" },
