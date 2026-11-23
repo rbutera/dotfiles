@@ -3,6 +3,7 @@
   "timezone": "Europe/London",
 {{- if eq .chezmoi.hostname "nimbus" }}
   "scheduler": "shadow",
+  "inprocessJobs": ["log-cap", "disk-headroom-measure", "recipe-register-build", "premise-register-build"],
 {{- else }}
   "scheduler": "hatchet",
 {{- end }}
