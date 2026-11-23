@@ -2844,11 +2844,11 @@
     }
   },
   {
-    "id": "chore-plan-weekly",
-    "name": "Navi: weekly chore plan whisper (Sun 19:30 London; slots the week's chores into real gaps as alarms; Rai 23 Nov 2026)",
+    "id": "week-plan-daily",
+    "name": "Navi: daily week-plan whisper (04:45 London; re-plans today to Sunday: chores, admin, our things, commute-aware alarms; Rai 23 Nov 2026)",
     "trigger": {
       "kind": "cron",
-      "expr": "30 19 * * 0",
+      "expr": "45 4 * * *",
       "tz": "Europe/London"
     },
     "target": {
@@ -2860,9 +2860,9 @@
       "cmd": "/bin/sh",
       "args": [
         "-c",
-        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source chore-plan-weekly \"$1\"",
-        "chore-plan",
-        "Weekly chore plan (Impulse job chore-plan-weekly, Rai's ask 23 Nov 2026). Open ~/notes/Robeson Way Routine.md and read the 'Weekly Chore Plan' section and the chore rules above it. Read the coming Mon-Sun: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, and this week's letters for where he sleeps, trips and dance nights. Place each due chore (dishwasher load + empty same night or next morning, laundry on a home evening, bins Tuesday night per [[Bin Day]], tidy before Sam cleans, anything else due) as a gentle alarm in a real home gap, one physical action per label. Never inside a drive, class, date, bedtime or a day away. No DM about it; plans for later days are mine to hold. Log one pointer line (600 bytes max) in today's letter."
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source week-plan-daily \"$1\"",
+        "week-plan",
+        "Daily week plan (Impulse job week-plan-daily, Rai's ask on voice 23 Nov 2026 21:21: plan my week, recalibrate every day, you're my wife, book my time). Read ~/notes/Week Plan.md (how it works + this week's plan) and the chore rules in ~/notes/Robeson Way Routine.md. Re-read the rest of the week fresh: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, yesterday's and today's letters (what slipped, where he sleeps, trips, dance), open beads and carry-forward notes for things the two of us need to do. Then re-plan today to Sunday: chores into real home gaps (dishwasher load and empty, laundry, bins Tue night per Bin Day, tidy before Sam), important life admin into real slots, our things (Zelda, paperwork, Perch) where he has room; office days use navi:commute and real train times. Vary the times so nothing becomes wallpaper; never inside a drive, class, date, bedtime or a day away. Set, move or cancel gentle alarms to match, one physical action per label. Update this week's section of Week Plan.md. No DM unless something today needs his decision; plans for later days are mine to hold. One pointer line (600 bytes max) in today's letter."
       ]
     },
     "policy": {
@@ -2882,9 +2882,9 @@
       "cmd": "/bin/sh",
       "args": [
         "-c",
-        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source chore-plan-weekly \"$1\"",
-        "chore-plan",
-        "Weekly chore plan (Impulse job chore-plan-weekly, Rai's ask 23 Nov 2026). Open ~/notes/Robeson Way Routine.md and read the 'Weekly Chore Plan' section and the chore rules above it. Read the coming Mon-Sun: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, and this week's letters for where he sleeps, trips and dance nights. Place each due chore (dishwasher load + empty same night or next morning, laundry on a home evening, bins Tuesday night per [[Bin Day]], tidy before Sam cleans, anything else due) as a gentle alarm in a real home gap, one physical action per label. Never inside a drive, class, date, bedtime or a day away. No DM about it; plans for later days are mine to hold. Log one pointer line (600 bytes max) in today's letter."
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source week-plan-daily \"$1\"",
+        "week-plan",
+        "Daily week plan (Impulse job week-plan-daily, Rai's ask on voice 23 Nov 2026 21:21: plan my week, recalibrate every day, you're my wife, book my time). Read ~/notes/Week Plan.md (how it works + this week's plan) and the chore rules in ~/notes/Robeson Way Routine.md. Re-read the rest of the week fresh: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, yesterday's and today's letters (what slipped, where he sleeps, trips, dance), open beads and carry-forward notes for things the two of us need to do. Then re-plan today to Sunday: chores into real home gaps (dishwasher load and empty, laundry, bins Tue night per Bin Day, tidy before Sam), important life admin into real slots, our things (Zelda, paperwork, Perch) where he has room; office days use navi:commute and real train times. Vary the times so nothing becomes wallpaper; never inside a drive, class, date, bedtime or a day away. Set, move or cancel gentle alarms to match, one physical action per label. Update this week's section of Week Plan.md. No DM unless something today needs his decision; plans for later days are mine to hold. One pointer line (600 bytes max) in today's letter."
       ],
       "cwd": "{{ .chezmoi.homeDir }}"
     }
