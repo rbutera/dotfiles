@@ -2844,6 +2844,52 @@
     }
   },
   {
+    "id": "chore-plan-weekly",
+    "name": "Navi: weekly chore plan whisper (Sun 19:30 London; slots the week's chores into real gaps as alarms; Rai 23 Nov 2026)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "30 19 * * 0",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "/bin/sh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source chore-plan-weekly \"$1\"",
+        "chore-plan",
+        "Weekly chore plan (Impulse job chore-plan-weekly, Rai's ask 23 Nov 2026). Open ~/notes/Robeson Way Routine.md and read the 'Weekly Chore Plan' section and the chore rules above it. Read the coming Mon-Sun: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, and this week's letters for where he sleeps, trips and dance nights. Place each due chore (dishwasher load + empty same night or next morning, laundry on a home evening, bins Tuesday night per [[Bin Day]], tidy before Sam cleans, anything else due) as a gentle alarm in a real home gap, one physical action per label. Never inside a drive, class, date, bedtime or a day away. No DM about it; plans for later days are mine to hold. Log one pointer line (600 bytes max) in today's letter."
+      ]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 60
+    },
+    "enabled": true,
+    "tags": [
+      "navi",
+      "home",
+      "adhd-scaffolding",
+      "nimbus"
+    ],
+    "inputs": {
+      "cmd": "/bin/sh",
+      "args": [
+        "-c",
+        "ARK_WHISPER_TOKEN=\"$(cat {{ .chezmoi.homeDir }}/navi/state/whisper-token)\" exec {{ .chezmoi.homeDir }}/Library/pnpm/ark whisper message -w {{ .chezmoi.homeDir }}/navi --source chore-plan-weekly \"$1\"",
+        "chore-plan",
+        "Weekly chore plan (Impulse job chore-plan-weekly, Rai's ask 23 Nov 2026). Open ~/notes/Robeson Way Routine.md and read the 'Weekly Chore Plan' section and the chore rules above it. Read the coming Mon-Sun: gog calendar for rai@rbutera.com and rai@conveo.ai, the Hey Listen alarm list, and this week's letters for where he sleeps, trips and dance nights. Place each due chore (dishwasher load + empty same night or next morning, laundry on a home evening, bins Tuesday night per [[Bin Day]], tidy before Sam cleans, anything else due) as a gentle alarm in a real home gap, one physical action per label. Never inside a drive, class, date, bedtime or a day away. No DM about it; plans for later days are mine to hold. Log one pointer line (600 bytes max) in today's letter."
+      ],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
+  },
+  {
     "id": "qmd-repack-weekly",
     "name": "Navi: qmd vector repack + cleanup (Sunday 04:30, workspace-oqr9y)",
     "trigger": {
