@@ -3,7 +3,7 @@
   "timezone": "Europe/London",
 {{- if eq .chezmoi.hostname "nimbus" }}
   "scheduler": "shadow",
-  "inprocessJobs": ["log-cap", "disk-headroom-measure", "recipe-register-build", "premise-register-build"],
+  "inprocessJobs": ["log-cap", "disk-headroom-measure", "recipe-register-build", "premise-register-build", "majora-todo-feed", "tft-data-refresh", "hatchet-session-prune", "stale-bead-detector-weekly", "qmd-repack-weekly", "stewardship-emit", "crossing-health-guard"],
 {{- else }}
   "scheduler": "hatchet",
 {{- end }}
