@@ -592,3 +592,11 @@ Edit the source from now on, then `chezmoi apply ~/navi-autopush.sh` (safe witho
 
 ### Solution/Fix
 executable_navi-autopush.sh: stderr classified via ~/navi/bin/autopush-lib.mjs, rebase retry only for non-fast-forward; refs/stash compared before/after stash push and popped only if new; refuses `git add -A` while unmerged paths exist; files over 95 MiB held back (untracked ones appended to .gitignore, never deleted); every run writes ~/navi/state/autopush-last-result.json read by recap-health-monitor's push-staleness guard. Tests: ~/navi/tests/test_navi_autopush.mjs.
+
+## 2026-11-27 -- navi-autopush pushes unpushed commits on a clean tree (workspace-knqlg)
+
+### Problem
+navi-autopush.sh exited at "Repo is clean, nothing to do" before pushing, so a checkpoint whose push failed was never retried once the tree went clean.
+
+### Solution/Fix
+When clean, count `git rev-list --count @{u}..HEAD` (no upstream = treat as 0). Above 0: push via push_with_retry (same classification, non-ff-only rebase retry, result file). Zero: keep the exit and write an ok result (cause "clean"). push_with_retry moved above the clean check. Tests in ~/navi/tests/test_navi_autopush.mjs.

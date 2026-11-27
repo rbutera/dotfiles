@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # navi-autopush.sh
-# Auto-commits and pushes ~/navi if the repo is dirty.
+# Auto-commits and pushes ~/navi if the repo is dirty; also pushes unpushed commits when clean.
 # Designed to be run via launchd at :47 past every hour.
 # Mirrors expedition-autopush.sh — see also com.rai.navi-autopush.plist
 #
@@ -41,6 +41,10 @@
 #   (3) files over 95 MiB are held back from staging (and gitignored if untracked), never deleted.
 #   (4) every run writes state/autopush-last-result.json {ok,cause,detail,at}; the
 #       recap-health-monitor push-staleness guard puts the cause in its alert.
+
+# FIXED 2026-11-27 (bead workspace-knqlg): a clean tree with unpushed commits used to exit at
+# "nothing to do", so a checkpoint whose push failed was never retried once the tree went clean.
+# Now `git rev-list --count @{u}..HEAD` > 0 pushes via the same classified path; 0 still exits.
 
 set -euo pipefail
 
@@ -103,11 +107,108 @@ classify_push_failure() {
     fi
 }
 
+# Push with pull-rebase retry ONLY for non-fast-forward.
+# Fix B: the retry's rebase can be blocked by unstaged changes written by concurrent
+# agent/session activity between the commit above and this retry. Stash first, restore after.
+# 2le4a: a failure of any other class (large file, auth, network, other pre-receive decline,
+# unknown) is logged with its cause and returned; rebasing cannot fix it.
+push_with_retry() {
+    local out
+    if out="$(git push origin "$BRANCH" 2>&1)"; then
+        printf '%s\n' "$out"
+        echo "$LOG_PREFIX Pushed successfully to $BRANCH. Commit: $COMMIT_MSG"
+        record_result 1 "pushed" ""
+        return 0
+    fi
+    printf '%s\n' "$out"
+    classify_push_failure "$out"
+    echo "$LOG_PREFIX ERROR: push FAILED, cause=$PUSH_CAUSE: $PUSH_DETAIL"
+    if [ "$PUSH_CAUSE" != "non-fast-forward" ]; then
+        echo "$LOG_PREFIX ERROR: cause '$PUSH_CAUSE' cannot be fixed by pull --rebase, NOT retrying. Needs a human or a transient to clear."
+        record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL"
+        return 1
+    fi
+    echo "$LOG_PREFIX Non-fast-forward. Rebasing and retrying..."
+
+    local stash_marker="autopush-retry-stash-$(date +%s)"
+    local stash_needed=0
+    local before_stash after_stash
+    if [ -n "$(git status --porcelain)" ]; then
+        # 2le4a (2): `git stash push` exits 0 with "No local changes to save" (e.g. only submodule
+        # content is dirty), and popping then would restore an OLD unrelated stash. Pop only a
+        # stash this run actually created.
+        before_stash="$(git rev-parse -q --verify refs/stash || true)"
+        if git stash push --include-untracked -m "$stash_marker"; then
+            after_stash="$(git rev-parse -q --verify refs/stash || true)"
+            if [ -n "$after_stash" ] && [ "$after_stash" != "$before_stash" ]; then
+                stash_needed=1
+                echo "$LOG_PREFIX Stashed in-flight changes ($stash_marker) before rebase retry."
+            else
+                echo "$LOG_PREFIX No stash was created (refs/stash unchanged); will NOT pop."
+            fi
+        else
+            echo "$LOG_PREFIX WARN: stash failed, attempting rebase anyway."
+        fi
+    fi
+
+    local rebase_ok=0
+    if git pull --rebase origin "$BRANCH"; then
+        rebase_ok=1
+    else
+        echo "$LOG_PREFIX ERROR: rebase failed. Aborting rebase to avoid a stuck repo."
+        git rebase --abort 2>/dev/null || true
+    fi
+
+    # Restore only OUR stash -- never silently drop live data, never pop someone else's.
+    if [ "$stash_needed" -eq 1 ]; then
+        if [ "$(git rev-parse -q --verify refs/stash || true)" != "$after_stash" ]; then
+            echo "$LOG_PREFIX ERROR: refs/stash moved since this run created $stash_marker; NOT popping. Stash preserved (git stash list)."
+        elif git stash pop; then
+            echo "$LOG_PREFIX Restored stashed changes after rebase retry."
+        else
+            echo "$LOG_PREFIX ERROR: stash pop conflicted. Stash '$stash_marker' is PRESERVED (git stash list) -- manual resolution needed. Not dropping it."
+        fi
+    fi
+
+    if [ "$rebase_ok" -ne 1 ]; then
+        echo "$LOG_PREFIX ERROR: Push retry aborted after failed rebase. Manual intervention may be needed."
+        record_result 0 "rebase-failed" "pull --rebase failed after non-fast-forward"
+        return 1
+    fi
+
+    if out="$(git push origin "$BRANCH" 2>&1)"; then
+        printf '%s\n' "$out"
+        echo "$LOG_PREFIX Push succeeded after rebase. Commit: $COMMIT_MSG"
+        record_result 1 "pushed" "after rebase"
+        return 0
+    fi
+    printf '%s\n' "$out"
+    classify_push_failure "$out"
+    echo "$LOG_PREFIX ERROR: Push failed after rebase, cause=$PUSH_CAUSE: $PUSH_DETAIL. Manual intervention may be needed."
+    record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL (after rebase)"
+    return 1
+}
+
 COMMIT_MSG=""
 
 # Check if repo is dirty (tracked changes, untracked files, or staged changes)
 if git diff --quiet && git diff --cached --quiet && [ -z "$(git status --porcelain)" ]; then
+    # workspace-knqlg: a clean tree can still hold unpushed commits (a checkpoint whose push
+    # failed). Previously this exited here and nothing ever retried that push. Count them and
+    # push through the same classified path. No upstream -> cannot count, treat as nothing.
+    UNPUSHED=0
+    if git rev-parse -q --verify '@{u}' >/dev/null 2>&1; then
+        UNPUSHED="$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)"
+    else
+        echo "$LOG_PREFIX WARN: no upstream configured for $BRANCH, cannot count unpushed commits."
+    fi
+    if [ "${UNPUSHED:-0}" -gt 0 ]; then
+        echo "$LOG_PREFIX Repo is clean but $UNPUSHED unpushed commit(s) on $BRANCH, pushing..."
+        COMMIT_MSG="(no new commit this run; $UNPUSHED unpushed)"
+        if push_with_retry; then exit 0; else exit 1; fi
+    fi
     echo "$LOG_PREFIX Repo is clean, nothing to do. (branch: $BRANCH)"
+    record_result 1 "clean" "nothing to push"
     exit 0
 fi
 
@@ -241,87 +342,5 @@ else
     fi
     git commit -m "$COMMIT_MSG"
 fi
-
-# Push with pull-rebase retry ONLY for non-fast-forward.
-# Fix B: the retry's rebase can be blocked by unstaged changes written by concurrent
-# agent/session activity between the commit above and this retry. Stash first, restore after.
-# 2le4a: a failure of any other class (large file, auth, network, other pre-receive decline,
-# unknown) is logged with its cause and returned; rebasing cannot fix it.
-push_with_retry() {
-    local out
-    if out="$(git push origin "$BRANCH" 2>&1)"; then
-        printf '%s\n' "$out"
-        echo "$LOG_PREFIX Pushed successfully to $BRANCH. Commit: $COMMIT_MSG"
-        record_result 1 "pushed" ""
-        return 0
-    fi
-    printf '%s\n' "$out"
-    classify_push_failure "$out"
-    echo "$LOG_PREFIX ERROR: push FAILED, cause=$PUSH_CAUSE: $PUSH_DETAIL"
-    if [ "$PUSH_CAUSE" != "non-fast-forward" ]; then
-        echo "$LOG_PREFIX ERROR: cause '$PUSH_CAUSE' cannot be fixed by pull --rebase, NOT retrying. Needs a human or a transient to clear."
-        record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL"
-        return 1
-    fi
-    echo "$LOG_PREFIX Non-fast-forward. Rebasing and retrying..."
-
-    local stash_marker="autopush-retry-stash-$(date +%s)"
-    local stash_needed=0
-    local before_stash after_stash
-    if [ -n "$(git status --porcelain)" ]; then
-        # 2le4a (2): `git stash push` exits 0 with "No local changes to save" (e.g. only submodule
-        # content is dirty), and popping then would restore an OLD unrelated stash. Pop only a
-        # stash this run actually created.
-        before_stash="$(git rev-parse -q --verify refs/stash || true)"
-        if git stash push --include-untracked -m "$stash_marker"; then
-            after_stash="$(git rev-parse -q --verify refs/stash || true)"
-            if [ -n "$after_stash" ] && [ "$after_stash" != "$before_stash" ]; then
-                stash_needed=1
-                echo "$LOG_PREFIX Stashed in-flight changes ($stash_marker) before rebase retry."
-            else
-                echo "$LOG_PREFIX No stash was created (refs/stash unchanged); will NOT pop."
-            fi
-        else
-            echo "$LOG_PREFIX WARN: stash failed, attempting rebase anyway."
-        fi
-    fi
-
-    local rebase_ok=0
-    if git pull --rebase origin "$BRANCH"; then
-        rebase_ok=1
-    else
-        echo "$LOG_PREFIX ERROR: rebase failed. Aborting rebase to avoid a stuck repo."
-        git rebase --abort 2>/dev/null || true
-    fi
-
-    # Restore only OUR stash -- never silently drop live data, never pop someone else's.
-    if [ "$stash_needed" -eq 1 ]; then
-        if [ "$(git rev-parse -q --verify refs/stash || true)" != "$after_stash" ]; then
-            echo "$LOG_PREFIX ERROR: refs/stash moved since this run created $stash_marker; NOT popping. Stash preserved (git stash list)."
-        elif git stash pop; then
-            echo "$LOG_PREFIX Restored stashed changes after rebase retry."
-        else
-            echo "$LOG_PREFIX ERROR: stash pop conflicted. Stash '$stash_marker' is PRESERVED (git stash list) -- manual resolution needed. Not dropping it."
-        fi
-    fi
-
-    if [ "$rebase_ok" -ne 1 ]; then
-        echo "$LOG_PREFIX ERROR: Push retry aborted after failed rebase. Manual intervention may be needed."
-        record_result 0 "rebase-failed" "pull --rebase failed after non-fast-forward"
-        return 1
-    fi
-
-    if out="$(git push origin "$BRANCH" 2>&1)"; then
-        printf '%s\n' "$out"
-        echo "$LOG_PREFIX Push succeeded after rebase. Commit: $COMMIT_MSG"
-        record_result 1 "pushed" "after rebase"
-        return 0
-    fi
-    printf '%s\n' "$out"
-    classify_push_failure "$out"
-    echo "$LOG_PREFIX ERROR: Push failed after rebase, cause=$PUSH_CAUSE: $PUSH_DETAIL. Manual intervention may be needed."
-    record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL (after rebase)"
-    return 1
-}
 
 push_with_retry
