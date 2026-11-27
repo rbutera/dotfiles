@@ -28,6 +28,20 @@
 #       this script at all. Fix: always operate on whatever branch is currently
 #       checked out ($BRANCH), not a hardcoded name.
 
+# FIXED 2026-11-27 (bead workspace-2le4a, follow-up to workspace-ipy4g). From 24 to 27 Nov
+# every push failed with GitHub GH001 (two videos >100 MB swept in) and 60 checkpoints sat
+# unpushed for ~50 h. Four faults, all fixed here:
+#   (1) every push failure was treated as non-fast-forward (stash, rebase, retry). Now the
+#       stderr is classified (large-file / auth / network / non-fast-forward /
+#       pre-receive-declined / unknown) and ONLY non-fast-forward gets the rebase retry.
+#   (2) `git stash push` with nothing to save exits 0, and the script then popped an OLD
+#       unrelated stash, conflicting logs/*.jsonl; the next run's `git add -A` committed the
+#       conflict markers. Now refs/stash is compared before and after, and the pop happens only
+#       if a new stash was created. `git add -A` is refused while any path is unmerged.
+#   (3) files over 95 MiB are held back from staging (and gitignored if untracked), never deleted.
+#   (4) every run writes state/autopush-last-result.json {ok,cause,detail,at}; the
+#       recap-health-monitor push-staleness guard puts the cause in its alert.
+
 set -euo pipefail
 
 # NAVI_AUTOPUSH_REPO exists so this script can be exercised end-to-end against a
@@ -48,6 +62,48 @@ if [ "$BRANCH" = "HEAD" ]; then
     echo "$LOG_PREFIX ERROR: repo is in detached HEAD state, refusing to autopush (would push to the wrong ref)."
     exit 1
 fi
+
+# --- 2le4a: helper + last-result state file. NAVI_AUTOPUSH_LIB / NAVI_AUTOPUSH_STATE_DIR let a
+# test run against a scratch repo. Both default to the real ~/navi locations.
+AUTOPUSH_LIB="${NAVI_AUTOPUSH_LIB:-$HOME/navi/bin/autopush-lib.mjs}"
+RESULT_FILE="${NAVI_AUTOPUSH_STATE_DIR:-$REPO/state}/autopush-last-result.json"
+
+resolve_node() {
+    local candidate
+    for candidate in node "$HOME/.asdf/shims/node" /opt/homebrew/bin/node /usr/local/bin/node; do
+        if command -v "$candidate" >/dev/null 2>&1 && "$candidate" --version >/dev/null 2>&1; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# record_result <ok 0|1> <cause> <detail> -- never fatal: the backup is the vital circuit.
+record_result() {
+    local nb
+    nb="$(resolve_node)" || { echo "$LOG_PREFIX WARN: cannot record result, no working node."; return 0; }
+    [ -f "$AUTOPUSH_LIB" ] || { echo "$LOG_PREFIX WARN: cannot record result, $AUTOPUSH_LIB missing."; return 0; }
+    "$nb" "$AUTOPUSH_LIB" result --file "$RESULT_FILE" --ok "$1" --cause "$2" --detail "$3" \
+        --branch "$BRANCH" --commit "${COMMIT_MSG:-}" || echo "$LOG_PREFIX WARN: could not write $RESULT_FILE."
+    return 0
+}
+
+# classify_push_failure <stderr-text> -> sets PUSH_CAUSE and PUSH_DETAIL
+classify_push_failure() {
+    PUSH_CAUSE="unknown"
+    PUSH_DETAIL="$(printf '%s' "$1" | tail -n 1)"
+    local nb out
+    if nb="$(resolve_node)" && [ -f "$AUTOPUSH_LIB" ] && out="$(printf '%s' "$1" | "$nb" "$AUTOPUSH_LIB" classify)"; then
+        PUSH_CAUSE="${out%%$'\t'*}"
+        PUSH_DETAIL="${out#*$'\t'}"
+    elif printf '%s' "$1" | grep -qE 'non-fast-forward|\(fetch first\)|Updates were rejected because'; then
+        # helper unavailable: recognise only the one class that is safe to retry
+        PUSH_CAUSE="non-fast-forward"
+    fi
+}
+
+COMMIT_MSG=""
 
 # Check if repo is dirty (tracked changes, untracked files, or staged changes)
 if git diff --quiet && git diff --cached --quiet && [ -z "$(git status --porcelain)" ]; then
@@ -104,6 +160,17 @@ else
     fi
 fi
 
+# --- 2le4a (2): never stage while any path is unmerged. On 26 Nov a failed stash pop left UU
+# paths and the next `git add -A` committed the conflict markers into logs/.
+UNMERGED="$(git diff --name-only --diff-filter=U || true)"
+if [ -n "$UNMERGED" ]; then
+    UNMERGED_COUNT="$(printf '%s\n' "$UNMERGED" | grep -c . || true)"
+    echo "$LOG_PREFIX ERROR: REFUSING to run 'git add -A': $UNMERGED_COUNT unmerged path(s) (conflict markers would be committed): $(printf '%s' "$UNMERGED" | tr '\n' ' ')"
+    echo "$LOG_PREFIX ERROR: resolve them by hand (git status), then the next run proceeds. Nothing staged, nothing pushed."
+    record_result 0 "unmerged-paths" "$UNMERGED_COUNT unmerged path(s): $(printf '%s' "$UNMERGED" | tr '\n' ' ' | cut -c1-200)"
+    exit 1
+fi
+
 ADD_ARGS=(-A -- .)
 DEFER_COUNT=0
 while IFS= read -r deferred; do
@@ -111,6 +178,31 @@ while IFS= read -r deferred; do
     ADD_ARGS+=(":(exclude)$deferred")
     DEFER_COUNT=$((DEFER_COUNT + 1))
 done <<< "$DEFER_LIST"
+
+# --- 2le4a (3): size gate. Hold back anything over 95 MiB (GitHub rejects >100 MiB with GH001).
+# Untracked ones are appended to .gitignore; nothing is ever deleted. Fails open (a gate that
+# stopped the backup would be worse than the bug), but says so loudly.
+OVERSIZE_COUNT=0
+if [ -n "$NODE_BIN" ] && [ -f "$AUTOPUSH_LIB" ]; then
+    if OVERSIZE_LIST="$($NODE_BIN "$AUTOPUSH_LIB" hold-back --repo "$REPO" --limit-mb 95)"; then
+        while IFS=$'\t' read -r kind big; do
+            [ -z "$big" ] && continue
+            OVERSIZE_COUNT=$((OVERSIZE_COUNT + 1))
+            if [ "$kind" = "exclude" ]; then
+                # tracked + modified: cannot be gitignored, so keep it out of this commit
+                ADD_ARGS+=(":(exclude,literal)$big")
+                echo "$LOG_PREFIX WARN: size gate held back tracked file $big (over 95 MiB). Left on disk, not staged."
+            else
+                # untracked: now in .gitignore, which git add honours (naming it as an exclude would error)
+                echo "$LOG_PREFIX WARN: size gate held back $big (over 95 MiB), appended to .gitignore. Left on disk, not staged."
+            fi
+        done <<< "$OVERSIZE_LIST"
+    else
+        echo "$LOG_PREFIX WARN: size gate FAILED to run -- staging without it."
+    fi
+else
+    echo "$LOG_PREFIX WARN: size gate SKIPPED -- no node or $AUTOPUSH_LIB missing."
+fi
 
 git add "${ADD_ARGS[@]}"
 
@@ -150,23 +242,45 @@ else
     git commit -m "$COMMIT_MSG"
 fi
 
-# Push with pull-rebase retry on non-fast-forward rejection.
-# Fix B: the retry's rebase can be blocked by unstaged changes written by
-# concurrent agent/session activity between the commit above and this retry
-# (board.json, journal entries, memory files). Stash them first, restore after.
+# Push with pull-rebase retry ONLY for non-fast-forward.
+# Fix B: the retry's rebase can be blocked by unstaged changes written by concurrent
+# agent/session activity between the commit above and this retry. Stash first, restore after.
+# 2le4a: a failure of any other class (large file, auth, network, other pre-receive decline,
+# unknown) is logged with its cause and returned; rebasing cannot fix it.
 push_with_retry() {
-    if git push origin "$BRANCH" 2>&1; then
+    local out
+    if out="$(git push origin "$BRANCH" 2>&1)"; then
+        printf '%s\n' "$out"
         echo "$LOG_PREFIX Pushed successfully to $BRANCH. Commit: $COMMIT_MSG"
+        record_result 1 "pushed" ""
         return 0
     fi
-    echo "$LOG_PREFIX Push failed (likely non-fast-forward or transient). Rebasing and retrying..."
+    printf '%s\n' "$out"
+    classify_push_failure "$out"
+    echo "$LOG_PREFIX ERROR: push FAILED, cause=$PUSH_CAUSE: $PUSH_DETAIL"
+    if [ "$PUSH_CAUSE" != "non-fast-forward" ]; then
+        echo "$LOG_PREFIX ERROR: cause '$PUSH_CAUSE' cannot be fixed by pull --rebase, NOT retrying. Needs a human or a transient to clear."
+        record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL"
+        return 1
+    fi
+    echo "$LOG_PREFIX Non-fast-forward. Rebasing and retrying..."
 
     local stash_marker="autopush-retry-stash-$(date +%s)"
     local stash_needed=0
+    local before_stash after_stash
     if [ -n "$(git status --porcelain)" ]; then
+        # 2le4a (2): `git stash push` exits 0 with "No local changes to save" (e.g. only submodule
+        # content is dirty), and popping then would restore an OLD unrelated stash. Pop only a
+        # stash this run actually created.
+        before_stash="$(git rev-parse -q --verify refs/stash || true)"
         if git stash push --include-untracked -m "$stash_marker"; then
-            stash_needed=1
-            echo "$LOG_PREFIX Stashed in-flight changes ($stash_marker) before rebase retry."
+            after_stash="$(git rev-parse -q --verify refs/stash || true)"
+            if [ -n "$after_stash" ] && [ "$after_stash" != "$before_stash" ]; then
+                stash_needed=1
+                echo "$LOG_PREFIX Stashed in-flight changes ($stash_marker) before rebase retry."
+            else
+                echo "$LOG_PREFIX No stash was created (refs/stash unchanged); will NOT pop."
+            fi
         else
             echo "$LOG_PREFIX WARN: stash failed, attempting rebase anyway."
         fi
@@ -180,25 +294,33 @@ push_with_retry() {
         git rebase --abort 2>/dev/null || true
     fi
 
-    # Always try to restore the stash — never silently drop live data.
+    # Restore only OUR stash -- never silently drop live data, never pop someone else's.
     if [ "$stash_needed" -eq 1 ]; then
-        if git stash pop; then
+        if [ "$(git rev-parse -q --verify refs/stash || true)" != "$after_stash" ]; then
+            echo "$LOG_PREFIX ERROR: refs/stash moved since this run created $stash_marker; NOT popping. Stash preserved (git stash list)."
+        elif git stash pop; then
             echo "$LOG_PREFIX Restored stashed changes after rebase retry."
         else
-            echo "$LOG_PREFIX ERROR: stash pop conflicted. Stash '$stash_marker' is PRESERVED (git stash list) — manual resolution needed. Not dropping it."
+            echo "$LOG_PREFIX ERROR: stash pop conflicted. Stash '$stash_marker' is PRESERVED (git stash list) -- manual resolution needed. Not dropping it."
         fi
     fi
 
     if [ "$rebase_ok" -ne 1 ]; then
         echo "$LOG_PREFIX ERROR: Push retry aborted after failed rebase. Manual intervention may be needed."
+        record_result 0 "rebase-failed" "pull --rebase failed after non-fast-forward"
         return 1
     fi
 
-    if git push origin "$BRANCH" 2>&1; then
+    if out="$(git push origin "$BRANCH" 2>&1)"; then
+        printf '%s\n' "$out"
         echo "$LOG_PREFIX Push succeeded after rebase. Commit: $COMMIT_MSG"
+        record_result 1 "pushed" "after rebase"
         return 0
     fi
-    echo "$LOG_PREFIX ERROR: Push failed after rebase. Manual intervention may be needed."
+    printf '%s\n' "$out"
+    classify_push_failure "$out"
+    echo "$LOG_PREFIX ERROR: Push failed after rebase, cause=$PUSH_CAUSE: $PUSH_DETAIL. Manual intervention may be needed."
+    record_result 0 "$PUSH_CAUSE" "$PUSH_DETAIL (after rebase)"
     return 1
 }
 

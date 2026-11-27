@@ -584,3 +584,11 @@ Problem: `~/navi-autopush.sh` and `~/expedition-autopush.sh` (hourly launchd job
 Change: added `executable_navi-autopush.sh` and `executable_expedition-autopush.sh` at the source root (deploy to `~/navi-autopush.sh` and `~/expedition-autopush.sh`, the exact paths the plists use, so no plist change and no bootout/bootstrap). Neither contains template syntax or onepasswordRead. Content copied byte-for-byte from the live files: `chezmoi status` and `chezmoi diff` on both targets are empty, so no apply was needed. Verified both end to end against scratch repos (expedition via HOME override, navi via NAVI_AUTOPUSH_REPO): each committed the dirty file and pushed to a scratch bare origin.
 
 Edit the source from now on, then `chezmoi apply ~/navi-autopush.sh` (safe without 1Password).
+
+## 2026-11-27 -- navi-autopush.sh: classify push failures, stash safety, size gate (workspace-2le4a)
+
+### Problem
+24-27 Nov every push failed with GitHub GH001 (two videos >100 MB). The script treated every failure as non-fast-forward (stash, pull --rebase, retry); a no-op `git stash push` still exited 0 so it popped an old unrelated stash, and the next `git add -A` committed the conflict markers. The staleness alert carried no cause.
+
+### Solution/Fix
+executable_navi-autopush.sh: stderr classified via ~/navi/bin/autopush-lib.mjs, rebase retry only for non-fast-forward; refs/stash compared before/after stash push and popped only if new; refuses `git add -A` while unmerged paths exist; files over 95 MiB held back (untracked ones appended to .gitignore, never deleted); every run writes ~/navi/state/autopush-last-result.json read by recap-health-monitor's push-staleness guard. Tests: ~/navi/tests/test_navi_autopush.mjs.
