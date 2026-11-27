@@ -3200,6 +3200,37 @@
       "args": ["-lc", "exec zsh {{ .chezmoi.homeDir }}/navi/curator/run-curator.sh vault-health notes >> {{ .chezmoi.homeDir }}/.logs/curator/launchd-vault-health-notes.log 2>&1"],
       "cwd": "{{ .chezmoi.homeDir }}/navi/curator"
     }
+  },
+  {
+    "id": "e8n-db-dump",
+    "name": "e8n Postgres dump (nightly 02:45: pipeline, dispatch, nocodb_meta to ~/backups/postgres, retention 14, before Backblaze 03:00, workspace-bu9ur)",
+    "trigger": {
+      "kind": "cron",
+      "expr": "45 2 * * *",
+      "tz": "Europe/London"
+    },
+    "target": {
+      "kind": "script",
+      "bin": "zsh"
+    },
+    "payload": {
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "exec bash {{ .chezmoi.homeDir }}/navi/bin/e8n-db-dump.sh >> {{ .chezmoi.homeDir }}/.logs/e8n-db-dump.log 2>&1"]
+    },
+    "policy": {
+      "maxConcurrent": 1,
+      "quotaAware": false,
+      "dedupe": "skip-if-running",
+      "timeout": 600
+    },
+    "enabled": true,
+    "tags": ["infrastructure", "backup", "nimbus"],
+    "inputs": {
+      "cmd": "zsh",
+      "args": ["-lc", "exec bash {{ .chezmoi.homeDir }}/navi/bin/e8n-db-dump.sh >> {{ .chezmoi.homeDir }}/.logs/e8n-db-dump.log 2>&1"],
+      "cwd": "{{ .chezmoi.homeDir }}"
+    }
   }
 ]
 {{- else }}

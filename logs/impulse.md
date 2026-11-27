@@ -648,3 +648,11 @@ Agents on spitfire and hogwarts froze on Claude's usage-limit menu when every no
 
 ### Solution/Fix
 Added Impulse job `nocap-health-watch` (cron `*/10 * * * *`, Europe/London) running ~/navi/bin/nocap-health-watch.mjs. Applied and armed with sync-crons --prune.
+
+## 2026-11-27 -- e8n-db-dump job (workspace-bu9ur)
+
+### Problem
+The nightly pg_dump of pipeline, dispatch and nocodb_meta (navi/bin/e8n-db-dump.sh) had no schedule. It must land before Backblaze's 03:00 pass so the rebuildable colima VM disks can be excluded safely.
+
+### Solution/Fix
+Added Impulse job `e8n-db-dump` (nimbus section, cron `45 2 * * *`, Europe/London, zsh -lc login shell for the docker PATH, stdout/stderr to ~/.logs/e8n-db-dump.log, timeout 600, skip-if-running). Same shape as `log-cap`. Applied with chezmoi apply on the one target, armed with sync-crons --prune.
