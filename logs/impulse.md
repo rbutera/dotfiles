@@ -656,3 +656,11 @@ The nightly pg_dump of pipeline, dispatch and nocodb_meta (navi/bin/e8n-db-dump.
 
 ### Solution/Fix
 Added Impulse job `e8n-db-dump` (nimbus section, cron `45 2 * * *`, Europe/London, zsh -lc login shell for the docker PATH, stdout/stderr to ~/.logs/e8n-db-dump.log, timeout 600, skip-if-running). Same shape as `log-cap`. Applied with chezmoi apply on the one target, armed with sync-crons --prune.
+
+## 2026-11-28 -- bead-triage-weekly now notifies the Sweep thread (workspace-tjt89)
+
+### Problem
+The weekly stale-bead triage ran as an ark-spawn session: capped at 30 min (executionTimeout) and its background subagents die with --print.
+
+### Solution/Fix
+Job is now `kind: script` running `zsh -lc 'ark-thread notify Sweep --from bead-triage-weekly "<prompt>"'`, cron `30 4 * * 0` Europe/London. Sweep (resident Ark Thread, cwd ~/navi) was reopened. The job only delivers the prompt; Sweep runs the triage.

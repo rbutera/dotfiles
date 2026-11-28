@@ -2144,6 +2144,17 @@
     "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/crossing-guard.mjs"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
   },
   {
+    "id": "tokenmaxx-health-guard",
+    "name": "Navi: tokenmaxx health guard (hourly at :20; reads tokenmaxx status on nimbus + latios, whispers my live session when a Claude login is dead >1h or no usable fallback exists; bead workspace-g6ibi)",
+    "trigger": { "kind": "cron", "expr": "20 * * * *", "tz": "Europe/London" },
+    "target": { "kind": "script", "bin": "zsh" },
+    "payload": { "kind": "shell", "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tokenmaxx-health-guard.mjs"] },
+    "policy": { "maxConcurrent": 1, "quotaAware": false, "dedupe": "skip-if-running", "timeout": 180 },
+    "enabled": true,
+    "tags": ["navi", "guard", "tokenmaxx"],
+    "inputs": { "cmd": "zsh", "args": ["-c", "source {{ .chezmoi.homeDir }}/.config/zsh/tools.zsh 2>/dev/null; exec node {{ .chezmoi.homeDir }}/navi/bin/tokenmaxx-health-guard.mjs"], "cwd": "{{ .chezmoi.homeDir }}/navi" }
+  },
+  {
     "id": "bind-mount-guard",
     "name": "Navi: Bind-mount guard (09:15 + 21:15 London; flags container bind mounts that see an empty dir while the host has files, whispers my live session on RED; bead workspace-cdxy9)",
     "trigger": { "kind": "cron", "expr": "15 9,21 * * *", "tz": "Europe/London" },
@@ -3046,35 +3057,33 @@
   },
   {
     "id": "bead-triage-weekly",
-    "name": "Navi: weekly stale-bead triage (Sundays 04:30 London; independent ark-spawn session, no whisper into Navi's main session, no DM to Rai)",
+    "name": "Navi: weekly stale-bead triage (Sundays 04:30 London; notifies the resident Sweep Ark Thread via ark-thread notify, no 30 min ark-spawn cap, no DM to Rai) [workspace-tjt89]",
     "trigger": {
       "kind": "cron",
       "expr": "30 4 * * 0",
       "tz": "Europe/London"
     },
     "target": {
-      "kind": "ark-spawn",
-      "agent": "tatl",
-      "model": "sonnet"
+      "kind": "script",
+      "bin": "zsh"
     },
     "payload": {
-      "kind": "prompt",
-      "text": "Run ~/navi/skills/bead-triage/SKILL.md end to end."
+      "kind": "shell",
+      "cmd": "zsh",
+      "args": ["-lc", "ark-thread notify Sweep --from bead-triage-weekly \"Weekly stale-bead triage (Impulse job bead-triage-weekly, Sunday 04:30 London). Run it now, in this thread: read ~/navi/skills/bead-triage/SKILL.md and follow it end to end (Step 0 log the run, Step 1 build the stale list and batches, Step 2 triage every batch with background ark:tatl subagents, Step 3 merge, Step 4 fan out the autonomous promotes in waves of about 8 until every one is worked). You are the resident Sweep thread, not Navi main session: you survive her renews, so background subagents are fine and there is no 30 minute cap. If today letter already shows a triage run, reuse its dir and only re-dispatch batches with no result-N.md and promotes with no work-id.md. OUTPUT: write the merged summary to ~/navi/state/bead-triage-YYYYMMDD/summary.md (London date) and add exactly one pointer line (600 bytes max: counts, dir path) to today daily letter with node ~/navi/bin/letter.mjs. Do NOT DM or message Rai or anyone: Rai rule is no summary message, the work is the output. Only genuine decisions only Rai can make go on the Potara board per the skill. Never print a secret value; no set -x; do not cat or grep .env files, tokens or op items.\""]
     },
     "policy": {
       "maxConcurrent": 1,
       "quotaAware": false,
       "dedupe": "skip-if-running",
-      "timeout": 10800
+      "timeout": 120
     },
     "enabled": true,
     "tags": ["navi", "beads", "adhd-scaffolding", "nimbus"],
     "inputs": {
-      "agent": "tatl",
-      "workingDir": "{{ .chezmoi.homeDir }}/navi",
-      "model": "sonnet",
-      "maxTurns": 200,
-      "prompt": "Weekly stale-bead triage (Impulse job bead-triage-weekly). You are an independent ephemeral session, not Navi's main session: nobody is watching you and nobody will answer questions, so decide and act. Read ~/navi/skills/bead-triage/SKILL.md and follow it end to end: Step 0 log the run, Step 1 build the stale list and batches, Step 2 triage every batch with ark:tatl subagents, Step 3 merge, Step 4 fan out the autonomous promotes in waves of about 8 until every one is worked. HEADLESS OVERRIDES to the skill: (1) Dispatch every subagent in the FOREGROUND (no run_in_background): this session exits when your final turn ends, which would kill background subagents. Send each wave of up to 8 Agent calls in ONE message so they run in parallel, and wait for the whole wave before the next. (2) There is no whisper trigger and no renew here; if today's letter already shows a triage run, reuse its dir and only re-dispatch batches with no result-N.md and promotes with no work-<id>.md. OUTPUT: write the merged summary to ~/navi/state/bead-triage-<YYYYMMDD>/summary.md (London date) and add exactly one pointer line (600 bytes max: counts, dir path) to today's daily letter with `node ~/navi/bin/letter.mjs <<'EOF' ... EOF`. Do NOT DM or message Rai or anyone (no reply tool, no send-rai-dm.mjs, no relay): Rai's rule is no summary message, the work is the output. Only genuine decisions only Rai can make go on the Potara board per the skill. Never print a secret value; no set -x; do not cat or grep .env files, tokens or op items. If you cannot dispatch subagents, say so in summary.md and triage the batches yourself in order rather than pretending."
+      "cmd": "zsh",
+      "args": ["-lc", "ark-thread notify Sweep --from bead-triage-weekly \"Weekly stale-bead triage (Impulse job bead-triage-weekly, Sunday 04:30 London). Run it now, in this thread: read ~/navi/skills/bead-triage/SKILL.md and follow it end to end (Step 0 log the run, Step 1 build the stale list and batches, Step 2 triage every batch with background ark:tatl subagents, Step 3 merge, Step 4 fan out the autonomous promotes in waves of about 8 until every one is worked). You are the resident Sweep thread, not Navi main session: you survive her renews, so background subagents are fine and there is no 30 minute cap. If today letter already shows a triage run, reuse its dir and only re-dispatch batches with no result-N.md and promotes with no work-id.md. OUTPUT: write the merged summary to ~/navi/state/bead-triage-YYYYMMDD/summary.md (London date) and add exactly one pointer line (600 bytes max: counts, dir path) to today daily letter with node ~/navi/bin/letter.mjs. Do NOT DM or message Rai or anyone: Rai rule is no summary message, the work is the output. Only genuine decisions only Rai can make go on the Potara board per the skill. Never print a secret value; no set -x; do not cat or grep .env files, tokens or op items.\""],
+      "cwd": "{{ .chezmoi.homeDir }}/navi"
     }
   },
   {
